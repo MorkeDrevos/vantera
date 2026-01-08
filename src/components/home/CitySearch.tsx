@@ -54,13 +54,11 @@ export default function CitySearch() {
     const qq = normalize(q);
     if (!qq) return [];
 
-    const ranked = CITIES.map((c) => ({ c, s: scoreCity(qq, c) }))
+    return CITIES.map((c) => ({ c, s: scoreCity(qq, c) }))
       .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s)
       .slice(0, 6)
       .map((x) => x.c);
-
-    return ranked;
   }, [q]);
 
   function goToCity(city: City) {
@@ -71,12 +69,10 @@ export default function CitySearch() {
   function onSubmit() {
     if (results.length > 0) {
       goToCity(results[Math.max(0, Math.min(active, results.length - 1))]);
-      return;
     }
-
-    // If no match, keep it calm - do nothing.
-    // Later we can route to /search?q=...
   }
+
+  const hasResults = open && results.length > 0;
 
   return (
     <div className="relative w-full max-w-xl">
@@ -91,7 +87,6 @@ export default function CitySearch() {
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => {
-            // Small delay so click works
             window.setTimeout(() => setOpen(false), 120);
           }}
           onKeyDown={(e) => {
@@ -117,7 +112,11 @@ export default function CitySearch() {
             }
           }}
           placeholder="Search a city…"
-          className="w-full rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-base text-zinc-950 shadow-sm outline-none placeholder:text-zinc-400 focus:border-zinc-300"
+          className={[
+            'w-full rounded-2xl border bg-white px-5 py-4 pr-24 text-base text-zinc-950 shadow-sm outline-none',
+            'placeholder:text-zinc-400 focus:border-zinc-300',
+            hasResults ? 'border-zinc-300' : 'border-zinc-200',
+          ].join(' ')}
           aria-label="Search a city"
           spellCheck={false}
           autoComplete="off"
@@ -127,13 +126,13 @@ export default function CitySearch() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={onSubmit}
-          className="absolute right-2 top-2 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 hover:bg-zinc-50"
+          className="absolute right-2 top-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-zinc-900"
         >
           Open
         </button>
       </div>
 
-      {open && results.length > 0 && (
+      {hasResults && (
         <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg">
           <div className="p-2">
             {results.map((city, idx) => (
@@ -148,7 +147,7 @@ export default function CitySearch() {
                   idx === active ? 'bg-zinc-100 text-zinc-950' : 'bg-white text-zinc-800 hover:bg-zinc-50',
                 ].join(' ')}
               >
-                <span>{city.name}</span>
+                <span className="font-medium">{city.name}</span>
                 <span className="text-xs text-zinc-500">city</span>
               </button>
             ))}
