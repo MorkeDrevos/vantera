@@ -1,14 +1,15 @@
 import './globals.css';
+import type { ReactNode } from 'react';
 
 export const metadata = {
   title: 'Locus',
-  description: 'Real estate, observed.',
+  description: 'Find cities, beautifully.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-zinc-950 antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }
