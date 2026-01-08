@@ -1,6 +1,32 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
-  theme: { extend: {} },
-  plugins: [],
-};
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+
+    "plugins": [
+      { "name": "next" }
+    ],
+
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
