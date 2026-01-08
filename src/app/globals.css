@@ -2,11 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base document reset */
 html,
 body {
   height: 100%;
 }
 
 body {
-  text-rendering: geometricPrecision;
+  margin: 0;
+  color: rgb(24 24 27); /* zinc-900 */
+  background: white;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
