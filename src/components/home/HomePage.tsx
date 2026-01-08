@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import CitySearch from './CitySearch';
 
-const FEATURED_CITIES = [
+const FEATURED = [
   { name: 'Madrid', slug: 'madrid' },
   { name: 'Barcelona', slug: 'barcelona' },
   { name: 'Lisbon', slug: 'lisbon' },
@@ -17,117 +17,106 @@ export default function HomePage() {
       {/* Top bar */}
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-3">
-          <div className="text-lg font-semibold tracking-tight">Locus</div>
+          <div className="h-9 w-9 rounded-2xl border border-zinc-200 bg-white shadow-sm" />
+          <div className="leading-tight">
+            <div className="text-sm font-semibold tracking-tight">Locus</div>
+            <div className="text-xs text-zinc-500">Real estate, observed</div>
+          </div>
         </div>
 
-        <nav className="hidden items-center gap-6 text-sm text-zinc-600 md:flex">
-          <Link className="hover:text-zinc-900" href="/about">
+        <nav className="hidden items-center gap-7 text-sm text-zinc-600 md:flex">
+          <Link className="hover:text-zinc-950" href="/about">
             About
           </Link>
-          <Link className="hover:text-zinc-900" href="/methodology">
+          <Link className="hover:text-zinc-950" href="/methodology">
             Methodology
           </Link>
-          <Link className="hover:text-zinc-900" href="/contact">
+          <Link className="hover:text-zinc-950" href="/contact">
             Contact
           </Link>
         </nav>
       </header>
 
       {/* Hero */}
-      <section className="mx-auto w-full max-w-6xl px-6 pt-10 md:pt-16">
-        <div className="max-w-3xl">
-          <h1 className="text-4xl font-semibold tracking-tight md:text-6xl">
-            Real estate, observed.
-          </h1>
+      <section className="mx-auto w-full max-w-6xl px-6 pb-16 pt-6 md:pb-24 md:pt-12">
+        <div className="grid gap-10 md:grid-cols-12 md:items-start">
+          <div className="md:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-600 shadow-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              Signals, not listings
+            </div>
 
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-zinc-600 md:text-lg">
-            Locus aggregates signals across markets to show what is actually happening in cities - before listings catch up.
-          </p>
+            <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-6xl">
+              Real estate,
+              <span className="text-zinc-400"> observed.</span>
+            </h1>
 
-          <div className="mt-10">
-            <CitySearch />
-            <p className="mt-3 text-xs text-zinc-500">
-              Start typing a city. No dropdowns. No filters.
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 md:text-lg">
+              Locus aggregates early signals across markets to show what is actually happening in cities before listings
+              catch up.
             </p>
-          </div>
-        </div>
-      </section>
 
-      {/* What it is */}
-      <section className="mx-auto w-full max-w-6xl px-6 pt-16 md:pt-24">
-        <div className="max-w-3xl">
-          <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-            Cities are not static
-          </h2>
+            <div className="mt-8">
+              <CitySearch />
+              <div className="mt-3 text-xs text-zinc-500">
+                Tip: type a city, hit Enter. Try <span className="text-zinc-700">madrid</span> or{' '}
+                <span className="text-zinc-700">nyc</span>.
+              </div>
+            </div>
 
-          <div className="mt-5 space-y-4 text-sm leading-relaxed text-zinc-600 md:text-base">
-            <p>Markets move continuously.</p>
-            <p>Listings, prices, and portals are delayed reflections of reality.</p>
-            <p>
-              Locus exists to observe cities in real time - by aggregating independent signals, activity, and data sources into a single, neutral view.
-            </p>
-            <p className="text-zinc-800">
-              No selling. No paid ranking. No noise.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="mx-auto w-full max-w-6xl px-6 pt-16 md:pt-24">
-        <div className="max-w-3xl">
-          <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-            Observation before transaction
-          </h2>
-
-          <ul className="mt-6 space-y-2 text-sm text-zinc-600 md:text-base">
-            <li>- Multiple data sources per city</li>
-            <li>- Signals weighted by confidence, not volume</li>
-            <li>- Local activity over global averages</li>
-            <li>- No manual curation</li>
-          </ul>
-
-          <p className="mt-6 text-sm text-zinc-800 md:text-base">
-            Locus does not predict. It observes.
-          </p>
-        </div>
-      </section>
-
-      {/* Explore */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-16 pt-16 md:pb-24 md:pt-24">
-        <div className="max-w-3xl">
-          <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
-            Start with a city
-          </h2>
-
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {FEATURED_CITIES.map((c) => (
+            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm">
               <Link
-                key={c.slug}
-                href={`/city/${c.slug}`}
-                className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 hover:border-zinc-300 hover:bg-zinc-50"
+                href="/methodology"
+                className="rounded-xl bg-zinc-950 px-5 py-3 text-white shadow-sm hover:bg-zinc-900"
               >
-                {c.name}
+                How it works
               </Link>
-            ))}
+              <Link
+                href="/about"
+                className="rounded-xl border border-zinc-200 bg-white px-5 py-3 text-zinc-900 shadow-sm hover:bg-zinc-50"
+              >
+                Why Locus
+              </Link>
+            </div>
+          </div>
+
+          {/* Right card */}
+          <div className="md:col-span-5">
+            <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <div className="text-sm font-semibold">Featured cities</div>
+              <div className="mt-1 text-sm text-zinc-600">Start with a market you know well.</div>
+
+              <div className="mt-5 grid grid-cols-2 gap-3">
+                {FEATURED.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/city/${c.slug}`}
+                    className="group rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm shadow-sm hover:bg-zinc-50"
+                  >
+                    <div className="font-medium text-zinc-950">{c.name}</div>
+                    <div className="text-xs text-zinc-500 group-hover:text-zinc-600">Open market</div>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                <div className="text-xs font-medium text-zinc-700">Coming next</div>
+                <div className="mt-1 text-sm text-zinc-600">City dashboards, alerts, and trend snapshots.</div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-zinc-200">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-6 px-6 py-10 md:flex-row md:items-center">
-          <div className="text-sm font-semibold text-zinc-900">Locus</div>
-
-          <div className="flex items-center gap-6 text-sm text-zinc-600">
-            <Link className="hover:text-zinc-900" href="/about">
-              About
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-xs text-zinc-500">
+          <div>© {new Date().getFullYear()} Locus</div>
+          <div className="flex items-center gap-4">
+            <Link className="hover:text-zinc-700" href="/privacy">
+              Privacy
             </Link>
-            <Link className="hover:text-zinc-900" href="/methodology">
-              Methodology
-            </Link>
-            <Link className="hover:text-zinc-900" href="/contact">
-              Contact
+            <Link className="hover:text-zinc-700" href="/terms">
+              Terms
             </Link>
           </div>
         </div>
