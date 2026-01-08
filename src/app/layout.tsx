@@ -1,5 +1,3 @@
-import './globals.css';
-
 export const metadata = {
   title: 'Locus',
   description: 'Real estate, observed.',
