@@ -7,62 +7,7 @@ import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
 
-function Shell({ children }: { children: ReactNode }) {
-  return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Ambient premium background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-56 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-white/10 blur-[140px]" />
-        <div className="absolute top-24 left-10 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-[120px]" />
-        <div className="absolute bottom-[-220px] left-1/2 h-[620px] w-[1100px] -translate-x-1/2 rounded-full bg-white/5 blur-[160px]" />
-      </div>
-
-      <div className="relative">
-        <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/5">
-              <div className="h-4 w-4 rounded-full bg-emerald-300/80" />
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold tracking-wide text-zinc-100">
-                Locus
-              </div>
-              <div className="text-xs text-zinc-400">
-                Truth-first real estate intelligence
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              Buyer-first
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              No portal logic
-            </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              Reality over hype
-            </span>
-          </div>
-        </header>
-
-        {/* Keep page constrained by default */}
-        <main className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
-          {children}
-        </main>
-
-        <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-10 text-xs text-zinc-500 sm:px-8">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>© {new Date().getFullYear()} Locus</div>
-            <div className="text-zinc-600">
-              Early build. UI is live. Intelligence layers evolve city by city.
-            </div>
-          </div>
-        </footer>
-      </div>
-    </div>
-  );
-}
+import PageShell from '@/components/layout/PageShell';
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
@@ -97,13 +42,7 @@ function Metric({
   );
 }
 
-function FeatureCard({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function FeatureCard({ title, body }: { title: string; body: string }) {
   return (
     <div className="rounded-2xl border border-white/12 bg-black/20 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
       <div className="text-sm font-semibold text-zinc-100">{title}</div>
@@ -112,117 +51,122 @@ function FeatureCard({
   );
 }
 
+function HomeHero({
+  regionCount,
+  timezoneCount,
+}: {
+  regionCount: number;
+  timezoneCount: number;
+}) {
+  return (
+    <section className="relative mt-6 sm:mt-12 pb-8 sm:pb-14">
+      {/* Full-bleed background layer */}
+      <div className="pointer-events-none absolute inset-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+        <div className="absolute left-1/2 top-[-240px] h-[620px] w-[1500px] -translate-x-1/2 rounded-full bg-emerald-500/14 blur-[170px]" />
+        <div className="absolute right-[-280px] top-[110px] h-[560px] w-[560px] rounded-full bg-violet-500/14 blur-[150px]" />
+        <div className="absolute left-[-260px] top-[220px] h-[460px] w-[460px] rounded-full bg-sky-500/10 blur-[150px]" />
+
+        <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:76px_76px]" />
+
+        {/* Slightly less fog so headline reads stronger */}
+        <div className="absolute inset-0 bg-[radial-gradient(900px_480px_at_50%_6%,rgba(0,0,0,0),rgba(0,0,0,0.42)_65%,rgba(0,0,0,0.82)_100%)]" />
+
+        {/* bottom separator so hero feels intentional */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
+      </div>
+
+      {/* Wider hero content so it feels less boxed */}
+      <div className="mx-auto max-w-7xl px-5 sm:px-10">
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+          <div className="lg:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
+              <span>The system is loyal to reality, not participants</span>
+            </div>
+
+            <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
+              <span className="text-zinc-50">Real estate,</span>
+              <br />
+              <span className="text-zinc-100">stripped of fiction.</span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-200/90 sm:text-lg">
+              Locus is a buyer-first intelligence layer. It models value,
+              liquidity, and pressure - without incentives, listings, or
+              negotiation theatre.
+            </p>
+
+            {/* Make search feel like the primary control */}
+            <div className="mt-7 max-w-xl rounded-3xl border border-white/20 bg-black/40 p-3 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
+              <CitySearch />
+            </div>
+
+            <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
+              Start with a city. Open its market surface. Truth layers activate
+              city by city.
+            </div>
+
+            <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+              <Metric label="Truth labs" value={CITIES.length} />
+              <Metric label="Regions" value={regionCount} />
+              <Metric label="Timezones" value={timezoneCount} />
+              <Metric label="Status" value="Live" tone="good" />
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              <FeatureCard
+                title="Value, not asking price"
+                body="We model market reality, not marketing. Buyers get leverage, not noise."
+              />
+              <FeatureCard
+                title="Probability, not promises"
+                body="Truth surfaces express outcomes like time-to-sell and pricing pressure. Not optimism."
+              />
+              <FeatureCard
+                title="Intent replaces search"
+                body="Buyers ask for safety, upside, schools, and timing. The system returns candidates and strategy."
+              />
+              <FeatureCard
+                title="Anti-gaming by design"
+                body="Truth layers are locked. No paid boosts, no suppression. Outputs change only when reality changes."
+              />
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <SectionLabel>Start here</SectionLabel>
+
+            <div className="rounded-3xl border border-white/10 bg-black/20 p-6 backdrop-blur-sm shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
+              <div className="text-sm font-semibold text-zinc-100">
+                Open a city truth lab
+              </div>
+              <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+                Each city is a live market surface. Imagery and clocks today.
+                Value, liquidity, and risk layers follow.
+              </div>
+
+              <div className="mt-5">
+                <CityCardsClient cities={CITIES.slice(0, 4)} />
+              </div>
+
+              <div className="mt-5 text-xs text-zinc-500">
+                Market nodes show coverage state. Signals appear only when
+                verified.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const regionCount = new Set(CITIES.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(CITIES.map((c) => c.tz)).size;
 
   return (
-    <Shell>
-      {/* FULL-BLEED HERO */}
-      <section className="relative mt-6 sm:mt-12">
-        {/* Full-bleed background layer */}
-        <div className="pointer-events-none absolute inset-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          <div className="absolute left-1/2 top-[-240px] h-[620px] w-[1500px] -translate-x-1/2 rounded-full bg-emerald-500/14 blur-[170px]" />
-          <div className="absolute right-[-280px] top-[110px] h-[560px] w-[560px] rounded-full bg-violet-500/14 blur-[150px]" />
-          <div className="absolute left-[-260px] top-[220px] h-[460px] w-[460px] rounded-full bg-sky-500/10 blur-[150px]" />
-
-          <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:76px_76px]" />
-
-          <div className="absolute inset-0 bg-[radial-gradient(1000px_520px_at_50%_8%,rgba(0,0,0,0),rgba(0,0,0,0.55)_70%,rgba(0,0,0,0.88)_100%)]" />
-
-          {/* bottom separator so hero feels intentional */}
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
-        </div>
-
-        {/* IMPORTANT CHANGE:
-            Wider hero content so it feels less boxed.
-            This keeps premium discipline but gives more authority. */}
-        <div className="mx-auto max-w-7xl px-5 sm:px-10">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-            <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
-                <span>The system is loyal to reality, not participants</span>
-              </div>
-
-              {/* Higher contrast headline */}
-              <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
-                <span className="text-zinc-50">Real estate,</span>
-                <br />
-                <span className="bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-                  stripped of fiction.
-                </span>
-              </h1>
-
-              <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-200/90 sm:text-lg">
-                Locus is a buyer-first intelligence layer. It models value,
-                liquidity, and pressure - without incentives, listings, or
-                negotiation theatre.
-              </p>
-
-              {/* Make search feel like the primary control */}
-              <div className="mt-7 max-w-xl rounded-3xl border border-white/12 bg-black/25 p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-                <CitySearch />
-              </div>
-
-              <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
-                Start with a city. Open its market surface. Truth layers activate
-                city by city.
-              </div>
-
-              <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-                <Metric label="Truth labs" value={CITIES.length} />
-                <Metric label="Regions" value={regionCount} />
-                <Metric label="Timezones" value={timezoneCount} />
-                <Metric label="Status" value="Live" tone="good" />
-              </div>
-
-              <div className="mt-10 grid gap-4 sm:grid-cols-2">
-                <FeatureCard
-                  title="Value, not asking price"
-                  body="We model market reality, not marketing. Buyers get leverage, not noise."
-                />
-                <FeatureCard
-                  title="Probability, not promises"
-                  body="Truth surfaces express outcomes like time-to-sell and pricing pressure. Not optimism."
-                />
-                <FeatureCard
-                  title="Intent replaces search"
-                  body="Buyers ask for safety, upside, schools, and timing. The system returns candidates and strategy."
-                />
-                <FeatureCard
-                  title="Anti-gaming by design"
-                  body="Truth layers are locked. No paid boosts, no suppression. Outputs change only when reality changes."
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <SectionLabel>Start here</SectionLabel>
-
-              {/* More breathing room + slightly clearer panel */}
-              <div className="rounded-3xl border border-white/12 bg-black/25 p-6 backdrop-blur shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
-                <div className="text-sm font-semibold text-zinc-100">
-                  Open a city truth lab
-                </div>
-                <div className="mt-2 text-sm leading-relaxed text-zinc-300">
-                  Each city is a live market surface. Imagery and clocks today.
-                  Value, liquidity, and risk layers follow.
-                </div>
-
-                <div className="mt-5">
-                  <CityCardsClient cities={CITIES.slice(0, 4)} />
-                </div>
-
-                <div className="mt-5 text-xs text-zinc-500">
-                  Market nodes show coverage state. Signals appear only when verified.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    <PageShell fullBleedHero={<HomeHero regionCount={regionCount} timezoneCount={timezoneCount} />}>
       {/* EXPLORE */}
       <section className="mt-16">
         <SectionLabel>Global truth labs</SectionLabel>
@@ -276,6 +220,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </Shell>
+    </PageShell>
   );
 }
