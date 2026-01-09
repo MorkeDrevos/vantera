@@ -18,7 +18,11 @@ export default async function CityPage({
   const prev = CITIES[(idx - 1 + CITIES.length) % CITIES.length];
   const next = CITIES[(idx + 1) % CITIES.length];
 
-  // Pass only what we need (serializable)
+  /**
+   * IMPORTANT:
+   * We pass ONLY serializable data into the client component.
+   * No functions, no Dates, no class instances.
+   */
   return (
     <CityPageClient
       city={{
@@ -29,11 +33,20 @@ export default async function CityPage({
         tz: city.tz,
         blurb: city.blurb ?? null,
         image: city.image?.src
-          ? { src: city.image.src, alt: city.image.alt ?? null }
+          ? {
+              src: city.image.src,
+              alt: city.image.alt ?? null,
+            }
           : null,
       }}
-      prev={{ name: prev.name, slug: prev.slug }}
-      next={{ name: next.name, slug: next.slug }}
+      prev={{
+        name: prev.name,
+        slug: prev.slug,
+      }}
+      next={{
+        name: next.name,
+        slug: next.slug,
+      }}
     />
   );
 }
