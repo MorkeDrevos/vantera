@@ -1,11 +1,14 @@
 // src/app/city/[slug]/page.tsx
 import { notFound } from 'next/navigation';
-import type { PageProps } from 'next';
 
 import CityPageClient from '@/components/city/CityPageClient';
 import { CITIES } from '@/components/home/cities';
 
-export default async function CityPage({ params }: PageProps) {
+export default async function CityPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
 
   const idx = CITIES.findIndex((c) => c.slug === slug);
