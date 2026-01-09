@@ -1,44 +1,41 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import type { City } from './cities';
+import type { City } from '@/data/cities';
 
 export default function CityCard({ city }: { city: City }) {
   return (
     <Link
       href={`/city/${city.slug}`}
-      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-sm transition hover:bg-white/8"
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900/60 transition hover:border-white/20"
     >
-      <div className="relative h-40 w-full">
+      <div className="relative h-48 w-full">
         <Image
-          src={city.image.src}
-          alt={city.image.alt}
+          src={city.image}
+          alt={`${city.name} city view`}
           fill
           className="object-cover opacity-85 transition group-hover:opacity-100"
-          sizes="(max-width: 768px) 100vw, 520px"
-          priority={city.slug === 'madrid' || city.slug === 'barcelona'}
+          sizes="(max-width: 768px) 100vw, 33vw"
+          priority={city.slug === 'madrid'}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
       </div>
 
       <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm font-semibold text-white">{city.name}</div>
-            <div className="mt-0.5 text-xs text-white/60">
-              {city.region ? city.region : 'City'} {city.tz ? `- ${city.tz}` : ''}
-            </div>
+            <h3 className="text-sm font-medium text-white">{city.name}</h3>
+            <p className="text-xs text-zinc-400">
+              {city.country}
+            </p>
           </div>
-
-          <span className="mt-0.5 rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/70">
+          <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white">
             Open
           </span>
         </div>
 
-        {city.blurb ? (
-          <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-white/70">
-            {city.blurb}
-          </p>
-        ) : null}
+        <p className="mt-2 line-clamp-2 text-xs text-zinc-400">
+          {city.blurb}
+        </p>
       </div>
     </Link>
   );
