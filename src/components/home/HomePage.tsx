@@ -46,9 +46,7 @@ function Shell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* IMPORTANT:
-            Keep the main container constrained so the rest of the page stays premium.
-            The HERO itself goes full-bleed inside HomePage (below). */}
+        {/* Keep page constrained by default */}
         <main className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
           {children}
         </main>
@@ -92,7 +90,7 @@ function Metric({
         : 'text-zinc-100';
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+    <div className="rounded-2xl border border-white/12 bg-black/20 px-4 py-3 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
       <div className="text-xs text-zinc-400">{label}</div>
       <div className={`mt-1 text-lg font-semibold ${valueClass}`}>{value}</div>
     </div>
@@ -107,7 +105,7 @@ function FeatureCard({
   body: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+    <div className="rounded-2xl border border-white/12 bg-black/20 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
       <div className="text-sm font-semibold text-zinc-100">{title}</div>
       <div className="mt-2 text-sm leading-relaxed text-zinc-300">{body}</div>
     </div>
@@ -122,42 +120,48 @@ export default function HomePage() {
     <Shell>
       {/* FULL-BLEED HERO */}
       <section className="relative mt-6 sm:mt-12">
-        {/* Full-bleed background layer that spans viewport width */}
+        {/* Full-bleed background layer */}
         <div className="pointer-events-none absolute inset-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden">
-          {/* Fresh color fields (still restrained) */}
-          <div className="absolute left-1/2 top-[-220px] h-[560px] w-[1400px] -translate-x-1/2 rounded-full bg-emerald-500/12 blur-[160px]" />
-          <div className="absolute right-[-260px] top-[120px] h-[520px] w-[520px] rounded-full bg-violet-500/12 blur-[140px]" />
-          <div className="absolute left-[-260px] top-[220px] h-[420px] w-[420px] rounded-full bg-sky-500/8 blur-[140px]" />
+          <div className="absolute left-1/2 top-[-240px] h-[620px] w-[1500px] -translate-x-1/2 rounded-full bg-emerald-500/14 blur-[170px]" />
+          <div className="absolute right-[-280px] top-[110px] h-[560px] w-[560px] rounded-full bg-violet-500/14 blur-[150px]" />
+          <div className="absolute left-[-260px] top-[220px] h-[460px] w-[460px] rounded-full bg-sky-500/10 blur-[150px]" />
 
-          {/* Subtle grid sheen to feel “system-like” */}
-          <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:72px_72px]" />
+          <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:76px_76px]" />
 
-          {/* Fade edges so it blends into the zinc base */}
-          <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_10%,rgba(0,0,0,0),rgba(0,0,0,0.55)_70%,rgba(0,0,0,0.85)_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1000px_520px_at_50%_8%,rgba(0,0,0,0),rgba(0,0,0,0.55)_70%,rgba(0,0,0,0.88)_100%)]" />
+
+          {/* bottom separator so hero feels intentional */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-white/10" />
         </div>
 
-        {/* Inner constraint (content remains premium, readable) */}
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        {/* IMPORTANT CHANGE:
+            Wider hero content so it feels less boxed.
+            This keeps premium discipline but gives more authority. */}
+        <div className="mx-auto max-w-7xl px-5 sm:px-10">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
             <div className="lg:col-span-7">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
                 <span>The system is loyal to reality, not participants</span>
               </div>
 
+              {/* Higher contrast headline */}
               <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
-                Real estate,
+                <span className="text-zinc-50">Real estate,</span>
                 <br />
-                <span className="text-zinc-300">stripped of fiction.</span>
+                <span className="bg-gradient-to-r from-zinc-100 via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+                  stripped of fiction.
+                </span>
               </h1>
 
-              <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
+              <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-200/90 sm:text-lg">
                 Locus is a buyer-first intelligence layer. It models value,
                 liquidity, and pressure - without incentives, listings, or
                 negotiation theatre.
               </p>
 
-              <div className="mt-7 max-w-xl">
+              {/* Make search feel like the primary control */}
+              <div className="mt-7 max-w-xl rounded-3xl border border-white/12 bg-black/25 p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
                 <CitySearch />
               </div>
 
@@ -180,7 +184,7 @@ export default function HomePage() {
                 />
                 <FeatureCard
                   title="Probability, not promises"
-                  body="Truth surfaces will express outcomes like time-to-sell and pricing pressure. Not optimism."
+                  body="Truth surfaces express outcomes like time-to-sell and pricing pressure. Not optimism."
                 />
                 <FeatureCard
                   title="Intent replaces search"
@@ -196,7 +200,8 @@ export default function HomePage() {
             <div className="lg:col-span-5">
               <SectionLabel>Start here</SectionLabel>
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+              {/* More breathing room + slightly clearer panel */}
+              <div className="rounded-3xl border border-white/12 bg-black/25 p-6 backdrop-blur shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
                 <div className="text-sm font-semibold text-zinc-100">
                   Open a city truth lab
                 </div>
@@ -205,8 +210,12 @@ export default function HomePage() {
                   Value, liquidity, and risk layers follow.
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-5">
                   <CityCardsClient cities={CITIES.slice(0, 4)} />
+                </div>
+
+                <div className="mt-5 text-xs text-zinc-500">
+                  Market nodes show coverage state. Signals appear only when verified.
                 </div>
               </div>
             </div>
@@ -230,7 +239,7 @@ export default function HomePage() {
         <SectionLabel>Curated routes</SectionLabel>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+          <div className="rounded-2xl border border-white/12 bg-black/20 px-4 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
             <div className="text-sm font-semibold text-zinc-100">
               Capital signal
             </div>
@@ -239,7 +248,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+          <div className="rounded-2xl border border-white/12 bg-black/20 px-4 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
             <div className="text-sm font-semibold text-zinc-100">
               Coastal demand
             </div>
@@ -248,7 +257,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+          <div className="rounded-2xl border border-white/12 bg-black/20 px-4 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
             <div className="text-sm font-semibold text-zinc-100">
               Always-on cities
             </div>
@@ -257,7 +266,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+          <div className="rounded-2xl border border-white/12 bg-black/20 px-4 py-4 shadow-[0_0_0_1px_rgba(255,255,255,0.02)]">
             <div className="text-sm font-semibold text-zinc-100">
               Growth vectors
             </div>
