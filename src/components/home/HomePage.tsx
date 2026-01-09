@@ -4,10 +4,12 @@ import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
 
+import FeaturedListingsClient from './FeaturedListingsClient';
+import { FEATURED_LISTINGS } from './listings';
+
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* premium ambient background */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-56 left-1/2 h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-white/10 blur-[140px]" />
         <div className="absolute -bottom-56 left-1/2 h-[640px] w-[1020px] -translate-x-1/2 rounded-full bg-white/5 blur-[160px]" />
@@ -86,7 +88,6 @@ export default function HomePage() {
       {/* HERO */}
       <section className="pt-6 sm:pt-12">
         <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-          {/* hero image (no broken icon risk because it's a background-image) */}
           <div className="relative">
             <div
               className="h-[290px] w-full sm:h-[320px] lg:h-[360px]"
@@ -126,7 +127,6 @@ export default function HomePage() {
                   <CitySearch />
                 </div>
 
-                {/* REAL STATS */}
                 <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
                   <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur">
                     <div className="text-xs text-zinc-400">Cities</div>
@@ -147,21 +147,65 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* POPULAR = REAL CARDS */}
               <div className="lg:col-span-5">
                 <div className="flex items-center justify-between">
                   <SectionLabel>Popular</SectionLabel>
-                  <div className="hidden text-xs text-zinc-400 sm:block">
-                    {heroCity?.name ? `Hero: ${heroCity.name}` : null}
-                  </div>
+                  <div className="hidden text-xs text-zinc-400 sm:block">{heroCity?.name ? `Hero: ${heroCity.name}` : null}</div>
                 </div>
                 <CityCardsClient cities={CITIES.slice(0, 4)} />
               </div>
             </div>
           </div>
 
-          {/* subtle inner edge */}
           <div className="pointer-events-none absolute inset-0 rounded-[34px] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+        </div>
+      </section>
+
+      {/* FEATURED LISTINGS (NEW, VERY IMPORTANT) */}
+      <section className="mt-16">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <SectionLabel>Featured listings</SectionLabel>
+            <div className="text-2xl font-semibold tracking-tight text-zinc-50">
+              The most desirable homes
+              <span className="text-zinc-300"> in the right places</span>
+            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
+              This is where the market starts. Curated, premium inventory with clean details and fast navigation.
+            </p>
+          </div>
+
+          <a
+            href="/listings"
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 transition hover:border-white/20 hover:bg-white/10"
+          >
+            View all listings
+          </a>
+        </div>
+
+        <div className="mt-6">
+          <FeaturedListingsClient listings={FEATURED_LISTINGS} />
+        </div>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">For buyers</div>
+            <div className="mt-2 text-sm text-zinc-200">Shortlist-worthy homes, presented properly.</div>
+            <div className="mt-4 h-px w-full bg-white/10" />
+            <div className="mt-4 text-xs text-zinc-400">Save, share, book viewings (next).</div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">For sellers</div>
+            <div className="mt-2 text-sm text-zinc-200">Premium exposure and clean positioning.</div>
+            <div className="mt-4 h-px w-full bg-white/10" />
+            <div className="mt-4 text-xs text-zinc-400">Get a valuation (next).</div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">Trust</div>
+            <div className="mt-2 text-sm text-zinc-200">No noise, no junk, just high-quality inventory.</div>
+            <div className="mt-4 h-px w-full bg-white/10" />
+            <div className="mt-4 text-xs text-zinc-400">Real data pipeline later.</div>
+          </div>
         </div>
       </section>
 
@@ -201,7 +245,7 @@ export default function HomePage() {
         <CityCardsClient cities={CITIES} />
       </section>
 
-      {/* (optional) curated strips under explore for immediate “alive” feel */}
+      {/* COLLECTION STRIPS */}
       <section className="mt-16">
         <SectionLabel>Collections</SectionLabel>
 
