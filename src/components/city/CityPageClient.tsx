@@ -4,7 +4,7 @@
 import Link from 'next/link';
 
 import type { City } from './cities';
-import SafeImage from './SafeImage';
+import SafeImage from '@/components/home/SafeImage';
 
 function safeAlt(city: City) {
   const a = city.image?.alt?.trim();
