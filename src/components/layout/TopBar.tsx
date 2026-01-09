@@ -1,6 +1,8 @@
+// src/components/layout/TopBar.tsx
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
@@ -24,10 +26,7 @@ export default function TopBar() {
   const [scrolled, setScrolled] = useState(false);
   const lastKeyAt = useRef<number>(0);
 
-  const onCityPage = useMemo(
-    () => pathname?.startsWith('/city/'),
-    [pathname],
-  );
+  const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
 
   const activeTab = useMemo(() => {
     const t = (searchParams?.get('tab') ?? '').toLowerCase();
@@ -58,17 +57,13 @@ export default function TopBar() {
         if (pathname !== '/') {
           router.push('/');
           window.setTimeout(() => {
-            const el = document.getElementById(
-              'locus-city-search',
-            ) as HTMLInputElement | null;
+            const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
             el?.focus();
           }, 350);
           return;
         }
 
-        const el = document.getElementById(
-          'locus-city-search',
-        ) as HTMLInputElement | null;
+        const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
         el?.focus();
         return;
       }
@@ -79,9 +74,7 @@ export default function TopBar() {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'truth');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        window.dispatchEvent(
-          new CustomEvent('locus:tab', { detail: { tab: 'truth' } }),
-        );
+        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'truth' } }));
         return;
       }
 
@@ -90,9 +83,7 @@ export default function TopBar() {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'supply');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        window.dispatchEvent(
-          new CustomEvent('locus:tab', { detail: { tab: 'supply' } }),
-        );
+        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'supply' } }));
         return;
       }
     };
@@ -110,17 +101,14 @@ export default function TopBar() {
     'pointer-events-none absolute inset-0 transition-colors',
     onCityPage
       ? scrolled
-        ? 'bg-black/30'
-        : 'bg-black/15'
+        ? 'bg-black/22'
+        : 'bg-black/10'
       : scrolled
-        ? 'bg-black/40'
-        : 'bg-black/25',
+        ? 'bg-black/32'
+        : 'bg-black/18',
   );
 
-  const surfaceClass = cx(
-    'sticky top-0 z-50 w-full',
-    'backdrop-blur-xl',
-  );
+  const surfaceClass = cx('sticky top-0 z-50 w-full', 'backdrop-blur-xl');
 
   const innerClass = cx(
     'mx-auto flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-8',
@@ -134,34 +122,48 @@ export default function TopBar() {
       {/* subtle bottom edge */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/10" />
 
+      {/* refined gold glint (very subtle) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-200/15 to-transparent" />
+
       {/* veil */}
       <div className={veilClass} />
 
       <div className={innerClass}>
         {/* Left — Identity */}
         <div className="flex min-w-0 items-center gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/5">
-            <div className="h-4 w-4 rounded-full bg-emerald-300/80" />
-          </div>
+          <Link
+            href="/"
+            className="group relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] hover:border-white/20"
+            prefetch
+            aria-label="Vantera home"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-200/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+            <Image
+              src="/brand/vantera-mark.png"
+              alt="Vantera mark"
+              width={28}
+              height={28}
+              className="relative opacity-95"
+              priority={false}
+            />
+          </Link>
 
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="truncate text-sm font-semibold tracking-wide text-zinc-100 hover:text-white"
+                className="truncate text-sm font-semibold tracking-[0.08em] text-zinc-100 hover:text-white"
                 prefetch
               >
-                Locus
+                VANTERA
               </Link>
 
-              <span className="hidden rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-100 sm:inline-flex">
-                TRUTH LAYER
+              <span className="hidden rounded-full border border-amber-200/20 bg-amber-200/10 px-2.5 py-1 text-[11px] text-amber-100 sm:inline-flex">
+                PROPERTY INTELLIGENCE
               </span>
             </div>
 
-            <div className="truncate text-xs text-zinc-400">
-              Truth-first real estate intelligence
-            </div>
+            <div className="truncate text-xs text-zinc-400">Global property intelligence</div>
           </div>
         </div>
 
@@ -173,7 +175,7 @@ export default function TopBar() {
 
           {onCityPage ? (
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              <span className="font-mono text-zinc-200">T</span> Truth
+              <span className="font-mono text-zinc-200">T</span> Insight
               <span className="mx-2 text-white/20">|</span>
               <span className="font-mono text-zinc-200">L</span> Live supply
             </span>
@@ -185,13 +187,13 @@ export default function TopBar() {
           {!onCityPage ? (
             <>
               <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                Buyer-first
+                Listings-first
               </span>
               <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                No portal logic
+                Protocol surface
               </span>
               <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                Reality over hype
+                Buyer and seller
               </span>
             </>
           ) : (
@@ -200,18 +202,18 @@ export default function TopBar() {
                 className={cx(
                   'rounded-full border px-3 py-1 text-xs transition',
                   activeTab === 'truth'
-                    ? 'border-amber-400/20 bg-amber-500/10 text-amber-100'
+                    ? 'border-amber-200/25 bg-amber-200/10 text-amber-100'
                     : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
                 )}
               >
-                Truth
+                Insight
               </span>
 
               <span
                 className={cx(
                   'rounded-full border px-3 py-1 text-xs transition',
                   activeTab === 'supply'
-                    ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
+                    ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-100'
                     : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
                 )}
               >
