@@ -55,19 +55,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
 
-        <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2">
-          {listing.status ? (
-            <span className="rounded-full border border-white/15 bg-black/45 px-2.5 py-1 text-[11px] text-zinc-100 backdrop-blur">
-              {listing.status}
-            </span>
-          ) : null}
-          {listing.kind ? (
-            <span className="rounded-full border border-white/15 bg-black/35 px-2.5 py-1 text-[11px] text-zinc-200 backdrop-blur">
-              {listing.kind}
-            </span>
-          ) : null}
-        </div>
-
+        {/* Top-right price pill */}
         <div className="pointer-events-none absolute right-4 top-4 rounded-full border border-white/15 bg-[linear-gradient(135deg,rgba(245,158,11,0.18),rgba(168,85,247,0.16))] px-2.5 py-1 text-[11px] text-zinc-100 backdrop-blur">
           {formatEur(listing.priceEur)}
         </div>
