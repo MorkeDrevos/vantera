@@ -1,4 +1,3 @@
-// src/components/layout/TopBar.tsx
 'use client';
 
 import Link from 'next/link';
@@ -25,7 +24,10 @@ export default function TopBar() {
   const [scrolled, setScrolled] = useState(false);
   const lastKeyAt = useRef<number>(0);
 
-  const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
+  const onCityPage = useMemo(
+    () => pathname?.startsWith('/city/'),
+    [pathname],
+  );
 
   const activeTab = useMemo(() => {
     const t = (searchParams?.get('tab') ?? '').toLowerCase();
@@ -42,42 +44,44 @@ export default function TopBar() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Don't hijack typing
       const target = e.target as Element | null;
       if (isEditableTarget(target)) return;
 
-      // Avoid double-fire on some keyboards
       const now = Date.now();
       if (now - lastKeyAt.current < 120) return;
       lastKeyAt.current = now;
 
-      // "/" focuses global city search (homepage)
+      // "/" → focus global city search
       if (e.key === '/') {
         e.preventDefault();
 
-        // If not on home, go home first, then focus after paint
         if (pathname !== '/') {
           router.push('/');
           window.setTimeout(() => {
-            const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
+            const el = document.getElementById(
+              'locus-city-search',
+            ) as HTMLInputElement | null;
             el?.focus();
           }, 350);
           return;
         }
 
-        const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
+        const el = document.getElementById(
+          'locus-city-search',
+        ) as HTMLInputElement | null;
         el?.focus();
         return;
       }
 
-      // "t" / "l" switch tabs on city pages
+      // City page shortcuts
       if (onCityPage && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'truth');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        // optional event for components that want to react without relying on URL only
-        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'truth' } }));
+        window.dispatchEvent(
+          new CustomEvent('locus:tab', { detail: { tab: 'truth' } }),
+        );
         return;
       }
 
@@ -86,7 +90,9 @@ export default function TopBar() {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'supply');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'supply' } }));
+        window.dispatchEvent(
+          new CustomEvent('locus:tab', { detail: { tab: 'supply' } }),
+        );
         return;
       }
     };
@@ -95,10 +101,25 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, pathname, router]);
 
+  /**
+   * IMPORTANT:
+   * - On city pages, the TopBar must be LIGHTER (it floats over imagery)
+   * - On home pages, it can be slightly heavier
+   */
+  const veilClass = cx(
+    'pointer-events-none absolute inset-0 transition-colors',
+    onCityPage
+      ? scrolled
+        ? 'bg-black/30'
+        : 'bg-black/15'
+      : scrolled
+        ? 'bg-black/40'
+        : 'bg-black/25',
+  );
+
   const surfaceClass = cx(
     'sticky top-0 z-50 w-full',
-    'transition',
-    scrolled ? 'backdrop-blur-xl' : 'backdrop-blur',
+    'backdrop-blur-xl',
   );
 
   const innerClass = cx(
@@ -108,22 +129,17 @@ export default function TopBar() {
 
   return (
     <div className={surfaceClass}>
-      {/* premium top edge */}
-      <div className={cx('pointer-events-none absolute inset-x-0 top-0 h-px', scrolled ? 'bg-white/12' : 'bg-white/8')} />
-      {/* premium bottom edge */}
-      <div className={cx('pointer-events-none absolute inset-x-0 bottom-0 h-px', scrolled ? 'bg-white/12' : 'bg-white/8')} />
+      {/* subtle top edge */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/10" />
+      {/* subtle bottom edge */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/10" />
 
-      {/* subtle gradient veil */}
-      <div
-        className={cx(
-          'pointer-events-none absolute inset-0',
-          scrolled ? 'bg-black/55' : 'bg-black/35',
-        )}
-      />
+      {/* veil */}
+      <div className={veilClass} />
 
       <div className={innerClass}>
-        {/* Left - Identity */}
-        <div className="relative flex min-w-0 items-center gap-3">
+        {/* Left — Identity */}
+        <div className="flex min-w-0 items-center gap-3">
           <div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/5">
             <div className="h-4 w-4 rounded-full bg-emerald-300/80" />
           </div>
@@ -149,8 +165,8 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Center - Command hints */}
-        <div className="relative hidden items-center gap-2 lg:flex">
+        {/* Center — Hints */}
+        <div className="hidden items-center gap-2 lg:flex">
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
             Press <span className="font-mono text-zinc-200">/</span> to search
           </span>
@@ -164,8 +180,8 @@ export default function TopBar() {
           ) : null}
         </div>
 
-        {/* Right - Mode chips */}
-        <div className="relative flex items-center gap-2">
+        {/* Right — Mode chips */}
+        <div className="flex items-center gap-2">
           {!onCityPage ? (
             <>
               <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
@@ -187,7 +203,6 @@ export default function TopBar() {
                     ? 'border-amber-400/20 bg-amber-500/10 text-amber-100'
                     : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
                 )}
-                title="Truth tab (press T)"
               >
                 Truth
               </span>
@@ -199,7 +214,6 @@ export default function TopBar() {
                     ? 'border-emerald-400/20 bg-emerald-500/10 text-emerald-100'
                     : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
                 )}
-                title="Live supply tab (press L)"
               >
                 Live supply
               </span>
