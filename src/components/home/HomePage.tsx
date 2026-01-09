@@ -61,21 +61,15 @@ export default function HomePage() {
     <Shell>
       {/* FULL-WIDTH HERO */}
       <section className="relative w-full overflow-hidden">
-        {/* Full-bleed premium background */}
         <div className="pointer-events-none absolute inset-0">
-          {/* deep royal gradient base */}
           <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_20%_-10%,rgba(245,208,87,0.18),transparent_55%),radial-gradient(1000px_700px_at_80%_-20%,rgba(168,85,247,0.22),transparent_55%),radial-gradient(900px_700px_at_50%_120%,rgba(59,130,246,0.14),transparent_55%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/65 to-zinc-950" />
-
-          {/* subtle grid + vignette */}
           <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:64px_64px]" />
           <div className="absolute inset-0 bg-[radial-gradient(900px_500px_at_50%_25%,transparent,rgba(0,0,0,0.55))]" />
         </div>
 
-        {/* Hero content container */}
         <div className="relative mx-auto w-full max-w-6xl px-5 pb-14 pt-8 sm:px-8 sm:pb-18 sm:pt-12">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-            {/* Left hero copy */}
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200 backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
@@ -96,11 +90,9 @@ export default function HomePage() {
                 listings data next.
               </p>
 
-              {/* Hero glass panel */}
               <div className="mt-7 max-w-xl rounded-3xl border border-white/10 bg-white/[0.06] p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:p-5">
                 <CitySearch />
 
-                {/* REAL STATS */}
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
                     <div className="text-xs text-zinc-400">Cities</div>
@@ -122,29 +114,25 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Popular cards */}
+            {/* POPULAR - COMPACT GRID */}
             <div className="lg:col-span-5">
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur sm:p-5">
                 <SectionLabel>Popular</SectionLabel>
-                <CityCardsClient cities={CITIES.slice(0, 4)} />
+                <CityCardsClient cities={CITIES.slice(0, 4)} variant="compact" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom fade into page */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-zinc-950" />
       </section>
 
-      {/* BODY */}
       <div className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
-        {/* EXPLORE */}
         <section className="mt-12">
           <SectionLabel>Explore</SectionLabel>
           <CityCardsClient cities={CITIES} />
         </section>
 
-        {/* FEATURED ROUTES */}
         <section className="mt-16">
           <SectionLabel>Featured routes</SectionLabel>
 
