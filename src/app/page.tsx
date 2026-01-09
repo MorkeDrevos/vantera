@@ -1,6 +1,11 @@
 // src/app/page.tsx
+import { Suspense } from 'react';
 import HomePage from '@/components/home/HomePage';
 
 export default function Page() {
-  return <HomePage />;
+  return (
+    <Suspense fallback={null}>
+      <HomePage />
+    </Suspense>
+  );
 }
