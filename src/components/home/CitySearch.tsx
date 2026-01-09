@@ -1,101 +1,165 @@
 'use client';
 
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
-import type { CityMeta } from './cities';
+import { useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-function formatLocalTime(tz: string, d: Date) {
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: tz,
-    }).format(d);
-  } catch {
-    return '';
-  }
+type City = {
+  name: string;
+  slug: string;
+  alt?: string[];
+};
+
+const CITIES: City[] = [
+  { name: 'Madrid', slug: 'madrid', alt: ['madrid, spain'] },
+  { name: 'Barcelona', slug: 'barcelona', alt: ['barcelona, spain'] },
+  { name: 'Lisbon', slug: 'lisbon', alt: ['lisboa'] },
+  { name: 'London', slug: 'london' },
+  { name: 'Paris', slug: 'paris' },
+  { name: 'Dubai', slug: 'dubai' },
+  { name: 'New York', slug: 'new-york', alt: ['nyc', 'new york city'] },
+];
+
+function normalize(s: string) {
+  return s.trim().toLowerCase();
 }
 
-function formatWeekday(tz: string, d: Date) {
-  try {
-    return new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: tz,
-    }).format(d);
-  } catch {
-    return '';
+function scoreCity(q: string, city: City) {
+  const qq = normalize(q);
+  if (!qq) return 0;
+
+  const name = normalize(city.name);
+  if (name === qq) return 100;
+  if (name.startsWith(qq)) return 80;
+  if (name.includes(qq)) return 60;
+
+  for (const a of city.alt ?? []) {
+    const aa = normalize(a);
+    if (aa === qq) return 90;
+    if (aa.startsWith(qq)) return 70;
+    if (aa.includes(qq)) return 55;
   }
+
+  return 0;
 }
 
-export default function CityCardsClient({ cities }: { cities: CityMeta[] }) {
-  const [now, setNow] = useState(() => new Date());
+export default function CitySearch() {
+  const router = useRouter();
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const t = window.setInterval(() => setNow(new Date()), 15_000);
-    return () => window.clearInterval(t);
-  }, []);
+  const [q, setQ] = useState('');
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
 
-  const cards = useMemo(() => {
-    return cities.map((c) => {
-      const time = formatLocalTime(c.tz, now);
-      const day = formatWeekday(c.tz, now);
-      return { ...c, time, day };
-    });
-  }, [cities, now]);
+  const results = useMemo(() => {
+    const qq = normalize(q);
+    if (!qq) return [];
+
+    return CITIES.map((c) => ({ c, s: scoreCity(qq, c) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 6)
+      .map((x) => x.c);
+  }, [q]);
+
+  function goToCity(city: City) {
+    setOpen(false);
+    router.push(`/city/${city.slug}`);
+  }
+
+  function onSubmit() {
+    if (results.length > 0) {
+      goToCity(results[Math.max(0, Math.min(active, results.length - 1))]);
+      return;
+    }
+  }
+
+  const showDropdown = open && (results.length > 0 || q.trim().length > 0);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {cards.map((c) => (
-        <a
-          key={c.slug}
-          href={`/city/${c.slug}`}
-          className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 transition hover:border-white/20 hover:bg-white/10"
+    <div className="relative w-full">
+      <div className="relative">
+        <input
+          ref={inputRef}
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setOpen(true);
+            setActive(0);
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => {
+            window.setTimeout(() => setOpen(false), 140);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              onSubmit();
+            }
+            if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+              setOpen(true);
+              return;
+            }
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setActive((v) => Math.min(v + 1, Math.max(0, results.length - 1)));
+            }
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setActive((v) => Math.max(v - 1, 0));
+            }
+            if (e.key === 'Escape') {
+              setOpen(false);
+              inputRef.current?.blur();
+            }
+          }}
+          placeholder="Search a city…"
+          className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-28 text-base text-zinc-100 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] outline-none placeholder:text-zinc-500 focus:border-white/20"
+          aria-label="Search a city"
+          spellCheck={false}
+          autoComplete="off"
+        />
+
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={onSubmit}
+          className="absolute right-2 top-2 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-zinc-100 transition hover:bg-white/15"
         >
-          <div className="relative h-40 w-full">
-            <Image
-              src={c.image.src}
-              alt={c.image.alt}
-              fill
-              className="object-cover opacity-85 transition group-hover:opacity-95"
-              sizes="(max-width: 1024px) 100vw, 33vw"
-              priority={c.slug === 'madrid'}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-950/35 to-transparent" />
-            <div className="absolute left-4 top-4 flex items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-zinc-950/50 px-3 py-1 text-xs text-zinc-200 backdrop-blur">
-                {c.region}
-              </span>
-              <span className="rounded-full border border-white/10 bg-zinc-950/50 px-3 py-1 text-xs text-zinc-200 backdrop-blur">
-                {c.country}
-              </span>
-            </div>
+          Open
+        </button>
+      </div>
 
-            <div className="absolute bottom-4 left-4 right-4">
-              <div className="flex items-end justify-between gap-4">
-                <div>
-                  <div className="text-lg font-semibold tracking-tight text-zinc-50">{c.name}</div>
-                  <div className="mt-1 text-xs text-zinc-300/90">{c.blurb}</div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-sm font-medium text-zinc-100">
-                    {c.day ? `${c.day} ` : ''}
-                    {c.time}
-                  </div>
-                  <div className="mt-1 text-[11px] text-zinc-400">{c.tz}</div>
-                </div>
+      {showDropdown && (
+        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_20px_80px_rgba(0,0,0,0.55)] backdrop-blur">
+          <div className="p-2">
+            {results.length > 0 ? (
+              results.map((city, idx) => (
+                <button
+                  key={city.slug}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => goToCity(city)}
+                  onMouseEnter={() => setActive(idx)}
+                  className={[
+                    'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition',
+                    idx === active
+                      ? 'bg-white/10 text-zinc-50'
+                      : 'bg-transparent text-zinc-200 hover:bg-white/5',
+                  ].join(' ')}
+                >
+                  <span className="font-medium">{city.name}</span>
+                  <span className="text-xs text-zinc-500">city</span>
+                </button>
+              ))
+            ) : (
+              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-zinc-300">
+                No matches for <span className="font-medium text-zinc-100">"{q.trim()}"</span>
+                <div className="mt-1 text-xs text-zinc-500">Try: madrid, barcelona, lisbon, nyc</div>
               </div>
-            </div>
+            )}
           </div>
-
-          <div className="px-5 py-4">
-            <div className="flex items-center justify-between">
-              <div className="text-xs text-zinc-400">Open city page</div>
-              <div className="text-xs text-zinc-500 transition group-hover:text-zinc-300">/city/{c.slug}</div>
-            </div>
-          </div>
-        </a>
-      ))}
+        </div>
+      )}
     </div>
   );
 }
