@@ -23,7 +23,7 @@ export const CITIES: City[] = [
     tz: 'Europe/Madrid',
     blurb: 'Capital energy, culture, and late nights.',
     image: {
-      src: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1600&q=80',
       alt: 'Madrid skyline at sunset',
     },
   },
@@ -35,7 +35,7 @@ export const CITIES: City[] = [
     tz: 'Europe/Madrid',
     blurb: 'Architecture, beaches, and design-forward streets.',
     image: {
-      src: 'https://images.unsplash.com/photo-1509803874385-db7c23652552?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1509803874385-db7c23652552?auto=format&fit=crop&w=1600&q=80',
       alt: 'Barcelona city view',
     },
   },
@@ -47,7 +47,8 @@ export const CITIES: City[] = [
     tz: 'Europe/Lisbon',
     blurb: 'Hills, light, and Atlantic charm.',
     image: {
-      src: 'https://source.unsplash.com/hSQnD4iObIM/2000x1200',
+      // FIX: previous Lisbon URL was 404. This one is working.
+      src: 'https://images.unsplash.com/photo-1750793521272-63b426ab6101?auto=format&fit=crop&w=1600&q=80',
       alt: 'Lisbon rooftops and river',
     },
   },
@@ -59,7 +60,7 @@ export const CITIES: City[] = [
     tz: 'Europe/London',
     blurb: 'Global capital of business and culture.',
     image: {
-      src: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1600&q=80',
       alt: 'London skyline with river',
     },
   },
@@ -71,7 +72,7 @@ export const CITIES: City[] = [
     tz: 'Europe/Paris',
     blurb: 'Iconic streets, timeless taste.',
     image: {
-      src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80',
       alt: 'Paris Eiffel Tower view',
     },
   },
@@ -83,7 +84,7 @@ export const CITIES: City[] = [
     tz: 'Asia/Dubai',
     blurb: 'Modern skyline, speed, and scale.',
     image: {
-      src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=1600&q=80',
       alt: 'Dubai skyline at night',
     },
   },
@@ -95,7 +96,7 @@ export const CITIES: City[] = [
     tz: 'America/New_York',
     blurb: 'The original 24/7 city.',
     image: {
-      src: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=2000&q=80',
+      src: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=1600&q=80',
       alt: 'New York skyline',
     },
   },
