@@ -6,10 +6,15 @@ import { useEffect, useMemo, useState } from 'react';
 import CityCard from './CityCard';
 import type { City } from './cities';
 
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
 function formatLocalTime(tz: string) {
   try {
-    return new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
+    // AM/PM for “live” feel (matches your request)
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
       hour12: true,
       timeZone: tz,
@@ -19,26 +24,14 @@ function formatLocalTime(tz: string) {
   }
 }
 
-type Variant = 'default' | 'compact';
-
-function gridClass(variant: Variant) {
-  if (variant === 'compact') {
-    // Sidebar-friendly:
-    // - 1 column on desktop (prevents squeeze)
-    // - 2 columns on small screens
-    return 'grid gap-4 sm:grid-cols-2 lg:grid-cols-1';
-  }
-
-  // Explore grid (unchanged intention)
-  return 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
-}
-
 export default function CityCardsClient({
   cities,
-  variant = 'default',
+  columns,
+  className,
 }: {
   cities: City[];
-  variant?: Variant;
+  columns?: string;
+  className?: string;
 }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
@@ -54,13 +47,15 @@ export default function CityCardsClient({
     }));
   }, [cities, now]);
 
+  const gridClass = columns ?? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
+
   return (
-    <div className={gridClass(variant)}>
+    <div className={cx(gridClass, className)}>
       {enriched.map((city) => (
         <div key={city.slug} className="relative">
           <CityCard city={city} />
           {city.localTime ? (
-            <div className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/10 bg-black/50 px-2 py-1 text-[11px] text-zinc-200 backdrop-blur">
+            <div className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/10 bg-black/55 px-2 py-1 text-[11px] text-zinc-200 backdrop-blur">
               {city.localTime}
             </div>
           ) : null}
