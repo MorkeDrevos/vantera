@@ -1,14 +1,15 @@
 // src/components/layout/Footer.tsx
-'use client';
+import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-10 text-xs text-zinc-500 sm:px-8">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>© {new Date().getFullYear()} Locus</div>
-        <div className="text-zinc-600">
-          Early build. UI is live. Intelligence layers evolve city by city.
-        </div>
+    <footer className="border-t mt-24 py-8 text-sm">
+      <div className="mx-auto max-w-6xl px-6 flex justify-between">
+        <span>© Vantera</span>
+        <nav className="flex gap-6">
+          <Link href="/contact">Contact</Link>
+          <a href="mailto:hello@vantera.io">hello@vantera.io</a>
+        </nav>
       </div>
     </footer>
   );
