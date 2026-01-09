@@ -1,14 +1,6 @@
 import CitySearch from './CitySearch';
-
-const CITIES = [
-  { name: 'Madrid', slug: 'madrid' },
-  { name: 'Barcelona', slug: 'barcelona' },
-  { name: 'Lisbon', slug: 'lisbon' },
-  { name: 'London', slug: 'london' },
-  { name: 'Paris', slug: 'paris' },
-  { name: 'Dubai', slug: 'dubai' },
-  { name: 'New York', slug: 'new-york' },
-];
+import CityCardsClient from './CityCardsClient';
+import { CITIES } from './cities';
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -30,10 +22,10 @@ function Shell({ children }: { children: React.ReactNode }) {
 
           <div className="hidden items-center gap-2 sm:flex">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              Premium UI baseline
+              Real images
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              Fast + simple
+              Live local time
             </span>
           </div>
         </header>
@@ -45,7 +37,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-6 text-xs text-zinc-500 sm:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>© {new Date().getFullYear()} Locus</div>
-            <div className="text-zinc-600">Built for speed, clarity, and premium feel</div>
+            <div className="text-zinc-600">A premium baseline for real data later</div>
           </div>
         </footer>
       </div>
@@ -66,11 +58,11 @@ export default function HomePage() {
   return (
     <Shell>
       <section className="pt-6 sm:pt-12">
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
-              <span>Now shipping a clean, locked homepage</span>
+              <span>Real images + live city time</span>
             </div>
 
             <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
@@ -79,26 +71,31 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-              A premium, minimal directory for cities. Search, open, and explore without noise.
+              Search a city, open the page, and expand from there. This is a production-grade UI baseline with real imagery
+              and real-time local clocks.
             </p>
 
             <div className="mt-7 max-w-xl">
               <CitySearch />
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-2">
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                Keyboard-friendly
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                Mobile-first
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                Clean routing
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-                Production baseline
-              </span>
+            <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="text-xs text-zinc-400">Cities</div>
+                <div className="mt-1 text-lg font-semibold text-zinc-100">{CITIES.length}</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="text-xs text-zinc-400">Regions</div>
+                <div className="mt-1 text-lg font-semibold text-zinc-100">3</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="text-xs text-zinc-400">Timezones</div>
+                <div className="mt-1 text-lg font-semibold text-zinc-100">5</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                <div className="text-xs text-zinc-400">Status</div>
+                <div className="mt-1 text-lg font-semibold text-emerald-300">Live</div>
+              </div>
             </div>
           </div>
 
@@ -114,7 +111,9 @@ export default function HomePage() {
                     className="group rounded-2xl border border-white/10 bg-zinc-950/40 px-4 py-4 transition hover:border-white/20 hover:bg-white/5"
                   >
                     <div className="text-sm font-medium text-zinc-100">{c.name}</div>
-                    <div className="mt-1 text-xs text-zinc-500">Open city</div>
+                    <div className="mt-1 text-xs text-zinc-500">
+                      {c.country} · {c.tz}
+                    </div>
                     <div className="mt-3 h-px w-full bg-white/10 transition group-hover:bg-white/15" />
                     <div className="mt-3 text-xs text-zinc-400">/city/{c.slug}</div>
                   </a>
@@ -122,7 +121,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-zinc-300">
-                Tip: start typing “mad”, “bar”, “lis”, or “nyc”.
+                Tip: type “mad”, “bar”, “lis”, or “nyc”. Use ↑ ↓ then Enter.
               </div>
             </div>
           </div>
@@ -130,23 +129,8 @@ export default function HomePage() {
       </section>
 
       <section className="mt-14">
-        <SectionLabel>More cities</SectionLabel>
-
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {CITIES.map((c) => (
-            <a
-              key={c.slug}
-              href={`/city/${c.slug}`}
-              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 transition hover:border-white/20 hover:bg-white/10"
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-medium text-zinc-100">{c.name}</div>
-                <div className="text-xs text-zinc-500">Open</div>
-              </div>
-              <div className="mt-2 text-xs text-zinc-400">Explore this city page</div>
-            </a>
-          ))}
-        </div>
+        <SectionLabel>Explore</SectionLabel>
+        <CityCardsClient cities={CITIES} />
       </section>
     </Shell>
   );
