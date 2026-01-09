@@ -75,6 +75,7 @@ export default function CitySearch() {
     <div className="relative">
       <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-2 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
         <input
+          id="locus-city-search"
           ref={inputRef}
           value={q}
           onChange={(e) => {
