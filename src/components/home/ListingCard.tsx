@@ -9,7 +9,11 @@ import type { Listing } from './listings';
 
 function formatEur(n: number) {
   try {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(n);
   } catch {
     return `€${Math.round(n).toLocaleString()}`;
   }
@@ -30,7 +34,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   return (
     <Link
-      href={`/listing/${listing.slug}`}
+      href={`/listing/${listing.id}`}
       className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
       prefetch
     >
@@ -43,6 +47,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover opacity-90 transition duration-300 group-hover:opacity-100"
             fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
+            onError={() => setImgOk(false)}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
@@ -90,7 +95,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-xs text-zinc-500">{`/listing/${listing.slug}`}</div>
+          <div className="text-xs text-zinc-500">{`/listing/${listing.id}`}</div>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-zinc-200 transition group-hover:border-white/20 group-hover:bg-white/10">
             View listing
           </span>
