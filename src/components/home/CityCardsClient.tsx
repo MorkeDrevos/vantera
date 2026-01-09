@@ -1,3 +1,5 @@
+// src/components/home/CityCardsClient.tsx
+
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -7,12 +9,11 @@ import type { City } from './cities';
 
 function formatLocalTime(tz: string, d: Date) {
   try {
-    // 12h + AM/PM (premium + clear)
     return new Intl.DateTimeFormat('en-US', {
-      timeZone: tz,
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true,
+      hour12: true, // AM/PM
+      timeZone: tz,
     }).format(d);
   } catch {
     return '';
@@ -23,23 +24,21 @@ export default function CityCardsClient({ cities }: { cities: City[] }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
-    // Sync to the next minute boundary, then tick every minute
-    const tick = () => setNow(new Date());
+    // Tick close to the minute boundary so the “live time” feels accurate.
+    const kick = () => setNow(new Date());
+    kick();
 
-    const msToNextMinute =
-      60_000 - (Date.now() % 60_000) + 10; // small buffer so we don't tick early
-
-    const t0 = setTimeout(() => {
-      tick();
-      const id = setInterval(tick, 60_000);
-      // store interval id on window so we can clear it in cleanup via closure
+    const msToNextMinute = 60_000 - (Date.now() % 60_000) + 25;
+    const t0 = window.setTimeout(() => {
+      kick();
+      const id = window.setInterval(kick, 60_000);
       (window as any).__locusCityTick = id;
     }, msToNextMinute);
 
     return () => {
-      clearTimeout(t0);
+      window.clearTimeout(t0);
       const id = (window as any).__locusCityTick;
-      if (id) clearInterval(id);
+      if (id) window.clearInterval(id);
       (window as any).__locusCityTick = null;
     };
   }, []);
@@ -56,10 +55,9 @@ export default function CityCardsClient({ cities }: { cities: City[] }) {
       {enriched.map((city) => (
         <div key={city.slug} className="relative">
           <CityCard city={city} />
-
           {city.localTime ? (
-            <div className="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/55 px-2.5 py-1 text-[11px] font-medium tracking-wide text-zinc-100 backdrop-blur">
-              <span className="opacity-90">{city.localTime}</span>
+            <div className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/10 bg-black/50 px-2 py-1 text-[11px] text-zinc-200 backdrop-blur">
+              {city.localTime}
             </div>
           ) : null}
         </div>
