@@ -47,9 +47,9 @@ export const CITIES: City[] = [
     tz: 'Europe/Lisbon',
     blurb: 'Hills, light, and Atlantic charm.',
     image: {
-      src: 'https://images.unsplash.com/photo-1525207934214-58e69a8f8a9f?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Lisbon rooftops and river',
-    },
+  src: 'https://images.unsplash.com/photo-1508261305436-0d0b6db9b775?auto=format&fit=crop&w=1600&q=80',
+  alt: 'Lisbon rooftops and river',
+},
   },
   {
     slug: 'london',
