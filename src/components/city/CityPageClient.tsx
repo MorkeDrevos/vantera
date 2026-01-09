@@ -1,80 +1,135 @@
-// src/components/home/CityCard.tsx
+// src/components/city/CityPageClient.tsx
 'use client';
 
 import Link from 'next/link';
-
-import type { City } from './cities';
 import SafeImage from '@/components/home/SafeImage';
 
-function safeAlt(city: City) {
+type CityImage = {
+  src: string;
+  alt: string | null;
+};
+
+export type CityPageCity = {
+  name: string;
+  slug: string;
+  country: string;
+  region: string | null;
+  tz: string;
+  blurb: string | null;
+  image: CityImage | null;
+};
+
+export type CityNavItem = {
+  name: string;
+  slug: string;
+};
+
+function safeAlt(city: CityPageCity) {
   const a = city.image?.alt?.trim();
   return a ? a : `${city.name} city view`;
 }
 
-export default function CityCard({ city }: { city: City }) {
+export default function CityPageClient({
+  city,
+  prev,
+  next,
+}: {
+  city: CityPageCity;
+  prev: CityNavItem;
+  next: CityNavItem;
+}) {
   const src = city.image?.src?.trim() ?? '';
 
   return (
-    <Link
-      href={`/city/${city.slug}`}
-      prefetch
-      className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
-    >
-      {/* premium “sheen” + edge glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_30%_-10%,rgba(255,255,255,0.14),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,215,128,0.10),transparent_45%,rgba(168,85,247,0.10))]" />
-      </div>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex flex-col gap-6">
+        <div className="flex items-center justify-between gap-4">
+          <Link
+            href="/"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:border-white/20"
+          >
+            ← Back
+          </Link>
 
-      <div className="relative h-[175px] w-full sm:h-[200px]">
-        {src ? (
-          <SafeImage
-            src={src}
-            alt={safeAlt(city)}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover opacity-90 transition duration-300 group-hover:opacity-100"
-            priority={city.slug === 'madrid'}
-            fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
-        )}
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/city/${prev.slug}`}
+              prefetch
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:border-white/20"
+              aria-label={`Previous city: ${prev.name}`}
+              title={`Previous: ${prev.name}`}
+            >
+              ← Prev
+            </Link>
+            <Link
+              href={`/city/${next.slug}`}
+              prefetch
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:border-white/20"
+              aria-label={`Next city: ${next.name}`}
+              title={`Next: ${next.name}`}
+            >
+              Next →
+            </Link>
+          </div>
+        </div>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-      </div>
-
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="truncate text-[15px] font-semibold tracking-tight text-zinc-50">
-              {city.name}
-            </div>
-            <div className="mt-1 truncate text-xs text-zinc-400">
-              {city.country}
-              {city.region ? ` · ${city.region}` : ''}
-            </div>
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
+          <div className="relative h-[260px] w-full sm:h-[360px]">
+            {src ? (
+              <SafeImage
+                src={src}
+                alt={safeAlt(city)}
+                fill
+                sizes="(max-width: 768px) 100vw, 1200px"
+                className="object-cover opacity-95"
+                priority={false}
+                fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           </div>
 
-          <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-200 transition group-hover:border-white/20">
-            <span>Open</span>
-            <span className="translate-x-0 opacity-70 transition group-hover:translate-x-[2px] group-hover:opacity-100">→</span>
-          </span>
-        </div>
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
+                {city.name}
+              </h1>
 
-        {city.blurb ? (
-          <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-zinc-300">
-            {city.blurb}
-          </p>
-        ) : null}
+              <div className="text-sm text-zinc-300">
+                <span className="text-zinc-200">{city.country}</span>
+                {city.region ? <span className="text-zinc-400">{` · ${city.region}`}</span> : null}
+                <span className="text-zinc-500">{` · ${city.tz}`}</span>
+              </div>
 
-        <div className="mt-4 h-px w-full bg-white/10" />
-        <div className="mt-4 text-xs text-zinc-400">
-          <span className="rounded-md border border-white/10 bg-black/20 px-2 py-1 font-mono">
-            {`/city/${city.slug}`}
-          </span>
+              {city.blurb ? (
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-200">
+                  {city.blurb}
+                </p>
+              ) : null}
+            </div>
+
+            <div className="mt-6 h-px w-full bg-white/10" />
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href="/browse"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 hover:border-white/20"
+              >
+                Browse listings
+              </Link>
+
+              <Link
+                href={`/city/${city.slug}`}
+                className="rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-zinc-300 hover:border-white/20"
+              >
+                {`/city/${city.slug}`}
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
