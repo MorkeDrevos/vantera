@@ -1,46 +1,49 @@
 // src/components/home/CityCard.tsx
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import type { CityMeta } from './cities';
+import type { City } from './cities';
+import SafeImage from './SafeImage';
 
-function safeAlt(city: CityMeta) {
+function safeAlt(city: City) {
   if (city.image?.alt?.trim()) return city.image.alt.trim();
   return `${city.name} city view`;
 }
 
-export default function CityCard({ city }: { city: CityMeta }) {
+export default function CityCard({ city }: { city: City }) {
   const [imgOk, setImgOk] = useState(true);
 
-  const hasImg = useMemo(() => {
-    const src = city.image?.src?.trim();
-    return Boolean(imgOk && src);
+  const src = useMemo(() => {
+    const s = city.image?.src?.trim();
+    return imgOk && s ? s : '';
   }, [imgOk, city.image?.src]);
 
   return (
     <Link
       href={`/city/${city.slug}`}
       className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
+      prefetch
     >
-      <div className="relative h-[160px] w-full sm:h-[180px]">
-        {hasImg ? (
-          <Image
-            src={city.image!.src}
+      <div className="relative h-[170px] w-full sm:h-[190px]">
+        {src ? (
+          <SafeImage
+            src={src}
             alt={safeAlt(city)}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover opacity-90 transition duration-300 group-hover:opacity-100"
             priority={city.slug === 'madrid'}
-            onError={() => setImgOk(false)}
+            fallback={
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+            }
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
       </div>
 
       <div className="p-5">
