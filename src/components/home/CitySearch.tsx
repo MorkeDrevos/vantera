@@ -69,8 +69,11 @@ export default function CitySearch() {
   function onSubmit() {
     if (results.length > 0) {
       goToCity(results[Math.max(0, Math.min(active, results.length - 1))]);
+      return;
     }
   }
+
+  const showDropdown = open && (results.length > 0 || q.trim().length > 0);
 
   return (
     <div className="relative w-full">
@@ -85,7 +88,7 @@ export default function CitySearch() {
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => {
-            window.setTimeout(() => setOpen(false), 120);
+            window.setTimeout(() => setOpen(false), 140);
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
@@ -110,7 +113,7 @@ export default function CitySearch() {
             }
           }}
           placeholder="Search a city…"
-          className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 pr-24 text-[15px] text-white placeholder:text-white/40 outline-none ring-0 transition focus:border-white/20 focus:bg-white/[0.06]"
+          className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-28 text-base text-zinc-100 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] outline-none placeholder:text-zinc-500 focus:border-white/20"
           aria-label="Search a city"
           spellCheck={false}
           autoComplete="off"
@@ -120,18 +123,17 @@ export default function CitySearch() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={onSubmit}
-          className="absolute right-2 top-2 inline-flex h-10 items-center justify-center rounded-xl border border-white/10 bg-white/10 px-4 text-sm font-medium text-white/90 transition hover:bg-white/15 active:scale-[0.99]"
+          className="absolute right-2 top-2 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-zinc-100 transition hover:bg-white/15"
         >
           Open
         </button>
       </div>
 
-      {open && results.length > 0 && (
-        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+      {showDropdown && (
+        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_20px_80px_rgba(0,0,0,0.55)] backdrop-blur">
           <div className="p-2">
-            {results.map((city, idx) => {
-              const isActive = idx === active;
-              return (
+            {results.length > 0 ? (
+              results.map((city, idx) => (
                 <button
                   key={city.slug}
                   type="button"
@@ -140,16 +142,21 @@ export default function CitySearch() {
                   onMouseEnter={() => setActive(idx)}
                   className={[
                     'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition',
-                    isActive
-                      ? 'bg-white/10 text-white'
-                      : 'bg-transparent text-white/80 hover:bg-white/5 hover:text-white',
+                    idx === active
+                      ? 'bg-white/10 text-zinc-50'
+                      : 'bg-transparent text-zinc-200 hover:bg-white/5',
                   ].join(' ')}
                 >
                   <span className="font-medium">{city.name}</span>
-                  <span className="text-xs text-white/45">city</span>
+                  <span className="text-xs text-zinc-500">city</span>
                 </button>
-              );
-            })}
+              ))
+            ) : (
+              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-zinc-300">
+                No matches for <span className="font-medium text-zinc-100">"{q.trim()}"</span>
+                <div className="mt-1 text-xs text-zinc-500">Try: madrid, barcelona, lisbon, nyc</div>
+              </div>
+            )}
           </div>
         </div>
       )}
