@@ -1,3 +1,4 @@
+// src/components/home/HomePage.tsx
 'use client';
 
 import type { ReactNode } from 'react';
@@ -26,7 +27,9 @@ function Shell({ children }: { children: ReactNode }) {
               <div className="text-sm font-semibold tracking-wide text-zinc-100">
                 Locus
               </div>
-              <div className="text-xs text-zinc-400">Truth-first real estate intelligence</div>
+              <div className="text-xs text-zinc-400">
+                Truth-first real estate intelligence
+              </div>
             </div>
           </div>
 
@@ -43,7 +46,10 @@ function Shell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
+        {/* IMPORTANT:
+            Keep the main container constrained so the rest of the page stays premium.
+            The HERO itself goes full-bleed inside HomePage (below). */}
+        <main className="relative mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
           {children}
         </main>
 
@@ -114,77 +120,107 @@ export default function HomePage() {
 
   return (
     <Shell>
-      {/* HERO – full width */}
-<section className="relative mt-6 sm:mt-12">
-  {/* Full-width color field */}
-  <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-    <div className="absolute left-1/2 top-[-180px] h-[520px] w-[1200px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[140px]" />
-    <div className="absolute right-[-200px] top-[120px] h-[420px] w-[420px] rounded-full bg-violet-500/10 blur-[120px]" />
-  </div>
+      {/* FULL-BLEED HERO */}
+      <section className="relative mt-6 sm:mt-12">
+        {/* Full-bleed background layer that spans viewport width */}
+        <div className="pointer-events-none absolute inset-0 left-1/2 w-screen -translate-x-1/2 overflow-hidden">
+          {/* Fresh color fields (still restrained) */}
+          <div className="absolute left-1/2 top-[-220px] h-[560px] w-[1400px] -translate-x-1/2 rounded-full bg-emerald-500/12 blur-[160px]" />
+          <div className="absolute right-[-260px] top-[120px] h-[520px] w-[520px] rounded-full bg-violet-500/12 blur-[140px]" />
+          <div className="absolute left-[-260px] top-[220px] h-[420px] w-[420px] rounded-full bg-sky-500/8 blur-[140px]" />
 
-  {/* Inner constraint */}
-  <div className="mx-auto max-w-6xl px-5 sm:px-8">
-    <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-      <div className="lg:col-span-7">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
-          <span>The system is loyal to reality, not participants</span>
+          {/* Subtle grid sheen to feel “system-like” */}
+          <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:72px_72px]" />
+
+          {/* Fade edges so it blends into the zinc base */}
+          <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_50%_10%,rgba(0,0,0,0),rgba(0,0,0,0.55)_70%,rgba(0,0,0,0.85)_100%)]" />
         </div>
 
-        <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
-          Real estate,
-          <br />
-          <span className="text-zinc-300">stripped of fiction.</span>
-        </h1>
+        {/* Inner constraint (content remains premium, readable) */}
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-7">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
+                <span>The system is loyal to reality, not participants</span>
+              </div>
 
-        <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-          Locus is a buyer-first intelligence layer. It models value, liquidity,
-          and pressure — without incentives, listings, or negotiation theatre.
-        </p>
+              <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
+                Real estate,
+                <br />
+                <span className="text-zinc-300">stripped of fiction.</span>
+              </h1>
 
-        <div className="mt-7 max-w-xl">
-          <CitySearch />
-        </div>
+              <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
+                Locus is a buyer-first intelligence layer. It models value,
+                liquidity, and pressure - without incentives, listings, or
+                negotiation theatre.
+              </p>
 
-        <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
-          Start with a city. Open its market surface. Truth layers activate city by city.
-        </div>
+              <div className="mt-7 max-w-xl">
+                <CitySearch />
+              </div>
 
-        <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-          <Metric label="Truth labs" value={CITIES.length} />
-          <Metric label="Regions" value={regionCount} />
-          <Metric label="Timezones" value={timezoneCount} />
-          <Metric label="Status" value="Live" tone="good" />
-        </div>
-      </div>
+              <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
+                Start with a city. Open its market surface. Truth layers activate
+                city by city.
+              </div>
 
-      <div className="lg:col-span-5">
-        <SectionLabel>Start here</SectionLabel>
+              <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+                <Metric label="Truth labs" value={CITIES.length} />
+                <Metric label="Regions" value={regionCount} />
+                <Metric label="Timezones" value={timezoneCount} />
+                <Metric label="Status" value="Live" tone="good" />
+              </div>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
-          <div className="text-sm font-semibold text-zinc-100">
-            Open a city truth lab
+              <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                <FeatureCard
+                  title="Value, not asking price"
+                  body="We model market reality, not marketing. Buyers get leverage, not noise."
+                />
+                <FeatureCard
+                  title="Probability, not promises"
+                  body="Truth surfaces will express outcomes like time-to-sell and pricing pressure. Not optimism."
+                />
+                <FeatureCard
+                  title="Intent replaces search"
+                  body="Buyers ask for safety, upside, schools, and timing. The system returns candidates and strategy."
+                />
+                <FeatureCard
+                  title="Anti-gaming by design"
+                  body="Truth layers are locked. No paid boosts, no suppression. Outputs change only when reality changes."
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <SectionLabel>Start here</SectionLabel>
+
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                <div className="text-sm font-semibold text-zinc-100">
+                  Open a city truth lab
+                </div>
+                <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+                  Each city is a live market surface. Imagery and clocks today.
+                  Value, liquidity, and risk layers follow.
+                </div>
+
+                <div className="mt-4">
+                  <CityCardsClient cities={CITIES.slice(0, 4)} />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
-            Each city is a live market surface. Imagery and clocks today.
-            Value, liquidity, and risk layers follow.
-          </div>
-
-          <div className="mt-4">
-            <CityCardsClient cities={CITIES.slice(0, 4)} />
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
       {/* EXPLORE */}
       <section className="mt-16">
         <SectionLabel>Global truth labs</SectionLabel>
         <div className="mb-6 max-w-2xl text-sm leading-relaxed text-zinc-300">
-          This is the map layer foundation. City pages become the on-ramp for buyers to explore truth-first intelligence,
-          and later the on-ramp for agents to distribute it on their own sites.
+          This is the map layer foundation. City pages become the on-ramp for
+          buyers to explore truth-first intelligence, and later the on-ramp for
+          agents to distribute it on their own sites.
         </div>
         <CityCardsClient cities={CITIES} />
       </section>
@@ -195,28 +231,36 @@ export default function HomePage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-            <div className="text-sm font-semibold text-zinc-100">Capital signal</div>
+            <div className="text-sm font-semibold text-zinc-100">
+              Capital signal
+            </div>
             <div className="mt-2 text-sm text-zinc-300">
               Major capitals and their surrounding pressure zones.
             </div>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-            <div className="text-sm font-semibold text-zinc-100">Coastal demand</div>
+            <div className="text-sm font-semibold text-zinc-100">
+              Coastal demand
+            </div>
             <div className="mt-2 text-sm text-zinc-300">
               Sea-adjacent markets where liquidity can flip fast.
             </div>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-            <div className="text-sm font-semibold text-zinc-100">Always-on cities</div>
+            <div className="text-sm font-semibold text-zinc-100">
+              Always-on cities
+            </div>
             <div className="mt-2 text-sm text-zinc-300">
               24/7 hubs where market activity never fully sleeps.
             </div>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
-            <div className="text-sm font-semibold text-zinc-100">Growth vectors</div>
+            <div className="text-sm font-semibold text-zinc-100">
+              Growth vectors
+            </div>
             <div className="mt-2 text-sm text-zinc-300">
               Talent inflows, infrastructure, and compounding demand.
             </div>
