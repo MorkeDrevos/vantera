@@ -1,124 +1,77 @@
-import Link from 'next/link';
 import CitySearch from './CitySearch';
-
-const FEATURED = [
-  { name: 'Madrid', slug: 'madrid' },
-  { name: 'Barcelona', slug: 'barcelona' },
-  { name: 'Lisbon', slug: 'lisbon' },
-  { name: 'London', slug: 'london' },
-  { name: 'Paris', slug: 'paris' },
-  { name: 'Dubai', slug: 'dubai' },
-  { name: 'New York', slug: 'new-york' },
-];
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white text-zinc-950">
-      {/* Top bar */}
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-2xl border border-zinc-200 bg-white shadow-sm" />
-          <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">Locus</div>
-            <div className="text-xs text-zinc-500">Real estate, observed</div>
-          </div>
+    <main className="min-h-screen bg-zinc-950 text-white">
+      {/* Background */}
+      <div className="pointer-events-none fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_20%_15%,rgba(56,189,248,0.18),transparent_55%),radial-gradient(900px_600px_at_80%_20%,rgba(168,85,247,0.16),transparent_55%),radial-gradient(1000px_700px_at_50%_90%,rgba(34,197,94,0.10),transparent_55%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-950 to-black" />
+      </div>
+
+      {/* Top */}
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 pt-7 sm:px-8">
+        <div className="flex items-center gap-2">
+          <div className="h-9 w-9 rounded-xl bg-white/10 ring-1 ring-white/10" />
+          <span className="text-sm font-semibold tracking-wide text-white/90">Locus</span>
         </div>
 
-        <nav className="hidden items-center gap-7 text-sm text-zinc-600 md:flex">
-          <Link className="hover:text-zinc-950" href="/about">
-            About
-          </Link>
-          <Link className="hover:text-zinc-950" href="/methodology">
-            Methodology
-          </Link>
-          <Link className="hover:text-zinc-950" href="/contact">
-            Contact
-          </Link>
-        </nav>
+        <div className="text-xs text-white/60">Prototype</div>
       </header>
 
       {/* Hero */}
-      <section className="mx-auto w-full max-w-6xl px-6 pb-16 pt-6 md:pb-24 md:pt-12">
-        <div className="grid gap-10 md:grid-cols-12 md:items-start">
-          <div className="md:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-600 shadow-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              Signals, not listings
-            </div>
+      <section className="mx-auto w-full max-w-6xl px-6 pb-20 pt-16 sm:px-8 sm:pt-20">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400/80" />
+            Live city routing
+          </div>
 
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-6xl">
-              Real estate,
-              <span className="text-zinc-400"> observed.</span>
-            </h1>
+          <h1 className="mt-5 text-4xl font-semibold leading-[1.06] tracking-[-0.02em] sm:text-6xl">
+            Find your city
+            <span className="text-white/70"> in seconds.</span>
+          </h1>
 
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 md:text-lg">
-              Locus aggregates early signals across markets to show what is actually happening in cities before listings
-              catch up.
-            </p>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-white/65 sm:text-lg">
+            A clean, fast directory that routes instantly. Search a city and jump straight into its page.
+          </p>
+        </div>
 
-            <div className="mt-8">
-              <CitySearch />
-              <div className="mt-3 text-xs text-zinc-500">
-                Tip: type a city, hit Enter. Try <span className="text-zinc-700">madrid</span> or{' '}
-                <span className="text-zinc-700">nyc</span>.
-              </div>
-            </div>
-
-            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm">
-              <Link
-                href="/methodology"
-                className="rounded-xl bg-zinc-950 px-5 py-3 text-white shadow-sm hover:bg-zinc-900"
-              >
-                How it works
-              </Link>
-              <Link
-                href="/about"
-                className="rounded-xl border border-zinc-200 bg-white px-5 py-3 text-zinc-900 shadow-sm hover:bg-zinc-50"
-              >
-                Why Locus
-              </Link>
+        {/* Search card */}
+        <div className="mt-10 max-w-2xl">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] sm:p-5">
+            <CitySearch />
+            <div className="mt-3 flex items-center justify-between gap-3 px-1">
+              <p className="text-xs text-white/50">
+                Tip: try <span className="text-white/70">Madrid</span> or <span className="text-white/70">Dubai</span>
+              </p>
+              <p className="text-xs text-white/40">Enter to open • ↑↓ to navigate</p>
             </div>
           </div>
 
-          {/* Right card */}
-          <div className="md:col-span-5">
-            <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <div className="text-sm font-semibold">Featured cities</div>
-              <div className="mt-1 text-sm text-zinc-600">Start with a market you know well.</div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3">
-                {FEATURED.map((c) => (
-                  <Link
-                    key={c.slug}
-                    href={`/city/${c.slug}`}
-                    className="group rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm shadow-sm hover:bg-zinc-50"
-                  >
-                    <div className="font-medium text-zinc-950">{c.name}</div>
-                    <div className="text-xs text-zinc-500 group-hover:text-zinc-600">Open market</div>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-                <div className="text-xs font-medium text-zinc-700">Coming next</div>
-                <div className="mt-1 text-sm text-zinc-600">City dashboards, alerts, and trend snapshots.</div>
-              </div>
+          {/* Small trust row */}
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-sm font-medium text-white/85">Fast routing</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/55">Instant push to /city/[slug]</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-sm font-medium text-white/85">Clean UI</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/55">Minimal, premium spacing & type</p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <p className="text-sm font-medium text-white/85">Keyboard-first</p>
+              <p className="mt-1 text-xs leading-relaxed text-white/55">Enter, arrows, escape supported</p>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-zinc-200">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-xs text-zinc-500">
-          <div>© {new Date().getFullYear()} Locus</div>
-          <div className="flex items-center gap-4">
-            <Link className="hover:text-zinc-700" href="/privacy">
-              Privacy
-            </Link>
-            <Link className="hover:text-zinc-700" href="/terms">
-              Terms
-            </Link>
-          </div>
+      {/* Footer */}
+      <footer className="mx-auto w-full max-w-6xl px-6 pb-10 sm:px-8">
+        <div className="flex items-center justify-between border-t border-white/10 pt-6 text-xs text-white/45">
+          <span>© {new Date().getFullYear()} Locus</span>
+          <span className="text-white/35">Built with Next + Tailwind</span>
         </div>
       </footer>
     </main>
