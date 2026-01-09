@@ -1,104 +1,97 @@
-export type CityMeta = {
+export type City = {
   name: string;
   slug: string;
-  country: string;
-  region: string;
-  tz: string; // IANA timezone
-  blurb: string;
+  region?: string;
+  tz?: string;
+  blurb?: string;
+  alt?: string[];
   image: {
-    src: string; // remote image URL
+    src: string;
     alt: string;
   };
-  alt?: string[];
 };
 
-export const CITIES: CityMeta[] = [
+export const CITIES: City[] = [
   {
     name: 'Madrid',
     slug: 'madrid',
-    country: 'Spain',
-    region: 'Europe',
+    region: 'Spain',
     tz: 'Europe/Madrid',
     blurb: 'Capital energy, culture, and late nights.',
+    alt: ['madrid, spain'],
     image: {
-      src: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1600&q=80',
+      // Use the "Download" URL from the Unsplash page you pick (or use images.unsplash.com directly)
+      src: 'https://images.unsplash.com/photo-1616088153814-2bff7ea6a0b8?auto=format&fit=crop&w=1600&q=80',
       alt: 'Madrid skyline at sunset',
     },
-    alt: ['madrid, spain'],
   },
   {
     name: 'Barcelona',
     slug: 'barcelona',
-    country: 'Spain',
-    region: 'Europe',
+    region: 'Spain',
     tz: 'Europe/Madrid',
     blurb: 'Architecture, beaches, and design-forward streets.',
+    alt: ['barcelona, spain'],
     image: {
-      src: 'https://images.unsplash.com/photo-1464790719320-516ecd75af6c?auto=format&fit=crop&w=1600&q=80',
+      src: 'https://images.unsplash.com/photo-1505739998589-00fc191ce01d?auto=format&fit=crop&w=1600&q=80',
       alt: 'Barcelona city view',
     },
-    alt: ['barcelona, spain'],
   },
   {
     name: 'Lisbon',
     slug: 'lisbon',
-    country: 'Portugal',
-    region: 'Europe',
+    region: 'Portugal',
     tz: 'Europe/Lisbon',
     blurb: 'Hills, light, and Atlantic charm.',
+    alt: ['lisboa'],
     image: {
-      src: 'https://images.unsplash.com/photo-1525207934214-58e69a8f8a3f?auto=format&fit=crop&w=1600&q=80',
+      src: 'https://images.unsplash.com/photo-1525207934214-58e69a8f8a42?auto=format&fit=crop&w=1600&q=80',
       alt: 'Lisbon rooftops and river',
     },
-    alt: ['lisboa'],
   },
   {
     name: 'London',
     slug: 'london',
-    country: 'United Kingdom',
-    region: 'Europe',
+    region: 'United Kingdom',
     tz: 'Europe/London',
     blurb: 'Global capital of business and culture.',
     image: {
-      src: 'https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1600&q=80',
-      alt: 'London skyline with river',
+      src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1600&q=80',
+      alt: 'London skyline',
     },
   },
   {
     name: 'Paris',
     slug: 'paris',
-    country: 'France',
-    region: 'Europe',
+    region: 'France',
     tz: 'Europe/Paris',
     blurb: 'Iconic streets, timeless taste.',
     image: {
       src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Paris Eiffel Tower view',
+      alt: 'Paris city scene',
     },
   },
   {
     name: 'Dubai',
     slug: 'dubai',
-    country: 'United Arab Emirates',
-    region: 'Middle East',
+    region: 'United Arab Emirates',
     tz: 'Asia/Dubai',
     blurb: 'Modern skyline, speed, and scale.',
     image: {
       src: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1600&q=80',
-      alt: 'Dubai skyline at dusk',
+      alt: 'Dubai skyline at night',
     },
   },
   {
     name: 'New York',
     slug: 'new-york',
-    country: 'United States',
-    region: 'North America',
+    region: 'United States',
     tz: 'America/New_York',
     blurb: 'The original 24/7 city.',
+    alt: ['nyc', 'new york city'],
     image: {
       src: 'https://images.unsplash.com/photo-1546436836-07a91091f160?auto=format&fit=crop&w=1600&q=80',
       alt: 'New York skyline',
     },
-    alt: ['nyc', 'new york city'],
   },
 ];
