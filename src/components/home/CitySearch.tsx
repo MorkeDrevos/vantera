@@ -1,33 +1,35 @@
 'use client';
 
-import Image from 'next/image';
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CITIES, type CityMeta } from './cities';
+
+import { CITIES, type City } from './cities';
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
 }
 
-function scoreCity(q: string, city: CityMeta) {
-  const qq = normalize(q);
-  if (!qq) return 0;
-
+function scoreCity(city: City, q: string) {
   const name = normalize(city.name);
-  if (name === qq) return 100;
-  if (name.startsWith(qq)) return 80;
-  if (name.includes(qq)) return 60;
-
-  for (const a of city.alt ?? []) {
-    const aa = normalize(a);
-    if (aa === qq) return 90;
-    if (aa.startsWith(qq)) return 70;
-    if (aa.includes(qq)) return 55;
-  }
-
+  const slug = normalize(city.slug);
   const country = normalize(city.country);
-  if (country === qq) return 40;
-  if (country.startsWith(qq)) return 25;
+  const tz = normalize(city.tz);
+
+  if (!q) return 0;
+
+  // Strongest: prefix match on name
+  if (name.startsWith(q)) return 100;
+
+  // Next: contains in name
+  if (name.includes(q)) return 80;
+
+  // Slug match
+  if (slug.startsWith(q)) return 70;
+  if (slug.includes(q)) return 60;
+
+  // Country / timezone match (weaker)
+  if (country.includes(q)) return 40;
+  if (tz.includes(q)) return 30;
 
   return 0;
 }
@@ -37,131 +39,110 @@ export default function CitySearch() {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const [q, setQ] = useState('');
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState<number>(-1);
 
   const results = useMemo(() => {
-    const qq = normalize(q);
-    if (!qq) return [];
+    const query = normalize(q);
+    if (!query) return [];
 
-    return CITIES.map((c) => ({ c, s: scoreCity(qq, c) }))
-      .filter((x) => x.s > 0)
-      .sort((a, b) => b.s - a.s)
-      .slice(0, 7)
-      .map((x) => x.c);
+    return [...CITIES]
+      .map((c) => ({ city: c, score: scoreCity(c, query) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score || a.city.name.localeCompare(b.city.name))
+      .slice(0, 8)
+      .map((x) => x.city);
   }, [q]);
 
-  function goToCity(city: CityMeta) {
-    setOpen(false);
+  function go(city: City) {
     router.push(`/city/${city.slug}`);
   }
 
   function onSubmit() {
-    if (results.length > 0) {
-      goToCity(results[Math.max(0, Math.min(active, results.length - 1))]);
-    }
+    if (results.length === 0) return;
+    const idx = active >= 0 ? active : 0;
+    go(results[Math.min(idx, results.length - 1)]);
   }
 
-  const showDropdown = open && (results.length > 0 || q.trim().length > 0);
-
   return (
-    <div className="relative w-full">
-      <div className="relative">
+    <div className="relative">
+      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-2">
         <input
           ref={inputRef}
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
-            setOpen(true);
-            setActive(0);
-          }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => {
-            window.setTimeout(() => setOpen(false), 140);
+            setActive(-1);
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
               onSubmit();
-            }
-            if (!open && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-              setOpen(true);
               return;
             }
+
             if (e.key === 'ArrowDown') {
               e.preventDefault();
-              setActive((v) => Math.min(v + 1, Math.max(0, results.length - 1)));
+              if (results.length === 0) return;
+              setActive((v) => Math.min(v + 1, results.length - 1));
+              return;
             }
+
             if (e.key === 'ArrowUp') {
               e.preventDefault();
+              if (results.length === 0) return;
               setActive((v) => Math.max(v - 1, 0));
+              return;
             }
+
             if (e.key === 'Escape') {
-              setOpen(false);
+              setQ('');
+              setActive(-1);
               inputRef.current?.blur();
             }
           }}
-          placeholder="Search a city…"
-          className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-28 text-base text-zinc-100 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] outline-none placeholder:text-zinc-500 focus:border-white/20"
+          placeholder="Search a city..."
+          className="h-11 w-full rounded-xl bg-transparent px-4 text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
           aria-label="Search a city"
-          spellCheck={false}
-          autoComplete="off"
         />
 
         <button
           type="button"
-          onMouseDown={(e) => e.preventDefault()}
           onClick={onSubmit}
-          className="absolute right-2 top-2 rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-sm font-medium text-zinc-100 transition hover:bg-white/15"
+          className="h-11 shrink-0 rounded-xl border border-white/10 bg-zinc-950/40 px-4 text-sm font-medium text-zinc-100 transition hover:border-white/20 hover:bg-white/5"
         >
           Open
         </button>
       </div>
 
-      {showDropdown && (
-        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_20px_80px_rgba(0,0,0,0.55)] backdrop-blur">
+      {results.length > 0 ? (
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-20 overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_16px_50px_rgba(0,0,0,0.55)] backdrop-blur">
           <div className="p-2">
-            {results.length > 0 ? (
-              results.map((city, idx) => (
-                <button
-                  key={city.slug}
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => goToCity(city)}
-                  onMouseEnter={() => setActive(idx)}
-                  className={[
-                    'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition',
-                    idx === active ? 'bg-white/10 text-zinc-50' : 'bg-transparent text-zinc-200 hover:bg-white/5',
-                  ].join(' ')}
-                >
-                  <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                    <Image
-                      src={city.image.src}
-                      alt={city.image.alt}
-                      fill
-                      className="object-cover"
-                      sizes="40px"
-                    />
+            {results.map((city, i) => (
+              <button
+                key={city.slug}
+                type="button"
+                onMouseEnter={() => setActive(i)}
+                onClick={() => go(city)}
+                className={[
+                  'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition',
+                  i === active ? 'bg-white/6' : 'hover:bg-white/5',
+                ].join(' ')}
+              >
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium text-zinc-100">{city.name}</div>
+                  <div className="truncate text-xs text-zinc-500">
+                    {city.country} · {city.tz}
                   </div>
+                </div>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="truncate font-medium">{city.name}</span>
-                      <span className="shrink-0 text-xs text-zinc-500">{city.country}</span>
-                    </div>
-                    <div className="mt-0.5 truncate text-xs text-zinc-500">{city.tz}</div>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-zinc-300">
-                No matches for <span className="font-medium text-zinc-100">"{q.trim()}"</span>
-                <div className="mt-1 text-xs text-zinc-500">Try: madrid, barcelona, lisbon, nyc</div>
-              </div>
-            )}
+                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-zinc-300">
+                  /city/{city.slug}
+                </span>
+              </button>
+            ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
