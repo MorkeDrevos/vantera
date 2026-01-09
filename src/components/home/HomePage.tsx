@@ -1,8 +1,15 @@
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
 
-function Shell({ children }: { children: React.ReactNode }) {
+function uniqCount(values: Array<string | undefined | null>) {
+  return new Set(values.filter(Boolean) as string[]).size;
+}
+
+function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -30,9 +37,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">
-          {children}
-        </main>
+        <main className="mx-auto w-full max-w-6xl px-5 pb-16 sm:px-8">{children}</main>
 
         <footer className="mx-auto w-full max-w-6xl px-5 pb-10 pt-6 text-xs text-zinc-500 sm:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -45,7 +50,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <div className="mb-4 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-zinc-400">
       <span className="h-px w-6 bg-white/10" />
@@ -55,6 +60,9 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function HomePage() {
+  const regions = uniqCount(CITIES.map((c: any) => c.region));
+  const timezones = uniqCount(CITIES.map((c: any) => c.tz));
+
   return (
     <Shell>
       <section className="pt-6 sm:pt-12">
@@ -71,8 +79,8 @@ export default function HomePage() {
             </h1>
 
             <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-              Search a city, open the page, and expand from there. This is a production-grade UI baseline with real imagery
-              and real-time local clocks.
+              Search a city, open the page, and expand from there. This is a production-grade UI baseline with real
+              imagery and real-time local clocks.
             </p>
 
             <div className="mt-7 max-w-xl">
@@ -86,11 +94,11 @@ export default function HomePage() {
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <div className="text-xs text-zinc-400">Regions</div>
-                <div className="mt-1 text-lg font-semibold text-zinc-100">3</div>
+                <div className="mt-1 text-lg font-semibold text-zinc-100">{regions || 0}</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <div className="text-xs text-zinc-400">Timezones</div>
-                <div className="mt-1 text-lg font-semibold text-zinc-100">5</div>
+                <div className="mt-1 text-lg font-semibold text-zinc-100">{timezones || 0}</div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                 <div className="text-xs text-zinc-400">Status</div>
@@ -104,19 +112,20 @@ export default function HomePage() {
               <SectionLabel>Popular</SectionLabel>
 
               <div className="grid grid-cols-2 gap-3">
-                {CITIES.slice(0, 6).map((c) => (
-                  <a
+                {CITIES.slice(0, 6).map((c: any) => (
+                  <Link
                     key={c.slug}
                     href={`/city/${c.slug}`}
                     className="group rounded-2xl border border-white/10 bg-zinc-950/40 px-4 py-4 transition hover:border-white/20 hover:bg-white/5"
                   >
                     <div className="text-sm font-medium text-zinc-100">{c.name}</div>
                     <div className="mt-1 text-xs text-zinc-500">
-                      {c.country} · {c.tz}
+                      {c.country}
+                      {c.tz ? ` · ${c.tz}` : ''}
                     </div>
                     <div className="mt-3 h-px w-full bg-white/10 transition group-hover:bg-white/15" />
                     <div className="mt-3 text-xs text-zinc-400">/city/{c.slug}</div>
-                  </a>
+                  </Link>
                 ))}
               </div>
 
@@ -130,7 +139,7 @@ export default function HomePage() {
 
       <section className="mt-14">
         <SectionLabel>Explore</SectionLabel>
-        <CityCardsClient cities={CITIES} />
+        <CityCardsClient cities={CITIES as any} />
       </section>
     </Shell>
   );
