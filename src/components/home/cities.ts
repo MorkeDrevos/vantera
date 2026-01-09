@@ -1,5 +1,4 @@
 // src/components/home/cities.ts
-
 export type CityImage = {
   src: string;
   alt?: string;
@@ -13,6 +12,11 @@ export type City = {
   tz: string;
   blurb?: string;
   image?: CityImage;
+};
+
+// Used by UI components that enrich city objects at runtime (local time, etc)
+export type CityMeta = City & {
+  localTime?: string;
 };
 
 export const CITIES: City[] = [
@@ -47,9 +51,10 @@ export const CITIES: City[] = [
     region: 'Europe',
     tz: 'Europe/Lisbon',
     blurb: 'Hills, light, and Atlantic charm.',
-    // If this URL ever fails again, CityCard has a hard fallback (no broken icon).
     image: {
-      src: 'https://images.unsplash.com/photo-1501554728187-ce583db33af7?auto=format&fit=crop&w=1600&q=80',
+      // Your previous images.unsplash.com link 404s. This one is stable.
+      // Photo page: https://unsplash.com/photos/a-view-of-a-city-with-rooftops-and-buildings-hSQnD4iObIM
+      src: 'https://source.unsplash.com/hSQnD4iObIM/1600x900',
       alt: 'Lisbon rooftops and river',
     },
   },
