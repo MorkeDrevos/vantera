@@ -1,29 +1,15 @@
 'use client';
 
+import Image from 'next/image';
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-type City = {
-  name: string;
-  slug: string;
-  alt?: string[];
-};
-
-const CITIES: City[] = [
-  { name: 'Madrid', slug: 'madrid', alt: ['madrid, spain'] },
-  { name: 'Barcelona', slug: 'barcelona', alt: ['barcelona, spain'] },
-  { name: 'Lisbon', slug: 'lisbon', alt: ['lisboa'] },
-  { name: 'London', slug: 'london' },
-  { name: 'Paris', slug: 'paris' },
-  { name: 'Dubai', slug: 'dubai' },
-  { name: 'New York', slug: 'new-york', alt: ['nyc', 'new york city'] },
-];
+import { CITIES, type CityMeta } from './cities';
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
 }
 
-function scoreCity(q: string, city: City) {
+function scoreCity(q: string, city: CityMeta) {
   const qq = normalize(q);
   if (!qq) return 0;
 
@@ -38,6 +24,10 @@ function scoreCity(q: string, city: City) {
     if (aa.startsWith(qq)) return 70;
     if (aa.includes(qq)) return 55;
   }
+
+  const country = normalize(city.country);
+  if (country === qq) return 40;
+  if (country.startsWith(qq)) return 25;
 
   return 0;
 }
@@ -57,11 +47,11 @@ export default function CitySearch() {
     return CITIES.map((c) => ({ c, s: scoreCity(qq, c) }))
       .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s)
-      .slice(0, 6)
+      .slice(0, 7)
       .map((x) => x.c);
   }, [q]);
 
-  function goToCity(city: City) {
+  function goToCity(city: CityMeta) {
     setOpen(false);
     router.push(`/city/${city.slug}`);
   }
@@ -69,7 +59,6 @@ export default function CitySearch() {
   function onSubmit() {
     if (results.length > 0) {
       goToCity(results[Math.max(0, Math.min(active, results.length - 1))]);
-      return;
     }
   }
 
@@ -141,14 +130,27 @@ export default function CitySearch() {
                   onClick={() => goToCity(city)}
                   onMouseEnter={() => setActive(idx)}
                   className={[
-                    'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition',
-                    idx === active
-                      ? 'bg-white/10 text-zinc-50'
-                      : 'bg-transparent text-zinc-200 hover:bg-white/5',
+                    'flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition',
+                    idx === active ? 'bg-white/10 text-zinc-50' : 'bg-transparent text-zinc-200 hover:bg-white/5',
                   ].join(' ')}
                 >
-                  <span className="font-medium">{city.name}</span>
-                  <span className="text-xs text-zinc-500">city</span>
+                  <div className="relative h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                    <Image
+                      src={city.image.src}
+                      alt={city.image.alt}
+                      fill
+                      className="object-cover"
+                      sizes="40px"
+                    />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="truncate font-medium">{city.name}</span>
+                      <span className="shrink-0 text-xs text-zinc-500">{city.country}</span>
+                    </div>
+                    <div className="mt-0.5 truncate text-xs text-zinc-500">{city.tz}</div>
+                  </div>
                 </button>
               ))
             ) : (
