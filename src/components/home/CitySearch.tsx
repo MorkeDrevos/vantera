@@ -72,10 +72,8 @@ export default function CitySearch() {
     }
   }
 
-  const hasResults = open && results.length > 0;
-
   return (
-    <div className="relative w-full max-w-xl">
+    <div className="relative w-full">
       <div className="relative">
         <input
           ref={inputRef}
@@ -112,11 +110,7 @@ export default function CitySearch() {
             }
           }}
           placeholder="Search a city…"
-          className={[
-            'w-full rounded-2xl border bg-white px-5 py-4 pr-24 text-base text-zinc-950 shadow-sm outline-none',
-            'placeholder:text-zinc-400 focus:border-zinc-300',
-            hasResults ? 'border-zinc-300' : 'border-zinc-200',
-          ].join(' ')}
+          className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 px-5 pr-24 text-[15px] text-white placeholder:text-white/40 outline-none ring-0 transition focus:border-white/20 focus:bg-white/[0.06]"
           aria-label="Search a city"
           spellCheck={false}
           autoComplete="off"
@@ -126,31 +120,36 @@ export default function CitySearch() {
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={onSubmit}
-          className="absolute right-2 top-2 rounded-xl bg-zinc-950 px-4 py-3 text-sm font-medium text-white shadow-sm hover:bg-zinc-900"
+          className="absolute right-2 top-2 inline-flex h-10 items-center justify-center rounded-xl border border-white/10 bg-white/10 px-4 text-sm font-medium text-white/90 transition hover:bg-white/15 active:scale-[0.99]"
         >
           Open
         </button>
       </div>
 
-      {hasResults && (
-        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-lg">
+      {open && results.length > 0 && (
+        <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur">
           <div className="p-2">
-            {results.map((city, idx) => (
-              <button
-                key={city.slug}
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => goToCity(city)}
-                onMouseEnter={() => setActive(idx)}
-                className={[
-                  'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm',
-                  idx === active ? 'bg-zinc-100 text-zinc-950' : 'bg-white text-zinc-800 hover:bg-zinc-50',
-                ].join(' ')}
-              >
-                <span className="font-medium">{city.name}</span>
-                <span className="text-xs text-zinc-500">city</span>
-              </button>
-            ))}
+            {results.map((city, idx) => {
+              const isActive = idx === active;
+              return (
+                <button
+                  key={city.slug}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => goToCity(city)}
+                  onMouseEnter={() => setActive(idx)}
+                  className={[
+                    'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm transition',
+                    isActive
+                      ? 'bg-white/10 text-white'
+                      : 'bg-transparent text-white/80 hover:bg-white/5 hover:text-white',
+                  ].join(' ')}
+                >
+                  <span className="font-medium">{city.name}</span>
+                  <span className="text-xs text-white/45">city</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
