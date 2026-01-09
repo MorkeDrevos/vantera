@@ -1,11 +1,12 @@
 // src/app/page.tsx
-import { Suspense } from 'react';
-import HomePage from '@/components/home/HomePage';
+import ComingSoon from '@/components/ComingSoon';
+import HomePageClient from '@/components/home/HomePageClient';
 
 export default function Page() {
-  return (
-    <Suspense fallback={null}>
-      <HomePage />
-    </Suspense>
-  );
+  // Set this env var ONLY in production on Vercel
+  const comingSoon = process.env.NEXT_PUBLIC_COMING_SOON === '1';
+
+  if (comingSoon) return <ComingSoon />;
+
+  return <HomePageClient />;
 }
