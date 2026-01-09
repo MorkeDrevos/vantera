@@ -114,106 +114,70 @@ export default function HomePage() {
 
   return (
     <Shell>
-      {/* HERO */}
-      <section className="pt-6 sm:pt-12">
-        <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-          <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
-              <span>The system is loyal to reality, not participants</span>
-            </div>
+      {/* HERO – full width */}
+<section className="relative mt-6 sm:mt-12">
+  {/* Full-width color field */}
+  <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div className="absolute left-1/2 top-[-180px] h-[520px] w-[1200px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[140px]" />
+    <div className="absolute right-[-200px] top-[120px] h-[420px] w-[420px] rounded-full bg-violet-500/10 blur-[120px]" />
+  </div>
 
-            <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
-              Real estate, stripped of fiction.
-            </h1>
+  {/* Inner constraint */}
+  <div className="mx-auto max-w-6xl px-5 sm:px-8">
+    <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+      <div className="lg:col-span-7">
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-300">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-300/90" />
+          <span>The system is loyal to reality, not participants</span>
+        </div>
 
-            <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-              Locus is a buyer-first intelligence layer. Start with a city truth lab, then expand.
-              No portal games. No boosted listings. No incentive fog.
-            </p>
+        <h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
+          Real estate,
+          <br />
+          <span className="text-zinc-300">stripped of fiction.</span>
+        </h1>
 
-            <div className="mt-7 max-w-xl">
-              <CitySearch />
-            </div>
+        <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
+          Locus is a buyer-first intelligence layer. It models value, liquidity,
+          and pressure — without incentives, listings, or negotiation theatre.
+        </p>
 
-            <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
-              Tip: search a city, open its page, then explore the network. This is the foundation that later
-              powers truth cards, value signals, and liquidity forecasts.
-            </div>
+        <div className="mt-7 max-w-xl">
+          <CitySearch />
+        </div>
 
-            {/* METRICS */}
-            <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
-              <Metric label="Truth labs" value={CITIES.length} />
-              <Metric label="Regions" value={regionCount} />
-              <Metric label="Timezones" value={timezoneCount} />
-              <Metric label="Status" value="Live" tone="good" />
-            </div>
+        <div className="mt-4 max-w-xl text-xs leading-relaxed text-zinc-500">
+          Start with a city. Open its market surface. Truth layers activate city by city.
+        </div>
 
-            {/* DIFFERENTIATION */}
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              <FeatureCard
-                title="Value, not asking price"
-                body="We are building systems that model real value and liquidity, not marketing. Buyers get leverage, not noise."
-              />
-              <FeatureCard
-                title="Probability, not promises"
-                body="Truth surfaces will express outcomes like time-to-sell and pricing pressure. Not agent optimism."
-              />
-              <FeatureCard
-                title="Intent replaces search"
-                body="Instead of filters, buyers ask for safety, upside, schools, walkability, and the system returns strategy and candidates."
-              />
-              <FeatureCard
-                title="Anti-gaming by design"
-                body="Truth layers are locked. No paid boosts, no suppression. The model updates when reality updates."
-              />
-            </div>
+        <div className="mt-7 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
+          <Metric label="Truth labs" value={CITIES.length} />
+          <Metric label="Regions" value={regionCount} />
+          <Metric label="Timezones" value={timezoneCount} />
+          <Metric label="Status" value="Live" tone="good" />
+        </div>
+      </div>
+
+      <div className="lg:col-span-5">
+        <SectionLabel>Start here</SectionLabel>
+
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+          <div className="text-sm font-semibold text-zinc-100">
+            Open a city truth lab
+          </div>
+          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+            Each city is a live market surface. Imagery and clocks today.
+            Value, liquidity, and risk layers follow.
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="lg:col-span-5">
-            <SectionLabel>Start here</SectionLabel>
-
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-zinc-100">
-                Open a city truth lab
-              </div>
-              <div className="mt-2 text-sm leading-relaxed text-zinc-300">
-                Each city page is a clean surface for real imagery, local time, and the scaffolding for intelligence layers.
-                This becomes the distribution entry point for buyers and agents later.
-              </div>
-
-              <div className="mt-4">
-                <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">
-                  Popular labs
-                </div>
-                <div className="mt-3">
-                  <CityCardsClient cities={CITIES.slice(0, 4)} />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-5">
-              <div className="text-sm font-semibold text-zinc-100">What comes next</div>
-              <div className="mt-2 text-sm leading-relaxed text-zinc-300">
-                Truth cards for properties, market pressure signals, liquidity scoring, and negotiation leverage.
-                Buyers see reality. Agents can distribute it, but never control it.
-              </div>
-              <div className="mt-4 grid gap-3">
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200">
-                  Reality check: overpricing index
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200">
-                  Liquidity: time-to-sell forecast
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-zinc-200">
-                  Risk: legal and zoning flags
-                </div>
-              </div>
-            </div>
+          <div className="mt-4">
+            <CityCardsClient cities={CITIES.slice(0, 4)} />
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* EXPLORE */}
       <section className="mt-16">
