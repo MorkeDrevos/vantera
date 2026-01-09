@@ -74,9 +74,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function findCities(slugs: string[]) {
-  const map = new Map(CITIES.map((c) => [c.slug, c]));
-  return slugs.map((s) => map.get(s)).filter(Boolean) as typeof CITIES;
+function findCities(slugs: readonly string[]) {
+  type City = (typeof CITIES)[number];
+  const map = new Map<string, City>(CITIES.map((c) => [c.slug, c]));
+  return slugs.map((s) => map.get(s)).filter(Boolean) as City[];
 }
 
 export default function HomePage() {
