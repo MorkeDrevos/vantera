@@ -1,4 +1,6 @@
 // src/components/home/HomePage.tsx
+import Image from 'next/image';
+
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
@@ -11,7 +13,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="absolute -top-28 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.18),transparent_62%)] blur-2xl" />
         <div className="absolute -top-12 right-[-200px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.20),transparent_62%)] blur-2xl" />
         <div className="absolute bottom-[-240px] left-[-240px] h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.12),transparent_60%)] blur-2xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(0,0,0,0.70))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(0,0,0,0.72))]" />
         <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:22px_22px]" />
       </div>
 
@@ -29,20 +31,31 @@ function Shell({ children }: { children: React.ReactNode }) {
 
               <div className="relative flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6">
                 <div className="flex items-center gap-4">
-                  <div className="relative grid h-12 w-12 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
-                    <div className="absolute inset-0 bg-[radial-gradient(120px_120px_at_35%_25%,rgba(232,190,92,0.22),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(120px_120px_at_70%_70%,rgba(120,76,255,0.20),transparent_60%)]" />
-                    <div className="relative h-6 w-6 rounded-lg bg-[linear-gradient(135deg,rgba(232,190,92,0.95),rgba(255,255,255,0.70),rgba(120,76,255,0.85))] opacity-90 shadow-[0_10px_25px_rgba(0,0,0,0.35)]" />
+                  {/* Brand logo */}
+                  <div className="relative">
+                    <Image
+                      src="/brand/vantera-logo-dark.png"
+                      alt="Vantera"
+                      width={170}
+                      height={52}
+                      priority
+                      className="h-8 w-auto opacity-95"
+                    />
+                    <div className="pointer-events-none absolute -inset-x-2 -inset-y-3 -z-10 rounded-2xl bg-[radial-gradient(220px_80px_at_50%_50%,rgba(232,190,92,0.12),transparent_60%)] blur-md" />
                   </div>
 
                   <div className="leading-tight">
                     <div className="flex items-center gap-2">
-                      <div className="text-[13px] font-semibold tracking-[0.14em] text-zinc-100">VANTERA</div>
                       <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-300">
                         City Index
                       </span>
+                      <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-zinc-300">
+                        Live
+                      </span>
                     </div>
-                    <div className="mt-1 text-xs text-zinc-400">Premium discovery layer - built for real data later</div>
+                    <div className="mt-1 text-xs text-zinc-400">
+                      Premium discovery layer - built for real data later
+                    </div>
                   </div>
                 </div>
 
@@ -82,17 +95,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionLabel({
-  children,
-  hint,
-}: {
-  children: React.ReactNode;
-  hint?: string;
-}) {
+function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-5 flex items-end justify-between gap-3">
       <div>
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">{String(children).toUpperCase()}</div>
+        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
+          {String(children).toUpperCase()}
+        </div>
         <div className="mt-2 h-px w-28 bg-gradient-to-r from-[rgba(232,190,92,0.55)] via-white/15 to-transparent" />
       </div>
       {hint ? (
@@ -148,13 +157,24 @@ function HeroShine() {
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {/* breathing ambient */}
       <div className="absolute inset-0 animate-[vanteraPulse_14s_ease-in-out_infinite]">
-        <div className="absolute -top-24 left-1/2 h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.20),transparent_62%)] blur-2xl" />
-        <div className="absolute -top-10 right-[-240px] h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_62%)] blur-2xl" />
-        <div className="absolute bottom-[-220px] left-[-220px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.13),transparent_60%)] blur-2xl" />
+        <div className="absolute -top-24 left-1/2 h-[540px] w-[1050px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.22),transparent_62%)] blur-2xl" />
+        <div className="absolute -top-10 right-[-260px] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_62%)] blur-2xl" />
+        <div className="absolute bottom-[-220px] left-[-220px] h-[660px] w-[660px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.13),transparent_60%)] blur-2xl" />
       </div>
 
       {/* glass highlight sweep */}
-      <div className="absolute inset-0 opacity-40 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.08)_45%,transparent_62%)] animate-[vanteraSweep_10s_ease-in-out_infinite]" />
+      <div className="absolute inset-0 opacity-40 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.09)_45%,transparent_62%)] animate-[vanteraSweep_10s_ease-in-out_infinite]" />
+
+      {/* subtle logo watermark in hero */}
+      <div className="absolute right-[-60px] top-[-40px] opacity-[0.10] blur-[0.2px]">
+        <Image
+          src="/brand/vantera-logo-dark.png"
+          alt=""
+          width={520}
+          height={160}
+          className="h-auto w-[520px]"
+        />
+      </div>
     </div>
   );
 }
@@ -167,7 +187,7 @@ export default function HomePage() {
     <Shell>
       {/* FULL-WIDTH HERO BAND (content centered) */}
       <section className="relative w-full pb-12 pt-8 sm:pb-16 sm:pt-10">
-        <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.55))] shadow-[0_50px_140px_rgba(0,0,0,0.70)]">
+        <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.58))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroShine />
 
           <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
@@ -258,7 +278,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BODY (kept premium max width) */}
+      {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint={`${CITIES.length} total`}>Explore</SectionLabel>
