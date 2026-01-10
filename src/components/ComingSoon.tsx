@@ -37,7 +37,7 @@ export default function ComingSoon() {
   width={900}
   height={280}
   priority
-  className="h-24 w-auto opacity-[0.97] sm:h-28 md:h-32"
+  className="h-24 w-auto opacity-[0.97] sm:h-28 md:h-36 lg:h-40"
 />
               {/* top glint */}
               <div className="pointer-events-none absolute -top-6 left-1/2 h-10 w-64 -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.22),transparent_65%)] blur-lg" />
