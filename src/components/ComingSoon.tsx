@@ -32,13 +32,13 @@ export default function ComingSoon() {
             <div className="relative">
               {/* If this file name differs, change it here */}
               <Image
-  src="/brand/vantera-logo-dark.png"
-  alt="Vantera"
-  width={900}
-  height={280}
-  priority
-  className="h-24 w-auto opacity-[0.97] sm:h-28 md:h-32"
-/>
+                src="/brand/vantera-logo-dark.png"
+                alt="Vantera"
+                width={420}
+                height={140}
+                priority
+                className="h-14 w-auto opacity-[0.96] sm:h-16"
+              />
               {/* top glint */}
               <div className="pointer-events-none absolute -top-6 left-1/2 h-10 w-64 -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.22),transparent_65%)] blur-lg" />
             </div>
