@@ -1,4 +1,3 @@
-// app/contact/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -11,11 +10,12 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
 
-    const form = e.currentTarget;
+    const formData = new FormData(e.currentTarget);
+
     const data = {
-      name: form.name.value,
-      email: form.email.value,
-      message: form.message.value,
+      name: String(formData.get('name') ?? ''),
+      email: String(formData.get('email') ?? ''),
+      message: String(formData.get('message') ?? ''),
     };
 
     const res = await fetch('/api/contact', {
@@ -30,7 +30,7 @@ export default function ContactPage() {
 
   return (
     <main className="mx-auto max-w-xl px-6 py-24">
-      <h1 className="text-3xl font-semibold mb-6">Contact</h1>
+      <h1 className="mb-6 text-3xl font-semibold">Contact</h1>
 
       {sent ? (
         <p className="text-green-600">
@@ -59,7 +59,7 @@ export default function ContactPage() {
           />
           <button
             disabled={loading}
-            className="bg-black text-white px-6 py-3"
+            className="bg-black px-6 py-3 text-white"
           >
             {loading ? 'Sending…' : 'Send'}
           </button>
