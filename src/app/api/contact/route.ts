@@ -1,11 +1,9 @@
 // src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@/generated/prisma';
+import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const prisma = new PrismaClient();
 
 type ContactPayload = {
   name?: string;
@@ -22,7 +20,6 @@ function clean(s: unknown, max = 5000) {
 }
 
 function isEmail(s: string) {
-  // simple pragmatic check
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
@@ -51,7 +48,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'Invalid email.' }, { status: 400 });
     }
 
-    // best-effort metadata
     const ip =
       req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       req.headers.get('x-real-ip') ||
@@ -73,7 +69,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch {
-    // Don’t leak details to clients
     return NextResponse.json({ ok: false, error: 'Server error.' }, { status: 500 });
   }
 }
