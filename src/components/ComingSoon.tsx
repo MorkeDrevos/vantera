@@ -7,96 +7,106 @@ import Link from 'next/link';
 export default function ComingSoon() {
   return (
     <main className="relative min-h-[100dvh] w-full overflow-hidden bg-[#07080B] text-white">
-      {/* Premium ambient backdrop */}
+      {/* Backdrop: vignette + corners + grain (quieter, more premium) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {/* deep vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_40%,rgba(255,255,255,0.06),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_80%_10%,rgba(120,76,255,0.16),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_20%_0%,rgba(232,190,92,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(0,0,0,0.80))]" />
+        {/* center glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(980px_560px_at_50%_44%,rgba(255,255,255,0.045),transparent_70%)]" />
 
-        {/* subtle grid */}
-        <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.60)_1px,transparent_0)] [background-size:26px_26px]" />
+        {/* corner tints (subtle purple like your photo) */}
+        <div className="absolute -top-44 -right-44 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.12),transparent_66%)] blur-3xl" />
+        <div className="absolute -bottom-52 -left-52 h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.10),transparent_68%)] blur-3xl" />
 
-        {/* soft “light cone” */}
-        <div className="absolute left-1/2 top-[-220px] h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.10),transparent_62%)] blur-2xl" />
+        {/* dark falloff */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.92))]" />
+
+        {/* very light grain */}
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.40)_1px,transparent_0)] [background-size:26px_26px]" />
+
+        {/* very faint diagonal streaks (less loud) */}
+        <div className="absolute inset-0 opacity-[0.06] [background:repeating-linear-gradient(115deg,rgba(255,255,255,0.08)_0px,rgba(255,255,255,0.08)_1px,transparent_12px,transparent_26px)]" />
       </div>
 
       <div className="mx-auto flex min-h-[100dvh] max-w-6xl flex-col items-center justify-center px-6 py-16 text-center">
-        {/* Brand lockup */}
-        <div className="relative">
-          <div className="pointer-events-none absolute -inset-x-24 -inset-y-16 -z-10 rounded-[48px] bg-[radial-gradient(600px_240px_at_50%_40%,rgba(232,190,92,0.10),transparent_62%)] blur-2xl" />
-          <div className="pointer-events-none absolute -inset-x-24 -inset-y-16 -z-10 rounded-[48px] bg-[radial-gradient(600px_240px_at_65%_30%,rgba(120,76,255,0.12),transparent_62%)] blur-2xl" />
+        {/* Brand block (logo should be center of attention) */}
+        <div className="flex flex-col items-center pt-4 sm:pt-8">
+          <div className="relative">
+            {/* top glow, tighter and more controlled */}
+            <div className="pointer-events-none absolute left-1/2 top-[-160px] h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.11),transparent_72%)] blur-3xl" />
 
-          <div className="flex flex-col items-center gap-5">
-            <div className="relative">
-              {/* If this file name differs, change it here */}
-              <Image
-  src="/brand/vantera-logo-dark.png"
-  alt="Vantera"
-  width={900}
-  height={280}
-  priority
-  className="h-24 w-auto opacity-[0.97] sm:h-28 md:h-36 lg:h-40"
-/>
-              {/* top glint */}
-              <div className="pointer-events-none absolute -top-6 left-1/2 h-10 w-64 -translate-x-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.22),transparent_65%)] blur-lg" />
-            </div>
+            {/* BIGGER logo */}
+            <Image
+              src="/brand/vantera-logo-dark.png"
+              alt="Vantera"
+              width={1600}
+              height={480}
+              priority
+              className="
+                relative
+                h-28 w-auto
+                opacity-[0.99]
+                sm:h-36
+                md:h-44
+                lg:h-52
+              "
+            />
+          </div>
 
-            <div className="text-[11px] tracking-[0.34em] text-white/60">
-              GLOBAL PROPERTY INTELLIGENCE
-            </div>
+          {/* Keep ONLY one subtitle line (remove the duplicate) */}
+          <div className="mt-3 text-[11px] tracking-[0.34em] text-white/55 sm:text-[12px]">
+            GLOBAL PROPERTY INTELLIGENCE
           </div>
         </div>
 
-        {/* Statement card */}
-        <div className="mt-10 w-full max-w-xl">
-          <div className="relative overflow-hidden rounded-[26px] border border-white/12 bg-white/[0.035] px-7 py-6 shadow-[0_40px_120px_rgba(0,0,0,0.75)]">
-            <div aria-hidden className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_20%_0%,rgba(255,255,255,0.07),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            </div>
-
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-white/70">
-                <span className="h-1.5 w-1.5 rounded-full bg-[rgba(232,190,92,0.95)] shadow-[0_0_0_3px_rgba(232,190,92,0.12)]" />
-                <span className="tracking-wide">Launching soon</span>
-              </div>
-
-              <div className="mt-4 text-balance text-xl font-medium leading-snug text-white/92 sm:text-2xl">
-                Intelligence for the world&apos;s most valuable assets.
-              </div>
-
-              <div className="mt-3 text-sm leading-relaxed text-white/60">
-                A private surface for high-value real estate - designed for clarity today, built for truth tomorrow.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/"
-            className="group relative overflow-hidden rounded-2xl border border-white/12 bg-white/[0.06] px-5 py-3 text-sm text-white/90 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition hover:border-white/20 hover:bg-white/[0.10]"
+        {/* Plaque (no big white border, feels like a caption not UI) */}
+        <div className="mt-10 w-full max-w-[860px]">
+          <div
+            className="
+              relative overflow-hidden
+              rounded-[22px]
+              bg-black/45
+              px-7 py-7
+              shadow-[0_30px_95px_rgba(0,0,0,0.72)]
+              sm:px-12 sm:py-9
+            "
           >
-            <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(420px_140px_at_50%_0%,rgba(255,255,255,0.14),transparent_60%)]" />
-            <span className="relative">Refresh</span>
-          </Link>
+            {/* ultra-thin edge (hairline), not a border */}
+            <div className="pointer-events-none absolute inset-0 rounded-[22px] ring-1 ring-white/[0.06]" />
 
+            {/* tiny highlight sweep (subtle) */}
+            <div className="pointer-events-none absolute inset-0 opacity-[0.16] [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_44%,transparent_66%)]" />
+
+            {/* soft inner haze at top (museum glass feel) */}
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.06),transparent)]" />
+
+            <div className="relative text-balance text-xl font-semibold text-white/92 sm:text-2xl">
+              Intelligence for the world’s most valuable assets.
+            </div>
+
+            <div className="relative mt-4 text-[11px] tracking-[0.46em] text-white/50">
+              LAUNCHING SOON
+            </div>
+          </div>
+        </div>
+
+        {/* Actions (more subtle, less loud) */}
+        <div className="mt-7 flex items-center gap-3">
           <Link
             href="/"
-            className="rounded-2xl border border-white/10 bg-black/30 px-5 py-3 text-sm text-white/70 transition hover:bg-black/20 hover:text-white/80"
+            className="rounded-2xl border border-white/[0.10] bg-white/[0.03] px-5 py-3 text-sm text-white/70 transition hover:bg-white/[0.06] hover:text-white/90"
+          >
+            Refresh
+          </Link>
+          <Link
+            href="/"
+            className="rounded-2xl border border-white/[0.08] bg-black/20 px-5 py-3 text-sm text-white/45 transition hover:bg-black/30 hover:text-white/70"
           >
             Home
           </Link>
         </div>
 
-        {/* Footer line */}
-        <div className="mt-14 text-[11px] tracking-[0.22em] text-white/40">
-          © {new Date().getFullYear()} VANTERA
+        {/* Footer */}
+        <div className="mt-14 text-[11px] tracking-[0.22em] text-white/30">
+          © {new Date().getFullYear()} Vantera
         </div>
       </div>
     </main>
