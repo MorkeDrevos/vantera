@@ -1,53 +1,72 @@
-// app/api/contact/route.ts
+// src/app/api/contact/route.ts
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = 'nodejs';
+
+type ContactPayload = {
+  name?: string;
+  email?: string;
+  message?: string;
+};
+
+function isEmail(s: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
 
 export async function POST(req: Request) {
   try {
-    const { name, email, message } = await req.json();
+    const body = (await req.json()) as ContactPayload;
 
-    if (!email || !message) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+    const name = String(body?.name ?? '').trim();
+    const email = String(body?.email ?? '').trim();
+    const message = String(body?.message ?? '').trim();
+
+    if (!email || !isEmail(email)) {
+      return NextResponse.json({ ok: false, error: 'Invalid email' }, { status: 400 });
+    }
+    if (!message) {
+      return NextResponse.json({ ok: false, error: 'Message is required' }, { status: 400 });
     }
 
-    // Send to you
-    await resend.emails.send({
-      from: 'Vantera <hello@vantera.io>',
-      to: ['hello@vantera.io'],
-      replyTo: email,
-      subject: 'New contact enquiry',
-      html: `
-        <p><strong>Name:</strong> ${name || '—'}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message.replace(/\n/g, '<br />')}</p>
-      `,
+    const apiKey = process.env.RESEND_API_KEY;
+    const to = process.env.CONTACT_TO_EMAIL; // set this in Vercel
+    const from = process.env.CONTACT_FROM_EMAIL || 'onboarding@resend.dev';
+
+    if (!apiKey) {
+      return NextResponse.json({ ok: false, error: 'Missing RESEND_API_KEY' }, { status: 500 });
+    }
+    if (!to) {
+      return NextResponse.json({ ok: false, error: 'Missing CONTACT_TO_EMAIL' }, { status: 500 });
+    }
+
+    const subject = `Vantera contact: ${name || 'Anonymous'} (${email})`;
+    const text = `Name: ${name || '-'}\nEmail: ${email}\n\nMessage:\n${message}\n`;
+
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: email,
+        subject,
+        text,
+      }),
     });
 
-    // Auto-reply to user
-    await resend.emails.send({
-      from: 'Vantera <hello@vantera.io>',
-      to: [email],
-      subject: 'We received your message',
-      html: `
-        <p>Hello${name ? ` ${name}` : ''},</p>
+    if (!r.ok) {
+      const errText = await r.text().catch(() => '');
+      return NextResponse.json(
+        { ok: false, error: 'Resend API error', details: errText.slice(0, 500) },
+        { status: 502 },
+      );
+    }
 
-        <p>Thank you for reaching out to Vantera.</p>
-
-        <p>Your message has been received and is currently under review.  
-        We approach every enquiry with care and discretion, and a member of our team will respond shortly.</p>
-
-        <p>Kind regards,<br />
-        Vantera<br />
-        <em>Intelligence for Real Assets</em></p>
-      `,
-    });
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch {
+    return NextResponse.json({ ok: false, error: 'Bad request' }, { status: 400 });
   }
 }
