@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { Suspense } from 'react';
 
 import TopBar from '@/components/layout/TopBar';
+import Footer from '@/components/layout/Footer';
 
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
@@ -27,19 +28,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
         <main className="w-full">{children}</main>
 
-        <footer className="mx-auto w-full max-w-7xl px-5 pb-10 pt-10 sm:px-8">
-          <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] px-5 py-5 text-xs text-zinc-400 shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:px-7">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_58%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_85%_10%,rgba(120,76,255,0.07),transparent_58%)]" />
-            </div>
-
-            <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>© {new Date().getFullYear()} Vantera</div>
-              <div className="text-zinc-500">A private intelligence surface for high-value real estate.</div>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </div>
   );
