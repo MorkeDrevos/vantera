@@ -40,12 +40,13 @@ function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof
         e.preventDefault();
 
         const focus = () => {
-          // Prefer Vantera id, fallback to legacy id
-          const el =
-            (document.getElementById('vantera-city-search') as HTMLInputElement | null) ??
-            (document.getElementById('locus-city-search') as HTMLInputElement | null);
-          el?.focus();
-        };
+  // Prefer Vantera id, fallback to legacy id
+  const el =
+    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
+    (document.getElementById('locus-city-search') as HTMLInputElement | null);
+
+  el?.focus();
+};
 
         if (pathname !== '/') {
           router.push('/');
