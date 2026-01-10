@@ -111,10 +111,6 @@ function uniqBy<T>(arr: T[], key: (t: T) => string) {
   return out;
 }
 
-function toLabel(s: string) {
-  return s.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
-}
-
 export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -184,6 +180,18 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
+  // ✅ Lock page scroll when a menu is open (makes it feel "production")
+  useEffect(() => {
+    const open = citiesOpen || mobileOpen;
+    if (!open) return;
+
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [citiesOpen, mobileOpen]);
+
   const veilClass = cx(
     'pointer-events-none absolute inset-0 transition-colors duration-300',
     onCityPage
@@ -217,7 +225,6 @@ export default function TopBar() {
   // --- Mega menu data (safe defaults, can be replaced later) ---
   const cityList = useMemo<CityLite[]>(() => (CITIES as any) ?? [], []);
   const countries = useMemo(() => {
-    // For the “quick country row” like JamesEdition
     const preferred = [
       'Spain',
       'United Arab Emirates',
@@ -248,22 +255,16 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  const topCities = useMemo(() => {
-    // Choose a “Top Cities” list from your CITIES, stable order
-    return cityList.slice(0, 10);
-  }, [cityList]);
+  const topCities = useMemo(() => cityList.slice(0, 10), [cityList]);
 
   const topRegions = useMemo(() => {
-    // Regions from cities (if you have region); else fallback to country buckets
     const raw = cityList
       .map((c) => (c.region ? String(c.region) : ''))
       .filter(Boolean);
 
     const uniq = uniqBy(raw, (r) => r.toLowerCase()).slice(0, 6);
-
     if (uniq.length > 0) return uniq;
 
-    // fallback: pseudo-regions from common countries
     return countries.slice(0, 6).map((c) => `${c}`);
   }, [cityList, countries]);
 
@@ -292,8 +293,6 @@ export default function TopBar() {
   );
 
   function countryHref(country: string) {
-    // If you later add /country/[slug], swap here.
-    // For now, route to home and let search handle it, or coming-soon.
     return `/coming-soon?country=${encodeURIComponent(country)}`;
   }
 
@@ -309,6 +308,19 @@ export default function TopBar() {
       </div>
 
       <div className={veilClass} />
+
+      {/* ✅ Desktop scrim when mega menu is open (closes on click) */}
+      {citiesOpen ? (
+        <button
+          type="button"
+          aria-label="Close cities menu"
+          onClick={() => setCitiesOpen(false)}
+          className={cx(
+            'fixed inset-0 z-[60] hidden cursor-default lg:block',
+            'bg-black/55 backdrop-blur-[2px]',
+          )}
+        />
+      ) : null}
 
       <div className={innerClass}>
         {/* Left - FULL LOGO */}
@@ -379,17 +391,28 @@ export default function TopBar() {
             <div
               ref={citiesPanelRef}
               className={cx(
-                'absolute left-0 mt-3 w-[980px] max-w-[calc(100vw-2rem)] origin-top-left',
-                'rounded-[28px] border border-white/12 bg-black/72',
-                'shadow-[0_34px_120px_rgba(0,0,0,0.62)] backdrop-blur-2xl',
+                // ✅ center under nav and guarantee it's above scrim
+                'absolute left-1/2 z-[70] mt-3 w-[980px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
+                // ✅ more solid, less bleed, stronger shadow
+                'rounded-[28px] border border-white/14 bg-[#070A10]/92',
+                'shadow-[0_40px_140px_rgba(0,0,0,0.75)] backdrop-blur-2xl',
+                // ✅ never overgrow vertically, scroll inside (production feel)
+                'max-h-[70vh] overflow-auto',
                 'transition-[transform,opacity] duration-200',
-                citiesOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-1 scale-[0.99] opacity-0',
+                citiesOpen
+                  ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
+                  : 'pointer-events-none -translate-y-1 scale-[0.99] opacity-0',
               )}
               role="menu"
               aria-label="Cities mega menu"
             >
+              {/* subtle inner finish */}
+              <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-inset ring-white/10" />
+              <div className="pointer-events-none absolute -top-24 right-[-140px] h-[280px] w-[560px] rounded-full bg-violet-400/10 blur-3xl" />
+              <div className="pointer-events-none absolute -top-24 left-[-160px] h-[240px] w-[520px] rounded-full bg-white/6 blur-3xl" />
+
               {/* Top country row */}
-              <div className="border-b border-white/10 px-5 py-4">
+              <div className="relative border-b border-white/10 px-5 py-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">
                     <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
@@ -428,7 +451,7 @@ export default function TopBar() {
               </div>
 
               {/* Columns */}
-              <div className="grid grid-cols-12 gap-5 px-5 py-5">
+              <div className="relative grid grid-cols-12 gap-5 px-5 py-5">
                 {/* Top regions */}
                 <div className="col-span-3">
                   <div className="mb-3 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">TOP REGIONS</div>
@@ -544,10 +567,10 @@ export default function TopBar() {
                 </div>
               </div>
 
-              <div className="pointer-events-none h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="pointer-events-none relative h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
               {/* Bottom strip */}
-              <div className="flex items-center justify-between gap-3 px-5 py-4">
+              <div className="relative flex items-center justify-between gap-3 px-5 py-4">
                 <div className="flex items-center gap-2 text-xs text-zinc-400">
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
                     <Sparkles className="h-3.5 w-3.5 opacity-85" />
@@ -689,7 +712,7 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile dropdown (keep clean, mega menu is desktop) */}
+      {/* Mobile dropdown */}
       <div
         id="vantera-mobile-menu"
         className={cx(
