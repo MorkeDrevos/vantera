@@ -4,6 +4,7 @@ import Image from 'next/image';
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
+import TopBar from '@/components/layout/TopBar';
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -18,61 +19,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
-        {/* FULL-WIDTH TOP BAR (content centered) */}
-        <header className="w-full px-5 pt-6 sm:px-8 sm:pt-8">
-          <div className="mx-auto w-full max-w-7xl">
-            <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_30px_90px_rgba(0,0,0,0.55)]">
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_30%_0%,rgba(232,190,92,0.16),transparent_55%)]" />
-                <div className="absolute inset-0 bg-[radial-gradient(800px_260px_at_80%_10%,rgba(120,76,255,0.18),transparent_55%)]" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-              </div>
-
-              <div className="relative flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6">
-                <div className="flex items-center gap-4">
-                  {/* Brand logo (establishes identity) */}
-                  <div className="relative">
-                    <Image
-                      src="/brand/vantera-logo-dark.png"
-                      alt="Vantera"
-                      width={170}
-                      height={52}
-                      priority
-                      className="h-8 w-auto opacity-95"
-                    />
-                    <div className="pointer-events-none absolute -inset-x-2 -inset-y-3 -z-10 rounded-2xl bg-[radial-gradient(220px_80px_at_50%_50%,rgba(232,190,92,0.12),transparent_60%)] blur-md" />
-                  </div>
-
-                  <div className="leading-tight">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-300">
-                        City Index
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-zinc-300">
-                        Live
-                      </span>
-                    </div>
-                    <div className="mt-1 text-xs text-zinc-400">Premium discovery layer - built for real data later</div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Real images
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Live city time
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Protocol-grade UI
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
+      <TopBar />
         <main className="w-full">{children}</main>
 
         <footer className="mx-auto w-full max-w-7xl px-5 pb-10 pt-10 sm:px-8">
@@ -178,7 +125,7 @@ export default function HomePage() {
   return (
     <Shell>
       {/* FULL-WIDTH ROYAL HERO BAND (content centered) */}
-      <section className="relative w-full pb-12 pt-8 sm:pb-16 sm:pt-10">
+      <section className="relative w-full pb-12 pt-12 sm:pb-16 sm:pt-14">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.58))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroShine />
 
