@@ -50,7 +50,7 @@ export default function TopBar() {
       if (now - lastKeyAt.current < 120) return;
       lastKeyAt.current = now;
 
-      // "/" → focus global city search
+      // "/" -> focus global city search
       if (e.key === '/') {
         e.preventDefault();
 
@@ -129,7 +129,7 @@ export default function TopBar() {
       <div className={veilClass} />
 
       <div className={innerClass}>
-        {/* Left — Identity */}
+        {/* Left - Identity */}
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
@@ -138,8 +138,10 @@ export default function TopBar() {
             aria-label="Vantera home"
           >
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-200/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+
+            {/* ✅ Logo mark lives in public/brand so it must be referenced by URL path */}
             <Image
-              src="/brand/vantera-mark.png"
+              src="/brand/vantera-icon.png"
               alt="Vantera mark"
               width={28}
               height={28}
@@ -167,7 +169,7 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Center — Hints */}
+        {/* Center - Hints */}
         <div className="hidden items-center gap-2 lg:flex">
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
             Press <span className="font-mono text-zinc-200">/</span> to search
@@ -182,7 +184,7 @@ export default function TopBar() {
           ) : null}
         </div>
 
-        {/* Right — Mode chips */}
+        {/* Right - Mode chips */}
         <div className="flex items-center gap-2">
           {!onCityPage ? (
             <>
