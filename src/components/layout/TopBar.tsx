@@ -22,19 +22,12 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 function focusGlobalSearch() {
-  // Prefer Vantera id, fallback to legacy id (until migration is done)
   const el =
     (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
     (document.getElementById('locus-city-search') as HTMLInputElement | null);
-
   el?.focus();
 }
 
-/**
- * Vantera hotkey behavior:
- * - Press "/" to focus the global city search on home
- * - Backward compatible with old Locus IDs while we migrate
- */
 function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof useRouter>) {
   const lastKeyAt = useRef<number>(0);
 
@@ -66,9 +59,7 @@ function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof
 }
 
 function dispatchTab(tab: 'truth' | 'supply') {
-  // New event name (Vantera)
   window.dispatchEvent(new CustomEvent('vantera:tab', { detail: { tab } }));
-  // Legacy compatibility until CityPageClient is migrated
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
 }
 
@@ -101,6 +92,29 @@ function useClickOutside(
   }, [enabled, onOutside, refs]);
 }
 
+type CityLite = {
+  name: string;
+  slug: string;
+  country: string;
+  region?: string | null;
+};
+
+function uniqBy<T>(arr: T[], key: (t: T) => string) {
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const a of arr) {
+    const k = key(a);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(a);
+  }
+  return out;
+}
+
+function toLabel(s: string) {
+  return s.replace(/-/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
 export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -122,11 +136,6 @@ export default function TopBar() {
     if (t === 'truth' || t === 'supply') return t;
     return 'truth';
   }, [searchParams]);
-
-  const topCities = useMemo(() => {
-    // Curated list: stable and predictable, but still sourced from your cities registry
-    return (CITIES ?? []).slice(0, 10);
-  }, []);
 
   useClickOutside([citiesWrapRef, citiesPanelRef], () => setCitiesOpen(false), citiesOpen);
 
@@ -175,7 +184,6 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
-  // Denser glass, calmer accents, more “private system”
   const veilClass = cx(
     'pointer-events-none absolute inset-0 transition-colors duration-300',
     onCityPage
@@ -206,19 +214,95 @@ export default function TopBar() {
   const linkActive =
     'text-white bg-white/[0.07] border border-white/12 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]';
 
-  const subLink =
-    'flex items-center justify-between gap-3 rounded-xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]';
+  // --- Mega menu data (safe defaults, can be replaced later) ---
+  const cityList = useMemo<CityLite[]>(() => (CITIES as any) ?? [], []);
+  const countries = useMemo(() => {
+    // For the “quick country row” like JamesEdition
+    const preferred = [
+      'Spain',
+      'United Arab Emirates',
+      'United States',
+      'United Kingdom',
+      'France',
+      'Portugal',
+      'Italy',
+      'Switzerland',
+      'Greece',
+      'Germany',
+      'Netherlands',
+    ];
+
+    const present = uniqBy(
+      cityList
+        .map((c) => c.country)
+        .filter(Boolean)
+        .map((c) => String(c)),
+      (x) => x.toLowerCase(),
+    );
+
+    const ordered = [
+      ...preferred.filter((p) => present.some((x) => x.toLowerCase() === p.toLowerCase())),
+      ...present.filter((x) => !preferred.some((p) => p.toLowerCase() === x.toLowerCase())),
+    ];
+
+    return ordered.slice(0, 12);
+  }, [cityList]);
+
+  const topCities = useMemo(() => {
+    // Choose a “Top Cities” list from your CITIES, stable order
+    return cityList.slice(0, 10);
+  }, [cityList]);
+
+  const topRegions = useMemo(() => {
+    // Regions from cities (if you have region); else fallback to country buckets
+    const raw = cityList
+      .map((c) => (c.region ? String(c.region) : ''))
+      .filter(Boolean);
+
+    const uniq = uniqBy(raw, (r) => r.toLowerCase()).slice(0, 6);
+
+    if (uniq.length > 0) return uniq;
+
+    // fallback: pseudo-regions from common countries
+    return countries.slice(0, 6).map((c) => `${c}`);
+  }, [cityList, countries]);
+
+  const propertyTypes = useMemo(
+    () => [
+      { label: 'Luxury villas', href: '/coming-soon?type=villas' },
+      { label: 'Penthouses', href: '/coming-soon?type=penthouses' },
+      { label: 'Waterfront', href: '/coming-soon?type=waterfront' },
+      { label: 'New developments', href: '/coming-soon?type=new-dev' },
+      { label: 'Land plots', href: '/coming-soon?type=land' },
+      { label: 'Branded residences', href: '/coming-soon?type=branded' },
+    ],
+    [],
+  );
+
+  const topSearches = useMemo(
+    () => [
+      { label: 'Sea view homes', href: '/coming-soon?q=sea%20view' },
+      { label: 'Gated communities', href: '/coming-soon?q=gated%20community' },
+      { label: 'Walk to beach', href: '/coming-soon?q=walk%20to%20beach' },
+      { label: 'Golf frontline', href: '/coming-soon?q=golf%20frontline' },
+      { label: 'Investment signal', href: '/coming-soon?q=investment%20signal' },
+      { label: 'Off-market', href: '/coming-soon?q=off%20market' },
+    ],
+    [],
+  );
+
+  function countryHref(country: string) {
+    // If you later add /country/[slug], swap here.
+    // For now, route to home and let search handle it, or coming-soon.
+    return `/coming-soon?country=${encodeURIComponent(country)}`;
+  }
 
   return (
     <div className={surfaceClass}>
-      {/* edges */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-      {/* ultra-subtle glint (reduced gold) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      {/* soft aura behind bar */}
       <div className="pointer-events-none absolute inset-0 opacity-70">
         <div className="absolute left-[-10%] top-[-160%] h-[260px] w-[520px] rounded-full bg-white/8 blur-3xl" />
         <div className="absolute right-[-12%] top-[-180%] h-[280px] w-[560px] rounded-full bg-violet-400/8 blur-3xl" />
@@ -227,7 +311,7 @@ export default function TopBar() {
       <div className={veilClass} />
 
       <div className={innerClass}>
-        {/* Left - Identity (FULL LOGO) */}
+        {/* Left - FULL LOGO */}
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
@@ -241,13 +325,10 @@ export default function TopBar() {
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
             )}
           >
-            {/* subtle plate */}
             <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-80" />
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/18" />
 
             <Image
-              // Put your full logo here:
-              // public/brand/vantera-logo-dark.png
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
               width={210}
@@ -264,7 +345,9 @@ export default function TopBar() {
 
           <div className="hidden min-w-0 leading-tight xl:block">
             <div className="flex items-center gap-2">
-              <span className="truncate text-xs font-semibold tracking-[0.18em] text-zinc-200/90">GLOBAL PROPERTY INTELLIGENCE</span>
+              <span className="truncate text-xs font-semibold tracking-[0.18em] text-zinc-200/90">
+                GLOBAL PROPERTY INTELLIGENCE
+              </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90">
                 <Crown className="h-3.5 w-3.5 opacity-85" />
                 TRUST LAYER
@@ -274,9 +357,9 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Center - Main navigation */}
+        {/* Center */}
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
-          {/* Cities dropdown */}
+          {/* Mega Menu trigger */}
           <div className="relative" ref={citiesWrapRef}>
             <button
               type="button"
@@ -292,110 +375,193 @@ export default function TopBar() {
               </span>
             </button>
 
+            {/* Mega panel */}
             <div
               ref={citiesPanelRef}
               className={cx(
-                'absolute left-0 mt-3 w-[420px] origin-top-left',
-                'rounded-3xl border border-white/12 bg-black/70 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-2xl',
+                'absolute left-0 mt-3 w-[980px] max-w-[calc(100vw-2rem)] origin-top-left',
+                'rounded-[28px] border border-white/12 bg-black/72',
+                'shadow-[0_34px_120px_rgba(0,0,0,0.62)] backdrop-blur-2xl',
                 'transition-[transform,opacity] duration-200',
-                citiesOpen ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-[0.985] opacity-0',
+                citiesOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-1 scale-[0.99] opacity-0',
               )}
               role="menu"
-              aria-label="Cities menu"
+              aria-label="Cities mega menu"
             >
-              <div className="flex items-center justify-between gap-3 px-2 pb-2">
-                <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">FEATURED CITIES</div>
-                <button
-                  type="button"
-                  onClick={() => setCitiesOpen(false)}
-                  className="rounded-full border border-white/12 bg-white/[0.05] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
-                >
-                  Close
-                </button>
-              </div>
+              {/* Top country row */}
+              <div className="border-b border-white/10 px-5 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">
+                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
+                      <Globe className="h-3.5 w-3.5 opacity-90" />
+                    </span>
+                    EXPLORE BY COUNTRY
+                  </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                {topCities.map((c) => (
-                  <Link
-                    key={c.slug}
-                    href={`/city/${c.slug}`}
-                    prefetch
+                  <button
+                    type="button"
                     onClick={() => setCitiesOpen(false)}
-                    className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
-                    role="menuitem"
+                    className="rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate font-medium text-zinc-100/95 group-hover:text-white">{c.name}</span>
-                      <span className="block truncate text-[11px] text-zinc-400">{c.country}</span>
-                    </span>
-                    <ArrowRight className="h-4 w-4 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-90" />
-                  </Link>
-                ))}
+                    Close
+                  </button>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {countries.map((c) => (
+                    <Link
+                      key={c}
+                      href={countryHref(c)}
+                      prefetch
+                      onClick={() => setCitiesOpen(false)}
+                      className={cx(
+                        'rounded-full border px-3 py-1.5 text-[12px]',
+                        'border-white/12 bg-white/[0.04] text-zinc-200',
+                        'hover:border-white/20 hover:bg-white/[0.06] hover:text-white',
+                      )}
+                      role="menuitem"
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCitiesOpen(false);
-                    if (pathname !== '/') {
-                      router.push('/');
-                      window.setTimeout(() => focusGlobalSearch(), 350);
-                      return;
-                    }
-                    focusGlobalSearch();
-                  }}
-                  className="flex flex-1 items-center justify-between rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Command className="h-4 w-4 opacity-90" />
-                    Search all cities
-                    <span className="ml-2 rounded-md border border-white/12 bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] text-zinc-200">
-                      /
-                    </span>
+              {/* Columns */}
+              <div className="grid grid-cols-12 gap-5 px-5 py-5">
+                {/* Top regions */}
+                <div className="col-span-3">
+                  <div className="mb-3 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">TOP REGIONS</div>
+                  <div className="grid gap-2">
+                    {topRegions.map((r) => (
+                      <Link
+                        key={r}
+                        href={`/coming-soon?region=${encodeURIComponent(r)}`}
+                        prefetch
+                        onClick={() => setCitiesOpen(false)}
+                        className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                        role="menuitem"
+                      >
+                        {r}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top cities */}
+                <div className="col-span-3">
+                  <div className="mb-3 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">TOP CITIES</div>
+                  <div className="grid gap-2">
+                    {topCities.map((c) => (
+                      <Link
+                        key={c.slug}
+                        href={`/city/${c.slug}`}
+                        prefetch
+                        onClick={() => setCitiesOpen(false)}
+                        className="group rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                        role="menuitem"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate font-medium text-zinc-100/95 group-hover:text-white">{c.name}</div>
+                            <div className="truncate text-[11px] text-zinc-400">{c.country}</div>
+                          </div>
+                          <ArrowRight className="h-4 w-4 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-90" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Property types */}
+                <div className="col-span-3">
+                  <div className="mb-3 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">PROPERTY TYPES</div>
+                  <div className="grid gap-2">
+                    {propertyTypes.map((t) => (
+                      <Link
+                        key={t.href}
+                        href={t.href}
+                        prefetch
+                        onClick={() => setCitiesOpen(false)}
+                        className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                        role="menuitem"
+                      >
+                        {t.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top searches + CTA */}
+                <div className="col-span-3">
+                  <div className="mb-3 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">TOP SEARCHES</div>
+                  <div className="grid gap-2">
+                    {topSearches.map((t) => (
+                      <Link
+                        key={t.href}
+                        href={t.href}
+                        prefetch
+                        onClick={() => setCitiesOpen(false)}
+                        className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                        role="menuitem"
+                      >
+                        {t.label}
+                      </Link>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-white/12 bg-white/[0.05] p-3">
+                    <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">GLOBAL SEARCH</div>
+                    <div className="mt-1 text-xs text-zinc-400">Press / anywhere to jump into city search</div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCitiesOpen(false);
+                        if (pathname !== '/') {
+                          router.push('/');
+                          window.setTimeout(() => focusGlobalSearch(), 350);
+                          return;
+                        }
+                        focusGlobalSearch();
+                      }}
+                      className={cx(
+                        'mt-3 flex w-full items-center justify-between rounded-xl',
+                        'border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200',
+                        'hover:border-white/20 hover:bg-white/[0.08]',
+                      )}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Command className="h-4 w-4 opacity-90" />
+                        Search cities
+                        <span className="ml-2 rounded-md border border-white/12 bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] text-zinc-200">
+                          /
+                        </span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 opacity-80" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pointer-events-none h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+              {/* Bottom strip */}
+              <div className="flex items-center justify-between gap-3 px-5 py-4">
+                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05]">
+                    <Sparkles className="h-3.5 w-3.5 opacity-85" />
                   </span>
-                  <ArrowRight className="h-4 w-4 opacity-80" />
-                </button>
+                  Truth-first coverage expands city by city
+                </div>
 
                 <Link
                   href="/"
                   prefetch
                   onClick={() => setCitiesOpen(false)}
-                  className="rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-sm text-zinc-100 hover:border-white/20 hover:bg-white/[0.08]"
                 >
-                  View hub
-                </Link>
-              </div>
-
-              <div className="pointer-events-none mt-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-              <div className="mt-3 grid gap-2">
-                <Link
-                  href="/coming-soon?section=signals"
-                  prefetch
-                  onClick={() => setCitiesOpen(false)}
-                  className={subLink}
-                  role="menuitem"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <Radar className="h-4 w-4 opacity-90" />
-                    Market signals
-                  </span>
-                  <ArrowRight className="h-4 w-4 opacity-80" />
-                </Link>
-
-                <Link
-                  href="/coming-soon?section=protocol"
-                  prefetch
-                  onClick={() => setCitiesOpen(false)}
-                  className={subLink}
-                  role="menuitem"
-                >
-                  <span className="inline-flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 opacity-90" />
-                    Protocol overview
-                  </span>
-                  <ArrowRight className="h-4 w-4 opacity-80" />
+                  View all cities <ArrowRight className="h-4 w-4 opacity-85" />
                 </Link>
               </div>
             </div>
@@ -483,8 +649,6 @@ export default function TopBar() {
             href="/"
             prefetch
             onClick={(e) => {
-              // On desktop this button is basically "take me to the hub"
-              // If already on home, focus search instead
               if (pathname === '/') {
                 e.preventDefault();
                 focusGlobalSearch();
@@ -525,13 +689,13 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown (keep clean, mega menu is desktop) */}
       <div
         id="vantera-mobile-menu"
         className={cx(
           'lg:hidden',
           'overflow-hidden transition-[max-height,opacity] duration-300',
-          mobileOpen ? 'max-h-[820px] opacity-100' : 'max-h-0 opacity-0',
+          mobileOpen ? 'max-h-[640px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
@@ -592,20 +756,9 @@ export default function TopBar() {
               </Link>
 
               <div className="mt-2 rounded-2xl border border-white/12 bg-white/[0.04] p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">CITIES</div>
-                  <Link
-                    href="/"
-                    prefetch
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.08]"
-                  >
-                    Hub
-                  </Link>
-                </div>
-
+                <div className="mb-2 text-xs font-semibold tracking-[0.16em] text-zinc-200/90">TOP CITIES</div>
                 <div className="grid grid-cols-2 gap-2">
-                  {topCities.map((c) => (
+                  {topCities.slice(0, 8).map((c) => (
                     <Link
                       key={c.slug}
                       href={`/city/${c.slug}`}
@@ -619,23 +772,18 @@ export default function TopBar() {
                   ))}
                 </div>
 
-                <div className="mt-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (pathname !== '/') router.push('/');
-                      window.setTimeout(() => focusGlobalSearch(), 100);
-                      setMobileOpen(false);
-                    }}
-                    className="flex w-full items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Command className="h-4 w-4 opacity-90" />
-                      Search all cities
-                    </span>
-                    <ArrowRight className="h-4 w-4 opacity-80" />
-                  </button>
-                </div>
+                <Link
+                  href="/"
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className="mt-3 flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Globe className="h-4 w-4 opacity-90" />
+                    View city hub
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </Link>
               </div>
             </div>
           </div>
