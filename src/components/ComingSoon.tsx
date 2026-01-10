@@ -28,18 +28,25 @@ export default function ComingSoon() {
 
       <div className="mx-auto flex min-h-[100dvh] max-w-6xl flex-col items-center justify-center px-6 py-16 text-center">
         {/* Top brand block (like your screenshot) */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center pt-6 sm:pt-10">
           {/* small logo + subtle top glow */}
           <div className="relative">
-            <div className="pointer-events-none absolute left-1/2 top-[-46px] h-32 w-72 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.10),transparent_68%)] blur-2xl" />
+            <div className="pointer-events-none absolute left-1/2 top-[-120px] h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_70%)] blur-3xl" />
             <Image
-              src="/brand/vantera-logo-dark.png"
-              alt="Vantera"
-              width={520}
-              height={180}
-              priority
-              className="relative h-12 w-auto opacity-[0.97] sm:h-14"
-            />
+  src="/brand/vantera-logo-dark.png"
+  alt="Vantera"
+  width={1200}
+  height={360}
+  priority
+  className="
+    relative
+    h-24 w-auto
+    opacity-[0.98]
+    sm:h-28
+    md:h-32
+    lg:h-36
+  "
+/>
           </div>
 
           {/* small subtitle under logo (tight) */}
