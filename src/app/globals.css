@@ -32,3 +32,26 @@ body {
     animation: none !important;
   }
 }
+/* --- Vantera luxury motion --- */
+
+@keyframes vanteraPulse {
+  0%, 100% {
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes vanteraSweep {
+  0%, 100% {
+    transform: translateX(-8%) translateY(-2%);
+    opacity: 0.18;
+  }
+  50% {
+    transform: translateX(8%) translateY(2%);
+    opacity: 0.35;
+  }
+}

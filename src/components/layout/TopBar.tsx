@@ -5,6 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { ArrowRight, ChevronDown, Command, Crown, Globe, MapPin, Radar, ShieldCheck, Sparkles } from 'lucide-react';
+
+import { CITIES } from '@/components/home/cities';
 
 function isEditableTarget(el: Element | null) {
   if (!el) return false;
@@ -18,28 +21,22 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
-export default function TopBar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+function focusGlobalSearch() {
+  // Prefer Vantera id, fallback to legacy id (until migration is done)
+  const el =
+    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
+    (document.getElementById('locus-city-search') as HTMLInputElement | null);
 
-  const [scrolled, setScrolled] = useState(false);
+  el?.focus();
+}
+
+/**
+ * Vantera hotkey behavior:
+ * - Press "/" to focus the global city search on home
+ * - Backward compatible with old Locus IDs while we migrate
+ */
+function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof useRouter>) {
   const lastKeyAt = useRef<number>(0);
-
-  const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
-
-  const activeTab = useMemo(() => {
-    const t = (searchParams?.get('tab') ?? '').toLowerCase();
-    if (t === 'truth' || t === 'supply') return t;
-    return 'truth';
-  }, [searchParams]);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -50,31 +47,117 @@ export default function TopBar() {
       if (now - lastKeyAt.current < 120) return;
       lastKeyAt.current = now;
 
-      // "/" → focus global city search
       if (e.key === '/') {
         e.preventDefault();
 
         if (pathname !== '/') {
           router.push('/');
-          window.setTimeout(() => {
-            const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
-            el?.focus();
-          }, 350);
+          window.setTimeout(() => focusGlobalSearch(), 350);
           return;
         }
 
-        const el = document.getElementById('locus-city-search') as HTMLInputElement | null;
-        el?.focus();
-        return;
+        focusGlobalSearch();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [pathname, router]);
+}
+
+function dispatchTab(tab: 'truth' | 'supply') {
+  // New event name (Vantera)
+  window.dispatchEvent(new CustomEvent('vantera:tab', { detail: { tab } }));
+  // Legacy compatibility until CityPageClient is migrated
+  window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
+}
+
+function useClickOutside(
+  refs: Array<React.RefObject<HTMLElement>>,
+  onOutside: () => void,
+  enabled: boolean,
+) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      for (const r of refs) {
+        const el = r.current;
+        if (el && el.contains(t)) return;
       }
 
-      // City page shortcuts
+      onOutside();
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [enabled, onOutside, refs]);
+}
+
+export default function TopBar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useHotkeyFocusSearch(pathname, router);
+
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [citiesOpen, setCitiesOpen] = useState(false);
+
+  const citiesWrapRef = useRef<HTMLDivElement>(null);
+  const citiesPanelRef = useRef<HTMLDivElement>(null);
+
+  const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
+
+  const activeTab = useMemo(() => {
+    const t = (searchParams?.get('tab') ?? '').toLowerCase();
+    if (t === 'truth' || t === 'supply') return t;
+    return 'truth';
+  }, [searchParams]);
+
+  const topCities = useMemo(() => {
+    // Curated list: stable and predictable, but still sourced from your cities registry
+    return (CITIES ?? []).slice(0, 10);
+  }, []);
+
+  useClickOutside([citiesWrapRef, citiesPanelRef], () => setCitiesOpen(false), citiesOpen);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    setCitiesOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as Element | null;
+      if (isEditableTarget(target)) return;
+
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setCitiesOpen(false);
+      }
+
       if (onCityPage && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'truth');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'truth' } }));
+        dispatchTab('truth');
         return;
       }
 
@@ -83,144 +166,481 @@ export default function TopBar() {
         const url = new URL(window.location.href);
         url.searchParams.set('tab', 'supply');
         router.replace(url.pathname + '?' + url.searchParams.toString());
-        window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab: 'supply' } }));
+        dispatchTab('supply');
         return;
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onCityPage, pathname, router]);
+  }, [onCityPage, router]);
 
-  /**
-   * IMPORTANT:
-   * - On city pages, the TopBar must be LIGHTER (it floats over imagery)
-   * - On home pages, it can be slightly heavier
-   */
+  // Denser glass, calmer accents, more “private system”
   const veilClass = cx(
-    'pointer-events-none absolute inset-0 transition-colors',
+    'pointer-events-none absolute inset-0 transition-colors duration-300',
     onCityPage
       ? scrolled
         ? 'bg-black/22'
-        : 'bg-black/10'
+        : 'bg-black/12'
       : scrolled
-        ? 'bg-black/32'
-        : 'bg-black/18',
+        ? 'bg-black/44'
+        : 'bg-black/26',
   );
 
-  const surfaceClass = cx('sticky top-0 z-50 w-full', 'backdrop-blur-xl');
+  const surfaceClass = cx(
+    'sticky top-0 z-50 w-full',
+    'backdrop-blur-[18px]',
+    'supports-[backdrop-filter]:bg-black/42',
+  );
 
   const innerClass = cx(
-    'mx-auto flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-8',
+    'mx-auto flex w-full items-center justify-between gap-4',
     'max-w-7xl',
+    'px-5 py-3 sm:px-8 sm:py-3.5',
   );
+
+  const linkBase =
+    'relative rounded-full px-3 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20';
+  const linkIdle =
+    'text-zinc-200/85 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10';
+  const linkActive =
+    'text-white bg-white/[0.07] border border-white/12 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]';
+
+  const subLink =
+    'flex items-center justify-between gap-3 rounded-xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]';
 
   return (
     <div className={surfaceClass}>
-      {/* subtle top edge */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/10" />
-      {/* subtle bottom edge */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/10" />
+      {/* edges */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      {/* refined gold glint (very subtle) */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-200/15 to-transparent" />
+      {/* ultra-subtle glint (reduced gold) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-      {/* veil */}
+      {/* soft aura behind bar */}
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute left-[-10%] top-[-160%] h-[260px] w-[520px] rounded-full bg-white/8 blur-3xl" />
+        <div className="absolute right-[-12%] top-[-180%] h-[280px] w-[560px] rounded-full bg-violet-400/8 blur-3xl" />
+      </div>
+
       <div className={veilClass} />
 
       <div className={innerClass}>
-        {/* Left — Identity */}
+        {/* Left - Identity (FULL LOGO) */}
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
-            className="group relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] hover:border-white/20"
             prefetch
             aria-label="Vantera home"
+            className={cx(
+              'group relative flex shrink-0 items-center',
+              'rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2',
+              'shadow-[0_0_0_1px_rgba(255,255,255,0.04)]',
+              'hover:border-white/16 hover:bg-white/[0.05]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+            )}
           >
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-200/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
+            {/* subtle plate */}
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-80" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/18" />
+
             <Image
-              src="/brand/vantera-mark.png"
-              alt="Vantera mark"
-              width={28}
-              height={28}
-              className="relative opacity-95"
+              // Put your full logo here:
+              // public/brand/vantera-logo-dark.png
+              src="/brand/vantera-logo-dark.png"
+              alt="Vantera"
+              width={210}
+              height={54}
               priority={false}
+              className={cx(
+                'relative h-9 w-auto opacity-95',
+                'drop-shadow-[0_14px_40px_rgba(0,0,0,0.45)]',
+                'transition group-hover:opacity-100',
+                'sm:h-10',
+              )}
             />
           </Link>
 
-          <div className="min-w-0 leading-tight">
+          <div className="hidden min-w-0 leading-tight xl:block">
             <div className="flex items-center gap-2">
-              <Link
-                href="/"
-                className="truncate text-sm font-semibold tracking-[0.08em] text-zinc-100 hover:text-white"
-                prefetch
-              >
-                VANTERA
-              </Link>
-
-              <span className="hidden rounded-full border border-amber-200/20 bg-amber-200/10 px-2.5 py-1 text-[11px] text-amber-100 sm:inline-flex">
-                PROPERTY INTELLIGENCE
+              <span className="truncate text-xs font-semibold tracking-[0.18em] text-zinc-200/90">GLOBAL PROPERTY INTELLIGENCE</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90">
+                <Crown className="h-3.5 w-3.5 opacity-85" />
+                TRUST LAYER
               </span>
             </div>
-
-            <div className="truncate text-xs text-zinc-400">Global property intelligence</div>
+            <div className="truncate text-xs text-zinc-400">Truth-first signal for buyers, sellers and agents</div>
           </div>
         </div>
 
-        {/* Center — Hints */}
-        <div className="hidden items-center gap-2 lg:flex">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-            Press <span className="font-mono text-zinc-200">/</span> to search
-          </span>
+        {/* Center - Main navigation */}
+        <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
+          {/* Cities dropdown */}
+          <div className="relative" ref={citiesWrapRef}>
+            <button
+              type="button"
+              onClick={() => setCitiesOpen((v) => !v)}
+              className={cx(linkBase, citiesOpen ? linkActive : linkIdle)}
+              aria-expanded={citiesOpen}
+              aria-haspopup="menu"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Globe className="h-4 w-4 opacity-90" />
+                Cities
+                <ChevronDown className={cx('h-4 w-4 transition', citiesOpen && 'rotate-180')} />
+              </span>
+            </button>
+
+            <div
+              ref={citiesPanelRef}
+              className={cx(
+                'absolute left-0 mt-3 w-[420px] origin-top-left',
+                'rounded-3xl border border-white/12 bg-black/70 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-2xl',
+                'transition-[transform,opacity] duration-200',
+                citiesOpen ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-[0.985] opacity-0',
+              )}
+              role="menu"
+              aria-label="Cities menu"
+            >
+              <div className="flex items-center justify-between gap-3 px-2 pb-2">
+                <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">FEATURED CITIES</div>
+                <button
+                  type="button"
+                  onClick={() => setCitiesOpen(false)}
+                  className="rounded-full border border-white/12 bg-white/[0.05] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {topCities.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/city/${c.slug}`}
+                    prefetch
+                    onClick={() => setCitiesOpen(false)}
+                    className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                    role="menuitem"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-zinc-100/95 group-hover:text-white">{c.name}</span>
+                      <span className="block truncate text-[11px] text-zinc-400">{c.country}</span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-90" />
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCitiesOpen(false);
+                    if (pathname !== '/') {
+                      router.push('/');
+                      window.setTimeout(() => focusGlobalSearch(), 350);
+                      return;
+                    }
+                    focusGlobalSearch();
+                  }}
+                  className="flex flex-1 items-center justify-between rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Command className="h-4 w-4 opacity-90" />
+                    Search all cities
+                    <span className="ml-2 rounded-md border border-white/12 bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] text-zinc-200">
+                      /
+                    </span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </button>
+
+                <Link
+                  href="/"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className="rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  View hub
+                </Link>
+              </div>
+
+              <div className="pointer-events-none mt-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+              <div className="mt-3 grid gap-2">
+                <Link
+                  href="/coming-soon?section=signals"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className={subLink}
+                  role="menuitem"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Radar className="h-4 w-4 opacity-90" />
+                    Market signals
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </Link>
+
+                <Link
+                  href="/coming-soon?section=protocol"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className={subLink}
+                  role="menuitem"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 opacity-90" />
+                    Protocol overview
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <Link href="/coming-soon?section=signals" prefetch className={cx(linkBase, linkIdle)}>
+            <span className="inline-flex items-center gap-2">
+              <Radar className="h-4 w-4 opacity-90" />
+              Signals
+            </span>
+          </Link>
+
+          <Link href="/coming-soon?section=protocol" prefetch className={cx(linkBase, linkIdle)}>
+            <span className="inline-flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 opacity-90" />
+              Protocol
+            </span>
+          </Link>
+
+          <Link href="/coming-soon?section=coverage" prefetch className={cx(linkBase, linkIdle)}>
+            <span className="inline-flex items-center gap-2">
+              <MapPin className="h-4 w-4 opacity-90" />
+              Coverage
+            </span>
+          </Link>
 
           {onCityPage ? (
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300">
-              <span className="font-mono text-zinc-200">T</span> Insight
-              <span className="mx-2 text-white/20">|</span>
-              <span className="font-mono text-zinc-200">L</span> Live supply
-            </span>
-          ) : null}
-        </div>
+            <div className="ml-2 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-zinc-200/90">
+              <span className="inline-flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-white/70" />
+                Mode:
+              </span>
 
-        {/* Right — Mode chips */}
-        <div className="flex items-center gap-2">
-          {!onCityPage ? (
-            <>
-              <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                Listings-first
-              </span>
-              <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                Protocol surface
-              </span>
-              <span className="hidden rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-300 sm:inline-flex">
-                Buyer and seller
-              </span>
-            </>
-          ) : (
-            <>
-              <span
+              <button
+                type="button"
+                onClick={() => {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('tab', 'truth');
+                  router.replace(url.pathname + '?' + url.searchParams.toString());
+                  dispatchTab('truth');
+                }}
                 className={cx(
-                  'rounded-full border px-3 py-1 text-xs transition',
+                  'rounded-full border px-2.5 py-1 text-xs transition',
                   activeTab === 'truth'
-                    ? 'border-amber-200/25 bg-amber-200/10 text-amber-100'
-                    : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
+                    ? 'border-white/18 bg-white/[0.10] text-white'
+                    : 'border-white/10 bg-white/[0.06] text-zinc-300 hover:border-white/18',
                 )}
               >
-                Insight
-              </span>
+                Insight <span className="ml-1 font-mono text-[11px] opacity-80">T</span>
+              </button>
 
-              <span
+              <button
+                type="button"
+                onClick={() => {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('tab', 'supply');
+                  router.replace(url.pathname + '?' + url.searchParams.toString());
+                  dispatchTab('supply');
+                }}
                 className={cx(
-                  'rounded-full border px-3 py-1 text-xs transition',
+                  'rounded-full border px-2.5 py-1 text-xs transition',
                   activeTab === 'supply'
-                    ? 'border-emerald-300/20 bg-emerald-300/10 text-emerald-100'
-                    : 'border-white/10 bg-white/5 text-zinc-300 hover:border-white/20',
+                    ? 'border-white/18 bg-white/[0.10] text-white'
+                    : 'border-white/10 bg-white/[0.06] text-zinc-300 hover:border-white/18',
                 )}
               >
-                Live supply
-              </span>
-            </>
-          )}
+                Live supply <span className="ml-1 font-mono text-[11px] opacity-80">L</span>
+              </button>
+            </div>
+          ) : null}
+        </nav>
+
+        {/* Right */}
+        <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-3 py-2 text-sm text-zinc-200/90 xl:flex">
+            <span className="inline-flex items-center gap-2">
+              <Command className="h-4 w-4 opacity-90" />
+              Search
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="font-mono text-xs text-zinc-200">/</span>
+          </div>
+
+          <Link
+            href="/"
+            prefetch
+            onClick={(e) => {
+              // On desktop this button is basically "take me to the hub"
+              // If already on home, focus search instead
+              if (pathname === '/') {
+                e.preventDefault();
+                focusGlobalSearch();
+              }
+            }}
+            className={cx(
+              'group relative hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold',
+              'border border-white/14 bg-white/[0.08] text-white',
+              'shadow-[0_10px_30px_rgba(0,0,0,0.28)]',
+              'hover:border-white/20 hover:bg-white/[0.10]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+              'sm:inline-flex',
+            )}
+            aria-label="Explore cities"
+          >
+            <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+              <span className="absolute -left-1/3 top-0 h-full w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/12 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+            </span>
+            Explore
+            <ArrowRight className="h-4 w-4 opacity-90 transition group-hover:translate-x-0.5" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            className={cx(
+              'relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm',
+              'border border-white/12 bg-white/[0.06] text-zinc-200/90 hover:border-white/20 hover:bg-white/[0.08]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+              'lg:hidden',
+            )}
+            aria-expanded={mobileOpen}
+            aria-controls="vantera-mobile-menu"
+          >
+            Menu
+            <ChevronDown className={cx('h-4 w-4 transition', mobileOpen && 'rotate-180')} />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile dropdown */}
+      <div
+        id="vantera-mobile-menu"
+        className={cx(
+          'lg:hidden',
+          'overflow-hidden transition-[max-height,opacity] duration-300',
+          mobileOpen ? 'max-h-[820px] opacity-100' : 'max-h-0 opacity-0',
+        )}
+      >
+        <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
+          <div className="rounded-2xl border border-white/12 bg-black/40 p-3 backdrop-blur-2xl">
+            <div className="grid gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  focusGlobalSearch();
+                  setMobileOpen(false);
+                }}
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Command className="h-4 w-4 opacity-90" />
+                  Search cities
+                  <span className="ml-2 rounded-md border border-white/12 bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] text-zinc-200">
+                    /
+                  </span>
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </button>
+
+              <Link
+                href="/coming-soon?section=signals"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Radar className="h-4 w-4 opacity-90" />
+                  Signals
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=protocol"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 opacity-90" />
+                  Protocol
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=coverage"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 opacity-90" />
+                  Coverage
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <div className="mt-2 rounded-2xl border border-white/12 bg-white/[0.04] p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">CITIES</div>
+                  <Link
+                    href="/"
+                    prefetch
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    Hub
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {topCities.map((c) => (
+                    <Link
+                      key={c.slug}
+                      href={`/city/${c.slug}`}
+                      prefetch
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.07]"
+                    >
+                      <div className="truncate font-medium text-zinc-100/95">{c.name}</div>
+                      <div className="truncate text-[11px] text-zinc-400">{c.country}</div>
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (pathname !== '/') router.push('/');
+                      window.setTimeout(() => focusGlobalSearch(), 100);
+                      setMobileOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Command className="h-4 w-4 opacity-90" />
+                      Search all cities
+                    </span>
+                    <ArrowRight className="h-4 w-4 opacity-80" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pointer-events-none mt-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
       </div>
     </div>
