@@ -1,3 +1,4 @@
+// src/app/contact/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -5,9 +6,11 @@ import { useState } from 'react';
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError(null);
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -18,14 +21,26 @@ export default function ContactPage() {
       message: String(formData.get('message') ?? ''),
     };
 
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-    setLoading(false);
-    if (res.ok) setSent(true);
+      if (!res.ok) {
+        const j = await res.json().catch(() => null);
+        setError(j?.error ? String(j.error) : 'Something went wrong');
+        setLoading(false);
+        return;
+      }
+
+      setSent(true);
+    } catch {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -33,37 +48,20 @@ export default function ContactPage() {
       <h1 className="mb-6 text-3xl font-semibold">Contact</h1>
 
       {sent ? (
-        <p className="text-green-600">
-          Thank you. Your message has been sent.
-        </p>
+        <p className="text-green-600">Thank you. Your message has been sent.</p>
       ) : (
-        <form onSubmit={onSubmit} className="space-y-4">
-          <input
-            name="name"
-            placeholder="Name"
-            className="w-full border px-4 py-3"
-          />
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="Email"
-            className="w-full border px-4 py-3"
-          />
-          <textarea
-            name="message"
-            required
-            placeholder="Message"
-            rows={5}
-            className="w-full border px-4 py-3"
-          />
-          <button
-            disabled={loading}
-            className="bg-black px-6 py-3 text-white"
-          >
-            {loading ? 'Sending…' : 'Send'}
-          </button>
-        </form>
+        <>
+          {error ? <p className="mb-4 text-red-600">{error}</p> : null}
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            <input name="name" placeholder="Name" className="w-full border px-4 py-3" />
+            <input name="email" type="email" required placeholder="Email" className="w-full border px-4 py-3" />
+            <textarea name="message" required placeholder="Message" rows={5} className="w-full border px-4 py-3" />
+            <button disabled={loading} className="bg-black px-6 py-3 text-white">
+              {loading ? 'Sending…' : 'Send'}
+            </button>
+          </form>
+        </>
       )}
     </main>
   );
