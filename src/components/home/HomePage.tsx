@@ -5,11 +5,29 @@ import { Suspense } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
-import TrustWordmarks from '@/components/trust/TrustWordmarks';
+import TrustMarquee, { TrustLogo } from '@/components/trust/TrustMarquee';
 
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
+
+const TRUST_LOGOS: TrustLogo[] = [
+  { name: "Sotheby's International Realty", src: '/brands/sothebys.svg', href: 'https://www.sothebysrealty.com' },
+  { name: "Christie's International Real Estate", src: '/brands/christies.svg', href: 'https://www.christiesrealestate.com' },
+  { name: 'Knight Frank', src: '/brands/knightfrank.svg', href: 'https://www.knightfrank.com' },
+  { name: 'Engel & Völkers', src: '/brands/engel-volkers.svg', href: 'https://www.engelvoelkers.com' },
+  { name: 'BARNES', src: '/brands/barnes.svg', href: 'https://www.barnes-international.com' },
+  { name: 'Coldwell Banker Global Luxury', src: '/brands/coldwell.svg', href: 'https://www.coldwellbankerluxury.com' },
+  { name: 'Savills', src: '/brands/savills.svg', href: 'https://www.savills.com' },
+  { name: 'JLL', src: '/brands/jll.svg', href: 'https://www.jll.com' },
+  { name: 'CBRE', src: '/brands/cbre.svg', href: 'https://www.cbre.com' },
+  { name: 'Douglas Elliman', src: '/brands/douglas-elliman.svg', href: 'https://www.elliman.com' },
+  { name: 'Compass', src: '/brands/compass.svg', href: 'https://www.compass.com' },
+  { name: 'Corcoran', src: '/brands/corcoran.svg', href: 'https://www.corcoran.com' },
+  { name: 'Century 21', src: '/brands/century21.svg', href: 'https://www.century21.com' },
+  { name: 'RE/MAX', src: '/brands/remax.svg', href: 'https://www.remax.com' },
+  { name: 'Berkshire Hathaway HomeServices', src: '/brands/bhhs.svg', href: 'https://www.bhhs.com' },
+];
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -287,26 +305,13 @@ export default function HomePage() {
       </section>
 
       {/* TRUST STRIP (full-width, outside max-w container) */}
-      <TrustWordmarks
-  className="mt-0"
-  firms={[
-    "Sotheby’s International Realty",
-    "Christie’s International Real Estate",
-    "Knight Frank",
-    "Savills",
-    "Engel & Völkers",
-    "BARNES International",
-    "Coldwell Banker Global Luxury",
-    "Douglas Elliman",
-    "Compass",
-    "CBRE",
-    "JLL",
-    "RE/MAX",
-    "Berkshire Hathaway HomeServices",
-    "Corcoran",
-    "Century 21",
-  ]}
-/>
+      <TrustMarquee
+        logos={TRUST_LOGOS}
+        className="mt-0"
+        eyebrow="Trusted reference set"
+        title="Benchmarked against the world’s leading firms"
+        subtitle="A credibility layer for clients who expect institutional standards."
+      />
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
