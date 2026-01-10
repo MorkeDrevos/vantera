@@ -18,135 +18,35 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
-        {/* FULL-WIDTH TOP BAR (content centered) */}
+        {/* TOP BAR */}
         <header className="w-full px-5 pt-6 sm:px-8 sm:pt-8">
-          <div className="mx-auto w-full max-w-7xl">
+          <div className="mx-auto max-w-7xl">
             <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] shadow-[0_30px_90px_rgba(0,0,0,0.55)]">
               <div className="pointer-events-none absolute inset-0">
                 <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_30%_0%,rgba(232,190,92,0.16),transparent_55%)]" />
                 <div className="absolute inset-0 bg-[radial-gradient(800px_260px_at_80%_10%,rgba(120,76,255,0.18),transparent_55%)]" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent" />
                 <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
               </div>
 
-              <div className="relative flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-6">
-                <div className="flex items-center gap-4">
-                  {/* Brand logo */}
-                  <div className="relative">
-                    <Image
-                      src="/brand/vantera-logo-dark.png"
-                      alt="Vantera"
-                      width={170}
-                      height={52}
-                      priority
-                      className="h-8 w-auto opacity-95"
-                    />
-                    <div className="pointer-events-none absolute -inset-x-2 -inset-y-3 -z-10 rounded-2xl bg-[radial-gradient(220px_80px_at_50%_50%,rgba(232,190,92,0.12),transparent_60%)] blur-md" />
-                  </div>
+              <div className="relative flex items-center justify-between px-6 py-5">
+                <Image
+                  src="/brand/vantera-logo-dark.png"
+                  alt="Vantera"
+                  width={170}
+                  height={52}
+                  priority
+                  className="h-8 w-auto opacity-95"
+                />
 
-                  <div className="leading-tight">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-300">
-                        City Index
-                      </span>
-                      <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-zinc-300">
-                        Live
-                      </span>
-                    </div>
-                    <div className="mt-1 text-xs text-zinc-400">
-                      Premium discovery layer - built for real data later
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Real images
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Live city time
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
-                    Protocol-grade UI
-                  </span>
-                </div>
+                <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] text-zinc-300">
+                  City Index · Live
+                </span>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="w-full">{children}</main>
-
-        <footer className="mx-auto w-full max-w-7xl px-5 pb-10 pt-10 sm:px-8">
-          <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.025] px-5 py-5 text-xs text-zinc-400 shadow-[0_24px_70px_rgba(0,0,0,0.45)] sm:px-7">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(700px_260px_at_20%_0%,rgba(232,190,92,0.10),transparent_58%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(700px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_58%)]" />
-            </div>
-
-            <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>© {new Date().getFullYear()} Vantera</div>
-              <div className="text-zinc-500">Designed as a premium surface for the coming intelligence layer</div>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </div>
-  );
-}
-
-function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
-  return (
-    <div className="mb-5 flex items-end justify-between gap-3">
-      <div>
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
-          {String(children).toUpperCase()}
-        </div>
-        <div className="mt-2 h-px w-28 bg-gradient-to-r from-[rgba(232,190,92,0.55)] via-white/15 to-transparent" />
-      </div>
-      {hint ? (
-        <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-300">
-          {hint}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  tone = 'neutral',
-}: {
-  label: string;
-  value: React.ReactNode;
-  tone?: 'neutral' | 'gold' | 'violet' | 'aqua';
-}) {
-  const toneRing =
-    tone === 'gold'
-      ? 'ring-[rgba(232,190,92,0.20)]'
-      : tone === 'violet'
-        ? 'ring-[rgba(120,76,255,0.20)]'
-        : tone === 'aqua'
-          ? 'ring-[rgba(62,196,255,0.18)]'
-          : 'ring-white/10';
-
-  const toneGlow =
-    tone === 'gold'
-      ? 'bg-[radial-gradient(260px_120px_at_30%_0%,rgba(232,190,92,0.16),transparent_60%)]'
-      : tone === 'violet'
-        ? 'bg-[radial-gradient(260px_120px_at_30%_0%,rgba(120,76,255,0.16),transparent_60%)]'
-        : tone === 'aqua'
-          ? 'bg-[radial-gradient(260px_120px_at_30%_0%,rgba(62,196,255,0.14),transparent_60%)]'
-          : 'bg-[radial-gradient(260px_120px_at_30%_0%,rgba(255,255,255,0.10),transparent_60%)]';
-
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 shadow-[0_18px_55px_rgba(0,0,0,0.45)] ring-1">
-      <div className={`pointer-events-none absolute inset-0 ${toneGlow}`} />
-      <div className={`pointer-events-none absolute inset-0 ring-1 ${toneRing}`} />
-      <div className="relative">
-        <div className="text-[11px] tracking-[0.16em] text-zinc-400">{label}</div>
-        <div className="mt-1 text-lg font-semibold text-zinc-100">{value}</div>
+        <main>{children}</main>
       </div>
     </div>
   );
@@ -154,208 +54,45 @@ function StatCard({
 
 function HeroShine() {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* breathing ambient */}
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 animate-[vanteraPulse_14s_ease-in-out_infinite]">
         <div className="absolute -top-24 left-1/2 h-[540px] w-[1050px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.22),transparent_62%)] blur-2xl" />
         <div className="absolute -top-10 right-[-260px] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_62%)] blur-2xl" />
         <div className="absolute bottom-[-220px] left-[-220px] h-[660px] w-[660px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.13),transparent_60%)] blur-2xl" />
       </div>
 
-      {/* glass highlight sweep */}
-      <div className="absolute inset-0 opacity-40 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.09)_45%,transparent_62%)] animate-[vanteraSweep_10s_ease-in-out_infinite]" />
-
-      {/* subtle logo watermark in hero */}
-      <div className="absolute right-[-60px] top-[-40px] opacity-[0.10] blur-[0.2px]">
-        <Image
-          src="/brand/vantera-logo-dark.png"
-          alt=""
-          width={520}
-          height={160}
-          className="h-auto w-[520px]"
-        />
-      </div>
+      <div className="absolute inset-0 animate-[vanteraSweep_10s_ease-in-out_infinite] opacity-40 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.09)_45%,transparent_62%)]" />
     </div>
   );
 }
 
 export default function HomePage() {
-  const regionCount = new Set(CITIES.map((c) => c.region).filter(Boolean)).size;
-  const timezoneCount = new Set(CITIES.map((c) => c.tz)).size;
-
   return (
     <Shell>
-      {/* FULL-WIDTH HERO BAND (content centered) */}
-      <section className="relative w-full pb-12 pt-8 sm:pb-16 sm:pt-10">
-        <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.58))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
-          <HeroShine />
+      <section className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.58))]">
+        <HeroShine />
 
-          <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
-            <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-              {/* LEFT */}
-              <div className="lg:col-span-7">
-                <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[rgba(232,190,92,0.98)] shadow-[0_0_0_3px_rgba(232,190,92,0.12)]" />
-                  <span className="tracking-wide">Private intelligence surface</span>
-                  <span className="text-zinc-500">·</span>
-                  <span className="text-zinc-300">Real images</span>
-                  <span className="text-zinc-500">·</span>
-                  <span className="text-zinc-300">Live city time</span>
-                </div>
+        <div className="relative mx-auto max-w-7xl px-6 py-20">
+          <h1 className="text-4xl font-semibold tracking-[-0.015em] sm:text-5xl lg:text-[72px]">
+            Discover cities with{' '}
+            <span className="bg-[linear-gradient(90deg,rgba(232,190,92,1),rgba(255,255,255,0.9),rgba(120,76,255,1))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(232,190,92,0.25)]">
+              premium clarity
+            </span>
+          </h1>
 
-                <h1 className="mt-7 text-balance text-4xl font-semibold tracking-[-0.015em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
-                  Discover cities with
-                  <span className="relative bg-[linear-gradient(90deg,rgba(232,190,92,1),rgba(255,255,255,0.90),rgba(120,76,255,1))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(232,190,92,0.25)]">
-                    {' '}
-                    premium clarity
-                  </span>
-                </h1>
+          <p className="mt-6 max-w-2xl text-zinc-300">
+            A private intelligence surface for global cities.
+          </p>
 
-                <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-                  Search a city, open the page, and expand from there. This is the luxury surface layer that will plug into verified
-                  listings and intelligence next.
-                </p>
-
-                <div className="mt-7 max-w-2xl">
-                  <div className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_26px_80px_rgba(0,0,0,0.62)] transition-all duration-500 hover:border-white/25 hover:bg-white/[0.04] sm:p-5">
-                    <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(700px_220px_at_50%_0%,rgba(232,190,92,0.18),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_220px_at_25%_0%,rgba(232,190,92,0.12),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_220px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
-                    <div className="relative">
-                      <CitySearch />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
-                  <StatCard label="CITIES" value={CITIES.length} tone="gold" />
-                  <StatCard label="REGIONS" value={regionCount} tone="violet" />
-                  <StatCard label="TIMEZONES" value={timezoneCount} tone="aqua" />
-                  <StatCard label="STATUS" value={<span className="text-[rgba(232,190,92,0.95)]">LIVE</span>} tone="neutral" />
-                </div>
-              </div>
-
-              {/* RIGHT */}
-              <div className="lg:col-span-5">
-                <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/22 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.70)] sm:p-6">
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_40%_0%,rgba(232,190,92,0.14),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_90%_20%,rgba(120,76,255,0.14),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] via-transparent to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-                  </div>
-
-                  <div className="relative">
-                    <SectionLabel hint="Live cards">Popular</SectionLabel>
-
-                    <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
-
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-                      Curated picks update as the index grows.
-                      <span className="text-zinc-500"> Real intelligence comes next.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
-                    <div className="text-[11px] tracking-[0.18em] text-zinc-400">SIGNAL</div>
-                    <div className="mt-2 text-zinc-200">Truth-first city surfaces</div>
-                    <div className="mt-1 text-xs text-zinc-500">Built to host verified data, not vibes.</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
-                    <div className="text-[11px] tracking-[0.18em] text-zinc-400">PACE</div>
-                    <div className="mt-2 text-zinc-200">Open a city in seconds</div>
-                    <div className="mt-1 text-xs text-zinc-500">Fast navigation, premium framing.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="mt-8 max-w-xl">
+            <CitySearch />
           </div>
-
-          {/* soft bottom fade into body */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0C0F14]" />
         </div>
       </section>
 
-      {/* BODY */}
-      <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
-        <section className="mt-10 sm:mt-12">
-          <SectionLabel hint={`${CITIES.length} total`}>Explore</SectionLabel>
-
-          <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(232,190,92,0.10),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
-            </div>
-            <div className="relative">
-              <CityCardsClient cities={CITIES} />
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-14 sm:mt-16">
-          <SectionLabel hint="Curated lanes">Featured routes</SectionLabel>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: 'European capitals', tone: 'gold' as const },
-              { title: 'Coastal cities', tone: 'aqua' as const },
-              { title: '24/7 cities', tone: 'violet' as const },
-              { title: 'High-growth hubs', tone: 'neutral' as const },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-sm text-zinc-200 shadow-[0_22px_60px_rgba(0,0,0,0.50)]"
-              >
-                <div
-                  className={[
-                    'pointer-events-none absolute inset-0',
-                    item.tone === 'gold'
-                      ? 'bg-[radial-gradient(520px_180px_at_20%_0%,rgba(232,190,92,0.12),transparent_60%)]'
-                      : item.tone === 'aqua'
-                        ? 'bg-[radial-gradient(520px_180px_at_20%_0%,rgba(62,196,255,0.10),transparent_60%)]'
-                        : item.tone === 'violet'
-                          ? 'bg-[radial-gradient(520px_180px_at_20%_0%,rgba(120,76,255,0.12),transparent_60%)]'
-                          : 'bg-[radial-gradient(520px_180px_at_20%_0%,rgba(255,255,255,0.08),transparent_60%)]',
-                  ].join(' ')}
-                />
-                <div className="relative">
-                  <div className="text-[11px] tracking-[0.18em] text-zinc-400">FEATURED</div>
-                  <div className="mt-2 font-medium">{item.title}</div>
-                  <div className="mt-1 text-xs text-zinc-500">Handpicked entry points</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <CityCardsClient cities={CITIES} />
       </div>
-
-      {/* Local keyframes for subtle luxury motion */}
-      <style jsx global>{`
-        @keyframes vanteraPulse {
-          0%,
-          100% {
-            opacity: 0.85;
-            transform: translateY(0px);
-          }
-          50% {
-            opacity: 1;
-            transform: translateY(-6px);
-          }
-        }
-        @keyframes vanteraSweep {
-          0%,
-          100% {
-            transform: translateX(-8%) translateY(-2%);
-            opacity: 0.18;
-          }
-          50% {
-            transform: translateX(8%) translateY(2%);
-            opacity: 0.35;
-          }
-        }
-      `}</style>
     </Shell>
   );
 }
