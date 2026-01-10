@@ -19,6 +19,15 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+function focusGlobalSearch() {
+  // Prefer Vantera id, fallback to legacy id (until migration is done)
+  const el =
+    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
+    (document.getElementById('locus-city-search') as HTMLInputElement | null);
+
+  el?.focus();
+}
+
 /**
  * Vantera hotkey behavior:
  * - Press "/" to focus the global city search on home
@@ -39,22 +48,13 @@ function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof
       if (e.key === '/') {
         e.preventDefault();
 
-        const focus = () => {
-  // Prefer Vantera id, fallback to legacy id
-  const el =
-    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
-    (document.getElementById('locus-city-search') as HTMLInputElement | null);
-
-  el?.focus();
-};
-
         if (pathname !== '/') {
           router.push('/');
-          window.setTimeout(focus, 350);
+          window.setTimeout(() => focusGlobalSearch(), 350);
           return;
         }
 
-        focus();
+        focusGlobalSearch();
       }
     };
 
@@ -207,7 +207,11 @@ export default function TopBar() {
 
           <div className="min-w-0 leading-tight">
             <div className="flex items-center gap-2">
-              <Link href="/" prefetch className="truncate text-sm font-semibold tracking-[0.18em] text-zinc-100 hover:text-white">
+              <Link
+                href="/"
+                prefetch
+                className="truncate text-sm font-semibold tracking-[0.18em] text-zinc-100 hover:text-white"
+              >
                 VANTERA
               </Link>
 
@@ -363,7 +367,9 @@ export default function TopBar() {
                 prefetch
                 className={cx(
                   'flex items-center justify-between rounded-xl border px-4 py-3 text-sm',
-                  pathname === '/' ? 'border-white/18 bg-white/[0.10] text-white' : 'border-white/12 bg-white/[0.06] text-zinc-200 hover:border-white/20',
+                  pathname === '/'
+                    ? 'border-white/18 bg-white/[0.10] text-white'
+                    : 'border-white/12 bg-white/[0.06] text-zinc-200 hover:border-white/20',
                 )}
               >
                 <span className="inline-flex items-center gap-2">
@@ -412,10 +418,7 @@ export default function TopBar() {
               <button
                 type="button"
                 onClick={() => {
-                  const el =
-                    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ??
-                    (document.getElementById('locus-city-search') as HTMLInputElement | null);
-                  el?.focus();
+                  focusGlobalSearch();
                   setMobileOpen(false);
                 }}
                 className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
