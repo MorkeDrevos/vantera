@@ -38,11 +38,15 @@ function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: st
   return (
     <div className="mb-5 flex items-end justify-between gap-3">
       <div>
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">{String(children).toUpperCase()}</div>
+        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
+          {String(children).toUpperCase()}
+        </div>
         <div className="mt-2 h-px w-28 bg-gradient-to-r from-white/18 via-white/10 to-transparent" />
       </div>
       {hint ? (
-        <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-300">{hint}</div>
+        <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-300">
+          {hint}
+        </div>
       ) : null}
     </div>
   );
@@ -65,6 +69,36 @@ function HeroShine() {
       <div className="absolute right-[-80px] top-[-70px] opacity-[0.05] blur-[0.2px]">
         <Image src="/brand/vantera-logo-dark.png" alt="" width={560} height={180} className="w-[560px]" />
       </div>
+    </div>
+  );
+}
+
+function HeroVideo() {
+  // Place your assets here:
+  // - public/hero/vantera-hero.mp4
+  // - public/hero/vantera-hero.jpg
+  return (
+    <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
+      <video
+        className="h-full w-full object-cover opacity-[0.55]"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        poster="/hero/vantera-hero.jpg"
+      >
+        <source src="/hero/vantera-hero.mp4" type="video/mp4" />
+      </video>
+
+      {/* premium veil + vignette */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),rgba(0,0,0,0.72))]" />
+      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(900px_420px_at_15%_20%,rgba(120,76,255,0.14),transparent_55%)] opacity-70" />
+      <div className="absolute inset-0 [background:radial-gradient(900px_420px_at_85%_25%,rgba(62,196,255,0.10),transparent_55%)] opacity-70" />
+
+      {/* subtle film grain (no external asset) */}
+      <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.65)_1px,transparent_0)] [background-size:18px_18px]" />
     </div>
   );
 }
@@ -105,6 +139,24 @@ function SignalStrip({
   );
 }
 
+function Pillar({
+  title,
+  body,
+}: {
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-200 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_180px_at_20%,rgba(255,255,255,0.06),transparent_60%)]" />
+      <div className="relative">
+        <div className="text-[11px] tracking-[0.18em] text-zinc-400">{title.toUpperCase()}</div>
+        <div className="mt-2 text-zinc-200">{body}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const regionCount = new Set(CITIES.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(CITIES.map((c) => c.tz)).size;
@@ -114,6 +166,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative w-full pb-12 pt-12 sm:pb-16 sm:pt-14">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
+          <HeroVideo />
           <HeroShine />
 
           <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
@@ -137,7 +190,7 @@ export default function HomePage() {
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-                  Vantera is a quiet intelligence surface designed for buyers, sellers and advisors who value signal over noise.
+                  Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
                   <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
                 </p>
 
@@ -178,6 +231,13 @@ export default function HomePage() {
                     ]}
                     right={[{ k: 'STATUS', v: <span className="text-zinc-100">LIVE</span> }]}
                   />
+                </div>
+
+                {/* Narrative pillars */}
+                <div className="mt-5 grid max-w-2xl gap-3 sm:grid-cols-3">
+                  <Pillar title="Signal" body="Market context designed to cut through noise." />
+                  <Pillar title="Verification" body="Truth layers activate as coverage becomes real." />
+                  <Pillar title="Coverage" body="A private index of the cities that matter." />
                 </div>
               </div>
 
