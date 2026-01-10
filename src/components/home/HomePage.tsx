@@ -4,6 +4,7 @@ import Image from 'next/image';
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
+import { Suspense } from 'react';
 import TopBar from '@/components/layout/TopBar';
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -19,7 +20,9 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
-      <TopBar />
+      <Suspense fallback={null}>
+  <TopBar />
+</Suspense>
         <main className="w-full">{children}</main>
 
         <footer className="mx-auto w-full max-w-7xl px-5 pb-10 pt-10 sm:px-8">
