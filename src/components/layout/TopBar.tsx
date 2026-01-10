@@ -7,6 +7,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, ChevronDown, Command, Crown, Globe, MapPin, Radar, ShieldCheck, Sparkles } from 'lucide-react';
 
+import { CITIES } from '@/components/home/cities';
+
 function isEditableTarget(el: Element | null) {
   if (!el) return false;
   const tag = el.tagName.toLowerCase();
@@ -70,6 +72,35 @@ function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
 }
 
+function useClickOutside(
+  refs: Array<React.RefObject<HTMLElement>>,
+  onOutside: () => void,
+  enabled: boolean,
+) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      for (const r of refs) {
+        const el = r.current;
+        if (el && el.contains(t)) return;
+      }
+
+      onOutside();
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [enabled, onOutside, refs]);
+}
+
 export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -79,6 +110,10 @@ export default function TopBar() {
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [citiesOpen, setCitiesOpen] = useState(false);
+
+  const citiesWrapRef = useRef<HTMLDivElement>(null);
+  const citiesPanelRef = useRef<HTMLDivElement>(null);
 
   const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
 
@@ -87,6 +122,13 @@ export default function TopBar() {
     if (t === 'truth' || t === 'supply') return t;
     return 'truth';
   }, [searchParams]);
+
+  const topCities = useMemo(() => {
+    // Curated list: stable and predictable, but still sourced from your cities registry
+    return (CITIES ?? []).slice(0, 10);
+  }, []);
+
+  useClickOutside([citiesWrapRef, citiesPanelRef], () => setCitiesOpen(false), citiesOpen);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -97,6 +139,7 @@ export default function TopBar() {
 
   useEffect(() => {
     setMobileOpen(false);
+    setCitiesOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -104,7 +147,10 @@ export default function TopBar() {
       const target = e.target as Element | null;
       if (isEditableTarget(target)) return;
 
-      if (e.key === 'Escape') setMobileOpen(false);
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+        setCitiesOpen(false);
+      }
 
       if (onCityPage && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
@@ -160,6 +206,9 @@ export default function TopBar() {
   const linkActive =
     'text-white bg-white/[0.07] border border-white/12 shadow-[0_0_0_1px_rgba(255,255,255,0.06)]';
 
+  const subLink =
+    'flex items-center justify-between gap-3 rounded-xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]';
+
   return (
     <div className={surfaceClass}>
       {/* edges */}
@@ -178,77 +227,195 @@ export default function TopBar() {
       <div className={veilClass} />
 
       <div className={innerClass}>
-        {/* Left - Identity */}
+        {/* Left - Identity (FULL LOGO) */}
         <div className="flex min-w-0 items-center gap-3">
           <Link
             href="/"
             prefetch
             aria-label="Vantera home"
-            className="group relative grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
+            className={cx(
+              'group relative flex shrink-0 items-center',
+              'rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2',
+              'shadow-[0_0_0_1px_rgba(255,255,255,0.04)]',
+              'hover:border-white/16 hover:bg-white/[0.05]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+            )}
           >
-            {/* emblem plate */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/12 via-transparent to-transparent opacity-90" />
+            {/* subtle plate */}
+            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-80" />
             <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10 group-hover:ring-white/18" />
 
-            {/* restrained halo */}
-            <div className="pointer-events-none absolute -inset-10 opacity-0 transition duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/10 via-violet-400/8 to-cyan-400/8 blur-2xl" />
-            </div>
-
             <Image
-              src="/brand/vantera-icon.png"
-              alt="Vantera mark"
-              width={30}
-              height={30}
-              className="relative opacity-95 drop-shadow-[0_10px_28px_rgba(255,255,255,0.10)] transition group-hover:scale-[1.03]"
+              // Put your full logo here:
+              // public/brand/vantera-logo-dark.png
+              src="/brand/vantera-logo-dark.png"
+              alt="Vantera"
+              width={210}
+              height={54}
               priority={false}
+              className={cx(
+                'relative h-9 w-auto opacity-95',
+                'drop-shadow-[0_14px_40px_rgba(0,0,0,0.45)]',
+                'transition group-hover:opacity-100',
+                'sm:h-10',
+              )}
             />
           </Link>
 
-          <div className="min-w-0 leading-tight">
+          <div className="hidden min-w-0 leading-tight xl:block">
             <div className="flex items-center gap-2">
-              <Link
-                href="/"
-                prefetch
-                className="truncate text-sm font-semibold tracking-[0.18em] text-zinc-100 hover:text-white"
-              >
-                VANTERA
-              </Link>
-
-              <span className="hidden items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90 sm:inline-flex">
+              <span className="truncate text-xs font-semibold tracking-[0.18em] text-zinc-200/90">GLOBAL PROPERTY INTELLIGENCE</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90">
                 <Crown className="h-3.5 w-3.5 opacity-85" />
-                PROPERTY INTELLIGENCE
+                TRUST LAYER
               </span>
             </div>
-
             <div className="truncate text-xs text-zinc-400">Truth-first signal for buyers, sellers and agents</div>
           </div>
         </div>
 
         {/* Center - Main navigation */}
         <nav className="hidden items-center gap-2 lg:flex" aria-label="Primary">
-          <Link href="/" prefetch className={cx(linkBase, pathname === '/' ? linkActive : linkIdle)}>
-            <span className="inline-flex items-center gap-2">
-              <Globe className="h-4 w-4 opacity-90" />
-              Cities
-            </span>
-          </Link>
+          {/* Cities dropdown */}
+          <div className="relative" ref={citiesWrapRef}>
+            <button
+              type="button"
+              onClick={() => setCitiesOpen((v) => !v)}
+              className={cx(linkBase, citiesOpen ? linkActive : linkIdle)}
+              aria-expanded={citiesOpen}
+              aria-haspopup="menu"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Globe className="h-4 w-4 opacity-90" />
+                Cities
+                <ChevronDown className={cx('h-4 w-4 transition', citiesOpen && 'rotate-180')} />
+              </span>
+            </button>
 
-          <Link href="/coming-soon" prefetch className={cx(linkBase, linkIdle)}>
+            <div
+              ref={citiesPanelRef}
+              className={cx(
+                'absolute left-0 mt-3 w-[420px] origin-top-left',
+                'rounded-3xl border border-white/12 bg-black/70 p-3 shadow-[0_28px_90px_rgba(0,0,0,0.55)] backdrop-blur-2xl',
+                'transition-[transform,opacity] duration-200',
+                citiesOpen ? 'pointer-events-auto scale-100 opacity-100' : 'pointer-events-none scale-[0.985] opacity-0',
+              )}
+              role="menu"
+              aria-label="Cities menu"
+            >
+              <div className="flex items-center justify-between gap-3 px-2 pb-2">
+                <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">FEATURED CITIES</div>
+                <button
+                  type="button"
+                  onClick={() => setCitiesOpen(false)}
+                  className="rounded-full border border-white/12 bg-white/[0.05] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {topCities.map((c) => (
+                  <Link
+                    key={c.slug}
+                    href={`/city/${c.slug}`}
+                    prefetch
+                    onClick={() => setCitiesOpen(false)}
+                    className="group flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2.5 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.06]"
+                    role="menuitem"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-zinc-100/95 group-hover:text-white">{c.name}</span>
+                      <span className="block truncate text-[11px] text-zinc-400">{c.country}</span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 opacity-70 transition group-hover:translate-x-0.5 group-hover:opacity-90" />
+                  </Link>
+                ))}
+              </div>
+
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCitiesOpen(false);
+                    if (pathname !== '/') {
+                      router.push('/');
+                      window.setTimeout(() => focusGlobalSearch(), 350);
+                      return;
+                    }
+                    focusGlobalSearch();
+                  }}
+                  className="flex flex-1 items-center justify-between rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Command className="h-4 w-4 opacity-90" />
+                    Search all cities
+                    <span className="ml-2 rounded-md border border-white/12 bg-white/[0.06] px-2 py-0.5 font-mono text-[11px] text-zinc-200">
+                      /
+                    </span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </button>
+
+                <Link
+                  href="/"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className="rounded-2xl border border-white/12 bg-white/[0.05] px-4 py-3 text-sm text-zinc-200 hover:border-white/20 hover:bg-white/[0.07]"
+                >
+                  View hub
+                </Link>
+              </div>
+
+              <div className="pointer-events-none mt-3 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+              <div className="mt-3 grid gap-2">
+                <Link
+                  href="/coming-soon?section=signals"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className={subLink}
+                  role="menuitem"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Radar className="h-4 w-4 opacity-90" />
+                    Market signals
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </Link>
+
+                <Link
+                  href="/coming-soon?section=protocol"
+                  prefetch
+                  onClick={() => setCitiesOpen(false)}
+                  className={subLink}
+                  role="menuitem"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 opacity-90" />
+                    Protocol overview
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-80" />
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <Link href="/coming-soon?section=signals" prefetch className={cx(linkBase, linkIdle)}>
             <span className="inline-flex items-center gap-2">
               <Radar className="h-4 w-4 opacity-90" />
               Signals
             </span>
           </Link>
 
-          <Link href="/coming-soon" prefetch className={cx(linkBase, linkIdle)}>
+          <Link href="/coming-soon?section=protocol" prefetch className={cx(linkBase, linkIdle)}>
             <span className="inline-flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 opacity-90" />
               Protocol
             </span>
           </Link>
 
-          <Link href="/coming-soon" prefetch className={cx(linkBase, linkIdle)}>
+          <Link href="/coming-soon?section=coverage" prefetch className={cx(linkBase, linkIdle)}>
             <span className="inline-flex items-center gap-2">
               <MapPin className="h-4 w-4 opacity-90" />
               Coverage
@@ -315,6 +482,14 @@ export default function TopBar() {
           <Link
             href="/"
             prefetch
+            onClick={(e) => {
+              // On desktop this button is basically "take me to the hub"
+              // If already on home, focus search instead
+              if (pathname === '/') {
+                e.preventDefault();
+                focusGlobalSearch();
+              }
+            }}
             className={cx(
               'group relative hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold',
               'border border-white/14 bg-white/[0.08] text-white',
@@ -356,65 +531,12 @@ export default function TopBar() {
         className={cx(
           'lg:hidden',
           'overflow-hidden transition-[max-height,opacity] duration-300',
-          mobileOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0',
+          mobileOpen ? 'max-h-[820px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
           <div className="rounded-2xl border border-white/12 bg-black/40 p-3 backdrop-blur-2xl">
             <div className="grid gap-2">
-              <Link
-                href="/"
-                prefetch
-                className={cx(
-                  'flex items-center justify-between rounded-xl border px-4 py-3 text-sm',
-                  pathname === '/'
-                    ? 'border-white/18 bg-white/[0.10] text-white'
-                    : 'border-white/12 bg-white/[0.06] text-zinc-200 hover:border-white/20',
-                )}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Globe className="h-4 w-4 opacity-90" />
-                  Cities
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-80" />
-              </Link>
-
-              <Link
-                href="/coming-soon"
-                prefetch
-                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Radar className="h-4 w-4 opacity-90" />
-                  Signals
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-80" />
-              </Link>
-
-              <Link
-                href="/coming-soon"
-                prefetch
-                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 opacity-90" />
-                  Protocol
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-80" />
-              </Link>
-
-              <Link
-                href="/coming-soon"
-                prefetch
-                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <MapPin className="h-4 w-4 opacity-90" />
-                  Coverage
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-80" />
-              </Link>
-
               <button
                 type="button"
                 onClick={() => {
@@ -432,6 +554,89 @@ export default function TopBar() {
                 </span>
                 <ArrowRight className="h-4 w-4 opacity-80" />
               </button>
+
+              <Link
+                href="/coming-soon?section=signals"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Radar className="h-4 w-4 opacity-90" />
+                  Signals
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=protocol"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 opacity-90" />
+                  Protocol
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=coverage"
+                prefetch
+                className="flex items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="h-4 w-4 opacity-90" />
+                  Coverage
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
+              </Link>
+
+              <div className="mt-2 rounded-2xl border border-white/12 bg-white/[0.04] p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="text-xs font-semibold tracking-[0.16em] text-zinc-200/90">CITIES</div>
+                  <Link
+                    href="/"
+                    prefetch
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-full border border-white/12 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-200 hover:border-white/20 hover:bg-white/[0.08]"
+                  >
+                    Hub
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {topCities.map((c) => (
+                    <Link
+                      key={c.slug}
+                      href={`/city/${c.slug}`}
+                      prefetch
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-xl border border-white/10 bg-white/[0.05] px-3 py-2 text-sm text-zinc-200 hover:border-white/18 hover:bg-white/[0.07]"
+                    >
+                      <div className="truncate font-medium text-zinc-100/95">{c.name}</div>
+                      <div className="truncate text-[11px] text-zinc-400">{c.country}</div>
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (pathname !== '/') router.push('/');
+                      window.setTimeout(() => focusGlobalSearch(), 100);
+                      setMobileOpen(false);
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl border border-white/12 bg-white/[0.06] px-4 py-3 text-sm text-zinc-200 hover:border-white/20"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Command className="h-4 w-4 opacity-90" />
+                      Search all cities
+                    </span>
+                    <ArrowRight className="h-4 w-4 opacity-80" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
