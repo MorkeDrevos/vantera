@@ -37,16 +37,12 @@ function Shell({ children }: { children: React.ReactNode }) {
 
                   <div className="leading-tight">
                     <div className="flex items-center gap-2">
-                      <div className="text-[13px] font-semibold tracking-[0.14em] text-zinc-100">
-                        VANTERA
-                      </div>
+                      <div className="text-[13px] font-semibold tracking-[0.14em] text-zinc-100">VANTERA</div>
                       <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-zinc-300">
                         City Index
                       </span>
                     </div>
-                    <div className="mt-1 text-xs text-zinc-400">
-                      Premium discovery layer - built for real data later
-                    </div>
+                    <div className="mt-1 text-xs text-zinc-400">Premium discovery layer - built for real data later</div>
                   </div>
                 </div>
 
@@ -66,7 +62,6 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* MAIN */}
         <main className="w-full">{children}</main>
 
         <footer className="mx-auto w-full max-w-7xl px-5 pb-10 pt-10 sm:px-8">
@@ -97,9 +92,7 @@ function SectionLabel({
   return (
     <div className="mb-5 flex items-end justify-between gap-3">
       <div>
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
-          {String(children).toUpperCase()}
-        </div>
+        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">{String(children).toUpperCase()}</div>
         <div className="mt-2 h-px w-28 bg-gradient-to-r from-[rgba(232,190,92,0.55)] via-white/15 to-transparent" />
       </div>
       {hint ? (
@@ -150,6 +143,22 @@ function StatCard({
   );
 }
 
+function HeroShine() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* breathing ambient */}
+      <div className="absolute inset-0 animate-[vanteraPulse_14s_ease-in-out_infinite]">
+        <div className="absolute -top-24 left-1/2 h-[520px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.20),transparent_62%)] blur-2xl" />
+        <div className="absolute -top-10 right-[-240px] h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_62%)] blur-2xl" />
+        <div className="absolute bottom-[-220px] left-[-220px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.13),transparent_60%)] blur-2xl" />
+      </div>
+
+      {/* glass highlight sweep */}
+      <div className="absolute inset-0 opacity-40 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.08)_45%,transparent_62%)] animate-[vanteraSweep_10s_ease-in-out_infinite]" />
+    </div>
+  );
+}
+
 export default function HomePage() {
   const regionCount = new Set(CITIES.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(CITIES.map((c) => c.tz)).size;
@@ -158,32 +167,25 @@ export default function HomePage() {
     <Shell>
       {/* FULL-WIDTH HERO BAND (content centered) */}
       <section className="relative w-full pb-12 pt-8 sm:pb-16 sm:pt-10">
-        <div className="relative w-full overflow-hidden border-y border-white/10 bg-white/[0.03] shadow-[0_40px_120px_rgba(0,0,0,0.62)]">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(1400px_560px_at_20%_0%,rgba(232,190,92,0.16),transparent_55%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(1300px_560px_at_82%_10%,rgba(120,76,255,0.18),transparent_55%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(1000px_560px_at_55%_110%,rgba(62,196,255,0.10),transparent_60%)]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-black/35" />
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-          </div>
+        <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.015),rgba(0,0,0,0.55))] shadow-[0_50px_140px_rgba(0,0,0,0.70)]">
+          <HeroShine />
 
-          {/* Inner content keeps premium max width */}
-          <div className="relative mx-auto w-full max-w-7xl px-5 py-10 sm:px-8 sm:py-12">
+          <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
               {/* LEFT */}
               <div className="lg:col-span-7">
-                <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[rgba(232,190,92,0.95)] shadow-[0_0_0_3px_rgba(232,190,92,0.10)]" />
-                  <span className="tracking-wide">Royal index layer</span>
+                <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[rgba(232,190,92,0.98)] shadow-[0_0_0_3px_rgba(232,190,92,0.12)]" />
+                  <span className="tracking-wide">Private intelligence surface</span>
                   <span className="text-zinc-500">·</span>
                   <span className="text-zinc-300">Real images</span>
                   <span className="text-zinc-500">·</span>
                   <span className="text-zinc-300">Live city time</span>
                 </div>
 
-                <h1 className="mt-7 text-balance text-4xl font-semibold tracking-tight text-zinc-50 sm:text-5xl lg:text-6xl">
+                <h1 className="mt-7 text-balance text-4xl font-semibold tracking-[-0.015em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
                   Discover cities with
-                  <span className="bg-[linear-gradient(90deg,rgba(232,190,92,0.95),rgba(255,255,255,0.85),rgba(120,76,255,0.95))] bg-clip-text text-transparent">
+                  <span className="relative bg-[linear-gradient(90deg,rgba(232,190,92,1),rgba(255,255,255,0.90),rgba(120,76,255,1))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(232,190,92,0.25)]">
                     {' '}
                     premium clarity
                   </span>
@@ -195,7 +197,8 @@ export default function HomePage() {
                 </p>
 
                 <div className="mt-7 max-w-2xl">
-                  <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_24px_70px_rgba(0,0,0,0.55)] sm:p-5">
+                  <div className="group relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_26px_80px_rgba(0,0,0,0.62)] transition-all duration-500 hover:border-white/25 hover:bg-white/[0.04] sm:p-5">
+                    <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(700px_220px_at_50%_0%,rgba(232,190,92,0.18),transparent_60%)]" />
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_220px_at_25%_0%,rgba(232,190,92,0.12),transparent_60%)]" />
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(700px_220px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
                     <div className="relative">
@@ -214,20 +217,18 @@ export default function HomePage() {
 
               {/* RIGHT */}
               <div className="lg:col-span-5">
-                <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/20 p-5 shadow-[0_34px_110px_rgba(0,0,0,0.62)] sm:p-6">
+                <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/22 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.70)] sm:p-6">
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_40%_0%,rgba(232,190,92,0.14),transparent_60%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_90%_20%,rgba(120,76,255,0.14),transparent_60%)]" />
                     <div className="absolute inset-0 bg-gradient-to-b from-white/[0.05] via-transparent to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
                   </div>
 
                   <div className="relative">
                     <SectionLabel hint="Live cards">Popular</SectionLabel>
 
-                    <CityCardsClient
-                      cities={CITIES.slice(0, 4)}
-                      columns="grid gap-4 grid-cols-1 sm:grid-cols-2"
-                    />
+                    <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
 
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                       Curated picks update as the index grows.
@@ -237,12 +238,12 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_18px_55px_rgba(0,0,0,0.45)]">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
                     <div className="text-[11px] tracking-[0.18em] text-zinc-400">SIGNAL</div>
                     <div className="mt-2 text-zinc-200">Truth-first city surfaces</div>
                     <div className="mt-1 text-xs text-zinc-500">Built to host verified data, not vibes.</div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_18px_55px_rgba(0,0,0,0.45)]">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
                     <div className="text-[11px] tracking-[0.18em] text-zinc-400">PACE</div>
                     <div className="mt-2 text-zinc-200">Open a city in seconds</div>
                     <div className="mt-1 text-xs text-zinc-500">Fast navigation, premium framing.</div>
@@ -251,6 +252,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+          {/* soft bottom fade into body */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0C0F14]" />
         </div>
       </section>
 
@@ -306,6 +310,32 @@ export default function HomePage() {
           </div>
         </section>
       </div>
+
+      {/* Local keyframes for subtle luxury motion */}
+      <style jsx global>{`
+        @keyframes vanteraPulse {
+          0%,
+          100% {
+            opacity: 0.85;
+            transform: translateY(0px);
+          }
+          50% {
+            opacity: 1;
+            transform: translateY(-6px);
+          }
+        }
+        @keyframes vanteraSweep {
+          0%,
+          100% {
+            transform: translateX(-8%) translateY(-2%);
+            opacity: 0.18;
+          }
+          50% {
+            transform: translateX(8%) translateY(2%);
+            opacity: 0.35;
+          }
+        }
+      `}</style>
     </Shell>
   );
 }
