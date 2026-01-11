@@ -1,10 +1,13 @@
-// src/components/home/PopularGridClient.tsx
 'use client';
 
 import type { City } from './cities';
 import CityCardsClient from './CityCardsClient';
 
-export default function PopularGridClient({ cities }: { cities: City[] }) {
+export default function FeaturedRoutesClient({
+  cities,
+}: {
+  cities: City[];
+}) {
   return (
     <CityCardsClient
       cities={cities}
