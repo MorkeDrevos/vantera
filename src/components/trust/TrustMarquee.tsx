@@ -7,7 +7,14 @@ type Brand = {
   invert?: boolean;
 };
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID;
+const CLIENT_ID = process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID || '';
+
+function brandfetchLogoUrl(domain: string) {
+  // IMPORTANT:
+  // Brandfetch may 403 if the client id is not part of the path.
+  // This format matches their Logo API pattern.
+  return `https://cdn.brandfetch.io/${domain}/${CLIENT_ID}?type=logo&format=svg`;
+}
 
 export default function TrustMarquee({
   brands,
@@ -22,8 +29,6 @@ export default function TrustMarquee({
   subtitle?: string;
   className?: string;
 }) {
-  const cid = CLIENT_ID || '';
-
   return (
     <section className={`w-full ${className}`}>
       <div className="relative overflow-hidden border-y border-white/10 bg-[#070A10]">
@@ -52,15 +57,15 @@ export default function TrustMarquee({
                 </div>
 
                 <Image
-  src={`https://cdn.brandfetch.io/${b.domain}?c=${encodeURIComponent(cid)}&type=logo&format=svg`}
-  alt={`${b.name} logo`}
-  width={220}
-  height={60}
-  unoptimized
-  className={`h-8 w-auto object-contain opacity-85 transition group-hover:opacity-100 ${
-    b.invert ?? true ? 'invert' : ''
-  }`}
-/>
+                  src={brandfetchLogoUrl(b.domain)}
+                  alt={`${b.name} logo`}
+                  width={220}
+                  height={60}
+                  unoptimized
+                  className={`h-8 w-auto object-contain opacity-85 transition group-hover:opacity-100 ${
+                    b.invert ?? true ? 'invert' : ''
+                  }`}
+                />
               </div>
             ))}
           </div>
