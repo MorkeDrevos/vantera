@@ -40,10 +40,13 @@ export default function CityCard({ city }: { city: City }) {
   return (
     <Link
       href={`/city/${city.slug}`}
+      prefetch
       className={[
         'group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]',
         'shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_26px_90px_rgba(0,0,0,0.45)]',
         'transition duration-500 hover:-translate-y-[2px] hover:border-white/18',
+        // keyboard focus (premium but obvious)
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
       ].join(' ')}
       aria-label={`Open ${city.name} market node`}
     >
@@ -101,7 +104,7 @@ export default function CityCard({ city }: { city: City }) {
                 </div>
               </div>
 
-              {/* Jewel button */}
+              {/* "Enter" jewel - make it feel like a control without being a nested button */}
               <span className="relative mt-0.5 inline-flex shrink-0 items-center gap-1.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-100 shadow-[0_12px_35px_rgba(0,0,0,0.40)] backdrop-blur-xl transition group-hover:border-white/18">
                 <span className="pointer-events-none absolute inset-0 opacity-70">
                   <span className="absolute -left-1/3 top-0 h-full w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/12 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
