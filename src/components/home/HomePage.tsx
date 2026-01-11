@@ -42,6 +42,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
+        {/* IMPORTANT: TopBar uses useSearchParams, so keep it inside Suspense */}
         <Suspense fallback={null}>
           <TopBar />
         </Suspense>
@@ -169,13 +170,16 @@ export default function HomePage() {
 
   return (
     <Shell>
-      {/* HERO */}
+      {/* HERO - FULL BLEED (edge to edge) */}
       <section className="relative w-full pb-12 pt-12 sm:pb-16 sm:pt-14">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
 
-          <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
+          {/* IMPORTANT CHANGE:
+              - removed mx-auto + max-w-7xl limiter
+              - content can now span the entire viewport width */}
+          <div className="relative w-full px-6 py-14 sm:px-10 sm:py-16 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
               {/* LEFT */}
               <div className="lg:col-span-7">
@@ -200,7 +204,6 @@ export default function HomePage() {
                   <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
                 </p>
 
-                {/* Command bar */}
                 <div className="mt-7 max-w-2xl">
                   <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
@@ -221,10 +224,7 @@ export default function HomePage() {
                       </div>
 
                       <div className="mt-4">
-                        {/* IMPORTANT: prevents build error if CitySearch uses useSearchParams */}
-                        <Suspense fallback={null}>
-                          <CitySearch />
-                        </Suspense>
+                        <CitySearch />
                       </div>
                     </div>
                   </div>
@@ -261,10 +261,7 @@ export default function HomePage() {
                   <div className="relative">
                     <SectionLabel hint="Private index">Selected cities</SectionLabel>
 
-                    {/* Safe to wrap too (harmless) */}
-                    <Suspense fallback={null}>
-                      <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
-                    </Suspense>
+                    <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
 
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                       Curated entry points.
@@ -295,18 +292,16 @@ export default function HomePage() {
       </section>
 
       {/* TRUST STRIP (full-width) */}
-      <Suspense fallback={null}>
-        <TrustMarquee
-          logos={TRUST_LOGOS}
-          className="mt-0"
-          eyebrow="Trusted reference set"
-          title="Benchmarked against the world’s leading firms"
-          subtitle="A credibility layer for clients who expect institutional standards."
-        />
-      </Suspense>
+      <TrustMarquee
+        logos={TRUST_LOGOS}
+        className="mt-0"
+        eyebrow="Trusted reference set"
+        title="Benchmarked against the world’s leading firms"
+        subtitle="A credibility layer for clients who expect institutional standards."
+      />
 
-      {/* BODY */}
-      <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
+      {/* BODY (keep premium wide, not edge-to-edge) */}
+      <div className="mx-auto w-full max-w-[1600px] px-6 pb-16 sm:px-10 2xl:px-14">
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore the index</SectionLabel>
 
@@ -316,9 +311,7 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
             </div>
             <div className="relative">
-              <Suspense fallback={null}>
-                <CityCardsClient cities={CITIES} />
-              </Suspense>
+              <CityCardsClient cities={CITIES} />
             </div>
           </div>
         </section>
