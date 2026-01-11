@@ -207,7 +207,7 @@ export default function HomePage() {
 
                 <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
                   Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
+                  <span className="text-zinc-500"> Built to model value, liquidity and risk without noise.</span>
                 </p>
 
                 <div className="mt-7 max-w-2xl">
