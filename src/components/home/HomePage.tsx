@@ -316,19 +316,17 @@ export default function HomePage() {
                 </div>
 
                 <h1 className="mt-7 text-balance text-4xl font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
-                  Extraordinary homes, priced with{' '}
-                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
-                    reality
-                  </span>
-                </h1>
+  Private intelligence for the world’s{' '}
+  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
+    most valuable assets
+  </span>
+</h1>
+
 
                 <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
-                  Vantera is a premium surface for buyers and sellers who want clarity, not persuasion.
-                  <span className="text-zinc-500">
-                    {' '}
-                    The system is loyal to reality, not participants.
-                  </span>
-                </p>
+  Vantera is a premium property portal for buyers, sellers and advisors who value signal over noise.
+  <span className="text-zinc-500"> Loyal to reality, not participants.</span>
+</p>
 
                 <div className="mt-7 max-w-2xl">
                   <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
@@ -354,6 +352,11 @@ export default function HomePage() {
                       <div className="mt-4">
                         <CitySearch />
                       </div>
+
+                      <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[12px] text-zinc-300">
+  Browse homes, then open the Truth Card - value, liquidity, risk and leverage in seconds.
+</div>
+
 
                       <div className="mt-4 grid gap-2 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
