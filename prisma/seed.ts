@@ -8,7 +8,7 @@ import {
   VerificationLevel,
 } from '@prisma/client';
 
-import { REGION_CLUSTERS, CITIES as CORE_CITIES, WATCHLIST_CITIES } from '../src/components/home/cities';
+import { REGION_CLUSTERS, ALL_CITIES } from '../src/components/home/cities';
 
 const prisma = new PrismaClient();
 
@@ -17,8 +17,6 @@ function monthStartUTC(d = new Date()) {
 }
 
 async function main() {
-  const ALL_CITIES = [...CORE_CITIES, ...WATCHLIST_CITIES];
-
   // 1) Upsert clusters
   for (const c of REGION_CLUSTERS) {
     await prisma.regionCluster.upsert({
@@ -50,7 +48,7 @@ async function main() {
   const clusters = await prisma.regionCluster.findMany();
   const clusterBySlug = new Map(clusters.map((x) => [x.slug, x.id]));
 
-  // 2) Upsert cities
+  // 2) Upsert cities (includes watchlist because we use ALL_CITIES)
   for (const city of ALL_CITIES) {
     const clusterId = city.clusterSlug ? clusterBySlug.get(city.clusterSlug) ?? null : null;
 
@@ -86,7 +84,7 @@ async function main() {
     });
   }
 
-  // 3) Seed a metrics snapshot for each city (placeholder)
+  // 3) City metrics (placeholder snapshot for each city)
   const asOf = monthStartUTC(new Date());
   const dbCities = await prisma.city.findMany();
 
@@ -111,7 +109,7 @@ async function main() {
     });
   }
 
-  // 4) Seed sample Marbella listings (only if none exist)
+  // 4) Sample Marbella listings (only if Marbella has none)
   const marbella = await prisma.city.findUnique({ where: { slug: 'marbella' } });
   if (marbella) {
     const existing = await prisma.listing.count({ where: { cityId: marbella.id } });
@@ -191,7 +189,7 @@ async function main() {
     }
   }
 
-  console.log('✅ Seed complete (clusters, cities incl watchlist, metrics, sample listings)');
+  console.log('✅ Seed complete');
 }
 
 main()
