@@ -12,6 +12,7 @@ datasource db {
 model ContactMessage {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   name      String?
   email     String?
@@ -24,7 +25,7 @@ model ContactMessage {
 }
 
 /* ---------------------------------------------
-   VAN TERA - Coverage + Listings (Foundation)
+   VANTERA - Coverage + Listings (Foundation)
    JamesEdition-style: Cities + Region Clusters
 ---------------------------------------------- */
 
@@ -72,9 +73,9 @@ model RegionCluster {
   slug      String   @unique
 
   // For ordering in UI
-  tier      CoverageTier
+  tier      CoverageTier   @default(TIER_3)
   status    CoverageStatus @default(EXPANDING)
-  priority  Int           @default(0)
+  priority  Int            @default(0)
 
   // Optional copy
   headline  String?
@@ -105,9 +106,9 @@ model City {
   region    String?
   tz        String
 
-  tier      CoverageTier
+  tier      CoverageTier   @default(TIER_3)
   status    CoverageStatus @default(EXPANDING)
-  priority  Int           @default(0)
+  priority  Int            @default(0)
 
   // Optional hero / card image
   heroImageSrc String?
@@ -189,12 +190,12 @@ model Listing {
   description  String?
 
   // Location (keep address private if needed)
-  neighborhood String?
-  address      String?
+  neighborhood  String?
+  address       String?
   addressHidden Boolean @default(false)
 
-  lat          Float?
-  lng          Float?
+  lat           Float?
+  lng           Float?
 
   // Core specs
   propertyType String? // villa, penthouse, apartment, estate, townhouse
@@ -203,7 +204,7 @@ model Listing {
   builtM2      Int?
   plotM2       Int?
 
-  // Pricing
+  // Pricing (whole currency units for now)
   price        Int?
   currency     String  @default("EUR")
 
