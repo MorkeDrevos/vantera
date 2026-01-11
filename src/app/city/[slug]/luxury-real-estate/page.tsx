@@ -108,15 +108,27 @@ export default async function CityLuxuryPage({ params }: Props) {
     region: city.region ?? null,
   });
 
+  const intentAbout =
+    doc.jsonld?.about?.map((a) => ({
+      '@type': a.type,
+      name: a.name,
+      ...(a.extra ?? {}),
+    })) ?? [];
+
   const pageJsonLd = webPageJsonLd({
     url: doc.canonical,
     name: doc.jsonld?.name ?? doc.title,
     description: doc.description,
-    about: (doc.jsonld?.about ?? []).map((a) => ({
-      '@type': a.type,
-      name: a.name,
-      ...(a.extra ?? {}),
-    })),
+    about: [
+      { '@type': 'Thing', name: 'Private intelligence for the world’s most valuable assets' },
+      { '@type': 'Thing', name: `Luxury real estate for sale in ${city.name}` },
+      { '@type': 'Thing', name: `${city.name} luxury homes` },
+      { '@type': 'Thing', name: `${city.name} prime real estate` },
+      { '@type': 'Thing', name: 'Pricing reality' },
+      { '@type': 'Thing', name: 'Market liquidity' },
+      { '@type': 'Thing', name: 'Property risk flags' },
+      ...intentAbout,
+    ],
   });
 
   const subtitle = [city.region, city.country].filter(Boolean).join(', ');
