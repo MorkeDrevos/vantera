@@ -9,6 +9,7 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
+import MarketBriefing from './MarketBriefing';
 import { CITIES } from './cities';
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -504,6 +505,11 @@ export default function HomePage() {
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
+        {/* NEW: MARKET BRIEFING */}
+        <div className="mt-10 sm:mt-12">
+          <MarketBriefing cities={CITIES} />
+        </div>
+
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint="Editorial selection">Featured properties</SectionLabel>
 
