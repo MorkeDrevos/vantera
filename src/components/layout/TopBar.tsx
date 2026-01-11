@@ -591,57 +591,64 @@ export default function TopBar() {
           </nav>
 
           {/* Right */}
-          <div className="ml-auto flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => {
-                if (pathname !== '/') {
-                  router.push('/');
-                  window.setTimeout(() => focusGlobalSearch(), 350);
-                  return;
-                }
-                focusGlobalSearch();
-              }}
-              className={cx(pill, 'hidden sm:inline-flex')}
-              aria-label="Search"
-            >
-              <Command className="h-4 w-4 opacity-85" />
-              <span>Search</span>
-              <span className="text-white/15">•</span>
-              <span className="font-mono text-xs text-zinc-200">/</span>
-            </button>
+<div className="ml-auto flex items-center gap-3 shrink-0">
+  {/* Buyer + Seller quick lanes (desktop) */}
+  <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/[0.02] ring-1 ring-inset ring-white/10 p-1 shadow-[0_22px_90px_rgba(0,0,0,0.55)]">
+    {/* BUYERS */}
+    <button
+      type="button"
+      onClick={() => {
+        if (pathname !== '/') {
+          router.push('/');
+          window.setTimeout(() => focusGlobalSearch(), 350);
+          return;
+        }
+        focusGlobalSearch();
+      }}
+      className={cx(
+        'group inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm transition',
+        'bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/10 hover:ring-white/12',
+      )}
+      aria-label="Buyer search"
+    >
+      <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tracking-[0.22em] text-zinc-200/80 ring-1 ring-inset ring-white/10">
+        BUYERS
+      </span>
+      <span className="text-zinc-100/90">Search</span>
+      <span className="text-white/15">•</span>
+      <span className="font-mono text-xs text-zinc-200">/</span>
+    </button>
 
-            <Link
-              href="/"
-              prefetch
-              onClick={(e) => {
-                if (pathname === '/') {
-                  e.preventDefault();
-                  focusGlobalSearch();
-                }
-              }}
-              className={cx(
-                'hidden sm:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold',
-                'bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition',
-                'shadow-[0_22px_90px_rgba(0,0,0,0.55)]',
-              )}
-              aria-label="Search homes"
-            >
-              <span className={cx('tracking-[0.06em]', goldText)}>Search homes</span>
-              <ArrowRight className="ml-2 h-4 w-4 opacity-85" />
-            </Link>
+    {/* SELLERS */}
+    <Link
+      href="/coming-soon?intent=sell"
+      prefetch
+      className={cx(
+        'group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition',
+        'bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/10 hover:ring-white/12',
+      )}
+      aria-label="Seller valuation"
+    >
+      <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-semibold tracking-[0.22em] text-zinc-200/80 ring-1 ring-inset ring-white/10">
+        SELLERS
+      </span>
+      <span className={goldText}>Get valuation</span>
+      <ArrowRight className="h-4 w-4 opacity-85" />
+    </Link>
+  </div>
 
-            <button
-              type="button"
-              onClick={() => setMobileOpen((v) => !v)}
-              className={cx(pill, 'lg:hidden')}
-              aria-expanded={mobileOpen}
-              aria-controls="vantera-mobile-menu"
-            >
-              Menu
-              <ChevronDown className={cx('h-4 w-4 transition', mobileOpen && 'rotate-180')} />
-            </button>
-          </div>
+  {/* Mobile: keep a single Menu button */}
+  <button
+    type="button"
+    onClick={() => setMobileOpen((v) => !v)}
+    className={cx(pill, 'sm:hidden')}
+    aria-expanded={mobileOpen}
+    aria-controls="vantera-mobile-menu"
+  >
+    Menu
+    <ChevronDown className={cx('h-4 w-4 transition', mobileOpen && 'rotate-180')} />
+  </button>
+</div>
         </div>
       </div>
 
@@ -657,143 +664,30 @@ export default function TopBar() {
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
           <div className="rounded-3xl bg-[#05060A] p-3 shadow-[0_40px_140px_rgba(0,0,0,0.88)] ring-1 ring-inset ring-white/10">
             <div className="grid gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  focusGlobalSearch();
-                  setMobileOpen(false);
-                }}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Command className="h-4 w-4 opacity-90" />
-                  Search
-                  <span className="ml-2 rounded-md px-2 py-0.5 font-mono text-[11px] text-zinc-200 ring-1 ring-inset ring-white/10 bg-white/[0.02]">
-                    /
-                  </span>
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </button>
-
-              {/* Countries section */}
-              <div className="mt-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3">
-                <div className="mb-2 text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
-                  EXPLORE BY COUNTRY
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {countries.slice(0, 10).map((c) => (
-                    <Link
-                      key={c}
-                      href={countryHref(c)}
-                      prefetch
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-full px-3 py-1.5 text-[12px] text-zinc-200 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
-                    >
-                      {c}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <Link
-                href="/coming-soon?section=for-sale"
-                prefetch
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <MapPin className="h-4 w-4 opacity-90" />
-                  For sale
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              <Link
-                href="/coming-soon?section=new-developments"
-                prefetch
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Radar className="h-4 w-4 opacity-90" />
-                  New developments
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              <Link
-                href="/coming-soon?section=off-market"
-                prefetch
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 opacity-90" />
-                  Off-market
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              <Link
-                href="/coming-soon?section=market-intel"
-                prefetch
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 opacity-90" />
-                  Market intel
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              {onCityPage ? (
-                <div className="mt-2 rounded-3xl bg-white/[0.02] p-3 ring-1 ring-inset ring-white/10">
-                  <div className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
-                    City mode
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('tab', 'truth');
-                        router.replace(url.pathname + '?' + url.searchParams.toString());
-                        dispatchTab('truth');
-                        setMobileOpen(false);
-                      }}
-                      className={cx(
-                        'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
-                        activeTab === 'truth'
-                          ? 'bg-white/[0.06] text-white ring-white/12'
-                          : 'bg-white/[0.02] text-zinc-300 ring-white/8 hover:bg-white/[0.04] hover:ring-white/10',
-                      )}
-                    >
-                      Insight <span className="ml-1 font-mono text-[11px] opacity-80">T</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('tab', 'supply');
-                        router.replace(url.pathname + '?' + url.searchParams.toString());
-                        dispatchTab('supply');
-                        setMobileOpen(false);
-                      }}
-                      className={cx(
-                        'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
-                        activeTab === 'supply'
-                          ? 'bg-white/[0.06] text-white ring-white/12'
-                          : 'bg-white/[0.02] text-zinc-300 ring-white/8 hover:bg-white/[0.04] hover:ring-white/10',
-                      )}
-                    >
-                      Live supply <span className="ml-1 font-mono text-[11px] opacity-80">L</span>
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
+  <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+    <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-400">FOR</div>
+    <div className="mt-2 flex gap-2">
+      <button
+        type="button"
+        onClick={() => {
+          focusGlobalSearch();
+          setMobileOpen(false);
+        }}
+        className="flex-1 rounded-full px-3 py-2 text-sm text-zinc-100 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
+      >
+        Buyers
+      </button>
+      <Link
+        href="/coming-soon?intent=sell"
+        prefetch
+        onClick={() => setMobileOpen(false)}
+        className="flex-1 rounded-full px-3 py-2 text-sm text-zinc-100 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition text-center"
+      >
+        Sellers
+      </Link>
+    </div>
+  </div>
+</div>
           </div>
 
           <div className="pointer-events-none mt-3 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
