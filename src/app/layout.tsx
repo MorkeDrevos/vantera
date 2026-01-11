@@ -3,46 +3,50 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import ComingSoon from '@/components/ComingSoon';
+
+import { jsonLd } from '@/lib/seo/seo.jsonld';
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
-import { jsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/seo/seo.jsonld';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
-  title: { default: SEO_CONFIG.defaultTitle, template: SEO_CONFIG.titleTemplate },
-  description: SEO_CONFIG.defaultDescription,
-  applicationName: SEO_CONFIG.siteName,
-
-  openGraph: {
-    type: 'website',
-    siteName: SEO_CONFIG.siteName,
-    title: SEO_CONFIG.defaultTitle,
-    description: SEO_CONFIG.defaultDescription,
-    url: SEO_CONFIG.domain,
-    images: ['/opengraph-image'],
+  title: {
+    default: 'Vantera – Private Intelligence for the World’s Most Valuable Assets',
+    template: '%s · Vantera',
   },
-
-  twitter: {
-    card: 'summary_large_image',
-    title: SEO_CONFIG.siteName,
-    description: SEO_CONFIG.defaultDescription,
-    images: ['/opengraph-image'],
-  },
-
-  robots: { index: true, follow: true },
+  description:
+    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
+  applicationName: 'Vantera',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === 'production';
   const comingSoon = isProd && process.env.NEXT_PUBLIC_COMING_SOON === '1';
 
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Vantera',
+    url: SEO_CONFIG.domain,
+    description:
+      'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence built to model value, liquidity, and risk without noise.',
+    publisher: {
+      '@type': 'Organization',
+      name: 'Vantera',
+      url: SEO_CONFIG.domain,
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: `${SEO_CONFIG.domain}/listings?q={search_term_string}`,
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="en">
-      <head>
-        {jsonLd(organizationJsonLd())}
-        {jsonLd(websiteJsonLd())}
-        {comingSoon ? <meta name="robots" content="noindex,nofollow" /> : null}
-      </head>
-      <body>{comingSoon ? <ComingSoon /> : children}</body>
+      <body>
+        {jsonLd(websiteJsonLd)}
+        {comingSoon ? <ComingSoon /> : children}
+      </body>
     </html>
   );
 }

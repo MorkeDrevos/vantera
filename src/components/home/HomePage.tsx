@@ -201,13 +201,13 @@ export default function HomePage() {
                 <h1 className="mt-7 text-balance text-4xl font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
                   Private intelligence for the world’s{' '}
                   <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
-                    most valuable cities
+                    most valuable assets
                   </span>
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-pretty text-base leading-relaxed text-zinc-300 sm:text-lg">
                   Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
+                  <span className="text-zinc-500"> Built to model value, liquidity and risk without noise.</span>
                 </p>
 
                 <div className="mt-7 max-w-2xl">

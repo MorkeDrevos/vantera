@@ -15,10 +15,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
 
-  const city = CITIES.find((c) => c.slug === slug);
-  if (!city) {
+  const idx = CITIES.findIndex((c) => c.slug === slug);
+  if (idx === -1) {
     return { title: 'City Not Found · Vantera', robots: { index: false, follow: false } };
   }
+
+  const city = CITIES[idx];
 
   const doc = SEO_INTENT.cityHub({
     name: city.name,
@@ -34,7 +36,7 @@ export async function generateMetadata({
     robots: doc.robots,
 
     openGraph: {
-      type: 'website',
+      type: 'article',
       title: doc.title,
       description: doc.description,
       url: doc.canonical,
@@ -72,15 +74,23 @@ export default async function CityPage({
     region: city.region ?? null,
   });
 
+  const intentAbout =
+    doc.jsonld?.about?.map((a) => ({
+      '@type': a.type,
+      name: a.name,
+      ...(a.extra ?? {}),
+    })) ?? [];
+
   const pageJsonLd = webPageJsonLd({
     url: doc.canonical,
     name: doc.jsonld?.name ?? doc.title,
     description: doc.description,
-    about: (doc.jsonld?.about ?? []).map((a) => ({
-      '@type': a.type,
-      name: a.name,
-      ...(a.extra ?? {}),
-    })),
+    about: [
+      { '@type': 'Thing', name: `${city.name} real estate` },
+      { '@type': 'Thing', name: 'Property intelligence' },
+      { '@type': 'Thing', name: 'Market liquidity' },
+      ...intentAbout,
+    ],
   });
 
   return (

@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-
 import CityCard from './CityCard';
 import type { City } from './cities';
 
@@ -32,7 +31,8 @@ export default function CityCardsClient({
   columns?: string;
   className?: string;
 }) {
-  const [now, setNow] = useState<Date>(() => new Date());
+  // Trigger re-render every minute so "Local time" stays fresh
+  const [_now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -44,7 +44,7 @@ export default function CityCardsClient({
       ...city,
       localTime: formatLocalTime(city.tz),
     }));
-  }, [cities, now]);
+  }, [cities, _now]);
 
   const gridClass = columns ?? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
 
