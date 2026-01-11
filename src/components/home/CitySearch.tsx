@@ -47,11 +47,17 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
+type PanelGeom = {
+  left: number;
+  top: number;
+  width: number;
+  maxHeight: number;
+};
+
 export default function CitySearch() {
   const router = useRouter();
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Anchor wrapper (the input pill) and the floating panel (portal)
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,7 +65,7 @@ export default function CitySearch() {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 
-  // Portal readiness (Next.js SSR-safe)
+  // SSR-safe portal
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -67,13 +73,11 @@ export default function CitySearch() {
     if (!q.trim()) setActive(0);
   }, [q]);
 
-  // TopBar can dispatch this event if needed.
+  // TopBar can dispatch this event
   useEffect(() => {
     const onFocusSearch = () => {
       setOpen(true);
-      window.setTimeout(() => {
-        focusVanteraCitySearch();
-      }, 0);
+      window.setTimeout(() => focusVanteraCitySearch(), 0);
     };
 
     window.addEventListener('vantera:focus-search', onFocusSearch as EventListener);
@@ -105,56 +109,59 @@ export default function CitySearch() {
     if (pick) go(pick.slug);
   }
 
-  // Floating panel geometry (portal fixes "goes behind" when any parent has overflow-hidden)
-  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ display: 'none' });
+  // Compute portal panel geometry (fixed positioning + scrollable maxHeight)
+  const [geom, setGeom] = useState<PanelGeom | null>(null);
 
-  function computePanelStyle() {
+  function computeGeom() {
     const anchor = anchorRef.current;
     if (!anchor) return;
 
     const r = anchor.getBoundingClientRect();
     const gap = 12;
 
-    // Keep within viewport with a little padding
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
     const left = clamp(r.left, 12, Math.max(12, vw - r.width - 12));
     const top = r.bottom + gap;
 
-    const maxH = Math.max(200, vh - top - 12); // at least 200px so it stays usable
+    // leave space for bottom padding
+    const maxHeight = Math.max(200, vh - top - 12);
 
-    setPanelStyle({
-      position: 'fixed',
-      left,
-      top,
-      width: r.width,
-      maxHeight: maxH,
-      zIndex: 9999, // above TopBar + hero layers
-      display: open ? 'block' : 'none',
-    });
+    setGeom({ left, top, width: r.width, maxHeight });
   }
 
-  // Recompute when opening, typing, resizing, scrolling
+  // Keep it pinned during open: scroll/resize/layout
   useEffect(() => {
     if (!open) return;
-    computePanelStyle();
 
-    const onResize = () => computePanelStyle();
-    // capture scroll from any scroll container
-    const onScroll = () => computePanelStyle();
+    computeGeom();
 
+    const onResize = () => computeGeom();
+    const onScrollCapture = () => computeGeom();
+
+    // Resize
     window.addEventListener('resize', onResize, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+
+    // Capture scroll from any container (important for nested scroll areas)
+    window.addEventListener('scroll', onScrollCapture, { passive: true, capture: true });
+
+    // Also respond to viewport changes on mobile (address bar)
+    const vv = window.visualViewport;
+    const onVV = () => computeGeom();
+    vv?.addEventListener('resize', onVV, { passive: true });
+    vv?.addEventListener('scroll', onVV, { passive: true });
 
     return () => {
       window.removeEventListener('resize', onResize);
-      window.removeEventListener('scroll', onScroll, true as any);
+      window.removeEventListener('scroll', onScrollCapture, true);
+      vv?.removeEventListener('resize', onVV as any);
+      vv?.removeEventListener('scroll', onVV as any);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, q, results.length]);
 
-  // Click outside closes (important because dropdown is portaled)
+  // Close on outside click/tap (needed because portal is outside component tree)
   useEffect(() => {
     if (!open) return;
 
@@ -181,14 +188,20 @@ export default function CitySearch() {
   }, [open]);
 
   const dropdown =
-    open && mounted
+    open && mounted && geom
       ? createPortal(
           <div
+            id="vantera-city-search-panel"
             ref={panelRef}
-            style={panelStyle}
+            style={{
+              position: 'fixed',
+              left: geom.left,
+              top: geom.top,
+              width: geom.width,
+              zIndex: 9999, // above hero/video and any sticky bars
+            }}
             className={[
-              // IMPORTANT: no overflow clipping from parents because this is portaled
-              'overflow-hidden rounded-2xl border border-white/10 bg-black/60',
+              'relative overflow-hidden rounded-2xl border border-white/10 bg-black/60',
               'shadow-[0_26px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl',
             ].join(' ')}
             role="listbox"
@@ -200,11 +213,11 @@ export default function CitySearch() {
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent" />
             </div>
 
-            {/* Scroll container (iOS-friendly) */}
+            {/* Scroll container */}
             <div
               className="relative p-2"
               style={{
-                maxHeight: typeof panelStyle.maxHeight === 'number' ? panelStyle.maxHeight : undefined,
+                maxHeight: geom.maxHeight,
                 overflowY: 'auto',
                 WebkitOverflowScrolling: 'touch',
                 overscrollBehavior: 'contain',
@@ -311,6 +324,7 @@ export default function CitySearch() {
             onFocus={() => {
               setOpen(true);
               setActive(0);
+              window.setTimeout(() => computeGeom(), 0);
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -367,7 +381,7 @@ export default function CitySearch() {
         </div>
       </div>
 
-      {/* Portal dropdown (fixes: clipped "behind" due to ancestor overflow-hidden, and adds real scrolling) */}
+      {/* Portal dropdown (fixes: clipped "behind" + adds real scrolling) */}
       {dropdown}
     </div>
   );
