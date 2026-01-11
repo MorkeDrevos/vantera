@@ -285,17 +285,27 @@ export default function TopBar() {
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/6" />
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-4 sm:px-8 sm:py-5">
-          <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
-            <Image
-              src="/brand/vantera-logo-dark-transparent.svg"
-              alt="Vantera"
-              width={620}
-              height={180}
-              priority={false}
-              className="h-[72px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.70)] sm:h-[78px] md:h-[86px]"
-            />
-          </Link>
+        // src/components/layout/TopBar.tsx
+
+<Link href="/" prefetch aria-label="Vantera home" className="relative flex shrink-0 items-center">
+  {/* subtle “flash” behind the mark */}
+  <span
+    aria-hidden
+    className="pointer-events-none absolute -left-6 -top-7 h-28 w-28 rounded-full
+               bg-[radial-gradient(circle_at_35%_35%,rgba(255,255,255,0.22),transparent_60%)]
+               blur-md"
+  />
+
+  <Image
+    src="/brand/vantera-logo-dark-transparent.svg"
+    alt="Vantera"
+    width={620}
+    height={180}
+    priority={false}
+    className="relative h-[72px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.70)] sm:h-[78px] md:h-[86px]"
+  />
+</Link>
+
 
           <div className="hidden flex-1 items-center justify-center lg:flex">
             <div className="flex items-center gap-10">
