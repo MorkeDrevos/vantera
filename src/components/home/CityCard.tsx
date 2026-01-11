@@ -4,7 +4,7 @@
 import Link from 'next/link';
 
 import type { City } from './cities';
-import SafeImage from './SafeImage';
+import SafeImage from '@/components/home/SafeImage';
 
 function safeAlt(city: City) {
   const a = city.image?.alt?.trim();
@@ -40,7 +40,6 @@ export default function CityCard({ city }: { city: City }) {
   return (
     <Link
       href={`/city/${city.slug}`}
-      prefetch
       className={[
         'group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]',
         'shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_26px_90px_rgba(0,0,0,0.45)]',
@@ -127,9 +126,7 @@ export default function CityCard({ city }: { city: City }) {
       {/* Body */}
       <div className="p-5">
         {city.blurb ? (
-          <p className="text-sm leading-relaxed text-zinc-300 line-clamp-2">
-            {city.blurb}
-          </p>
+          <p className="text-sm leading-relaxed text-zinc-300 line-clamp-2">{city.blurb}</p>
         ) : (
           <p className="text-sm leading-relaxed text-zinc-300">
             A private city surface designed for clarity. Truth layers activate as verified coverage expands.
