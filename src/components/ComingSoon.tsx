@@ -49,7 +49,7 @@ export default function ComingSoon() {
 
           {/* whisper subtitle */}
           <div className="mt-4 text-[11px] tracking-[0.36em] text-white/45">
-            GLOBAL PROPERTY INTELLIGENCE
+            COMING SOON
           </div>
         </div>
 
