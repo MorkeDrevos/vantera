@@ -106,7 +106,7 @@ export default function TopBar() {
   const citiesWrapRef = useRef<HTMLDivElement>(null);
   const citiesPanelRef = useRef<HTMLDivElement>(null);
 
-  // Hover intent timers (noticeably improves "JE" feel)
+  // Hover intent timers
   const openT = useRef<number | null>(null);
   const closeT = useRef<number | null>(null);
 
@@ -166,7 +166,7 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
-  // Lock scroll ONLY for mobile menu (do not lock for mega menu)
+  // Lock scroll ONLY for mobile menu
   useEffect(() => {
     if (!mobileOpen) return;
 
@@ -177,7 +177,7 @@ export default function TopBar() {
     };
   }, [mobileOpen]);
 
-  // Robust click outside (only when mega is open)
+  // Click outside closes mega menu (only when open)
   useEffect(() => {
     if (!citiesOpen) return;
 
@@ -202,7 +202,7 @@ export default function TopBar() {
     };
   }, [citiesOpen]);
 
-  // --- Mega menu data ---
+  // Mega menu data
   const cityList = useMemo<CityLite[]>(() => (CITIES as any) ?? [], []);
   const countries = useMemo(() => {
     const preferred = [
@@ -276,21 +276,7 @@ export default function TopBar() {
     return `/coming-soon?country=${encodeURIComponent(country)}`;
   }
 
-  // ---- Styling (JE-like, calmer borders, solid bar) ----
-  const barBg = scrolled ? 'bg-[#07080B]/96' : 'bg-[#07080B]/88';
-  const barBorder = 'border-b border-white/5';
-
-  const navLink =
-    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium text-zinc-200/85 hover:text-white transition';
-  const navLinkActive = 'text-white';
-
-  const pill =
-    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/8 hover:ring-white/10 transition';
-
-  const goldText =
-    'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
-
-  // ---- Hover open/close (this is the part you are missing right now) ----
+  // Hover open/close
   function cancelTimers() {
     if (openT.current) window.clearTimeout(openT.current);
     if (closeT.current) window.clearTimeout(closeT.current);
@@ -313,40 +299,52 @@ export default function TopBar() {
     setCitiesOpen((v) => !v);
   }
 
+  // Styling
+  const barBg = scrolled ? 'bg-[#07080B]/96' : 'bg-[#07080B]/88';
+  const barBorder = 'border-b border-white/5';
+
+  const navLink =
+    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium text-zinc-200/85 hover:text-white transition';
+  const navLinkActive = 'text-white';
+
+  const pill =
+    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/8 hover:ring-white/10 transition';
+
+  const goldText =
+    'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[16px]', barBg, barBorder)}>
-        {/* subtle ambient */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
           <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
         </div>
 
-        {/* Taller bar so logo can be bigger */}
-        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-4 px-5 py-6 sm:px-8 sm:py-7">
-          {/* Left: Bigger logo, no box */}
+        {/* Taller bar - logo bigger */}
+        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-5 px-5 py-7 sm:px-8 sm:py-8">
+          {/* Left: BIG logo */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex items-center shrink-0">
             <Image
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
-              width={420}
-              height={96}
+              width={520}
+              height={120}
               priority={false}
-              className="h-16 w-auto sm:h-18 md:h-20 drop-shadow-[0_22px_90px_rgba(0,0,0,0.70)]"
+              className="h-20 w-auto sm:h-22 md:h-24 drop-shadow-[0_22px_90px_rgba(0,0,0,0.70)]"
             />
           </Link>
 
-          {/* Center: one-line menu */}
+          {/* Center: one-line menu (IMPORTANT: no overflow-hidden here) */}
           <nav
             className={cx(
-              'hidden lg:flex items-center gap-6',
+              'hidden lg:flex items-center gap-7',
               'flex-1 min-w-0',
               'whitespace-nowrap',
-              'overflow-hidden',
             )}
             aria-label="Primary"
           >
-            {/* Destinations (hover + click) */}
+            {/* Destinations */}
             <div
               className="relative shrink-0"
               ref={citiesWrapRef}
@@ -369,7 +367,6 @@ export default function TopBar() {
               {/* Mega panel */}
               <div
                 ref={citiesPanelRef}
-                // Keep open when cursor moves into panel
                 onMouseEnter={() => {
                   cancelTimers();
                   setCitiesOpen(true);
@@ -391,7 +388,6 @@ export default function TopBar() {
               >
                 <div className="pointer-events-none absolute inset-0 rounded-[26px] bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
 
-                {/* Header */}
                 <div className="relative border-b border-white/8 px-6 py-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/85">
@@ -424,7 +420,6 @@ export default function TopBar() {
                   </div>
                 </div>
 
-                {/* Columns */}
                 <div className="relative grid grid-cols-12 gap-6 px-6 py-6">
                   <div className="col-span-3">
                     <div className="mb-3 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
@@ -667,21 +662,6 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setCitiesOpen(true);
-                  setMobileOpen(false);
-                }}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Globe className="h-4 w-4 opacity-90" />
-                  Destinations
-                </span>
-                <ChevronDown className="h-4 w-4 opacity-80" />
-              </button>
-
               <Link
                 href="/coming-soon?section=for-sale"
                 prefetch
@@ -734,7 +714,6 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </Link>
 
-              {/* City page mode pills */}
               {onCityPage ? (
                 <div className="mt-2 rounded-3xl bg-white/[0.02] p-3 ring-1 ring-inset ring-white/10">
                   <div className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
