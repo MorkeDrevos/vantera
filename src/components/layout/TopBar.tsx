@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, ChevronDown, Command, Globe, MapPin, ShieldCheck, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, Command, Globe, MapPin, X } from 'lucide-react';
 
 import { CITIES } from '@/components/home/cities';
 
@@ -290,19 +290,19 @@ export default function TopBar() {
         {/* Taller layout */}
         <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-6 sm:px-8 sm:py-7">
           {/* Brand - big */}
-          <Link href="/" prefetch aria-label="Vantera home" className="flex items-center shrink-0">
+          <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
             <Image
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
               width={620}
               height={180}
               priority={false}
-              className="h-[86px] w-auto sm:h-[96px] md:h-[108px] drop-shadow-[0_30px_120px_rgba(0,0,0,0.70)]"
+              className="h-[86px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.70)] sm:h-[96px] md:h-[108px]"
             />
           </Link>
 
           {/* Desktop nav - luxury simple */}
-          <div className="hidden lg:flex flex-1 items-center justify-center">
+          <div className="hidden flex-1 items-center justify-center lg:flex">
             <div className="flex items-center gap-10">
               {/* Destinations */}
               <div
@@ -382,7 +382,7 @@ export default function TopBar() {
                       type="button"
                       onClick={() => setMegaOpen(false)}
                       className={cx(
-                        'shrink-0 rounded-full px-3.5 py-2 text-[12px] text-zinc-200/90 transition inline-flex items-center gap-2',
+                        'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[12px] text-zinc-200/90 transition',
                         softFill,
                         softBorder,
                       )}
@@ -451,26 +451,24 @@ export default function TopBar() {
                           href="/"
                           prefetch
                           onClick={() => setMegaOpen(false)}
-                          className="text-xs text-zinc-200/85 hover:text-white transition inline-flex items-center gap-2"
+                          className="inline-flex items-center gap-2 text-xs text-zinc-200/85 hover:text-white transition"
                         >
                           View all <ArrowRight className="h-4 w-4 opacity-70" />
                         </Link>
                       </div>
                     </div>
 
-                    {/* Buy / Sell inside mega for clarity */}
+                    {/* Explore / Sell inside mega for clarity */}
                     <div className="col-span-4">
                       <div className="grid gap-3">
                         <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-                          <div className="px-4 py-3 border-b border-white/10">
+                          <div className="border-b border-white/10 px-4 py-3">
                             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                               Buyers
                             </div>
-                            <div className="mt-1 text-xs text-zinc-400">
-                              Search listings and open cities.
-                            </div>
+                            <div className="mt-1 text-xs text-zinc-400">Search listings and open cities.</div>
                           </div>
-                          <div className="p-4 grid gap-2">
+                          <div className="grid gap-2 p-4">
                             <button
                               type="button"
                               onClick={() => {
@@ -483,7 +481,7 @@ export default function TopBar() {
                                 focusGlobalSearch();
                               }}
                               className={cx(
-                                'w-full rounded-2xl px-4 py-3 text-sm text-zinc-100/90 inline-flex items-center justify-between transition',
+                                'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
                                 softFill,
                                 softBorder,
                               )}
@@ -499,7 +497,7 @@ export default function TopBar() {
                               href="/coming-soon?section=for-sale"
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="w-full rounded-2xl px-4 py-3 text-sm text-zinc-200/90 inline-flex items-center justify-between bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.02] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
                             >
                               <span className="inline-flex items-center gap-2">
                                 <MapPin className="h-4 w-4 opacity-80" />
@@ -511,7 +509,7 @@ export default function TopBar() {
                         </div>
 
                         <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-                          <div className="px-4 py-3 border-b border-white/10">
+                          <div className="border-b border-white/10 px-4 py-3">
                             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                               Private sellers
                             </div>
@@ -525,7 +523,7 @@ export default function TopBar() {
                               prefetch
                               onClick={() => setMegaOpen(false)}
                               className={cx(
-                                'w-full rounded-2xl px-4 py-3 text-sm font-semibold inline-flex items-center justify-between transition',
+                                'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
                                 'bg-white/[0.03] ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16',
                               )}
                             >
@@ -544,7 +542,7 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Buy / Sell - minimal, premium */}
+              {/* CHANGED: Buy -> Explore (same behavior) */}
               <button
                 type="button"
                 onClick={() => {
@@ -557,7 +555,7 @@ export default function TopBar() {
                 }}
                 className={textLink}
               >
-                Buy
+                Explore
               </button>
 
               <Link href="/coming-soon?flow=sell" prefetch className={textLink}>
@@ -567,9 +565,9 @@ export default function TopBar() {
           </div>
 
           {/* Right actions - calm */}
-          <div className="ml-auto flex items-center gap-3 shrink-0">
+          <div className="ml-auto flex shrink-0 items-center gap-3">
             {/* Desktop quick actions */}
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden items-center gap-3 sm:flex">
               <button
                 type="button"
                 onClick={() => {
@@ -581,7 +579,7 @@ export default function TopBar() {
                   focusGlobalSearch();
                 }}
                 className={cx(
-                  'rounded-full px-4 py-2.5 text-sm text-zinc-200/90 inline-flex items-center gap-2 transition',
+                  'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm text-zinc-200/90 transition',
                   softFill,
                   softBorder,
                 )}
@@ -597,7 +595,7 @@ export default function TopBar() {
                 href="/coming-soon?flow=sell"
                 prefetch
                 className={cx(
-                  'rounded-full px-5 py-2.5 text-sm font-semibold inline-flex items-center gap-2 transition',
+                  'inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition',
                   'bg-white/[0.03] ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16',
                   'shadow-[0_30px_140px_rgba(0,0,0,0.55)]',
                 )}
@@ -613,7 +611,7 @@ export default function TopBar() {
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
-                'lg:hidden rounded-full px-4 py-2.5 text-sm text-zinc-200/90 inline-flex items-center gap-2 transition',
+                'inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm text-zinc-200/90 transition lg:hidden',
                 softFill,
                 softBorder,
               )}
@@ -631,8 +629,7 @@ export default function TopBar() {
       <div
         id="vantera-mobile-menu"
         className={cx(
-          'lg:hidden',
-          'fixed inset-0 z-[70]',
+          'fixed inset-0 z-[70] lg:hidden',
           mobileOpen ? 'pointer-events-auto' : 'pointer-events-none',
         )}
       >
@@ -659,7 +656,7 @@ export default function TopBar() {
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
 
-          <div className="relative flex items-center justify-between px-5 py-5 border-b border-white/10">
+          <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-5">
             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
               Vantera
             </div>
@@ -667,7 +664,7 @@ export default function TopBar() {
               type="button"
               onClick={() => setMobileOpen(false)}
               className={cx(
-                'rounded-full px-3.5 py-2 text-[12px] text-zinc-200/90 inline-flex items-center gap-2 transition',
+                'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] text-zinc-200/90 transition',
                 softFill,
                 softBorder,
               )}
@@ -677,16 +674,16 @@ export default function TopBar() {
             </button>
           </div>
 
-          <div className="relative px-5 py-5 space-y-4">
+          <div className="relative space-y-4 px-5 py-5">
             {/* Buyer */}
-            <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/10">
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+              <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                   Buyers
                 </div>
                 <div className="mt-1 text-xs text-zinc-400">Search homes and cities.</div>
               </div>
-              <div className="p-4 grid gap-2">
+              <div className="grid gap-2 p-4">
                 <button
                   type="button"
                   onClick={() => {
@@ -699,7 +696,7 @@ export default function TopBar() {
                     setMobileOpen(false);
                   }}
                   className={cx(
-                    'w-full rounded-2xl px-4 py-3 text-sm text-zinc-100/90 inline-flex items-center justify-between transition',
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
                     softFill,
                     softBorder,
                   )}
@@ -716,7 +713,7 @@ export default function TopBar() {
                   href="/coming-soon?section=for-sale"
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="w-full rounded-2xl px-4 py-3 text-sm text-zinc-200/90 inline-flex items-center justify-between bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.02] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <MapPin className="h-4 w-4 opacity-80" />
@@ -728,8 +725,8 @@ export default function TopBar() {
             </div>
 
             {/* Seller */}
-            <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/10">
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+              <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                   Private sellers
                 </div>
@@ -743,7 +740,7 @@ export default function TopBar() {
                   prefetch
                   onClick={() => setMobileOpen(false)}
                   className={cx(
-                    'w-full rounded-2xl px-4 py-3 text-sm font-semibold inline-flex items-center justify-between transition',
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
                     'bg-white/[0.03] ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16',
                   )}
                 >
@@ -751,15 +748,13 @@ export default function TopBar() {
                   <ArrowRight className="h-4 w-4 opacity-85 text-zinc-100" />
                 </Link>
 
-                <div className="mt-2 text-[11px] text-zinc-500">
-                  Leads go to you. No middle layer.
-                </div>
+                <div className="mt-2 text-[11px] text-zinc-500">Leads go to you. No middle layer.</div>
               </div>
             </div>
 
-            {/* Destinations quick list + countries (your missing piece) */}
-            <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/10">
+            {/* Destinations quick list + countries */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+              <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                   Destinations
                 </div>
@@ -775,7 +770,7 @@ export default function TopBar() {
                       href={countryHref(c)}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-full px-3 py-1.5 text-[12px] text-zinc-100/90 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.06] hover:ring-white/14 transition"
+                      className="rounded-full bg-white/[0.03] px-3 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.06] hover:ring-white/14 transition"
                     >
                       {c}
                     </Link>
@@ -790,13 +785,11 @@ export default function TopBar() {
                       href={`/city/${c.slug}`}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-2xl px-3.5 py-3 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                      className="rounded-2xl bg-white/[0.02] px-3.5 py-3 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-zinc-100/90">
-                            {c.name}
-                          </div>
+                          <div className="truncate text-sm font-semibold text-zinc-100/90">{c.name}</div>
                           <div className="truncate text-[11px] text-zinc-400">{c.country}</div>
                         </div>
                         <ArrowRight className="h-4 w-4 opacity-70" />
@@ -809,14 +802,14 @@ export default function TopBar() {
 
             {/* City mode (only on city pages) */}
             {onCityPage ? (
-              <div className="rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10 overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/10">
+              <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+                <div className="border-b border-white/10 px-4 py-3">
                   <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                     City mode
                   </div>
                   <div className="mt-1 text-xs text-zinc-400">Switch view (T or L).</div>
                 </div>
-                <div className="p-4 flex items-center gap-2">
+                <div className="flex items-center gap-2 p-4">
                   <button
                     type="button"
                     onClick={() => {
@@ -858,7 +851,6 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            {/* Footer note */}
             <div className="pt-2 text-[11px] text-zinc-500">
               Vantera is built for buyers, private sellers and advisors. Signal over noise.
             </div>
