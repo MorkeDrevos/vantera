@@ -114,10 +114,18 @@ export default function CityPageClient({
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                href="/browse"
+                href={`/listings?city=${city.slug}`}
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 hover:border-white/20"
               >
                 Browse listings
+              </Link>
+
+              {/* ✅ Ranking fuel: internal link to the city luxury page */}
+              <Link
+                href={`/city/${city.slug}/luxury-real-estate`}
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 hover:border-white/20"
+              >
+                Luxury in {city.name}
               </Link>
 
               <Link
