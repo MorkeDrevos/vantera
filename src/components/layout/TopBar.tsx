@@ -73,35 +73,6 @@ function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
 }
 
-function useClickOutside(
-  refs: Array<React.RefObject<HTMLElement>>,
-  onOutside: () => void,
-  enabled: boolean,
-) {
-  useEffect(() => {
-    if (!enabled) return;
-
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node | null;
-      if (!t) return;
-
-      for (const r of refs) {
-        const el = r.current;
-        if (el && el.contains(t)) return;
-      }
-
-      onOutside();
-    };
-
-    window.addEventListener('mousedown', onDown, { passive: true });
-    window.addEventListener('touchstart', onDown, { passive: true });
-    return () => {
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('touchstart', onDown);
-    };
-  }, [enabled, onOutside, refs]);
-}
-
 type CityLite = {
   name: string;
   slug: string;
@@ -135,6 +106,10 @@ export default function TopBar() {
   const citiesWrapRef = useRef<HTMLDivElement>(null);
   const citiesPanelRef = useRef<HTMLDivElement>(null);
 
+  // Hover intent timers
+  const openT = useRef<number | null>(null);
+  const closeT = useRef<number | null>(null);
+
   const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
 
   const activeTab = useMemo(() => {
@@ -143,8 +118,7 @@ export default function TopBar() {
     return 'truth';
   }, [searchParams]);
 
-  useClickOutside([citiesWrapRef, citiesPanelRef], () => setCitiesOpen(false), citiesOpen);
-
+  // Scroll style
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
@@ -152,11 +126,13 @@ export default function TopBar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close menus on route change
   useEffect(() => {
     setMobileOpen(false);
     setCitiesOpen(false);
   }, [pathname]);
 
+  // Escape + city shortcuts
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as Element | null;
@@ -190,19 +166,43 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
-  // Lock scroll when overlays are open
+  // Lock scroll ONLY for mobile menu
   useEffect(() => {
-    const open = citiesOpen || mobileOpen;
-    if (!open) return;
+    if (!mobileOpen) return;
 
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [citiesOpen, mobileOpen]);
+  }, [mobileOpen]);
 
-  // --- Mega menu data ---
+  // Click outside closes mega menu (only when open)
+  useEffect(() => {
+    if (!citiesOpen) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      const wrap = citiesWrapRef.current;
+      const panel = citiesPanelRef.current;
+
+      if (wrap && wrap.contains(t)) return;
+      if (panel && panel.contains(t)) return;
+
+      setCitiesOpen(false);
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [citiesOpen]);
+
+  // Mega menu data
   const cityList = useMemo<CityLite[]>(() => (CITIES as any) ?? [], []);
   const countries = useMemo(() => {
     const preferred = [
@@ -276,62 +276,95 @@ export default function TopBar() {
     return `/coming-soon?country=${encodeURIComponent(country)}`;
   }
 
-  // ---- JE-like: solid, controlled, one-line nav, big logo outside any box ----
-  const barBg = scrolled ? 'bg-[#07080B]/96' : 'bg-[#07080B]/86';
-  const barBorder = 'border-b border-white/5';
+  // Hover open/close
+  function cancelTimers() {
+    if (openT.current) window.clearTimeout(openT.current);
+    if (closeT.current) window.clearTimeout(closeT.current);
+    openT.current = null;
+    closeT.current = null;
+  }
 
-  const navLink =
-    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium text-zinc-200/85 hover:text-white transition';
-  const navLinkActive = 'text-white';
+  function openCitiesSoon() {
+    cancelTimers();
+    openT.current = window.setTimeout(() => setCitiesOpen(true), 70);
+  }
 
-  const pill =
-    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/8 hover:ring-white/10 transition';
+  function closeCitiesSoon() {
+    cancelTimers();
+    closeT.current = window.setTimeout(() => setCitiesOpen(false), 170);
+  }
+
+  function toggleCities() {
+    cancelTimers();
+    setCitiesOpen((v) => !v);
+  }
+
+  // Royal styling
+  const barBg = scrolled ? 'bg-[#07080B]/95' : 'bg-[#07080B]/86';
+  const barBorder = scrolled ? 'border-b border-white/5' : 'border-b border-white/0';
 
   const goldText =
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
 
+  const navLink =
+    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium tracking-[0.01em] text-zinc-200/80 hover:text-white transition';
+  const navLinkActive = 'text-white';
+
+  const pill =
+    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.035] hover:bg-white/[0.055] ring-1 ring-inset ring-white/8 hover:ring-white/12 transition';
+
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className={cx('relative w-full backdrop-blur-[16px]', barBg, barBorder)}>
-        {/* subtle ambient, not translucent glass */}
+      <div className={cx('relative w-full backdrop-blur-[18px]', barBg, barBorder)}>
+        {/* more royal ambient */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+          {/* gold hairline */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/20 to-transparent" />
+          {/* soft crown glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_320px_at_50%_0%,rgba(231,201,130,0.11),transparent_58%)]" />
+          {/* cooler edge shading */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,0.52))]" />
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-4 px-5 py-3 sm:px-8">
-          {/* Left: BIG logo (no box) */}
-          <Link
-            href="/"
-            prefetch
-            aria-label="Vantera home"
-            className="flex items-center gap-3 shrink-0"
-          >
+        {/* Taller bar */}
+        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-6 px-5 py-8 sm:px-8 sm:py-9">
+          {/* Left: much taller logo */}
+          <Link href="/" prefetch aria-label="Vantera home" className="flex items-center shrink-0">
             <Image
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
-              width={260}
-              height={64}
+              width={700}
+              height={180}
               priority={false}
-              className="h-10 w-auto sm:h-11 md:h-12 drop-shadow-[0_20px_70px_rgba(0,0,0,0.65)]"
+              className={cx(
+                'w-auto',
+                // taller across sizes, but safe
+                'h-[88px] sm:h-[96px] md:h-[104px]',
+                'drop-shadow-[0_26px_110px_rgba(0,0,0,0.75)]',
+              )}
             />
           </Link>
 
           {/* Center: one-line menu */}
           <nav
             className={cx(
-              'hidden lg:flex items-center gap-6',
+              'hidden lg:flex items-center gap-8',
               'flex-1 min-w-0',
               'whitespace-nowrap',
-              'overflow-hidden',
             )}
             aria-label="Primary"
           >
-            {/* Destinations (Cities mega) */}
-            <div className="relative shrink-0" ref={citiesWrapRef}>
+            {/* Destinations (hover + click) */}
+            <div
+              className="relative shrink-0"
+              ref={citiesWrapRef}
+              onMouseEnter={openCitiesSoon}
+              onMouseLeave={closeCitiesSoon}
+            >
               <button
                 type="button"
-                onClick={() => setCitiesOpen((v) => !v)}
+                onClick={toggleCities}
+                onFocus={() => setCitiesOpen(true)}
                 className={cx(navLink, citiesOpen && navLinkActive)}
                 aria-expanded={citiesOpen}
                 aria-haspopup="menu"
@@ -341,13 +374,17 @@ export default function TopBar() {
                 <ChevronDown className={cx('h-4 w-4 transition', citiesOpen && 'rotate-180')} />
               </button>
 
-              {/* Mega panel */}
               <div
                 ref={citiesPanelRef}
+                onMouseEnter={() => {
+                  cancelTimers();
+                  setCitiesOpen(true);
+                }}
+                onMouseLeave={closeCitiesSoon}
                 className={cx(
-                  'absolute left-1/2 z-[70] mt-4 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
-                  'rounded-[26px] bg-[#05060A]',
-                  'shadow-[0_70px_220px_rgba(0,0,0,0.90)]',
+                  'absolute left-1/2 z-[80] mt-5 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
+                  'rounded-[28px] bg-[#05060A]',
+                  'shadow-[0_90px_260px_rgba(0,0,0,0.92)]',
                   'ring-1 ring-inset ring-white/10',
                   'max-h-[74vh] overflow-auto',
                   'transition-[transform,opacity] duration-200',
@@ -358,7 +395,8 @@ export default function TopBar() {
                 role="menu"
                 aria-label="Destinations menu"
               >
-                <div className="pointer-events-none absolute inset-0 rounded-[26px] bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+                <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(1000px_320px_at_50%_0%,rgba(231,201,130,0.13),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
 
                 {/* Header */}
                 <div className="relative border-b border-white/8 px-6 py-4">
@@ -516,6 +554,7 @@ export default function TopBar() {
 
                 <div className="pointer-events-none relative h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
 
+                {/* Bottom strip */}
                 <div className="relative flex items-center justify-between gap-3 px-6 py-4">
                   <div className="flex items-center gap-2 text-xs text-zinc-400">
                     <Sparkles className="h-4 w-4 opacity-70" />
@@ -551,7 +590,7 @@ export default function TopBar() {
             </Link>
           </nav>
 
-          {/* Right: Search pill + CTA */}
+          {/* Right */}
           <div className="ml-auto flex items-center gap-2 shrink-0">
             <button
               type="button"
@@ -606,23 +645,13 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Desktop scrim */}
-      {citiesOpen ? (
-        <button
-          type="button"
-          aria-label="Close destinations menu"
-          onClick={() => setCitiesOpen(false)}
-          className="fixed inset-0 z-[60] hidden bg-black/70 lg:block"
-        />
-      ) : null}
-
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown (add countries here too) */}
       <div
         id="vantera-mobile-menu"
         className={cx(
           'lg:hidden',
           'overflow-hidden transition-[max-height,opacity] duration-300',
-          mobileOpen ? 'max-h-[720px] opacity-100' : 'max-h-0 opacity-0',
+          mobileOpen ? 'max-h-[860px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
@@ -646,17 +675,25 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </button>
 
-              <button
-                type="button"
-                onClick={() => setCitiesOpen(true)}
-                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Globe className="h-4 w-4 opacity-90" />
-                  Destinations
-                </span>
-                <ChevronDown className="h-4 w-4 opacity-80" />
-              </button>
+              {/* Countries section */}
+              <div className="mt-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+                <div className="mb-2 text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
+                  EXPLORE BY COUNTRY
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {countries.slice(0, 10).map((c) => (
+                    <Link
+                      key={c}
+                      href={countryHref(c)}
+                      prefetch
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-full px-3 py-1.5 text-[12px] text-zinc-200 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+              </div>
 
               <Link
                 href="/coming-soon?section=for-sale"
@@ -710,23 +747,6 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </Link>
 
-              <Link
-                href="/"
-                prefetch
-                onClick={(e) => {
-                  if (pathname === '/') {
-                    e.preventDefault();
-                    setMobileOpen(false);
-                    focusGlobalSearch();
-                  }
-                }}
-                className="mt-1 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-zinc-100 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
-              >
-                <span className={goldText}>Search homes</span>
-                <ArrowRight className="h-4 w-4 opacity-85" />
-              </Link>
-
-              {/* City page mode pills */}
               {onCityPage ? (
                 <div className="mt-2 rounded-3xl bg-white/[0.02] p-3 ring-1 ring-inset ring-white/10">
                   <div className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">

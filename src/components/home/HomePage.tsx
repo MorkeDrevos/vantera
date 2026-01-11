@@ -299,25 +299,25 @@ export default function HomePage() {
 
       {/* TRUST */}
       <TrustMarquee
-        className="-mt-6"
-        brands={[
-          { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-          { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-          { name: 'Knight Frank', domain: 'knightfrank.com' },
-          { name: 'Savills', domain: 'savills.com' },
-          { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-          { name: 'BARNES', domain: 'barnes-international.com' },
-          { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-          { name: 'Douglas Elliman', domain: 'elliman.com' },
-          { name: 'Compass', domain: 'compass.com' },
-          { name: 'CBRE', domain: 'cbre.com' },
-          { name: 'JLL', domain: 'jll.com' },
-          { name: 'RE/MAX', domain: 'remax.com' },
-          { name: 'BHHS', domain: 'bhhs.com' },
-          { name: 'Corcoran', domain: 'corcoran.com' },
-          { name: 'Century 21', domain: 'century21.com' },
-        ]}
-      />
+  className="-mt-6"
+  brands={[
+    { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+    { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+    { name: 'Knight Frank', domain: 'knightfrank.com' },
+    { name: 'Savills', domain: 'savills.com' },
+    { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+    { name: 'BARNES', domain: 'barnes-international.com' },
+    { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+    { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
+    { name: 'Compass', domain: 'compass.com', invert: false },
+    { name: 'CBRE', domain: 'cbre.com', invert: false },
+    { name: 'JLL', domain: 'jll.com', invert: false },
+    { name: 'RE/MAX', domain: 'remax.com' },
+    { name: 'BHHS', domain: 'bhhs.com' },
+    { name: 'Corcoran', domain: 'corcoran.com', invert: false },
+    { name: 'Century 21', domain: 'century21.com', invert: false },
+  ]}
+/>
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
