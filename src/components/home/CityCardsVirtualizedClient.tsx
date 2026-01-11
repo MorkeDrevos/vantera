@@ -10,18 +10,27 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+export type CityListingsStats = {
+  verifiedCount: number;
+  pendingCount?: number;
+};
+
 export default function CityCardsVirtualizedClient({
   cities,
   className,
   columns = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3',
   initial = 18,
   step = 18,
+
+  // Optional: plug this in once you have real DB/API
+  statsByCity,
 }: {
   cities: City[];
   className?: string;
   columns?: string;
   initial?: number;
   step?: number;
+  statsByCity?: Record<string, CityListingsStats | undefined>;
 }) {
   const sorted = useMemo(() => {
     // Stable sort: keep input order unless you want tier sorting later
@@ -62,9 +71,10 @@ export default function CityCardsVirtualizedClient({
   return (
     <div className={cx('w-full', className)}>
       <div className={columns}>
-        {visible.map((city) => (
-          <CityCard key={city.slug} city={city} />
-        ))}
+        {visible.map((city) => {
+          const stats = statsByCity?.[city.slug];
+          return <CityCard key={city.slug} city={city} stats={stats} />;
+        })}
       </div>
 
       <div className="mt-6 flex items-center justify-between gap-3">
