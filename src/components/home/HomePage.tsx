@@ -6,11 +6,11 @@ import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
 import TrustMarquee from '@/components/trust/TrustMarquee';
+
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 
 import CitySearch from './CitySearch';
-import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 import { CITIES } from './cities';
 
