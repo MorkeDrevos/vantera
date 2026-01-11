@@ -52,14 +52,15 @@ export default function TrustMarquee({
                 </div>
 
                 <Image
-                  src={`https://cdn.brandfetch.io/${b.domain}?c=${encodeURIComponent(cid)}`}
-                  alt={`${b.name} logo`}
-                  width={220}
-                  height={60}
-                  className={`h-8 w-auto object-contain opacity-85 transition group-hover:opacity-100 ${
-                    b.invert ?? true ? 'invert' : ''
-                  }`}
-                />
+  src={`https://cdn.brandfetch.io/${b.domain}?c=${encodeURIComponent(cid)}&type=logo&format=svg`}
+  alt={`${b.name} logo`}
+  width={220}
+  height={60}
+  unoptimized
+  className={`h-8 w-auto object-contain opacity-85 transition group-hover:opacity-100 ${
+    b.invert ?? true ? 'invert' : ''
+  }`}
+/>
               </div>
             ))}
           </div>
