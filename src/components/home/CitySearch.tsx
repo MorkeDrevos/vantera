@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 
 import SafeImage from './SafeImage';
@@ -42,24 +43,34 @@ function focusVanteraCitySearch() {
   el?.focus();
 }
 
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n));
+}
+
 export default function CitySearch() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Anchor wrapper (the input pill) and the floating panel (portal)
+  const anchorRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 
+  // Portal readiness (Next.js SSR-safe)
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!q.trim()) setActive(0);
   }, [q]);
 
-  // ✅ Bulletproof hotkey focus: TopBar can dispatch this event if needed.
-  // Even if it doesn't, this is harmless and future-proof.
+  // TopBar can dispatch this event if needed.
   useEffect(() => {
     const onFocusSearch = () => {
       setOpen(true);
-      // Let React commit before focusing (prevents flaky focus on route changes)
       window.setTimeout(() => {
         focusVanteraCitySearch();
       }, 0);
@@ -94,9 +105,185 @@ export default function CitySearch() {
     if (pick) go(pick.slug);
   }
 
+  // Floating panel geometry (portal fixes "goes behind" when any parent has overflow-hidden)
+  const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ display: 'none' });
+
+  function computePanelStyle() {
+    const anchor = anchorRef.current;
+    if (!anchor) return;
+
+    const r = anchor.getBoundingClientRect();
+    const gap = 12;
+
+    // Keep within viewport with a little padding
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const left = clamp(r.left, 12, Math.max(12, vw - r.width - 12));
+    const top = r.bottom + gap;
+
+    const maxH = Math.max(200, vh - top - 12); // at least 200px so it stays usable
+
+    setPanelStyle({
+      position: 'fixed',
+      left,
+      top,
+      width: r.width,
+      maxHeight: maxH,
+      zIndex: 9999, // above TopBar + hero layers
+      display: open ? 'block' : 'none',
+    });
+  }
+
+  // Recompute when opening, typing, resizing, scrolling
+  useEffect(() => {
+    if (!open) return;
+    computePanelStyle();
+
+    const onResize = () => computePanelStyle();
+    // capture scroll from any scroll container
+    const onScroll = () => computePanelStyle();
+
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll, true as any);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, q, results.length]);
+
+  // Click outside closes (important because dropdown is portaled)
+  useEffect(() => {
+    if (!open) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      const anchor = anchorRef.current;
+      const panel = panelRef.current;
+
+      if (anchor && anchor.contains(t)) return;
+      if (panel && panel.contains(t)) return;
+
+      setOpen(false);
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [open]);
+
+  const dropdown =
+    open && mounted
+      ? createPortal(
+          <div
+            ref={panelRef}
+            style={panelStyle}
+            className={[
+              // IMPORTANT: no overflow clipping from parents because this is portaled
+              'overflow-hidden rounded-2xl border border-white/10 bg-black/60',
+              'shadow-[0_26px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl',
+            ].join(' ')}
+            role="listbox"
+            aria-label="City search results"
+          >
+            {/* dropdown polish */}
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] via-white/[0.02] to-transparent" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent" />
+            </div>
+
+            {/* Scroll container (iOS-friendly) */}
+            <div
+              className="relative p-2"
+              style={{
+                maxHeight: typeof panelStyle.maxHeight === 'number' ? panelStyle.maxHeight : undefined,
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain',
+              }}
+            >
+              {results.length > 0 ? (
+                <ul className="space-y-1">
+                  {results.map((c, idx) => (
+                    <li key={c.slug}>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()} // keep input focused
+                        onMouseEnter={() => setActive(idx)}
+                        onClick={() => go(c.slug)}
+                        className={[
+                          'group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition',
+                          idx === active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.05]',
+                        ].join(' ')}
+                        role="option"
+                        aria-selected={idx === active}
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="relative h-9 w-12 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                            {c.image?.src ? (
+                              <SafeImage
+                                src={c.image.src}
+                                alt={c.image.alt ?? `${c.name} thumbnail`}
+                                fill
+                                sizes="48px"
+                                className="object-cover opacity-[0.92] transition duration-500 group-hover:opacity-100"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+                            )}
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-semibold text-zinc-100">{c.name}</div>
+                            <div className="truncate text-xs text-zinc-500">
+                              {c.country}
+                              {c.region ? ` · ${c.region}` : ''}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <CityLocalTime
+                            tz={c.tz}
+                            className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+                          />
+                          <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300 shadow-[0_10px_30px_rgba(0,0,0,0.30)]">
+                            /city/{c.slug}
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="px-4 py-4">
+                  <div className="text-sm font-semibold text-zinc-200">No results</div>
+                  <div className="mt-1 text-xs text-zinc-500">
+                    Try {examples.map((x, i) => (i === examples.length - 1 ? x : `${x}, `))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
     <div className="relative">
-      <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-2 shadow-[0_22px_80px_rgba(0,0,0,0.50)] backdrop-blur-2xl">
+      <div
+        ref={anchorRef}
+        className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-2 shadow-[0_22px_80px_rgba(0,0,0,0.50)] backdrop-blur-2xl"
+      >
         {/* top highlight + subtle polish */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.10] via-white/[0.02] to-transparent" />
@@ -123,10 +310,8 @@ export default function CitySearch() {
             }}
             onFocus={() => {
               setOpen(true);
-              // If focused by hotkey, we want dropdown immediately
               setActive(0);
             }}
-            onBlur={() => window.setTimeout(() => setOpen(false), 120)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -158,6 +343,8 @@ export default function CitySearch() {
             spellCheck={false}
             autoComplete="off"
             aria-label="Search a city"
+            aria-expanded={open}
+            aria-controls="vantera-city-search-panel"
           />
 
           <button
@@ -180,78 +367,8 @@ export default function CitySearch() {
         </div>
       </div>
 
-      {open ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+12px)] z-20 overflow-hidden rounded-2xl border border-white/10 bg-black/60 shadow-[0_26px_80px_rgba(0,0,0,0.65)] backdrop-blur-2xl">
-          {/* dropdown polish */}
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] via-white/[0.02] to-transparent" />
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent" />
-          </div>
-
-          <div className="relative p-2">
-            {results.length > 0 ? (
-              <ul className="space-y-1">
-                {results.map((c, idx) => (
-                  <li key={c.slug}>
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onMouseEnter={() => setActive(idx)}
-                      onClick={() => go(c.slug)}
-                      className={[
-                        'group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition',
-                        idx === active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.05]',
-                      ].join(' ')}
-                    >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="relative h-9 w-12 overflow-hidden rounded-xl border border-white/10 bg-white/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
-                          {c.image?.src ? (
-                            <SafeImage
-                              src={c.image.src}
-                              alt={c.image.alt ?? `${c.name} thumbnail`}
-                              fill
-                              sizes="48px"
-                              className="object-cover opacity-[0.92] transition duration-500 group-hover:opacity-100"
-                            />
-                          ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
-                          )}
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                        </div>
-
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-zinc-100">{c.name}</div>
-                          <div className="truncate text-xs text-zinc-500">
-                            {c.country}
-                            {c.region ? ` · ${c.region}` : ''}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex shrink-0 items-center gap-2">
-                        <CityLocalTime
-                          tz={c.tz}
-                          className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-                        />
-                        <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300 shadow-[0_10px_30px_rgba(0,0,0,0.30)]">
-                          /city/{c.slug}
-                        </span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="px-4 py-4">
-                <div className="text-sm font-semibold text-zinc-200">No results</div>
-                <div className="mt-1 text-xs text-zinc-500">
-                  Try {examples.map((x, i) => (i === examples.length - 1 ? x : `${x}, `))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : null}
+      {/* Portal dropdown (fixes: clipped "behind" due to ancestor overflow-hidden, and adds real scrolling) */}
+      {dropdown}
     </div>
   );
 }
