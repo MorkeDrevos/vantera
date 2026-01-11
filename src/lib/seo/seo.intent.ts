@@ -7,53 +7,10 @@ export type PageKind =
   | 'luxury_global'
   | 'luxury_city'
   | 'city_hub'
-  | 'city_supply'
-  | 'city_pricing'
-  | 'city_truth'
   | 'listing'
   | 'sell_luxury'
   | 'agents'
-  | 'crm'; // future
-
-export type SeoDoc = {
-  kind: PageKind;
-
-  // Full absolute URL canonical
-  canonical: string;
-
-  // Human title without the "· Vantera" suffix (we apply template)
-  title: string;
-
-  // Meta description
-  description: string;
-
-  // Primary keyword theme (internal)
-  primaryTopic: string;
-
-  // Secondary keyword themes (internal)
-  secondaryTopics: string[];
-
-  // OG image absolute URL (can be dynamic route)
-  ogImage: string;
-
-  // Robots directives
-  robots?: {
-    index?: boolean;
-    follow?: boolean;
-  };
-
-  // JSON-LD friendly metadata
-  jsonld?: {
-    name: string;
-    about: Array<{ type: 'Thing' | 'Place' | 'Audience'; name: string; extra?: Record<string, any> }>;
-  };
-
-  // Internal linking guidance to prevent cannibalization
-  internalLinks: {
-    shouldLinkTo: PageKind[];
-    shouldNotCompeteWith: PageKind[];
-  };
-};
+  | 'crm';
 
 export type CityLite = {
   name: string;
@@ -65,11 +22,30 @@ export type CityLite = {
 export type ListingLite = {
   id: string;
   slug: string;
-  title: string; // "6-bed villa with sea views"
+  title: string;
   cityName: string;
   citySlug: string;
-  priceLabel?: string | null; // "€4.2M" or empty
-  propertyType?: string | null; // "villa", "penthouse"
+  priceLabel?: string | null;
+  propertyType?: string | null;
+};
+
+export type SeoDoc = {
+  kind: PageKind;
+  canonical: string;
+  title: string;
+  description: string;
+  primaryTopic: string;
+  secondaryTopics: string[];
+  ogImage: string;
+  robots?: { index?: boolean; follow?: boolean };
+  jsonld?: {
+    name: string;
+    about: Array<{ type: 'Thing' | 'Place' | 'Audience'; name: string; extra?: Record<string, any> }>;
+  };
+  internalLinks: {
+    shouldLinkTo: PageKind[];
+    shouldNotCompeteWith: PageKind[];
+  };
 };
 
 function abs(path: string) {
@@ -82,8 +58,6 @@ function clean(str: string) {
 }
 
 function makeTitle(core: string) {
-  // Keep your preference: normal hyphens, no em dashes
-  // Keep it clicky and not spammy
   return clean(core);
 }
 
@@ -97,59 +71,40 @@ function placeLine(city?: CityLite) {
   return extra ? ` (${extra})` : '';
 }
 
+const ABOUT = {
+  truthPlatform: [
+    { type: 'Thing' as const, name: 'Real estate market intelligence' },
+    { type: 'Thing' as const, name: 'Market value modeling' },
+    { type: 'Thing' as const, name: 'Property liquidity' },
+    { type: 'Thing' as const, name: 'Pricing analysis' },
+  ],
+  luxury: [
+    { type: 'Thing' as const, name: 'Luxury real estate' },
+    { type: 'Thing' as const, name: 'Prime real estate' },
+    { type: 'Thing' as const, name: 'High-end property markets' },
+  ],
+  audienceLuxury: [{ type: 'Audience' as const, name: 'High net worth buyers and investors' }],
+};
+
 export const SEO_INTENT = {
   abs,
 
-  // Shared "about" sets for JSON-LD
-  about: {
-    truthPlatform: [
-      { type: 'Thing' as const, name: 'Real estate market intelligence' },
-      { type: 'Thing' as const, name: 'Market value modeling' },
-      { type: 'Thing' as const, name: 'Property liquidity' },
-      { type: 'Thing' as const, name: 'Pricing analysis' },
-    ],
-    luxury: [
-      { type: 'Thing' as const, name: 'Luxury real estate' },
-      { type: 'Thing' as const, name: 'Prime real estate' },
-      { type: 'Thing' as const, name: 'High-end property markets' },
-    ],
-    audienceLuxury: [
-      { type: 'Audience' as const, name: 'High net worth buyers and investors' },
-    ],
-  },
-
-  // HOME
   home(): SeoDoc {
     const canonical = abs('/');
     return {
       kind: 'home',
       canonical,
       title: makeTitle('Vantera - Truth-First Real Estate Intelligence'),
-      description: makeDescription(
-        'Truth-first real estate intelligence platform. Explore cities, luxury markets, supply signals, pricing reality, and verified listings.'
-      ),
+      description: makeDescription(SEO_CONFIG.defaultDescription),
       primaryTopic: 'truth-first real estate intelligence',
-      secondaryTopics: [
-        'city market intelligence',
-        'luxury real estate',
-        'pricing signals',
-        'supply dynamics',
-        'verified listings',
-      ],
+      secondaryTopics: ['city market intelligence', 'luxury real estate', 'pricing signals', 'supply dynamics', 'verified listings'],
       ogImage: abs('/opengraph-image'),
       robots: { index: true, follow: true },
-      jsonld: {
-        name: 'Vantera',
-        about: [...SEO_INTENT.about.truthPlatform],
-      },
-      internalLinks: {
-        shouldLinkTo: ['luxury_global', 'city_hub', 'sell_luxury', 'agents'],
-        shouldNotCompeteWith: [],
-      },
+      jsonld: { name: 'Vantera', about: [...ABOUT.truthPlatform] },
+      internalLinks: { shouldLinkTo: ['luxury_global', 'city_hub', 'sell_luxury', 'agents'], shouldNotCompeteWith: [] },
     };
   },
 
-  // LUXURY GLOBAL
   luxuryGlobal(): SeoDoc {
     const canonical = abs('/luxury-real-estate');
     return {
@@ -160,29 +115,18 @@ export const SEO_INTENT = {
         'Explore luxury real estate for sale through truth-first market intelligence. Prime areas, real value signals, liquidity indicators, and pricing reality beyond listings.'
       ),
       primaryTopic: 'luxury real estate for sale',
-      secondaryTopics: [
-        'luxury homes for sale',
-        'prime real estate',
-        'high-end property',
-        'luxury market intelligence',
-      ],
+      secondaryTopics: ['luxury homes for sale', 'prime real estate', 'high-end property', 'luxury market intelligence'],
       ogImage: abs('/luxury-real-estate/opengraph-image'),
       robots: { index: true, follow: true },
-      jsonld: {
-        name: 'Luxury Real Estate for Sale',
-        about: [...SEO_INTENT.about.luxury, ...SEO_INTENT.about.truthPlatform, ...SEO_INTENT.about.audienceLuxury],
-      },
-      internalLinks: {
-        shouldLinkTo: ['luxury_city', 'city_hub'],
-        shouldNotCompeteWith: ['listing'],
-      },
+      jsonld: { name: 'Luxury Real Estate for Sale', about: [...ABOUT.luxury, ...ABOUT.truthPlatform, ...ABOUT.audienceLuxury] },
+      internalLinks: { shouldLinkTo: ['luxury_city', 'city_hub'], shouldNotCompeteWith: ['listing'] },
     };
   },
 
-  // CITY HUB
   cityHub(city: CityLite): SeoDoc {
     const canonical = abs(`/city/${city.slug}`);
     const citySuffix = placeLine(city);
+
     return {
       kind: 'city_hub',
       canonical,
@@ -191,32 +135,27 @@ export const SEO_INTENT = {
         `Real estate intelligence for ${city.name}${citySuffix}. Track supply pressure, pricing signals, market reality, and explore verified listings built on truth-first analysis.`
       ),
       primaryTopic: `${city.name} real estate`,
-      secondaryTopics: [
-        `${city.name} property market`,
-        `${city.name} housing supply`,
-        `${city.name} pricing`,
-        `${city.name} luxury real estate`,
-      ],
+      secondaryTopics: [`${city.name} property market`, `${city.name} housing supply`, `${city.name} pricing`, `${city.name} luxury real estate`],
       ogImage: abs(`/city/${city.slug}/opengraph-image`),
       robots: { index: true, follow: true },
       jsonld: {
         name: `${city.name} Real Estate Intelligence`,
         about: [
           { type: 'Place', name: city.name, extra: { country: city.country ?? undefined, region: city.region ?? undefined } },
-          ...SEO_INTENT.about.truthPlatform,
+          ...ABOUT.truthPlatform,
         ],
       },
       internalLinks: {
-        shouldLinkTo: ['luxury_city', 'city_supply', 'city_pricing', 'city_truth', 'listing'],
+        shouldLinkTo: ['luxury_city', 'listing'],
         shouldNotCompeteWith: ['luxury_city'],
       },
     };
   },
 
-  // CITY LUXURY
   luxuryCity(city: CityLite): SeoDoc {
     const canonical = abs(`/city/${city.slug}/luxury-real-estate`);
     const citySuffix = placeLine(city);
+
     return {
       kind: 'luxury_city',
       canonical,
@@ -237,9 +176,9 @@ export const SEO_INTENT = {
         name: `Luxury Real Estate for Sale in ${city.name}`,
         about: [
           { type: 'Place', name: city.name, extra: { country: city.country ?? undefined, region: city.region ?? undefined } },
-          ...SEO_INTENT.about.luxury,
-          ...SEO_INTENT.about.truthPlatform,
-          ...SEO_INTENT.about.audienceLuxury,
+          ...ABOUT.luxury,
+          ...ABOUT.truthPlatform,
+          ...ABOUT.audienceLuxury,
         ],
       },
       internalLinks: {
@@ -249,41 +188,27 @@ export const SEO_INTENT = {
     };
   },
 
-  // LISTING PAGE (future-proof)
   listing(listing: ListingLite): SeoDoc {
     const canonical = abs(`/listing/${listing.slug || listing.id}`);
     const price = listing.priceLabel ? ` - ${listing.priceLabel}` : '';
-    const cityPhrase = `${listing.cityName}`;
-    const propertyType = listing.propertyType ? `${listing.propertyType}` : 'home';
+    const propertyType = listing.propertyType ? listing.propertyType : 'home';
 
     return {
       kind: 'listing',
       canonical,
-      title: makeTitle(`${listing.title}${price} - ${propertyType} for sale in ${cityPhrase}`),
+      title: makeTitle(`${listing.title}${price} - ${propertyType} for sale in ${listing.cityName}`),
       description: makeDescription(
-        `${listing.title} in ${cityPhrase}. View pricing context, liquidity indicators, and truth-first listing signals designed to separate asking price from market reality.`
+        `${listing.title} in ${listing.cityName}. View pricing context, liquidity indicators, and truth-first listing signals designed to separate asking price from market reality.`
       ),
-      primaryTopic: `${propertyType} for sale in ${cityPhrase}`,
-      secondaryTopics: [
-        `${listing.cityName} property for sale`,
-        `${listing.cityName} real estate listing`,
-        'luxury homes for sale',
-        'market value signals',
-      ],
+      primaryTopic: `${propertyType} for sale in ${listing.cityName}`,
+      secondaryTopics: [`${listing.cityName} property for sale`, `${listing.cityName} real estate listing`, 'luxury homes for sale', 'market value signals'],
       ogImage: abs(`/listing/${listing.slug || listing.id}/opengraph-image`),
       robots: { index: true, follow: true },
       jsonld: {
-        name: `${listing.title} - ${cityPhrase}`,
-        about: [
-          { type: 'Place', name: listing.cityName },
-          { type: 'Thing', name: 'Real estate listing' },
-          ...SEO_INTENT.about.truthPlatform,
-        ],
+        name: `${listing.title} - ${listing.cityName}`,
+        about: [{ type: 'Place', name: listing.cityName }, { type: 'Thing', name: 'Real estate listing' }, ...ABOUT.truthPlatform],
       },
-      internalLinks: {
-        shouldLinkTo: ['city_hub', 'luxury_city'],
-        shouldNotCompeteWith: ['luxury_city', 'luxury_global'],
-      },
+      internalLinks: { shouldLinkTo: ['city_hub', 'luxury_city'], shouldNotCompeteWith: ['luxury_city', 'luxury_global'] },
     };
   },
 };
