@@ -1,4 +1,5 @@
 // prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,4 +21,237 @@ model ContactMessage {
   honeypot  String?
   ip        String?
   userAgent String?
+}
+
+/* ---------------------------------------------
+   VAN TERA - Coverage + Listings (Foundation)
+   JamesEdition-style: Cities + Region Clusters
+---------------------------------------------- */
+
+enum CoverageTier {
+  TIER_0
+  TIER_1
+  TIER_2
+  TIER_3
+}
+
+enum CoverageStatus {
+  LIVE
+  TRACKING
+  EXPANDING
+}
+
+enum ListingStatus {
+  DRAFT
+  LIVE
+  SOLD
+  ARCHIVED
+}
+
+enum ListingVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum VerificationLevel {
+  SELF_REPORTED
+  VERIFIED_DOCS
+  VERIFIED_ON_SITE
+}
+
+/**
+ * RegionCluster
+ * Ex: "Costa del Sol", "French Riviera", "Miami Metro"
+ */
+model RegionCluster {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  slug      String   @unique
+
+  // For ordering in UI
+  tier      CoverageTier
+  status    CoverageStatus @default(EXPANDING)
+  priority  Int           @default(0)
+
+  // Optional copy
+  headline  String?
+  blurb     String?
+
+  // For map/seo pages later
+  country   String?
+  region    String?
+
+  cities    City[]
+
+  @@index([tier, priority])
+}
+
+/**
+ * City
+ * Canonical city object, linked optionally to a RegionCluster
+ */
+model City {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  slug      String   @unique
+
+  country   String
+  region    String?
+  tz        String
+
+  tier      CoverageTier
+  status    CoverageStatus @default(EXPANDING)
+  priority  Int           @default(0)
+
+  // Optional hero / card image
+  heroImageSrc String?
+  heroImageAlt String?
+
+  // Optional editorial copy
+  blurb     String?
+
+  // Optional geo (helpful for maps later)
+  lat       Float?
+  lng       Float?
+
+  clusterId String?
+  cluster   RegionCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+
+  metrics   CityMetric[]
+  listings  Listing[]
+
+  @@index([country])
+  @@index([tier, priority])
+  @@index([clusterId])
+}
+
+/**
+ * CityMetric
+ * Snapshot series for city-level market signals.
+ * Use this to power "Vantera Market Index" per city.
+ */
+model CityMetric {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  cityId    String
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  // Snapshot date (for monthly series)
+  asOf      DateTime
+
+  // Core signals (nullable until you have source)
+  medianPricePerSqm     Int?
+  primePricePerSqm      Int?
+  medianRentPerSqm      Int?
+  yoyPriceChangePct     Float?
+  yoyRentChangePct      Float?
+  daysOnMarketMedian    Int?
+  activeListingCount    Int?
+
+  // Confidence and provenance
+  confidenceScore       Int?    // 0-100
+  sourceNote            String? // "manual", "licensed feed", etc.
+
+  @@unique([cityId, asOf])
+  @@index([cityId, asOf])
+}
+
+/**
+ * Listing
+ * Luxury-first listing model. Works for:
+ * - Verified inventory
+ * - Private sellers (one-off)
+ * - Off-market (visibility PRIVATE)
+ * - Agents (later)
+ */
+model Listing {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cityId    String
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  status       ListingStatus     @default(DRAFT)
+  visibility   ListingVisibility @default(PUBLIC)
+  verification VerificationLevel @default(SELF_REPORTED)
+
+  // Display
+  title        String
+  headline     String?
+  description  String?
+
+  // Location (keep address private if needed)
+  neighborhood String?
+  address      String?
+  addressHidden Boolean @default(false)
+
+  lat          Float?
+  lng          Float?
+
+  // Core specs
+  propertyType String? // villa, penthouse, apartment, estate, townhouse
+  bedrooms     Int?
+  bathrooms    Int?
+  builtM2      Int?
+  plotM2       Int?
+
+  // Pricing
+  price        Int?
+  currency     String  @default("EUR")
+
+  // Running costs (Spain luxury reality)
+  communityFeesMonthly Int?
+  ibiYearly            Int?
+  garbageTaxYearly     Int?
+
+  // Truth fields (expand later)
+  yearBuilt     Int?
+  renovationYear Int?
+  energyRating  String?
+
+  // Media
+  media      ListingMedia[]
+  coverMediaId String?
+  coverMedia  ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+
+  @@index([cityId, status])
+  @@index([status, visibility])
+  @@index([cityId, price])
+}
+
+/**
+ * ListingMedia
+ * Images first. Video later.
+ */
+model ListingMedia {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // Image URL and metadata
+  url       String
+  alt       String?
+  width     Int?
+  height    Int?
+
+  // Ordering for galleries
+  sortOrder Int @default(0)
+
+  // Optional type for future: image, floorplan, video
+  kind      String @default("image")
+
+  // Reverse relation for coverMedia
+  coverOf   Listing? @relation("ListingCover")
+
+  @@index([listingId, sortOrder])
 }
