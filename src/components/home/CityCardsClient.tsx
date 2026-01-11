@@ -2,7 +2,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-
 import CityCard from './CityCard';
 import type { City } from './cities';
 
@@ -32,7 +31,8 @@ export default function CityCardsClient({
   columns?: string;
   className?: string;
 }) {
-  const [now, setNow] = useState<Date>(() => new Date());
+  // Trigger re-render every minute so "Local time" stays fresh
+  const [_now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -44,13 +44,9 @@ export default function CityCardsClient({
       ...city,
       localTime: formatLocalTime(city.tz),
     }));
-  }, [cities, now]);
+  }, [cities, _now]);
 
-  // Responsive behavior (default):
-  // - 1 column on mobile + tablets
-  // - 2 columns only from lg and up
-  // - 3 columns only from xl and up
-  const gridClass = columns ?? 'grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3';
+  const gridClass = columns ?? 'grid gap-6 sm:grid-cols-2 lg:grid-cols-3';
 
   return (
     <div className={cx(gridClass, className)}>
@@ -81,7 +77,9 @@ export default function CityCardsClient({
 
                   <span className="text-white/20">•</span>
 
-                  <span className="font-semibold tracking-[0.08em] text-zinc-100">{city.localTime}</span>
+                  <span className="font-semibold tracking-[0.08em] text-zinc-100">
+                    {city.localTime}
+                  </span>
                 </div>
               </div>
             </div>
