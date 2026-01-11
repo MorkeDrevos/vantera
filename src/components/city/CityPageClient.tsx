@@ -2,11 +2,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Lock, ShieldCheck, Sparkles } from 'lucide-react';
-
 import SafeImage from '@/components/home/SafeImage';
+import BrokerVerificationBadge from '@/components/badges/BrokerVerificationBadge';
+
+import TruthCard from '@/components/truth/TruthCard';
+import type { TruthCardData } from '@/lib/truth/truth.schema';
 
 type CityImage = {
   src: string;
@@ -21,6 +21,10 @@ export type CityPageCity = {
   tz: string;
   blurb: string | null;
   image: CityImage | null;
+
+  // Optional (won’t break callers)
+  tier?: 'TIER_0' | 'TIER_1' | 'TIER_2' | 'TIER_3';
+  status?: 'LIVE' | 'TRACKING' | 'EXPANDING';
 };
 
 export type CityNavItem = {
@@ -28,89 +32,117 @@ export type CityNavItem = {
   slug: string;
 };
 
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
 function safeAlt(city: CityPageCity) {
   const a = city.image?.alt?.trim();
   return a ? a : `${city.name} city view`;
 }
 
-type CityUiState = 'INTELLIGENCE_ACTIVE_LISTINGS_LOCKED' | 'VERIFIED_SUPPLY_ONLY' | 'COVERAGE_EXPANDING';
-
-type CitySupplySnapshot = {
-  verifiedListingsCount: number;
-  pendingListingsCount: number;
-  intelligenceActive: boolean;
+// Temporary until DB: per-city verified supply count
+const VERIFIED_SUPPLY_COUNT: Record<string, number> = {
+  marbella: 0,
+  benahavis: 0,
+  estepona: 0,
+  monaco: 0,
+  dubai: 0,
+  london: 0,
+  // when you publish first verified listing, flip one to 1
 };
 
-function computeCityUiState(s: CitySupplySnapshot): CityUiState {
-  if (s.verifiedListingsCount > 0) return 'VERIFIED_SUPPLY_ONLY';
-  if (s.intelligenceActive) return 'INTELLIGENCE_ACTIVE_LISTINGS_LOCKED';
-  return 'COVERAGE_EXPANDING';
+// Temporary sample Truth Cards (only rendered when verified supply exists)
+function sampleTruthCards(cityName: string): TruthCardData[] {
+  return [
+    {
+      propertyId: `VNT-${cityName.toUpperCase().slice(0, 3)}-A1`,
+      cityName,
+      assetType: 'Villa',
+      verificationStatus: 'verified',
+      dataConfidence: 86,
+      lastUpdatedISO: new Date().toISOString(),
+
+      askingPrice: 3_950_000,
+      currency: 'EUR',
+      fairValueBand: { low: 3_600_000, mid: 3_820_000, high: 4_050_000 },
+      pricingSignal: 'fair',
+      deviationPct: +3,
+
+      estimatedTimeToSellDays: { low: 35, high: 72 },
+      liquidityScore: 78,
+      demandPressure: 'high',
+      buyerPoolDepth: 'deep',
+
+      reductionProbabilityPct: 22,
+      anomalyFlags: [],
+      bedrooms: 5,
+      bathrooms: 5,
+      builtAreaSqm: 420,
+      plotAreaSqm: 1200,
+      primeAttributes: ['Sea views', 'Gated', 'Near golf'],
+    },
+    {
+      propertyId: `VNT-${cityName.toUpperCase().slice(0, 3)}-B7`,
+      cityName,
+      assetType: 'Penthouse',
+      verificationStatus: 'verified',
+      dataConfidence: 74,
+      lastUpdatedISO: new Date().toISOString(),
+
+      askingPrice: 1_650_000,
+      currency: 'EUR',
+      fairValueBand: { low: 1_420_000, mid: 1_520_000, high: 1_670_000 },
+      pricingSignal: 'overpriced',
+      deviationPct: +9,
+
+      estimatedTimeToSellDays: { low: 55, high: 110 },
+      liquidityScore: 62,
+      demandPressure: 'medium',
+      buyerPoolDepth: 'normal',
+
+      reductionProbabilityPct: 57,
+      anomalyFlags: ['price drift', 'stale positioning'],
+      bedrooms: 3,
+      bathrooms: 3,
+      builtAreaSqm: 185,
+      plotAreaSqm: undefined,
+      primeAttributes: ['Walk to centre', 'Terrace'],
+    },
+  ];
 }
 
-function stateCopy(state: CityUiState) {
-  if (state === 'VERIFIED_SUPPLY_ONLY') {
-    return {
-      badge: 'Verified supply only',
-      title: 'Verified supply only',
-      body: 'Only properties that pass identity, pricing and integrity checks appear here. Each one opens a Truth Card.',
-      icon: <ShieldCheck className="h-4 w-4 opacity-80" />,
-    };
-  }
-
-  if (state === 'INTELLIGENCE_ACTIVE_LISTINGS_LOCKED') {
-    return {
-      badge: 'Intelligence active · Listings locked',
-      title: 'Intelligence active · Listings locked',
-      body: 'Market intelligence is live. Public inventory unlocks only after verified supply meets integrity thresholds.',
-      icon: <Lock className="h-4 w-4 opacity-80" />,
-    };
-  }
-
-  return {
-    badge: 'Coverage expanding',
-    title: 'Coverage expanding',
-    body: 'This city is indexed. Verified supply unlocks as integrity thresholds are met.',
-    icon: <Sparkles className="h-4 w-4 opacity-80" />,
-  };
-}
-
-type TabKey = 'truth' | 'supply';
-
-function getTab(sp: URLSearchParams): TabKey {
-  const t = (sp.get('tab') ?? 'truth').toLowerCase();
-  return t === 'supply' ? 'supply' : 'truth';
-}
-
-function TabButton({
-  active,
-  label,
-  onClick,
+function StateBanner({
+  title,
+  subtitle,
+  tone = 'neutral',
+  cta,
 }: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
+  title: string;
+  subtitle: string;
+  tone?: 'neutral' | 'good' | 'warn' | 'violet';
+  cta?: React.ReactNode;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        'rounded-full border px-3.5 py-2 text-[11px] font-semibold tracking-[0.18em] transition',
-        active
-          ? 'border-white/14 bg-white/[0.06] text-zinc-100'
-          : 'border-white/10 bg-white/[0.02] text-zinc-300 hover:bg-white/[0.04] hover:border-white/12',
-      ].join(' ')}
-    >
-      {label.toUpperCase()}
-    </button>
-  );
-}
+  const cls =
+    tone === 'good'
+      ? 'border-emerald-400/18 bg-emerald-500/10'
+      : tone === 'warn'
+        ? 'border-amber-400/18 bg-amber-500/10'
+        : tone === 'violet'
+          ? 'border-violet-400/18 bg-violet-500/10'
+          : 'border-white/10 bg-white/[0.03]';
 
-function MiniPill({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex items-baseline gap-2 rounded-2xl border border-white/10 bg-black/25 px-3 py-2">
-      <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{k}</div>
-      <div className="text-xs text-zinc-100">{v}</div>
+    <div className={cx('relative overflow-hidden rounded-[26px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.55)]', cls)}>
+      <div className="pointer-events-none absolute inset-0 opacity-50 [background:radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
+      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">CITY STATE</div>
+          <div className="mt-2 text-base font-medium text-zinc-100">{title}</div>
+          <div className="mt-1 text-sm text-zinc-300">{subtitle}</div>
+        </div>
+        {cta ? <div className="shrink-0">{cta}</div> : null}
+      </div>
     </div>
   );
 }
@@ -126,38 +158,15 @@ export default function CityPageClient({
 }) {
   const src = city.image?.src?.trim() ?? '';
 
-  const sp = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const tier = city.tier ?? 'TIER_3';
+  const verifiedCount = VERIFIED_SUPPLY_COUNT[city.slug] ?? 0;
 
-  const tab = useMemo(() => getTab(sp), [sp]);
-
-  function setTab(nextTab: TabKey) {
-    const nextParams = new URLSearchParams(sp.toString());
-    nextParams.set('tab', nextTab);
-    router.push(`${pathname}?${nextParams.toString()}`, { scroll: false });
-  }
-
-  // Phase 2: replace this with real DB numbers
-  // For now we keep it deterministic and believable:
-  const supply = useMemo<CitySupplySnapshot>(() => {
-    const isFlagship = city.slug === 'marbella' || city.slug === 'benahavis' || city.slug === 'estepona';
-    const intelligenceActive = isFlagship || city.country === 'United Kingdom' || city.country === 'United States';
-
-    return {
-      verifiedListingsCount: 0, // <- flip to >0 and the city becomes "Verified supply only"
-      pendingListingsCount: isFlagship ? 2 : 0,
-      intelligenceActive,
-    };
-  }, [city.country, city.slug]);
-
-  const uiState = useMemo(() => computeCityUiState(supply), [supply]);
-  const copy = useMemo(() => stateCopy(uiState), [uiState]);
+  const showVerifiedSupply = verifiedCount > 0;
+  const showIntelligenceLocked = !showVerifiedSupply && (tier === 'TIER_0' || tier === 'TIER_1');
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <div className="flex flex-col gap-6">
-        {/* Top nav */}
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/"
@@ -181,16 +190,14 @@ export default function CityPageClient({
               prefetch
               className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-zinc-200 hover:border-white/20"
               aria-label={`Next city: ${next.name}`}
-              title={`Next: ${next.name}`}
+              title={`Next city: ${next.name}`}
             >
               Next →
             </Link>
           </div>
         </div>
 
-        {/* Main card */}
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
-          {/* Hero image */}
           <div className="relative h-[260px] w-full sm:h-[360px]">
             {src ? (
               <SafeImage
@@ -206,18 +213,9 @@ export default function CityPageClient({
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-            {/* Market mode badge */}
-            <div className="absolute left-4 top-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/35 px-3 py-2 text-xs text-zinc-200 backdrop-blur-2xl">
-                {copy.icon}
-                <span className="font-semibold tracking-[0.12em]">{copy.badge}</span>
-              </div>
-            </div>
           </div>
 
           <div className="p-6 sm:p-8">
-            {/* Title */}
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">{city.name}</h1>
 
@@ -225,114 +223,14 @@ export default function CityPageClient({
                 <span className="text-zinc-200">{city.country}</span>
                 {city.region ? <span className="text-zinc-400">{` · ${city.region}`}</span> : null}
                 <span className="text-zinc-500">{` · ${city.tz}`}</span>
+                <span className="text-zinc-600">{` · ${tier}`}</span>
               </div>
 
-              {city.blurb ? (
-                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-200">{city.blurb}</p>
-              ) : null}
-            </div>
-
-            {/* State panel */}
-            <div className="mt-6 rounded-3xl border border-white/10 bg-black/25 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.55)]">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200">
-                    {copy.icon}
-                    <span className="font-semibold tracking-[0.18em]">{copy.title.toUpperCase()}</span>
-                  </div>
-
-                  <div className="mt-3 text-sm leading-relaxed text-zinc-300">{copy.body}</div>
-
-                  <div className="mt-4 flex flex-wrap items-center gap-2">
-                    <TabButton active={tab === 'truth'} label="Truth" onClick={() => setTab('truth')} />
-                    <TabButton active={tab === 'supply'} label="Supply" onClick={() => setTab('supply')} />
-                  </div>
-                </div>
-
-                <div className="grid gap-2 sm:text-right">
-                  <MiniPill k="VERIFIED" v={<span className="font-mono">{supply.verifiedListingsCount}</span>} />
-                  <MiniPill k="PENDING" v={<span className="font-mono">{supply.pendingListingsCount}</span>} />
-                </div>
-              </div>
-            </div>
-
-            {/* Tab body */}
-            <div className="mt-6">
-              {tab === 'truth' ? (
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">TRUTH CARD</div>
-
-                  {uiState === 'VERIFIED_SUPPLY_ONLY' ? (
-                    <div className="mt-3 text-sm text-zinc-300">
-                      Truth Card will render here for each verified listing (Phase 2).
-                    </div>
-                  ) : uiState === 'INTELLIGENCE_ACTIVE_LISTINGS_LOCKED' ? (
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-zinc-300">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-200">
-                        <Lock className="h-4 w-4 opacity-80" />
-                        Intelligence active · Listings locked
-                      </div>
-                      <div className="mt-3 leading-relaxed">
-                        We run the intelligence layer before opening public supply. Publish a verified listing to help
-                        unlock this market.
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <Link
-                          href="/sell"
-                          className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-100 hover:bg-white/[0.09]"
-                        >
-                          Publish verified listing
-                        </Link>
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-2 text-xs text-zinc-300">
-                          Verified supply only
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-3 text-sm text-zinc-300">
-                      Coverage is warming. Truth Cards activate as soon as verified listings exist.
-                    </div>
-                  )}
-                </div>
-              ) : null}
-
-              {tab === 'supply' ? (
-                <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SUPPLY</div>
-
-                  {uiState === 'VERIFIED_SUPPLY_ONLY' ? (
-                    <div className="mt-3 text-sm text-zinc-300">
-                      Verified listings grid will render here (Phase 2). Each listing opens its Truth Card.
-                    </div>
-                  ) : (
-                    <div className="mt-3 rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-zinc-300">
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-200">
-                        <Lock className="h-4 w-4 opacity-80" />
-                        Listings locked
-                      </div>
-                      <div className="mt-3 leading-relaxed">
-                        Supply is integrity-gated. You can upload one listing, pay by credit card and publish after
-                        verification.
-                      </div>
-
-                      <div className="mt-4">
-                        <Link
-                          href="/sell"
-                          className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-100 hover:bg-white/[0.09]"
-                        >
-                          Publish verified listing
-                        </Link>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : null}
+              {city.blurb ? <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-200">{city.blurb}</p> : null}
             </div>
 
             <div className="mt-6 h-px w-full bg-white/10" />
 
-            {/* Links */}
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href={`/listings?city=${city.slug}`}
@@ -341,7 +239,6 @@ export default function CityPageClient({
                 Browse listings
               </Link>
 
-              {/* ✅ Ranking fuel */}
               <Link
                 href={`/city/${city.slug}/luxury-real-estate`}
                 className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-200 hover:border-white/20"
@@ -350,14 +247,73 @@ export default function CityPageClient({
               </Link>
 
               <Link
-                href={`/city/${city.slug}`}
+                href={`/sell?city=${encodeURIComponent(city.slug)}`}
                 className="rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-zinc-300 hover:border-white/20"
               >
-                {`/city/${city.slug}`}
+                Publish verified listing
               </Link>
             </div>
           </div>
         </div>
+
+        {/* CITY STATE LOGIC */}
+        {showVerifiedSupply ? (
+          <StateBanner
+            tone="good"
+            title="Verified supply only"
+            subtitle="Listings are visible because verification is complete. Truth Cards render from audited signals."
+            cta={
+              <div className="flex items-center gap-2">
+                <BrokerVerificationBadge status="verified" level="verified-broker" />
+              </div>
+            }
+          />
+        ) : showIntelligenceLocked ? (
+          <StateBanner
+            tone="violet"
+            title="Intelligence active · Listings locked"
+            subtitle="The intelligence layer is ready, but listings remain locked until verified supply exists in this city."
+            cta={
+              <Link
+                href={`/sell?city=${encodeURIComponent(city.slug)}`}
+                className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.06] px-5 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-100 hover:bg-white/[0.09]"
+              >
+                Publish verified listing
+              </Link>
+            }
+          />
+        ) : (
+          <StateBanner
+            tone="neutral"
+            title="Coverage expanding"
+            subtitle="Market structure first. Verified listings appear only once integrity gates are live for this city."
+            cta={
+              <Link
+                href={`/sell?city=${encodeURIComponent(city.slug)}`}
+                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-5 py-2 text-xs font-semibold tracking-[0.14em] text-zinc-200 hover:bg-white/[0.06]"
+              >
+                Submit a listing
+              </Link>
+            }
+          />
+        )}
+
+        {/* Truth Cards (only when verified supply exists) */}
+        {showVerifiedSupply ? (
+          <div className="grid gap-4">
+            {sampleTruthCards(city.name).map((d) => (
+              <TruthCard key={d.propertyId} data={d} onOpen={() => {}} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[26px] border border-white/10 bg-white/[0.02] p-5 text-sm text-zinc-300">
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">WHY LOCK</div>
+            <div className="mt-2">
+              Vantera does not show unverified supply. This prevents fake inventory, inflated pricing and marketing theatre.
+              The moment the first verified listing is published, this city flips to <span className="text-zinc-100">Verified supply only</span>.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
