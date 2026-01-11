@@ -62,15 +62,26 @@ function Tag({ children }: { children: React.ReactNode }) {
 export default function LuxuryRealEstatePage() {
   const doc = SEO_INTENT.luxuryGlobal();
 
+  const intentAbout =
+    doc.jsonld?.about?.map((a) => ({
+      '@type': a.type,
+      name: a.name,
+      ...(a.extra ?? {}),
+    })) ?? [];
+
   const pageJsonLd = webPageJsonLd({
     url: doc.canonical,
     name: doc.jsonld?.name ?? doc.title,
     description: doc.description,
-    about: (doc.jsonld?.about ?? []).map((a) => ({
-      '@type': a.type,
-      name: a.name,
-      ...(a.extra ?? {}),
-    })),
+    about: [
+      { '@type': 'Thing', name: 'Private intelligence for the world’s most valuable assets' },
+      { '@type': 'Thing', name: 'Luxury real estate for sale' },
+      { '@type': 'Thing', name: 'Prime real estate' },
+      { '@type': 'Thing', name: 'Property value signals' },
+      { '@type': 'Thing', name: 'Market liquidity' },
+      { '@type': 'Thing', name: 'Pricing reality' },
+      ...intentAbout,
+    ],
   });
 
   const exampleCities = CITIES.slice(0, 8);
@@ -79,7 +90,7 @@ export default function LuxuryRealEstatePage() {
     <main className="min-h-screen bg-[#06060a] text-zinc-100">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-32 left-1/2 h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.16),transparent_55%)] blur-2xl" />
-        <div className="absolute -bottom-40 left-1/2 h-[660px] w-[1100px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(155,109,255,0.16),transparent_60%)] blur-2xl" />
+        <div className="absolute -bottom-40 left=1/2 h-[660px] w-[1100px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(155,109,255,0.16),transparent_60%)] blur-2xl" />
       </div>
 
       {jsonLd(pageJsonLd)}
