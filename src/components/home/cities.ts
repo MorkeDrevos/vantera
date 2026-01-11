@@ -29,7 +29,7 @@ export type RegionCluster = {
 };
 
 export type City = {
-  // Required fields used by UI today
+  // Existing fields used by UI today
   slug: string;
   name: string;
   country: string;
@@ -38,7 +38,7 @@ export type City = {
   blurb?: string;
   image?: CityImage;
 
-  // Premium coverage metadata (optional, won’t break current UI)
+  // Coverage metadata (optional - won't break current UI)
   tier?: CoverageTier;
   status?: CoverageStatus;
   priority?: number;
@@ -49,7 +49,6 @@ export type City = {
 
 /**
  * Canonical Vantera coverage clusters
- * JamesEdition-style regional grouping.
  */
 export const REGION_CLUSTERS: RegionCluster[] = [
   {
@@ -104,7 +103,7 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     citySlugs: ['miami', 'new-york'],
   },
 
-  // Watchlist clusters (still included at launch, just Tier 3)
+  // Tier 3 region groupings (still included at launch)
   {
     slug: 'lake-como-region',
     name: 'Lake Como Region',
@@ -140,13 +139,10 @@ export const REGION_CLUSTERS: RegionCluster[] = [
 ];
 
 /**
- * ALL cities - including watchlist - visible in product at launch.
- * This is the canonical Vantera list.
+ * Core launch cities (Tiers 0-2)
  */
-export const ALL_CITIES: City[] = [
-  // -----------------------
-  // Tier 0 (Flagship)
-  // -----------------------
+export const CITIES: City[] = [
+  // Tier 0
   {
     slug: 'marbella',
     name: 'Marbella',
@@ -196,9 +192,7 @@ export const ALL_CITIES: City[] = [
     },
   },
 
-  // -----------------------
-  // Tier 1 (Core global)
-  // -----------------------
+  // Tier 1
   {
     slug: 'monaco',
     name: 'Monaco',
@@ -245,9 +239,7 @@ export const ALL_CITIES: City[] = [
     },
   },
 
-  // -----------------------
-  // Tier 2 (Visible expansion - still fully included at launch)
-  // -----------------------
+  // Tier 2
   {
     slug: 'new-york',
     name: 'New York',
@@ -327,10 +319,12 @@ export const ALL_CITIES: City[] = [
       alt: 'French Riviera harbour',
     },
   },
+];
 
-  // -----------------------
-  // Tier 3 (Watchlist - INCLUDED at launch)
-  // -----------------------
+/**
+ * Tier 3 watchlist - included at launch (visible and searchable)
+ */
+export const WATCHLIST_CITIES: City[] = [
   {
     slug: 'paris',
     name: 'Paris',
@@ -340,7 +334,6 @@ export const ALL_CITIES: City[] = [
     tier: 'TIER_3',
     status: 'EXPANDING',
     priority: 30,
-    clusterSlug: 'french-riviera',
     blurb: 'Prime districts only. Coverage expanding.',
     image: {
       src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2400&q=80',
@@ -412,18 +405,5 @@ export const ALL_CITIES: City[] = [
   },
 ];
 
-// Backwards compatibility: many parts of UI import `CITIES`
-export const CITIES: City[] = ALL_CITIES;
-
-export const ALL_CITIES_SORTED: City[] = [...ALL_CITIES].sort((a, b) => {
-  const ap = a.priority ?? 0;
-  const bp = b.priority ?? 0;
-  return bp - ap;
-});
-
-export const CITIES_BY_TIER: Record<CoverageTier, City[]> = {
-  TIER_0: ALL_CITIES_SORTED.filter((c) => c.tier === 'TIER_0'),
-  TIER_1: ALL_CITIES_SORTED.filter((c) => c.tier === 'TIER_1'),
-  TIER_2: ALL_CITIES_SORTED.filter((c) => c.tier === 'TIER_2'),
-  TIER_3: ALL_CITIES_SORTED.filter((c) => c.tier === 'TIER_3'),
-};
+// Canonical combined list (use this everywhere you want "all cities")
+export const ALL_CITIES: City[] = [...CITIES, ...WATCHLIST_CITIES].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
