@@ -2,6 +2,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { Suspense } from 'react';
 
 import TopBar from './TopBar';
 import ProtocolStrip from './ProtocolStrip';
@@ -44,7 +45,11 @@ export default function PageShell({
       </div>
 
       <div className="relative">
-        <TopBar />
+        {/* CRITICAL: TopBar uses useSearchParams, so it must be inside Suspense */}
+        <Suspense fallback={null}>
+          <TopBar />
+        </Suspense>
+
         <ProtocolStrip />
 
         {/* subtle spacer + separator so hero doesn't feel glued to the strip */}
@@ -60,9 +65,9 @@ export default function PageShell({
           <main className={`relative mx-auto w-full ${bodyMaxWidthClassName} px-5 pb-16 sm:px-8`}>
             {children}
           </main>
-        ) : (
-          children ? <div className="relative">{children}</div> : null
-        )}
+        ) : children ? (
+          <div className="relative">{children}</div>
+        ) : null}
 
         <Footer />
       </div>

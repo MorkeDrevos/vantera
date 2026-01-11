@@ -122,10 +122,6 @@ function uniqBy<T>(arr: T[], key: (t: T) => string) {
   return out;
 }
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
 export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -195,6 +191,7 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
+  // lock scroll when either overlay menu is open
   useEffect(() => {
     const open = citiesOpen || mobileOpen;
     if (!open) return;
@@ -221,6 +218,7 @@ export default function TopBar() {
       'Greece',
       'Germany',
       'Netherlands',
+      'Canada',
     ];
 
     const present = uniqBy(
@@ -281,8 +279,8 @@ export default function TopBar() {
   }
 
   // Royal palette helpers (low-white borders, deep graphite, restrained gold)
-  const barBg = scrolled ? 'bg-[#06070B]/92' : 'bg-[#06070B]/78';
-  const barRing = scrolled ? 'ring-1 ring-white/8' : 'ring-1 ring-white/6';
+  const barBg = scrolled ? 'bg-[#06070B]/96' : 'bg-[#06070B]/88';
+  const barRing = scrolled ? 'ring-1 ring-white/[0.07]' : 'ring-1 ring-white/[0.06]';
 
   const linkBase =
     'relative inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15';
@@ -297,11 +295,17 @@ export default function TopBar() {
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
   const goldRing = 'ring-1 ring-inset ring-[#E7C982]/20';
 
+  // JE-style country strip: subtle, scrollable, under main bar
+  const stripBg = scrolled ? 'bg-[#05060A]/90' : 'bg-[#05060A]/78';
+  const stripBorder = 'border-t border-white/[0.06]';
+  const stripLink =
+    'inline-flex items-center whitespace-nowrap px-2.5 py-2 text-[12px] text-zinc-200/80 hover:text-white transition';
+
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Royal background + frame */}
-      <div className={cx('relative w-full backdrop-blur-[18px]', barBg, barRing)}>
-        {/* top/bottom hairlines (not white) */}
+      {/* MAIN BAR */}
+      <div className={cx('relative w-full backdrop-blur-[12px]', barBg, barRing)}>
+        {/* top/bottom hairlines (not bright white) */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
 
@@ -321,10 +325,10 @@ export default function TopBar() {
               aria-label="Vantera home"
               className={cx(
                 'group relative flex shrink-0 items-center',
-                'rounded-2xl bg-[#05060A]/70 px-3 py-2',
-                'ring-1 ring-inset ring-white/8',
+                'rounded-2xl bg-[#05060A]/80 px-3 py-2',
+                'ring-1 ring-inset ring-white/[0.07]',
                 'shadow-[0_18px_60px_rgba(0,0,0,0.55)]',
-                'hover:ring-white/10 hover:bg-[#05060A]/80',
+                'hover:ring-white/[0.10] hover:bg-[#05060A]/90',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15',
               )}
             >
@@ -356,7 +360,7 @@ export default function TopBar() {
                 <span
                   className={cx(
                     'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] text-zinc-100/90',
-                    'bg-white/[0.03] ring-1 ring-inset ring-white/8',
+                    'bg-white/[0.03] ring-1 ring-inset ring-white/[0.07]',
                   )}
                 >
                   <Crown className="h-3.5 w-3.5 opacity-85" />
@@ -381,7 +385,7 @@ export default function TopBar() {
                 aria-haspopup="menu"
               >
                 <Globe className="h-4 w-4 opacity-90" />
-                Cities
+                Destinations
                 <ChevronDown className={cx('h-4 w-4 transition', citiesOpen && 'rotate-180')} />
               </button>
 
@@ -410,7 +414,12 @@ export default function TopBar() {
                 <div className="relative border-b border-white/8 px-6 py-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/85">
-                      <span className={cx('inline-flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.03]', goldRing)}>
+                      <span
+                        className={cx(
+                          'inline-flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.03]',
+                          goldRing,
+                        )}
+                      >
                         <Globe className="h-4 w-4 opacity-90" />
                       </span>
                       Explore by country
@@ -480,7 +489,7 @@ export default function TopBar() {
                   {/* Cities */}
                   <div className="col-span-4">
                     <div className="mb-3 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
-                      Top cities
+                      Featured cities
                     </div>
                     <div className="grid gap-2">
                       {topCities.map((c) => (
@@ -584,13 +593,27 @@ export default function TopBar() {
                       >
                         <span className="inline-flex items-center gap-2">
                           <Command className="h-4 w-4 opacity-90" />
-                          Search cities
+                          Search homes
                           <span className="ml-2 rounded-md px-2 py-0.5 font-mono text-[11px] text-zinc-200 ring-1 ring-inset ring-white/10 bg-white/[0.02]">
                             /
                           </span>
                         </span>
                         <ArrowRight className="h-4 w-4 opacity-70" />
                       </button>
+
+                      <Link
+                        href="/coming-soon?section=listings"
+                        prefetch
+                        onClick={() => setCitiesOpen(false)}
+                        className={cx(
+                          'mt-2 inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm',
+                          'bg-white/[0.02] ring-1 ring-inset ring-white/8 text-zinc-200/90',
+                          'hover:bg-white/[0.04] hover:ring-white/10 hover:text-white',
+                        )}
+                      >
+                        Browse listings
+                        <ArrowRight className="h-4 w-4 opacity-70" />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -600,7 +623,12 @@ export default function TopBar() {
                 {/* Bottom strip */}
                 <div className="relative flex items-center justify-between gap-3 px-6 py-4">
                   <div className="flex items-center gap-2 text-xs text-zinc-400">
-                    <span className={cx('inline-flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.03]', goldRing)}>
+                    <span
+                      className={cx(
+                        'inline-flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.03]',
+                        goldRing,
+                      )}
+                    >
                       <Sparkles className="h-4 w-4 opacity-85" />
                     </span>
                     Truth-first coverage expands city by city
@@ -616,29 +644,36 @@ export default function TopBar() {
                       'hover:bg-white/[0.05] hover:ring-white/12 hover:text-white',
                     )}
                   >
-                    View all cities <ArrowRight className="h-4 w-4 opacity-80" />
+                    View all destinations <ArrowRight className="h-4 w-4 opacity-80" />
                   </Link>
                 </div>
               </div>
             </div>
 
-            <Link href="/coming-soon?section=signals" prefetch className={cx(linkBase, linkIdle)}>
-              <Radar className="h-4 w-4 opacity-90" />
-              Signals
+            <Link href="/coming-soon?section=for-sale" prefetch className={cx(linkBase, linkIdle)}>
+              For sale
             </Link>
 
-            <Link href="/coming-soon?section=protocol" prefetch className={cx(linkBase, linkIdle)}>
-              <ShieldCheck className="h-4 w-4 opacity-90" />
-              Protocol
+            <Link href="/coming-soon?section=new-developments" prefetch className={cx(linkBase, linkIdle)}>
+              New developments
             </Link>
 
-            <Link href="/coming-soon?section=coverage" prefetch className={cx(linkBase, linkIdle)}>
-              <MapPin className="h-4 w-4 opacity-90" />
-              Coverage
+            <Link href="/coming-soon?section=off-market" prefetch className={cx(linkBase, linkIdle)}>
+              Off-market
+            </Link>
+
+            <Link href="/coming-soon?section=intel" prefetch className={cx(linkBase, linkIdle)}>
+              Market intel
             </Link>
 
             {onCityPage ? (
-              <div className={cx('ml-2 inline-flex items-center gap-2 rounded-full px-3 py-2', 'bg-white/[0.02]', 'ring-1 ring-inset ring-white/10')}>
+              <div
+                className={cx(
+                  'ml-2 inline-flex items-center gap-2 rounded-full px-3 py-2',
+                  'bg-white/[0.02]',
+                  'ring-1 ring-inset ring-white/10',
+                )}
+              >
                 <span className="inline-flex items-center gap-2 text-sm text-zinc-200/90">
                   <Sparkles className="h-4 w-4 text-white/70" />
                   Mode:
@@ -685,7 +720,13 @@ export default function TopBar() {
 
           {/* Right */}
           <div className="flex items-center gap-2">
-            <div className={cx('hidden items-center gap-2 rounded-full px-3 py-2 text-sm xl:flex', 'bg-white/[0.02]', 'ring-1 ring-inset ring-white/10')}>
+            <div
+              className={cx(
+                'hidden items-center gap-2 rounded-full px-3 py-2 text-sm xl:flex',
+                'bg-white/[0.02]',
+                'ring-1 ring-inset ring-white/10',
+              )}
+            >
               <span className="inline-flex items-center gap-2 text-zinc-200/90">
                 <Command className="h-4 w-4 opacity-90" />
                 Search
@@ -710,12 +751,12 @@ export default function TopBar() {
                 'hover:bg-white/[0.05] hover:ring-white/12',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/15',
               )}
-              aria-label="Explore cities"
+              aria-label="Search homes"
             >
               <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
                 <span className="absolute -left-1/3 top-0 h-full w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
               </span>
-              <span className={cx('tracking-[0.06em]', goldText)}>Explore</span>
+              <span className={cx('tracking-[0.06em]', goldText)}>Search homes</span>
               <ArrowRight className="h-4 w-4 opacity-85 transition group-hover:translate-x-0.5" />
             </Link>
 
@@ -731,15 +772,66 @@ export default function TopBar() {
             </button>
           </div>
         </div>
+
+        {/* JE-STYLE COUNTRY STRIP (desktop only) */}
+        <div className={cx('hidden lg:block', stripBg, stripBorder)}>
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="flex items-center gap-3">
+              <span className="py-2 text-[12px] font-semibold tracking-[0.14em] uppercase text-zinc-200/70">
+                Countries
+              </span>
+
+              <div className="h-4 w-px bg-white/10" />
+
+              <div
+                className={cx(
+                  'relative flex min-w-0 flex-1 items-center gap-1 overflow-x-auto',
+                  '[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                )}
+              >
+                {countries.map((c) => (
+                  <Link
+                    key={c}
+                    href={countryHref(c)}
+                    prefetch
+                    onClick={() => setCitiesOpen(false)}
+                    className={stripLink}
+                  >
+                    {c}
+                  </Link>
+                ))}
+
+                <Link
+                  href="/"
+                  prefetch
+                  onClick={(e) => {
+                    if (pathname === '/') {
+                      e.preventDefault();
+                      focusGlobalSearch();
+                    }
+                  }}
+                  className={cx(
+                    'ml-auto inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px]',
+                    'bg-white/[0.02] text-zinc-200/85 ring-1 ring-inset ring-white/8',
+                    'hover:bg-white/[0.04] hover:text-white hover:ring-white/10',
+                  )}
+                >
+                  <Command className="h-4 w-4 opacity-85" />
+                  Quick search <span className="font-mono text-[11px] opacity-80">/</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Desktop scrim */}
       {citiesOpen ? (
         <button
           type="button"
-          aria-label="Close cities menu"
+          aria-label="Close destinations menu"
           onClick={() => setCitiesOpen(false)}
-          className="fixed inset-0 z-[60] hidden bg-black/70 lg:block"
+          className="fixed inset-0 z-[60] hidden bg-black/75 lg:block"
         />
       ) : null}
 
@@ -749,7 +841,7 @@ export default function TopBar() {
         className={cx(
           'lg:hidden',
           'overflow-hidden transition-[max-height,opacity] duration-300',
-          mobileOpen ? 'max-h-[680px] opacity-100' : 'max-h-0 opacity-0',
+          mobileOpen ? 'max-h-[720px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
@@ -769,7 +861,7 @@ export default function TopBar() {
               >
                 <span className="inline-flex items-center gap-2">
                   <Command className="h-4 w-4 opacity-90" />
-                  Search cities
+                  Search homes
                   <span className="ml-2 rounded-md px-2 py-0.5 font-mono text-[11px] text-zinc-200 ring-1 ring-inset ring-white/10 bg-white/[0.02]">
                     /
                   </span>
@@ -778,39 +870,7 @@ export default function TopBar() {
               </button>
 
               <Link
-                href="/coming-soon?section=signals"
-                prefetch
-                className={cx(
-                  'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
-                  'bg-white/[0.02] ring-1 ring-inset ring-white/10',
-                  'hover:bg-white/[0.04] hover:ring-white/12',
-                )}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Radar className="h-4 w-4 opacity-90" />
-                  Signals
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              <Link
-                href="/coming-soon?section=protocol"
-                prefetch
-                className={cx(
-                  'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
-                  'bg-white/[0.02] ring-1 ring-inset ring-white/10',
-                  'hover:bg-white/[0.04] hover:ring-white/12',
-                )}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 opacity-90" />
-                  Protocol
-                </span>
-                <ArrowRight className="h-4 w-4 opacity-75" />
-              </Link>
-
-              <Link
-                href="/coming-soon?section=coverage"
+                href="/coming-soon?section=for-sale"
                 prefetch
                 className={cx(
                   'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
@@ -820,14 +880,62 @@ export default function TopBar() {
               >
                 <span className="inline-flex items-center gap-2">
                   <MapPin className="h-4 w-4 opacity-90" />
-                  Coverage
+                  For sale
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-75" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=new-developments"
+                prefetch
+                className={cx(
+                  'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
+                  'bg-white/[0.02] ring-1 ring-inset ring-white/10',
+                  'hover:bg-white/[0.04] hover:ring-white/12',
+                )}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Radar className="h-4 w-4 opacity-90" />
+                  New developments
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-75" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=off-market"
+                prefetch
+                className={cx(
+                  'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
+                  'bg-white/[0.02] ring-1 ring-inset ring-white/10',
+                  'hover:bg-white/[0.04] hover:ring-white/12',
+                )}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 opacity-90" />
+                  Off-market
+                </span>
+                <ArrowRight className="h-4 w-4 opacity-75" />
+              </Link>
+
+              <Link
+                href="/coming-soon?section=intel"
+                prefetch
+                className={cx(
+                  'flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200',
+                  'bg-white/[0.02] ring-1 ring-inset ring-white/10',
+                  'hover:bg-white/[0.04] hover:ring-white/12',
+                )}
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 opacity-90" />
+                  Market intel
                 </span>
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </Link>
 
               <div className="mt-2 rounded-3xl bg-white/[0.02] p-3 ring-1 ring-inset ring-white/10">
                 <div className={cx('mb-2 text-xs font-semibold tracking-[0.18em] uppercase', goldText)}>
-                  Top cities
+                  Featured cities
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {topCities.slice(0, 8).map((c) => (
@@ -860,7 +968,7 @@ export default function TopBar() {
                 >
                   <span className="inline-flex items-center gap-2">
                     <Globe className="h-4 w-4 opacity-90" />
-                    View city hub
+                    View destination hub
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-75" />
                 </Link>

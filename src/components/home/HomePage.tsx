@@ -42,6 +42,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
+        {/* IMPORTANT: TopBar uses useSearchParams, so keep it inside Suspense */}
         <Suspense fallback={null}>
           <TopBar />
         </Suspense>
@@ -75,17 +76,14 @@ function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: st
 function HeroShine() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* breathing ambient - uses your keyframes */}
       <div className="absolute inset-0 animate-[vanteraPulse_14s_ease-in-out_infinite]">
         <div className="absolute -top-28 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.10),transparent_62%)] blur-2xl" />
         <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.18),transparent_62%)] blur-2xl" />
         <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.12),transparent_60%)] blur-2xl" />
       </div>
 
-      {/* glass sweep - restrained */}
       <div className="absolute inset-0 animate-[vanteraSweep_10s_ease-in-out_infinite] opacity-25 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.08)_45%,transparent_62%)]" />
 
-      {/* watermark */}
       <div className="absolute right-[-80px] top-[-70px] opacity-[0.05] blur-[0.2px]">
         <Image src="/brand/vantera-logo-dark.png" alt="" width={560} height={180} className="w-[560px]" />
       </div>
@@ -94,9 +92,6 @@ function HeroShine() {
 }
 
 function HeroVideo() {
-  // Place your assets here:
-  // - public/hero/vantera-hero.mp4
-  // - public/hero/vantera-hero.jpg
   return (
     <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
       <video
@@ -111,13 +106,11 @@ function HeroVideo() {
         <source src="/hero/vantera-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* premium veil + vignette */}
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),rgba(0,0,0,0.72))]" />
       <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
       <div className="absolute inset-0 [background:radial-gradient(900px_420px_at_15%_20%,rgba(120,76,255,0.14),transparent_55%)] opacity-70" />
       <div className="absolute inset-0 [background:radial-gradient(900px_420px_at_85%_25%,rgba(62,196,255,0.10),transparent_55%)] opacity-70" />
 
-      {/* subtle film grain (no external asset) */}
       <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.65)_1px,transparent_0)] [background-size:18px_18px]" />
     </div>
   );
@@ -159,13 +152,7 @@ function SignalStrip({
   );
 }
 
-function Pillar({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-200 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_180px_at_20%,rgba(255,255,255,0.06),transparent_60%)]" />
@@ -183,13 +170,16 @@ export default function HomePage() {
 
   return (
     <Shell>
-      {/* HERO */}
+      {/* HERO - FULL BLEED (edge to edge) */}
       <section className="relative w-full pb-12 pt-12 sm:pb-16 sm:pt-14">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
 
-          <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
+          {/* IMPORTANT CHANGE:
+              - removed mx-auto + max-w-7xl limiter
+              - content can now span the entire viewport width */}
+          <div className="relative w-full px-6 py-14 sm:px-10 sm:py-16 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
               {/* LEFT */}
               <div className="lg:col-span-7">
@@ -214,7 +204,6 @@ export default function HomePage() {
                   <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
                 </p>
 
-                {/* Command bar */}
                 <div className="mt-7 max-w-2xl">
                   <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
@@ -241,7 +230,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Signal strip (replaces stat cards) */}
                 <div className="mt-5 max-w-2xl">
                   <SignalStrip
                     left={[
@@ -253,7 +241,6 @@ export default function HomePage() {
                   />
                 </div>
 
-                {/* Narrative pillars */}
                 <div className="mt-5 grid max-w-2xl gap-3 sm:grid-cols-3">
                   <Pillar title="Signal" body="Market context designed to cut through noise." />
                   <Pillar title="Verification" body="Truth layers activate as coverage becomes real." />
@@ -304,7 +291,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* TRUST STRIP (full-width, outside max-w container) */}
+      {/* TRUST STRIP (full-width) */}
       <TrustMarquee
         logos={TRUST_LOGOS}
         className="mt-0"
@@ -313,8 +300,8 @@ export default function HomePage() {
         subtitle="A credibility layer for clients who expect institutional standards."
       />
 
-      {/* BODY */}
-      <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
+      {/* BODY (keep premium wide, not edge-to-edge) */}
+      <div className="mx-auto w-full max-w-[1600px] px-6 pb-16 sm:px-10 2xl:px-14">
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore the index</SectionLabel>
 

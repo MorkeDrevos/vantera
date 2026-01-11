@@ -1,52 +1,38 @@
 // src/app/layout.tsx
-
 import type { Metadata } from 'next';
 import './globals.css';
 
+import ComingSoon from '@/components/ComingSoon';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://vantera.com'),
-
-  title: {
-    default: 'Vantera – Truth-First Real Estate Intelligence',
-    template: '%s · Vantera',
-  },
-
+  title: { default: 'Vantera – Truth-First Real Estate Intelligence', template: '%s · Vantera' },
   description:
-    'Truth-first real estate intelligence. Explore cities, supply, pricing signals, and verified market data – without noise.',
-
+    'Truth-first real estate intelligence. Explore cities, supply, pricing signals, and verified market data - without noise.',
   applicationName: 'Vantera',
-
   openGraph: {
     type: 'website',
     siteName: 'Vantera',
     title: 'Vantera – Truth-First Real Estate Intelligence',
-    description:
-      'Explore cities, supply dynamics, and real estate truth layers built for clarity and trust.',
+    description: 'Explore cities, supply dynamics, and real estate truth layers built for clarity and trust.',
     images: ['/og/vantera-default.png'],
   },
-
   twitter: {
     card: 'summary_large_image',
     title: 'Vantera',
-    description:
-      'Truth-first real estate intelligence for cities worldwide.',
+    description: 'Truth-first real estate intelligence for cities worldwide.',
     images: ['/og/vantera-default.png'],
   },
-
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const isProd = process.env.NODE_ENV === 'production';
+  const comingSoon = isProd && process.env.NEXT_PUBLIC_COMING_SOON === '1';
+
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>{comingSoon ? <ComingSoon /> : children}</body>
     </html>
   );
 }

@@ -46,11 +46,6 @@ export default function ComingSoon() {
               "
             />
           </div>
-
-          {/* whisper subtitle */}
-          <div className="mt-4 text-[11px] tracking-[0.36em] text-white/45">
-            GLOBAL PROPERTY INTELLIGENCE
-          </div>
         </div>
 
         {/* SPACE — intentional */}
@@ -71,7 +66,7 @@ export default function ComingSoon() {
             {/* ultra-hairline */}
             <div className="pointer-events-none absolute inset-0 rounded-[20px] ring-1 ring-white/[0.045]" />
 
-            <div className="relative text-balance text-xl font-medium text-white/88 sm:text-2xl">
+            <div className="relative text-balance text-base font-medium text-zinc-300 sm:text-lg">
               Intelligence for the world’s most valuable assets.
             </div>
 

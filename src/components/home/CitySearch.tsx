@@ -34,6 +34,14 @@ function rank(city: City, q: string) {
   return 0;
 }
 
+function focusVanteraCitySearch() {
+  const el =
+    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
+    (document.getElementById('locus-city-search') as HTMLInputElement | null);
+
+  el?.focus();
+}
+
 export default function CitySearch() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -45,6 +53,21 @@ export default function CitySearch() {
   useEffect(() => {
     if (!q.trim()) setActive(0);
   }, [q]);
+
+  // ✅ Bulletproof hotkey focus: TopBar can dispatch this event if needed.
+  // Even if it doesn't, this is harmless and future-proof.
+  useEffect(() => {
+    const onFocusSearch = () => {
+      setOpen(true);
+      // Let React commit before focusing (prevents flaky focus on route changes)
+      window.setTimeout(() => {
+        focusVanteraCitySearch();
+      }, 0);
+    };
+
+    window.addEventListener('vantera:focus-search', onFocusSearch as EventListener);
+    return () => window.removeEventListener('vantera:focus-search', onFocusSearch as EventListener);
+  }, []);
 
   const results = useMemo(() => {
     const qq = normalize(q);
@@ -98,7 +121,11 @@ export default function CitySearch() {
               setOpen(true);
               setActive(0);
             }}
-            onFocus={() => setOpen(true)}
+            onFocus={() => {
+              setOpen(true);
+              // If focused by hotkey, we want dropdown immediately
+              setActive(0);
+            }}
             onBlur={() => window.setTimeout(() => setOpen(false), 120)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -193,9 +220,7 @@ export default function CitySearch() {
                         </div>
 
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-zinc-100">
-                            {c.name}
-                          </div>
+                          <div className="truncate text-sm font-semibold text-zinc-100">{c.name}</div>
                           <div className="truncate text-xs text-zinc-500">
                             {c.country}
                             {c.region ? ` · ${c.region}` : ''}
