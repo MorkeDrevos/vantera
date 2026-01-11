@@ -285,7 +285,7 @@ export default function TopBar() {
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/6" />
         </div>
 
-        // src/components/layout/TopBar.tsx
+        <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-4 sm:px-8 sm:py-5">
 
 <Link href="/" prefetch aria-label="Vantera home" className="relative flex shrink-0 items-center">
   {/* subtle “flash” behind the mark */}
