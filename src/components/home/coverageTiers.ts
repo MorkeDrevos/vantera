@@ -1,36 +1,49 @@
 // src/components/home/coverageTiers.ts
 import type { City } from './cities';
 
-export type CoverageTier = 'core' | 'expanded' | 'scout';
+export type CoverageTier = 'Core' | 'Plus' | 'Watch';
 
-export function coverageTierLabel(tier: CoverageTier) {
-  if (tier === 'core') return 'Core';
-  if (tier === 'expanded') return 'Expanded';
-  return 'Scout';
-}
+export function coverageTierForCity(city: City): CoverageTier {
+  const slug = city.slug?.toLowerCase?.() ?? '';
+  const country = city.country?.toLowerCase?.() ?? '';
+  const name = city.name?.toLowerCase?.() ?? '';
 
-// You can tune this list anytime without touching the City type.
-const CORE_SLUGS = new Set<string>([
-  'madrid',
-  'paris',
-  'london',
-  'dubai',
-  'new-york',
-  'nyc',
-  'marbella',
-]);
+  // Core = deepest coverage (start here)
+  if (
+    slug === 'marbella' ||
+    slug === 'london' ||
+    slug === 'paris' ||
+    slug === 'madrid' ||
+    slug === 'barcelona' ||
+    slug === 'monaco' ||
+    slug === 'dubai' ||
+    slug === 'new-york' ||
+    slug === 'miami' ||
+    slug === 'geneva' ||
+    slug === 'zurich'
+  ) {
+    return 'Core';
+  }
 
-// Simple, deterministic tiering:
-// - Core = flagship cities
-// - Expanded = has a blurb and image (stronger editorial coverage)
-// - Scout = everything else
-export function getCoverageTier(city: City): CoverageTier {
-  const slug = (city.slug || '').toLowerCase();
-  if (CORE_SLUGS.has(slug)) return 'core';
+  // Plus = strong luxury relevance, good density
+  if (
+    name.includes('cannes') ||
+    name.includes('antibes') ||
+    name.includes('ibiza') ||
+    name.includes('mallorca') ||
+    name.includes('lisbon') ||
+    name.includes('rome') ||
+    name.includes('milan') ||
+    name.includes('vienna') ||
+    name.includes('amsterdam') ||
+    name.includes('stockholm') ||
+    name.includes('copenhagen') ||
+    country.includes('switzerland') ||
+    country.includes('uae')
+  ) {
+    return 'Plus';
+  }
 
-  const hasEditorial = Boolean(city.blurb && city.blurb.trim().length > 0);
-  const hasImage = Boolean(city.image?.src && city.image.src.trim().length > 0);
-
-  if (hasEditorial && hasImage) return 'expanded';
-  return 'scout';
+  // Watch = tracked, but depth still building
+  return 'Watch';
 }
