@@ -11,6 +11,7 @@ import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 
 import CitySearch from './CitySearch';
+import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 import { CITIES } from './cities';
 
