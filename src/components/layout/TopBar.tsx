@@ -73,35 +73,6 @@ function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
 }
 
-function useClickOutside(
-  refs: Array<React.RefObject<HTMLElement>>,
-  onOutside: () => void,
-  enabled: boolean,
-) {
-  useEffect(() => {
-    if (!enabled) return;
-
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node | null;
-      if (!t) return;
-
-      for (const r of refs) {
-        const el = r.current;
-        if (el && el.contains(t)) return;
-      }
-
-      onOutside();
-    };
-
-    window.addEventListener('mousedown', onDown, { passive: true });
-    window.addEventListener('touchstart', onDown, { passive: true });
-    return () => {
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('touchstart', onDown);
-    };
-  }, [enabled, onOutside, refs]);
-}
-
 type CityLite = {
   name: string;
   slug: string;
@@ -132,12 +103,12 @@ export default function TopBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
 
-  // Hover intent timers (this is what makes hover open reliable)
-  const openTimer = useRef<number | null>(null);
-  const closeTimer = useRef<number | null>(null);
-
   const citiesWrapRef = useRef<HTMLDivElement>(null);
   const citiesPanelRef = useRef<HTMLDivElement>(null);
+
+  // Hover intent timers (noticeably improves "JE" feel)
+  const openT = useRef<number | null>(null);
+  const closeT = useRef<number | null>(null);
 
   const onCityPage = useMemo(() => pathname?.startsWith('/city/'), [pathname]);
 
@@ -147,8 +118,7 @@ export default function TopBar() {
     return 'truth';
   }, [searchParams]);
 
-  useClickOutside([citiesWrapRef, citiesPanelRef], () => setCitiesOpen(false), citiesOpen);
-
+  // Scroll style
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
@@ -156,11 +126,13 @@ export default function TopBar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close menus on route change
   useEffect(() => {
     setMobileOpen(false);
     setCitiesOpen(false);
   }, [pathname]);
 
+  // Escape + city shortcuts
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as Element | null;
@@ -194,7 +166,7 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
-  // Lock scroll only for mobile menu
+  // Lock scroll ONLY for mobile menu (do not lock for mega menu)
   useEffect(() => {
     if (!mobileOpen) return;
 
@@ -205,13 +177,30 @@ export default function TopBar() {
     };
   }, [mobileOpen]);
 
-  // Cleanup timers on unmount
+  // Robust click outside (only when mega is open)
   useEffect(() => {
-    return () => {
-      if (openTimer.current) window.clearTimeout(openTimer.current);
-      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    if (!citiesOpen) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      const wrap = citiesWrapRef.current;
+      const panel = citiesPanelRef.current;
+
+      if (wrap && wrap.contains(t)) return;
+      if (panel && panel.contains(t)) return;
+
+      setCitiesOpen(false);
     };
-  }, []);
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [citiesOpen]);
 
   // --- Mega menu data ---
   const cityList = useMemo<CityLite[]>(() => (CITIES as any) ?? [], []);
@@ -287,27 +276,8 @@ export default function TopBar() {
     return `/coming-soon?country=${encodeURIComponent(country)}`;
   }
 
-  // Hover handlers for the Destinations item (desktop)
-  function openCitiesHover() {
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    if (openTimer.current) window.clearTimeout(openTimer.current);
-
-    openTimer.current = window.setTimeout(() => {
-      setCitiesOpen(true);
-    }, 110);
-  }
-
-  function closeCitiesHover() {
-    if (openTimer.current) window.clearTimeout(openTimer.current);
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-
-    closeTimer.current = window.setTimeout(() => {
-      setCitiesOpen(false);
-    }, 170);
-  }
-
-  // ---- JE-like: solid, controlled, one-line nav, BIG logo, reliable hover ----
-  const barBg = scrolled ? 'bg-[#07080B]/98' : 'bg-[#07080B]/92';
+  // ---- Styling (JE-like, calmer borders, solid bar) ----
+  const barBg = scrolled ? 'bg-[#07080B]/96' : 'bg-[#07080B]/88';
   const barBorder = 'border-b border-white/5';
 
   const navLink =
@@ -320,6 +290,29 @@ export default function TopBar() {
   const goldText =
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
 
+  // ---- Hover open/close (this is the part you are missing right now) ----
+  function cancelTimers() {
+    if (openT.current) window.clearTimeout(openT.current);
+    if (closeT.current) window.clearTimeout(closeT.current);
+    openT.current = null;
+    closeT.current = null;
+  }
+
+  function openCitiesSoon() {
+    cancelTimers();
+    openT.current = window.setTimeout(() => setCitiesOpen(true), 60);
+  }
+
+  function closeCitiesSoon() {
+    cancelTimers();
+    closeT.current = window.setTimeout(() => setCitiesOpen(false), 140);
+  }
+
+  function toggleCities() {
+    cancelTimers();
+    setCitiesOpen((v) => !v);
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[16px]', barBg, barBorder)}>
@@ -329,40 +322,41 @@ export default function TopBar() {
           <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
         </div>
 
-        {/* Increased height for bigger logo */}
-        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-5 px-5 py-6 sm:px-8 sm:py-7">
-          {/* BIG logo (no box) */}
+        {/* Taller bar so logo can be bigger */}
+        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-4 px-5 py-6 sm:px-8 sm:py-7">
+          {/* Left: Bigger logo, no box */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex items-center shrink-0">
             <Image
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
-              width={360}
-              height={92}
+              width={420}
+              height={96}
               priority={false}
-              className="h-16 w-auto sm:h-18 md:h-20 drop-shadow-[0_24px_90px_rgba(0,0,0,0.70)]"
+              className="h-16 w-auto sm:h-18 md:h-20 drop-shadow-[0_22px_90px_rgba(0,0,0,0.70)]"
             />
           </Link>
 
-          {/* One-line menu */}
+          {/* Center: one-line menu */}
           <nav
             className={cx(
-              'hidden lg:flex items-center gap-7',
+              'hidden lg:flex items-center gap-6',
               'flex-1 min-w-0',
               'whitespace-nowrap',
               'overflow-hidden',
             )}
             aria-label="Primary"
           >
-            {/* Destinations - hover opens */}
+            {/* Destinations (hover + click) */}
             <div
               className="relative shrink-0"
               ref={citiesWrapRef}
-              onMouseEnter={openCitiesHover}
-              onMouseLeave={closeCitiesHover}
+              onMouseEnter={openCitiesSoon}
+              onMouseLeave={closeCitiesSoon}
             >
               <button
                 type="button"
-                onClick={() => setCitiesOpen((v) => !v)}
+                onClick={toggleCities}
+                onFocus={() => setCitiesOpen(true)}
                 className={cx(navLink, citiesOpen && navLinkActive)}
                 aria-expanded={citiesOpen}
                 aria-haspopup="menu"
@@ -375,8 +369,14 @@ export default function TopBar() {
               {/* Mega panel */}
               <div
                 ref={citiesPanelRef}
+                // Keep open when cursor moves into panel
+                onMouseEnter={() => {
+                  cancelTimers();
+                  setCitiesOpen(true);
+                }}
+                onMouseLeave={closeCitiesSoon}
                 className={cx(
-                  'absolute left-1/2 z-[70] mt-4 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
+                  'absolute left-1/2 z-[80] mt-4 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
                   'rounded-[26px] bg-[#05060A]',
                   'shadow-[0_70px_220px_rgba(0,0,0,0.90)]',
                   'ring-1 ring-inset ring-white/10',
@@ -667,6 +667,21 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  setCitiesOpen(true);
+                  setMobileOpen(false);
+                }}
+                className="flex items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-200 bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.04] hover:ring-white/12 transition"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Globe className="h-4 w-4 opacity-90" />
+                  Destinations
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-80" />
+              </button>
+
               <Link
                 href="/coming-soon?section=for-sale"
                 prefetch
@@ -719,22 +734,7 @@ export default function TopBar() {
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </Link>
 
-              <Link
-                href="/"
-                prefetch
-                onClick={(e) => {
-                  if (pathname === '/') {
-                    e.preventDefault();
-                    setMobileOpen(false);
-                    focusGlobalSearch();
-                  }
-                }}
-                className="mt-1 flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold text-zinc-100 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
-              >
-                <span className={goldText}>Search homes</span>
-                <ArrowRight className="h-4 w-4 opacity-85" />
-              </Link>
-
+              {/* City page mode pills */}
               {onCityPage ? (
                 <div className="mt-2 rounded-3xl bg-white/[0.02] p-3 ring-1 ring-inset ring-white/10">
                   <div className="mb-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
