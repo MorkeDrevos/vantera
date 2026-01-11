@@ -135,4 +135,70 @@ export default function LuxuryRealEstatePage() {
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <Pill title="What defines luxury beyond price">
             Luxury is not price alone. True luxury is scarcity, location power, privacy, planning constraints, and a buyer pool that stays deep through cycles.
-            Vantera
+            Vantera models the parts portals cannot: value, liquidity, and risk in context.
+          </Pill>
+
+          <Pill title="Asking price is not value">
+            The biggest lie in real estate is that asking price equals value. Luxury amplifies this gap.
+            We track signals that reveal reality: reductions, velocity, dispersion, and comparable pressure.
+          </Pill>
+
+          <Pill title="Liquidity matters more than finishes">
+            A beautiful home that cannot sell is not prime. Liquidity is the real luxury.
+            Vantera highlights demand depth and time-to-sell pressure so buyers and sellers stop guessing.
+          </Pill>
+
+          <Pill title="Truth-first listings, sellers, and agents">
+            Vantera is a listings portal and selling platform, but the truth layer leads.
+            Private sellers and agents publish inside reality constraints, not marketing narratives.
+          </Pill>
+        </div>
+
+        <div className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight text-white">Explore luxury by city</h2>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+                City pages are where Vantera wins long-tail searches like “luxury real estate for sale in {`{city}` }”.
+              </p>
+            </div>
+            <Link
+              href="/"
+              className="mt-3 w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10 sm:mt-0"
+            >
+              Browse all cities
+            </Link>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {exampleCities.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/city/${c.slug}/luxury-real-estate`}
+                className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 hover:bg-white/[0.05]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-white">{c.name}</div>
+                    <div className="truncate text-xs text-zinc-400">
+                      {[c.region, c.country].filter(Boolean).join(', ')}
+                    </div>
+                  </div>
+                  <div className="text-xs text-zinc-400 group-hover:text-zinc-200">View</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-6 text-xs text-zinc-500">
+            Popular searches: luxury real estate for sale, luxury homes for sale, prime real estate, high-end property, exclusive homes, off-market luxury.
+          </div>
+        </div>
+
+        <div className="mt-12 text-xs text-zinc-600">
+          <div>Canonical: {doc.canonical}</div>
+        </div>
+      </div>
+    </main>
+  );
+}
