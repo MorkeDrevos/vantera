@@ -11,6 +11,12 @@ import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import { CITIES } from './cities';
 
+type TrustLogo = {
+  name: string;
+  src: string;
+  href: string;
+};
+
 const TRUST_LOGOS: TrustLogo[] = [
   { name: "Sotheby's International Realty", src: '/brands/sothebys.svg', href: 'https://www.sothebysrealty.com' },
   { name: "Christie's International Real Estate", src: '/brands/christies.svg', href: 'https://www.christiesrealestate.com' },
