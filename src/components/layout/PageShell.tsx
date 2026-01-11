@@ -7,6 +7,8 @@ import TopBar from './TopBar';
 import ProtocolStrip from './ProtocolStrip';
 import Footer from './Footer';
 
+type ContentWidth = 'wide' | 'reading' | 'full';
+
 type PageShellProps = {
   children?: ReactNode;
 
@@ -16,16 +18,41 @@ type PageShellProps = {
   // If true, we skip the constrained <main> spacing (useful for hero-driven pages like city)
   heroOnly?: boolean;
 
-  // Optional: override default body container width (homepage uses max-w-6xl, hero uses max-w-7xl)
+  // New: preferred width control (cleaner than passing raw Tailwind classes)
+  // - wide: premium platform width (default)
+  // - reading: narrower for text-heavy pages
+  // - full: no max width at all
+  contentWidth?: ContentWidth;
+
+  // New: allow children area to be full width (rare, but useful)
+  // If true, we render children without the constrained container.
+  fullBleedChildren?: boolean;
+
+  // Backwards compat: override default body container width (legacy)
   bodyMaxWidthClassName?: string;
 };
+
+function widthToClass(w: ContentWidth) {
+  if (w === 'full') return '';
+  if (w === 'reading') return 'max-w-6xl';
+  // "wide" (default): luxurious, not boxed on desktop
+  return 'max-w-[1600px]';
+}
 
 export default function PageShell({
   children,
   fullBleedHero,
   heroOnly = false,
-  bodyMaxWidthClassName = 'max-w-6xl',
+
+  // New defaults
+  contentWidth = 'wide',
+  fullBleedChildren = false,
+
+  // Backwards compat (if someone is already passing this, it wins)
+  bodyMaxWidthClassName,
 }: PageShellProps) {
+  const computedMaxW = bodyMaxWidthClassName ?? widthToClass(contentWidth);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Ambient background (global) */}
@@ -57,12 +84,16 @@ export default function PageShell({
 
         {/* If hero-only page, do not inject a big constrained main */}
         {!heroOnly ? (
-          <main className={`relative mx-auto w-full ${bodyMaxWidthClassName} px-5 pb-16 sm:px-8`}>
-            {children}
-          </main>
-        ) : (
-          children ? <div className="relative">{children}</div> : null
-        )}
+          fullBleedChildren ? (
+            <main className="relative w-full pb-16">{children}</main>
+          ) : (
+            <main className={`relative mx-auto w-full ${computedMaxW} px-5 pb-16 sm:px-8`}>
+              {children}
+            </main>
+          )
+        ) : children ? (
+          <div className="relative">{children}</div>
+        ) : null}
 
         <Footer />
       </div>
