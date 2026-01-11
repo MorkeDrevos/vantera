@@ -1,54 +1,82 @@
 // middleware.ts
 import { NextResponse, type NextRequest } from 'next/server';
 
-// Everything on these hosts should behave normally (no coming-soon gate)
-const ALLOW_HOSTS = new Set([
+const DEV_HOSTS = new Set([
   'dev.vantera.io',
   'localhost',
   '127.0.0.1',
 ]);
 
-function isBypassPath(pathname: string) {
-  // Let Next internals + assets work normally
+function getHost(req: NextRequest) {
+  // Vercel typically forwards the real host here
+  const xfHost = req.headers.get('x-forwarded-host');
+  const host = req.headers.get('host');
+  const raw = (xfHost || host || '').toLowerCase();
+
+  // strip port
+  return raw.split(',')[0].trim().split(':')[0];
+}
+
+function isPublicAsset(pathname: string) {
+  // Next internals
   if (pathname.startsWith('/_next')) return true;
 
-  // Let public/static files load normally (add more if you need)
+  // Allow common static files
   if (pathname === '/favicon.ico') return true;
   if (pathname === '/robots.txt') return true;
   if (pathname === '/sitemap.xml') return true;
 
-  // Let OG images / icons / assets load
+  // Allow your public folders used by ComingSoon + homepage
   if (pathname.startsWith('/og/')) return true;
   if (pathname.startsWith('/brand/')) return true;
   if (pathname.startsWith('/brands/')) return true;
   if (pathname.startsWith('/hero/')) return true;
 
-  // Let API routes work (health checks, etc.)
-  if (pathname.startsWith('/api')) return true;
+  // Allow any file with an extension (png, jpg, svg, css, js, etc.)
+  // This prevents breaking images/fonts even if you move folders later.
+  if (/\.[a-zA-Z0-9]+$/.test(pathname)) return true;
 
   return false;
 }
 
 export function middleware(req: NextRequest) {
+  const host = getHost(req);
   const { pathname } = req.nextUrl;
 
-  // Always allow bypass paths
-  if (isBypassPath(pathname)) return NextResponse.next();
+  // Always let assets + APIs through
+  if (isPublicAsset(pathname) || pathname.startsWith('/api')) {
+    const res = NextResponse.next();
+    res.headers.set('x-vantera-gate', 'bypass-assets');
+    res.headers.set('x-vantera-host', host || 'unknown');
+    return res;
+  }
 
-  // Figure out host (strip port if present)
-  const host = (req.headers.get('host') || '').toLowerCase().split(':')[0];
+  // Prevent looping / reprocessing coming-soon itself
+  if (pathname === '/coming-soon') {
+    const res = NextResponse.next();
+    res.headers.set('x-vantera-gate', 'allow-coming-soon');
+    res.headers.set('x-vantera-host', host || 'unknown');
+    return res;
+  }
 
-  // Allow dev + local to work normally
-  if (ALLOW_HOSTS.has(host)) return NextResponse.next();
+  // DEV host(s) work normally
+  if (DEV_HOSTS.has(host)) {
+    const res = NextResponse.next();
+    res.headers.set('x-vantera-gate', 'dev-allow');
+    res.headers.set('x-vantera-host', host || 'unknown');
+    return res;
+  }
 
-  // Everything else (vantera.io + any other non-dev host) shows Coming Soon
-  // Rewrite (NOT redirect) so URL stays the same.
+  // Everything else is forced to Coming Soon (rewrite keeps URL)
   const url = req.nextUrl.clone();
   url.pathname = '/coming-soon';
-  return NextResponse.rewrite(url);
+
+  const res = NextResponse.rewrite(url);
+  res.headers.set('x-vantera-gate', 'prod-coming-soon');
+  res.headers.set('x-vantera-host', host || 'unknown');
+  return res;
 }
 
-// Run middleware on all routes (we already bypass assets in code above)
 export const config = {
   matcher: ['/:path*'],
 };
