@@ -288,7 +288,7 @@ export default function TopBar() {
         <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-4 sm:px-8 sm:py-5">
           <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
             <Image
-              src="/brand/vantera-logo-dark-transparent.svg"
+              src="/brand/vantera-logo-dark.svg"
               alt="Vantera"
               width={620}
               height={180}
