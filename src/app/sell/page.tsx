@@ -1,12 +1,20 @@
 // src/app/sell/page.tsx
-import type { Metadata } from 'next';
+import { Suspense } from 'react';
+
 import SellerUploadClient from '@/components/sell/SellerUploadClient';
 
-export const metadata: Metadata = {
-  title: 'Publish a verified listing | Vantera',
-  description: 'One listing at a time. Verified supply only.',
-};
+function Loading() {
+  return (
+    <div className="mx-auto w-full max-w-3xl px-6 py-10 text-sm text-zinc-300">
+      Loading sell flow...
+    </div>
+  );
+}
 
-export default function SellPage() {
-  return <SellerUploadClient />;
+export default function Page() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SellerUploadClient />
+    </Suspense>
+  );
 }
