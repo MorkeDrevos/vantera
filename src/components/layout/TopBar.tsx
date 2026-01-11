@@ -286,12 +286,12 @@ export default function TopBar() {
 
   function openCitiesSoon() {
     cancelTimers();
-    openT.current = window.setTimeout(() => setCitiesOpen(true), 60);
+    openT.current = window.setTimeout(() => setCitiesOpen(true), 70);
   }
 
   function closeCitiesSoon() {
     cancelTimers();
-    closeT.current = window.setTimeout(() => setCitiesOpen(false), 140);
+    closeT.current = window.setTimeout(() => setCitiesOpen(false), 170);
   }
 
   function toggleCities() {
@@ -299,52 +299,62 @@ export default function TopBar() {
     setCitiesOpen((v) => !v);
   }
 
-  // Styling
-  const barBg = scrolled ? 'bg-[#07080B]/96' : 'bg-[#07080B]/88';
-  const barBorder = 'border-b border-white/5';
-
-  const navLink =
-    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium text-zinc-200/85 hover:text-white transition';
-  const navLinkActive = 'text-white';
-
-  const pill =
-    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.03] hover:bg-white/[0.05] ring-1 ring-inset ring-white/8 hover:ring-white/10 transition';
+  // Royal styling
+  const barBg = scrolled ? 'bg-[#07080B]/95' : 'bg-[#07080B]/86';
+  const barBorder = scrolled ? 'border-b border-white/5' : 'border-b border-white/0';
 
   const goldText =
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
 
+  const navLink =
+    'inline-flex items-center gap-2 px-2 py-2 text-[15px] font-medium tracking-[0.01em] text-zinc-200/80 hover:text-white transition';
+  const navLinkActive = 'text-white';
+
+  const pill =
+    'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-zinc-200/90 bg-white/[0.035] hover:bg-white/[0.055] ring-1 ring-inset ring-white/8 hover:ring-white/12 transition';
+
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className={cx('relative w-full backdrop-blur-[16px]', barBg, barBorder)}>
+      <div className={cx('relative w-full backdrop-blur-[18px]', barBg, barBorder)}>
+        {/* more royal ambient */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+          {/* gold hairline */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/20 to-transparent" />
+          {/* soft crown glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_320px_at_50%_0%,rgba(231,201,130,0.11),transparent_58%)]" />
+          {/* cooler edge shading */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.15),rgba(0,0,0,0.52))]" />
         </div>
 
-        {/* Taller bar - logo bigger */}
-        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-5 px-5 py-7 sm:px-8 sm:py-8">
-          {/* Left: BIG logo */}
+        {/* Taller bar */}
+        <div className="relative mx-auto flex w-full max-w-7xl items-center gap-6 px-5 py-8 sm:px-8 sm:py-9">
+          {/* Left: much taller logo */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex items-center shrink-0">
             <Image
               src="/brand/vantera-logo-dark.png"
               alt="Vantera"
-              width={520}
-              height={120}
+              width={700}
+              height={180}
               priority={false}
-              className="h-20 w-auto sm:h-22 md:h-24 drop-shadow-[0_22px_90px_rgba(0,0,0,0.70)]"
+              className={cx(
+                'w-auto',
+                // taller across sizes, but safe
+                'h-[88px] sm:h-[96px] md:h-[104px]',
+                'drop-shadow-[0_26px_110px_rgba(0,0,0,0.75)]',
+              )}
             />
           </Link>
 
-          {/* Center: one-line menu (IMPORTANT: no overflow-hidden here) */}
+          {/* Center: one-line menu */}
           <nav
             className={cx(
-              'hidden lg:flex items-center gap-7',
+              'hidden lg:flex items-center gap-8',
               'flex-1 min-w-0',
               'whitespace-nowrap',
             )}
             aria-label="Primary"
           >
-            {/* Destinations */}
+            {/* Destinations (hover + click) */}
             <div
               className="relative shrink-0"
               ref={citiesWrapRef}
@@ -364,7 +374,6 @@ export default function TopBar() {
                 <ChevronDown className={cx('h-4 w-4 transition', citiesOpen && 'rotate-180')} />
               </button>
 
-              {/* Mega panel */}
               <div
                 ref={citiesPanelRef}
                 onMouseEnter={() => {
@@ -373,9 +382,9 @@ export default function TopBar() {
                 }}
                 onMouseLeave={closeCitiesSoon}
                 className={cx(
-                  'absolute left-1/2 z-[80] mt-4 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
-                  'rounded-[26px] bg-[#05060A]',
-                  'shadow-[0_70px_220px_rgba(0,0,0,0.90)]',
+                  'absolute left-1/2 z-[80] mt-5 w-[1120px] max-w-[calc(100vw-2rem)] -translate-x-1/2 origin-top',
+                  'rounded-[28px] bg-[#05060A]',
+                  'shadow-[0_90px_260px_rgba(0,0,0,0.92)]',
                   'ring-1 ring-inset ring-white/10',
                   'max-h-[74vh] overflow-auto',
                   'transition-[transform,opacity] duration-200',
@@ -386,8 +395,10 @@ export default function TopBar() {
                 role="menu"
                 aria-label="Destinations menu"
               >
-                <div className="pointer-events-none absolute inset-0 rounded-[26px] bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+                <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(1000px_320px_at_50%_0%,rgba(231,201,130,0.13),transparent_60%)]" />
+                <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
 
+                {/* Header */}
                 <div className="relative border-b border-white/8 px-6 py-4">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/85">
@@ -420,6 +431,7 @@ export default function TopBar() {
                   </div>
                 </div>
 
+                {/* Columns */}
                 <div className="relative grid grid-cols-12 gap-6 px-6 py-6">
                   <div className="col-span-3">
                     <div className="mb-3 text-xs font-semibold tracking-[0.18em] uppercase text-zinc-200/80">
@@ -542,6 +554,7 @@ export default function TopBar() {
 
                 <div className="pointer-events-none relative h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
 
+                {/* Bottom strip */}
                 <div className="relative flex items-center justify-between gap-3 px-6 py-4">
                   <div className="flex items-center gap-2 text-xs text-zinc-400">
                     <Sparkles className="h-4 w-4 opacity-70" />
@@ -632,13 +645,13 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {/* Mobile dropdown (add countries here too) */}
       <div
         id="vantera-mobile-menu"
         className={cx(
           'lg:hidden',
           'overflow-hidden transition-[max-height,opacity] duration-300',
-          mobileOpen ? 'max-h-[720px] opacity-100' : 'max-h-0 opacity-0',
+          mobileOpen ? 'max-h-[860px] opacity-100' : 'max-h-0 opacity-0',
         )}
       >
         <div className="mx-auto max-w-7xl px-5 pb-5 sm:px-8">
@@ -661,6 +674,26 @@ export default function TopBar() {
                 </span>
                 <ArrowRight className="h-4 w-4 opacity-75" />
               </button>
+
+              {/* Countries section */}
+              <div className="mt-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+                <div className="mb-2 text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
+                  EXPLORE BY COUNTRY
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {countries.slice(0, 10).map((c) => (
+                    <Link
+                      key={c}
+                      href={countryHref(c)}
+                      prefetch
+                      onClick={() => setMobileOpen(false)}
+                      className="rounded-full px-3 py-1.5 text-[12px] text-zinc-200 bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/12 transition"
+                    >
+                      {c}
+                    </Link>
+                  ))}
+                </div>
+              </div>
 
               <Link
                 href="/coming-soon?section=for-sale"
