@@ -1,5 +1,5 @@
 // src/components/home/CoverageTierBadge.tsx
-import type { CoverageTier } from './coverageTiers';
+type CoverageTier = 'Core' | 'Plus' | 'Watchlist';
 
 export default function CoverageTierBadge({ tier }: { tier: CoverageTier }) {
   const styles =
