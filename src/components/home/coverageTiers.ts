@@ -3,10 +3,11 @@ import type { City } from './cities';
 
 export type CoverageTier = 'Core' | 'Plus' | 'Watch';
 
+// Keep your core logic here (you can refine the lists anytime)
 export function coverageTierForCity(city: City): CoverageTier {
-  const slug = city.slug?.toLowerCase?.() ?? '';
-  const country = city.country?.toLowerCase?.() ?? '';
-  const name = city.name?.toLowerCase?.() ?? '';
+  const slug = (city.slug ?? '').toLowerCase();
+  const country = (city.country ?? '').toLowerCase();
+  const name = (city.name ?? '').toLowerCase();
 
   // Core = deepest coverage (start here)
   if (
@@ -46,4 +47,16 @@ export function coverageTierForCity(city: City): CoverageTier {
 
   // Watch = tracked, but depth still building
   return 'Watch';
+}
+
+// Compatibility export (CityCard.tsx expects this)
+export function getCoverageTier(city: City): CoverageTier {
+  return coverageTierForCity(city);
+}
+
+// Compatibility export (CoverageTierBadge.tsx expects this)
+export function coverageTierLabel(tier: CoverageTier): string {
+  if (tier === 'Core') return 'Core coverage';
+  if (tier === 'Plus') return 'Plus coverage';
+  return 'Watchlist';
 }
