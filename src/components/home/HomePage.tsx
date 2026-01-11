@@ -96,13 +96,7 @@ function HeroShine() {
 
       {/* ghost mark */}
       <div className="absolute right-[-90px] top-[-70px] opacity-[0.05] blur-[0.2px]">
-        <Image
-          src="/brand/vantera-logo-dark.png"
-          alt=""
-          width={560}
-          height={180}
-          className="w-[560px]"
-        />
+        <Image src="/brand/vantera-logo-dark.png" alt="" width={560} height={180} className="w-[560px]" />
       </div>
     </div>
   );
@@ -260,7 +254,9 @@ function MockListing({
           </div>
         </div>
 
-        <div className={`mt-3 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-[12px] ${tone}`}>
+        <div
+          className={`mt-3 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-[12px] ${tone}`}
+        >
           <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{signal.k}</div>
           <div className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[11px]">{signal.v}</div>
         </div>
@@ -284,7 +280,11 @@ export default function HomePage() {
     <Shell>
       {/* HERO - full bleed, mobile-first */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
+        {/* IMPORTANT FIX:
+            - This wrapper used to be overflow-hidden which clips the CitySearch dropdown.
+            - Keep the cinematic layers clipped inside (HeroVideo/HeroShine), but let UI overflow.
+        */}
+        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
 
@@ -301,7 +301,6 @@ export default function HomePage() {
                   <span className="text-zinc-300">Signal over noise</span>
                 </div>
 
-                {/* Stronger subheadline */}
                 <h1 className="mt-6 text-balance text-[40px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
                   Private intelligence for the world&apos;s{' '}
                   <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
@@ -316,12 +315,20 @@ export default function HomePage() {
 
                 {/* Search terminal card */}
                 <div className="mt-6 max-w-2xl">
-                  <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  {/* IMPORTANT FIX:
+                      - This card used to be overflow-hidden, which clips CitySearch dropdown.
+                      - We keep ONLY the decorative layer clipped.
+                  */}
+                  <div className="relative z-20 overflow-visible rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
+                    {/* Decorative layer (clipped) */}
+                    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px]">
+                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    </div>
 
+                    {/* Content (NOT clipped) */}
                     <div className="relative px-4 py-4 sm:px-5 sm:py-5">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -336,14 +343,13 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      <div className="mt-4">
-                        {/* CitySearch already includes its own UI - this wrapper makes it feel terminal-grade */}
+                      <div className="mt-4 relative z-30">
+                        {/* CitySearch wrapper: keep it above all hero decor */}
                         <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                           <CitySearch />
                         </div>
                       </div>
 
-                      {/* Bridge line */}
                       <div className="mt-3 rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-[12px] text-zinc-300">
                         Browse homes, then open their intelligence - value, liquidity, risk and leverage in seconds.
                       </div>
@@ -351,12 +357,8 @@ export default function HomePage() {
                       <div className="mt-4 grid gap-2 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-black/28 px-3 py-2">
                           <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">EXAMPLE</div>
-                          <div className="mt-1 font-mono text-[12px] text-zinc-200">
-                            SAFE • UNDERVALUED • UPSIDE
-                          </div>
-                          <div className="mt-1 text-[12px] text-zinc-400">
-                            Near schools, strong demand, 5-year lift.
-                          </div>
+                          <div className="mt-1 font-mono text-[12px] text-zinc-200">SAFE • UNDERVALUED • UPSIDE</div>
+                          <div className="mt-1 text-[12px] text-zinc-400">Near schools, strong demand, 5-year lift.</div>
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-black/28 px-3 py-2">
                           <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">YOU GET</div>
@@ -379,7 +381,6 @@ export default function HomePage() {
                   />
                 </div>
 
-                {/* Sharpened pills copy */}
                 <div className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-3">
                   <Pillar title="Reality" body="Fair value is modelled from signals, not asking prices." />
                   <Pillar title="Liquidity" body="We estimate time-to-sell and what is driving it." />
@@ -399,11 +400,7 @@ export default function HomePage() {
                   <div className="relative">
                     <SectionLabel hint="Private index">Selected cities</SectionLabel>
 
-                    {/* iPhone-perfect: 1 col, then 2 col */}
-                    <CityCardsClient
-                      cities={CITIES.slice(0, 4)}
-                      columns="grid gap-4 grid-cols-1 sm:grid-cols-2"
-                    />
+                    <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
 
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                       Curated entry points.
@@ -449,7 +446,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Micro wow: a subtle "live preview" strip */}
                 <div className="mt-4 rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -480,7 +476,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* fade into page */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0B0E13]" />
         </div>
       </section>
@@ -509,7 +504,6 @@ export default function HomePage() {
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
-        {/* Featured properties */}
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint="Editorial selection">Featured properties</SectionLabel>
 
@@ -546,7 +540,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Why Vantera wins */}
         <section className="mt-14 sm:mt-16">
           <SectionLabel hint="Plain-language intelligence">Why Vantera wins</SectionLabel>
 
@@ -555,17 +548,17 @@ export default function HomePage() {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects both sides from bad pricing',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects both sides from bad pricing']}
             />
             <FeatureCard
               eyebrow="AI-native"
               title="Intent-based matching"
               body="Forget filters. Describe what you want. Vantera returns homes, timing guidance and the smartest next move."
-              bullets={['Understands intent, not checkboxes', 'Suggests strategy, not just options', 'Gives wait-or-buy clarity']}
+              bullets={[
+                'Understands intent, not checkboxes',
+                'Suggests strategy, not just options',
+                'Gives wait-or-buy clarity',
+              ]}
             />
             <FeatureCard
               eyebrow="Integrity"
@@ -576,7 +569,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* City index */}
         <section className="mt-14 sm:mt-16">
           <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore cities</SectionLabel>
 
@@ -597,7 +589,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Curated routes */}
         <section className="mt-14 sm:mt-16">
           <SectionLabel hint="Curated lanes">Curated routes</SectionLabel>
 
