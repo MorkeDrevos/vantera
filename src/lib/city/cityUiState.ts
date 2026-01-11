@@ -10,27 +10,26 @@ export type CityUiState =
 export type CitySupplySnapshot = {
   verifiedListingsCount: number;
   pendingListingsCount: number;
-  hasIntelligenceModels: boolean; // value/liquidity/risk live
+  hasIntelligenceModels: boolean;
 };
 
 export function computeCityUiState(city: City, supply: CitySupplySnapshot): CityUiState {
   const tier: CoverageTier = city.tier ?? 'TIER_3';
   const status: CoverageStatus = city.status ?? 'EXPANDING';
 
-  // If we have verified supply, always show the "verified only" gate
+  // If we have verified supply, enforce the "verified supply only" mode.
   if (supply.verifiedListingsCount > 0) return 'VERIFIED_SUPPLY_ONLY';
 
-  // If intelligence is live but no verified supply yet, lock listings
+  // Intelligence can be active before public inventory.
   if (supply.hasIntelligenceModels && supply.verifiedListingsCount === 0) {
     return 'INTELLIGENCE_ACTIVE_LISTINGS_LOCKED';
   }
 
-  // Tier 0 / Tier 1 cities with tracking but no supply should feel like private index
+  // Tier 0/1 cities should feel like a private index early.
   if ((tier === 'TIER_0' || tier === 'TIER_1') && status !== 'EXPANDING') {
     return 'PRIVATE_INDEX';
   }
 
-  // Default: expanding coverage
   return 'COVERAGE_EXPANDING';
 }
 
@@ -58,7 +57,7 @@ export function cityUiCopy(state: CityUiState) {
       badgeTop: 'PRIVATE INDEX',
       badgeBottom: 'Early access',
       title: 'Private index',
-      body: 'Early access intelligence surface. Coverage deepens progressively.',
+      body: 'Early access intelligence surface. Coverage deepens progressively as verified supply is ingested.',
     };
   }
 
@@ -67,5 +66,5 @@ export function cityUiCopy(state: CityUiState) {
     badgeBottom: 'Signals warming',
     title: 'Coverage expanding',
     body: 'This market is indexed. Verified supply unlocks as integrity thresholds are met.',
-  };
+    };
 }
