@@ -3,26 +3,31 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import ComingSoon from '@/components/ComingSoon';
+import { SEO_CONFIG } from '@/lib/seo/seo.config';
+import { jsonLd, organizationJsonLd, websiteJsonLd } from '@/lib/seo/seo.jsonld';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vantera.com'),
-  title: { default: 'Vantera – Truth-First Real Estate Intelligence', template: '%s · Vantera' },
-  description:
-    'Truth-first real estate intelligence. Explore cities, supply, pricing signals, and verified market data - without noise.',
-  applicationName: 'Vantera',
+  metadataBase: new URL(SEO_CONFIG.domain),
+  title: { default: SEO_CONFIG.defaultTitle, template: SEO_CONFIG.titleTemplate },
+  description: SEO_CONFIG.defaultDescription,
+  applicationName: SEO_CONFIG.siteName,
+
   openGraph: {
     type: 'website',
-    siteName: 'Vantera',
-    title: 'Vantera – Truth-First Real Estate Intelligence',
-    description: 'Explore cities, supply dynamics, and real estate truth layers built for clarity and trust.',
-    images: ['/og/vantera-default.png'],
+    siteName: SEO_CONFIG.siteName,
+    title: SEO_CONFIG.defaultTitle,
+    description: SEO_CONFIG.defaultDescription,
+    url: SEO_CONFIG.domain,
+    images: ['/opengraph-image'],
   },
+
   twitter: {
     card: 'summary_large_image',
-    title: 'Vantera',
-    description: 'Truth-first real estate intelligence for cities worldwide.',
-    images: ['/og/vantera-default.png'],
+    title: SEO_CONFIG.siteName,
+    description: SEO_CONFIG.defaultDescription,
+    images: ['/opengraph-image'],
   },
+
   robots: { index: true, follow: true },
 };
 
@@ -32,6 +37,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
+      <head>
+        {jsonLd(organizationJsonLd())}
+        {jsonLd(websiteJsonLd())}
+        {comingSoon ? <meta name="robots" content="noindex,nofollow" /> : null}
+      </head>
       <body>{comingSoon ? <ComingSoon /> : children}</body>
     </html>
   );
