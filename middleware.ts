@@ -1,30 +1,39 @@
 // middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+const PUBLIC_FILE = /\.(.*)$/;
+
 export function middleware(req: NextRequest) {
-  const host = req.headers.get('host') || '';
+  const host = (req.headers.get('host') || '').toLowerCase();
   const url = req.nextUrl;
 
-  // 🔒 PRODUCTION DOMAIN = MAINTENANCE
-  if (host === 'vantera.io' || host === 'www.vantera.io') {
-    // Allow assets
-    if (
-      url.pathname.startsWith('/_next') ||
-      url.pathname.startsWith('/favicon') ||
-      url.pathname.endsWith('.svg') ||
-      url.pathname.endsWith('.png') ||
-      url.pathname.endsWith('.jpg')
-    ) {
-      return NextResponse.next();
-    }
+  // ✅ ONLY gate the real prod domains
+  const isProdDomain = host === 'vantera.io' || host === 'www.vantera.io';
 
-    // Always rewrite to maintenance page
-    url.pathname = '/maintenance';
-    return NextResponse.rewrite(url);
+  // ✅ dev.vantera.io (and anything else) works normally
+  if (!isProdDomain) return NextResponse.next();
+
+  const { pathname } = url;
+
+  // Allow Next internals + public files + API
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname === '/favicon.ico' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    PUBLIC_FILE.test(pathname)
+  ) {
+    return NextResponse.next();
   }
 
-  // 🟢 DEV DOMAIN WORKS NORMALLY
-  return NextResponse.next();
+  // Allow the coming-soon route itself
+  if (pathname === '/coming-soon') return NextResponse.next();
+
+  // ✅ Force EVERY other URL to /coming-soon (no redirect, just rewrite)
+  url.pathname = '/coming-soon';
+  url.search = '';
+  return NextResponse.rewrite(url);
 }
 
 export const config = {
