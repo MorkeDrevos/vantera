@@ -38,7 +38,7 @@ const TRUST_LOGOS: TrustLogo[] = [
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0B0E13] text-zinc-100">
-      {/* Ambient */}
+      {/* Ambient: quieter, more expensive (less gold, more graphite/ivory) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-32 left-1/2 h-[620px] w-[1080px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.07),transparent_62%)] blur-2xl" />
         <div className="absolute -top-24 right-[-220px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.14),transparent_62%)] blur-2xl" />
@@ -48,7 +48,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="relative">
-        {/* Keep TopBar in Suspense (useSearchParams) */}
+        {/* IMPORTANT: TopBar uses useSearchParams, so keep it inside Suspense */}
         <Suspense fallback={null}>
           <TopBar />
         </Suspense>
@@ -176,13 +176,15 @@ export default function HomePage() {
 
   return (
     <Shell>
-      {/* HERO - FULL BLEED */}
+      {/* HERO - FULL BLEED (edge to edge) */}
       <section className="relative w-full pb-12 pt-12 sm:pb-16 sm:pt-14">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
 
-          {/* Full-bleed container (NO max width limiter) */}
+          {/* IMPORTANT CHANGE:
+              - removed mx-auto + max-w-7xl limiter
+              - content can now span the entire viewport width */}
           <div className="relative w-full px-6 py-14 sm:px-10 sm:py-16 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
               {/* LEFT */}
@@ -208,7 +210,6 @@ export default function HomePage() {
                   <span className="text-zinc-500"> Built for clarity today. Designed for truth tomorrow.</span>
                 </p>
 
-                {/* Command bar */}
                 <div className="mt-7 max-w-2xl">
                   <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
@@ -294,19 +295,32 @@ export default function HomePage() {
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0B0E13]" />
         </div>
-      </section>
+            </section>
 
-      {/* TRUST STRIP (full width) */}
+      {/* TRUST */}
       <TrustMarquee
-        logos={TRUST_LOGOS}
-        className="mt-0"
-        eyebrow="Trusted reference set"
-        title="Benchmarked against the world’s leading firms"
-        subtitle="A credibility layer for clients who expect institutional standards."
+        className="-mt-6"
+        brands={[
+          { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+          { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+          { name: 'Knight Frank', domain: 'knightfrank.com' },
+          { name: 'Savills', domain: 'savills.com' },
+          { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+          { name: 'BARNES', domain: 'barnes-international.com' },
+          { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+          { name: 'Douglas Elliman', domain: 'elliman.com' },
+          { name: 'Compass', domain: 'compass.com' },
+          { name: 'CBRE', domain: 'cbre.com' },
+          { name: 'JLL', domain: 'jll.com' },
+          { name: 'RE/MAX', domain: 'remax.com' },
+          { name: 'BHHS', domain: 'bhhs.com' },
+          { name: 'Corcoran', domain: 'corcoran.com' },
+          { name: 'Century 21', domain: 'century21.com' },
+        ]}
       />
 
-      {/* BODY (wide container) */}
-      <div className="mx-auto w-full max-w-[1600px] px-6 pb-16 sm:px-10 2xl:px-14">
+      {/* BODY */}
+      <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore the index</SectionLabel>
 
