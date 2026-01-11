@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
-import TrustMarquee, { TrustLogo } from '@/components/trust/TrustMarquee';
+import TrustMarquee from '@/components/trust/TrustMarquee';
 
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
@@ -289,19 +289,32 @@ export default function HomePage() {
 
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0B0E13]" />
         </div>
-      </section>
+            </section>
 
-      {/* TRUST STRIP (full-width) */}
+      {/* TRUST */}
       <TrustMarquee
-        logos={TRUST_LOGOS}
-        className="mt-0"
-        eyebrow="Trusted reference set"
-        title="Benchmarked against the world’s leading firms"
-        subtitle="A credibility layer for clients who expect institutional standards."
+        className="-mt-6"
+        brands={[
+          { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+          { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+          { name: 'Knight Frank', domain: 'knightfrank.com' },
+          { name: 'Savills', domain: 'savills.com' },
+          { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+          { name: 'BARNES', domain: 'barnes-international.com' },
+          { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+          { name: 'Douglas Elliman', domain: 'elliman.com' },
+          { name: 'Compass', domain: 'compass.com' },
+          { name: 'CBRE', domain: 'cbre.com' },
+          { name: 'JLL', domain: 'jll.com' },
+          { name: 'RE/MAX', domain: 'remax.com' },
+          { name: 'BHHS', domain: 'bhhs.com' },
+          { name: 'Corcoran', domain: 'corcoran.com' },
+          { name: 'Century 21', domain: 'century21.com' },
+        ]}
       />
 
-      {/* BODY (keep premium wide, not edge-to-edge) */}
-      <div className="mx-auto w-full max-w-[1600px] px-6 pb-16 sm:px-10 2xl:px-14">
+      {/* BODY */}
+      <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
         <section className="mt-10 sm:mt-12">
           <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore the index</SectionLabel>
 
