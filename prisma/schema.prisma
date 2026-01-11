@@ -213,14 +213,14 @@ model Listing {
   garbageTaxYearly     Int?
 
   // Truth fields (expand later)
-  yearBuilt     Int?
+  yearBuilt      Int?
   renovationYear Int?
-  energyRating  String?
+  energyRating   String?
 
   // Media
-  media      ListingMedia[]
-  coverMediaId String?
-  coverMedia  ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
+  media        ListingMedia[]
+  coverMediaId  String? @unique
+  coverMedia    ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
 
   @@index([cityId, status])
   @@index([status, visibility])
