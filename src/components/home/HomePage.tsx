@@ -14,8 +14,8 @@ import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 
-// Keep this in sync with the runtime shapes used by CitySearch/CityCardsClient.
-// We avoid importing from ./cities so HomePage can be DB-driven.
+import type { CoverageTier, CoverageStatus } from '@prisma/client';
+
 export type RuntimeCity = {
   slug: string;
   name: string;
@@ -23,13 +23,16 @@ export type RuntimeCity = {
   region?: string | null;
   tz: string;
 
-  tier?: string;
-  status?: string;
+  tier?: CoverageTier;
+  status?: CoverageStatus;
   priority?: number;
 
   blurb?: string | null;
 
-  image?: { src: string; alt?: string | null } | null;
+  image?: {
+    src: string;
+    alt?: string | null;
+  } | null;
 
   heroImageSrc?: string | null;
   heroImageAlt?: string | null;
