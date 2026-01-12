@@ -6,8 +6,12 @@ import ComingSoon from '@/components/ComingSoon';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
 import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
+import { prisma } from '@/lib/prisma';
 
-import { PrismaClient, type City as PrismaCity } from '@prisma/client';
+// Make sure Prisma runs in Node (not Edge) and avoid build-time SSG attempts
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = (() => {
   const doc = SEO_INTENT.home();
@@ -34,38 +38,23 @@ export const metadata: Metadata = (() => {
   };
 })();
 
-// Prisma singleton (prevents too many clients in dev / hot reload)
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    // log: ['error', 'warn'], // enable if you want
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-function toRuntimeCity(row: PrismaCity): RuntimeCity {
+function toRuntimeCity(row: any): RuntimeCity {
   return {
     slug: row.slug,
     name: row.name,
     country: row.country,
     region: row.region,
     tz: row.tz,
-
     tier: row.tier,
     status: row.status,
     priority: row.priority ?? 0,
-
     blurb: row.blurb,
-
     image: row.heroImageSrc
       ? {
           src: row.heroImageSrc,
           alt: row.heroImageAlt,
         }
       : null,
-
     heroImageSrc: row.heroImageSrc,
     heroImageAlt: row.heroImageAlt,
   };
@@ -90,6 +79,16 @@ export default async function Page() {
   });
 
   if (comingSoon) return <ComingSoon />;
+
+  // Build/preview safety: don’t crash if env isn’t set
+  if (!process.env.DATABASE_URL) {
+    return (
+      <>
+        {jsonLd(pageJsonLd)}
+        <HomePage cities={[]} />
+      </>
+    );
+  }
 
   const rows = await prisma.city.findMany({
     orderBy: [{ priority: 'desc' }, { name: 'asc' }],
