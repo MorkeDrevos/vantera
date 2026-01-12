@@ -1,6 +1,5 @@
 // prisma/seed.ts
 import {
-  PrismaClient,
   CoverageTier,
   CoverageStatus,
   ListingStatus,
@@ -8,9 +7,8 @@ import {
   VerificationLevel,
 } from '@prisma/client';
 
+import { prisma } from '../src/lib/prisma';
 import { REGION_CLUSTERS, ALL_CITIES } from '../src/components/home/cities';
-
-const prisma = new PrismaClient();
 
 function monthStartUTC(d = new Date()) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0));
@@ -90,7 +88,13 @@ async function main() {
 
   for (const c of dbCities) {
     const base =
-      c.tier === CoverageTier.TIER_0 ? 55 : c.tier === CoverageTier.TIER_1 ? 45 : c.tier === CoverageTier.TIER_2 ? 35 : 25;
+      c.tier === CoverageTier.TIER_0
+        ? 55
+        : c.tier === CoverageTier.TIER_1
+          ? 45
+          : c.tier === CoverageTier.TIER_2
+            ? 35
+            : 25;
 
     await prisma.cityMetric.upsert({
       where: { cityId_asOf: { cityId: c.id, asOf } },

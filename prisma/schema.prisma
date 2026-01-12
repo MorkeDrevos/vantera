@@ -218,8 +218,10 @@ model Listing {
   renovationYear Int?
   energyRating   String?
 
-  // Media
-  media        ListingMedia[]
+  // Media (named relation because we also relate Listing <-> ListingMedia as "ListingCover")
+  media        ListingMedia[] @relation("ListingMedia")
+
+  // Cover media (optional 1:1)
   coverMediaId  String? @unique
   coverMedia    ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
 
@@ -236,8 +238,9 @@ model ListingMedia {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
+  // Main media -> listing relation (named to avoid ambiguity with "ListingCover")
   listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing   Listing  @relation("ListingMedia", fields: [listingId], references: [id], onDelete: Cascade)
 
   // Image URL and metadata
   url       String

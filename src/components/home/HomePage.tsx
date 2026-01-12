@@ -13,7 +13,30 @@ import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
-import { CITIES } from './cities';
+
+import type { CoverageTier, CoverageStatus } from '@prisma/client';
+
+export type RuntimeCity = {
+  slug: string;
+  name: string;
+  country: string;
+  region?: string | null;
+  tz: string;
+
+  tier?: CoverageTier;
+  status?: CoverageStatus;
+  priority?: number;
+
+  blurb?: string | null;
+
+  image?: {
+    src: string;
+    alt?: string | null;
+  } | null;
+
+  heroImageSrc?: string | null;
+  heroImageAlt?: string | null;
+};
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -194,100 +217,14 @@ function FeatureCard({
   );
 }
 
-function MockListing({
-  title,
-  location,
-  price,
-  metaLeft,
-  metaRight,
-  signal,
-}: {
-  title: string;
-  location: string;
-  price: string;
-  metaLeft: string;
-  metaRight: string;
-  signal: { k: string; v: string; tone?: 'good' | 'warn' | 'neutral' };
-}) {
-  const tone =
-    signal.tone === 'good'
-      ? 'bg-emerald-400/15 text-emerald-200 border-emerald-300/20'
-      : signal.tone === 'warn'
-      ? 'bg-amber-400/15 text-amber-200 border-amber-300/20'
-      : 'bg-white/[0.04] text-zinc-200 border-white/10';
-
-  return (
-    <div className="group relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)] transition hover:translate-y-[-2px] hover:border-white/14">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 opacity-75 [background:radial-gradient(900px_300px_at_25%_10%,rgba(255,255,255,0.06),transparent_60%)]" />
-        <div className="absolute inset-0 opacity-70 [background:radial-gradient(900px_300px_at_85%_20%,rgba(120,76,255,0.10),transparent_60%)]" />
-      </div>
-
-      <div className="relative h-44 overflow-hidden sm:h-48">
-        <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02),rgba(0,0,0,0.35))]" />
-        <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.85)_1px,transparent_0)] [background-size:16px_16px]" />
-        <div className="absolute -left-16 -top-16 h-56 w-56 rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.18),transparent_62%)] blur-2xl" />
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_62%)] blur-2xl" />
-
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-[11px] text-zinc-200">
-          Featured
-        </div>
-      </div>
-
-      <div className="relative p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-sm font-medium text-zinc-100">{title}</div>
-            <div className="mt-1 text-xs text-zinc-400">{location}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-sm font-semibold text-zinc-50">{price}</div>
-            <div className="mt-1 text-[11px] text-zinc-500">Indicative</div>
-          </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
-            <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">PROPERTY DNA</div>
-            <div className="mt-1 text-[12px] text-zinc-200">{metaLeft}</div>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
-            <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">LIQUIDITY</div>
-            <div className="mt-1 text-[12px] text-zinc-200">{metaRight}</div>
-          </div>
-        </div>
-
-        <div
-          className={`mt-3 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2 text-[12px] ${tone}`}
-        >
-          <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{signal.k}</div>
-          <div className="rounded-full border border-white/10 bg-black/20 px-2 py-1 text-[11px]">{signal.v}</div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-[11px] text-zinc-500">Signal over noise</div>
-          <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-200 transition group-hover:bg-white/[0.06]">
-            View details
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function HomePage() {
-  const regionCount = new Set(CITIES.map((c) => c.region).filter(Boolean)).size;
-  const timezoneCount = new Set(CITIES.map((c) => c.tz)).size;
+export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
+  const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
+  const timezoneCount = new Set(cities.map((c) => c.tz)).size;
 
   return (
     <Shell>
       {/* HERO - full bleed, mobile-first */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        {/* IMPORTANT FIX:
-            - This wrapper used to be overflow-hidden which clips the CitySearch dropdown.
-            - Keep the cinematic layers clipped inside (HeroVideo/HeroShine), but let UI overflow.
-        */}
         <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
@@ -319,12 +256,7 @@ export default function HomePage() {
 
                 {/* Search terminal card */}
                 <div className="mt-6 max-w-2xl">
-                  {/* IMPORTANT FIX:
-                      - This card used to be overflow-hidden, which clips CitySearch dropdown.
-                      - We keep ONLY the decorative layer clipped.
-                  */}
                   <div className="relative z-20 overflow-visible rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
-                    {/* Decorative layer (clipped) */}
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px]">
                       <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
                       <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
@@ -332,7 +264,6 @@ export default function HomePage() {
                       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                     </div>
 
-                    {/* Content (NOT clipped) */}
                     <div className="relative px-4 py-4 sm:px-5 sm:py-5">
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -348,9 +279,8 @@ export default function HomePage() {
                       </div>
 
                       <div className="mt-4 relative z-30">
-                        {/* CitySearch wrapper: keep it above all hero decor */}
                         <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                          <CitySearch />
+                          <CitySearch cities={cities} />
                         </div>
                       </div>
 
@@ -377,7 +307,7 @@ export default function HomePage() {
                 <div className="mt-4 max-w-2xl">
                   <SignalStrip
                     left={[
-                      { k: 'COVERAGE', v: <span className="text-zinc-100">{CITIES.length} cities</span> },
+                      { k: 'COVERAGE', v: <span className="text-zinc-100">{cities.length} cities</span> },
                       { k: 'REGIONS', v: <span className="text-zinc-100">{regionCount}</span> },
                       { k: 'TIMEZONES', v: <span className="text-zinc-100">{timezoneCount}</span> },
                     ]}
@@ -404,7 +334,7 @@ export default function HomePage() {
                   <div className="relative">
                     <SectionLabel hint="Private index">Selected cities</SectionLabel>
 
-                    <CityCardsClient cities={CITIES.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
+                    <CityCardsClient cities={cities.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
 
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                       Curated entry points.
@@ -508,15 +438,14 @@ export default function HomePage() {
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
-        {/* NEW: MARKET BRIEFING */}
         <div className="mt-10 sm:mt-12">
-          <MarketBriefing cities={CITIES} />
+          <MarketBriefing cities={cities as any} />
         </div>
 
         <section className="mt-10 sm:mt-12">
-  <SectionLabel hint="Believable, not fake listings">Featured intelligence</SectionLabel>
-  <FeaturedIntelligencePanel />
-</section>
+          <SectionLabel hint="Believable, not fake listings">Featured intelligence</SectionLabel>
+          <FeaturedIntelligencePanel />
+        </section>
 
         <section className="mt-14 sm:mt-16">
           <SectionLabel hint="Plain-language intelligence">Why Vantera wins</SectionLabel>
@@ -548,7 +477,7 @@ export default function HomePage() {
         </section>
 
         <section className="mt-14 sm:mt-16">
-          <SectionLabel hint={`${CITIES.length} cities tracked`}>Explore cities</SectionLabel>
+          <SectionLabel hint={`${cities.length} cities tracked`}>Explore cities</SectionLabel>
 
           <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
             <div className="pointer-events-none absolute inset-0">
@@ -556,8 +485,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
             </div>
             <div className="relative">
-  <CityCardsVirtualizedClient cities={CITIES} />
-</div>
+              <CityCardsVirtualizedClient cities={cities as any} />
+            </div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
