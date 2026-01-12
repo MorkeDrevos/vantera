@@ -7,8 +7,12 @@ import Footer from '@/components/layout/Footer';
 
 import TrustMarquee from '@/components/trust/TrustMarquee';
 
+import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
+import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
+
 import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
+import MarketBriefing from './MarketBriefing';
 import { CITIES } from './cities';
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -504,41 +508,15 @@ export default function HomePage() {
 
       {/* BODY */}
       <div className="mx-auto w-full max-w-7xl px-5 pb-16 sm:px-8">
+        {/* NEW: MARKET BRIEFING */}
+        <div className="mt-10 sm:mt-12">
+          <MarketBriefing cities={CITIES} />
+        </div>
+
         <section className="mt-10 sm:mt-12">
-          <SectionLabel hint="Editorial selection">Featured properties</SectionLabel>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            <MockListing
-              title="Architect’s sea-view villa"
-              location="Coastal micro-market, prime zone"
-              price="€4.95M"
-              metaLeft="Fair value band: tight"
-              metaRight="High demand, fast velocity"
-              signal={{ k: 'PRICE REALISM', v: 'Fairly priced', tone: 'good' }}
-            />
-            <MockListing
-              title="Penthouse, legacy address"
-              location="Capital district, landmark proximity"
-              price="€7.40M"
-              metaLeft="Value uplift potential: strong"
-              metaRight="Buyer pool: selective"
-              signal={{ k: 'NEGOTIATION', v: 'Moderate leverage', tone: 'neutral' }}
-            />
-            <MockListing
-              title="Hillside estate with privacy"
-              location="Low supply pocket, long holds"
-              price="€12.80M"
-              metaLeft="Risk flags: low"
-              metaRight="Time-to-sell: extended"
-              signal={{ k: 'LIQUIDITY', v: 'May sit longer', tone: 'warn' }}
-            />
-          </div>
-
-          <div className="mt-4 rounded-[26px] border border-white/10 bg-white/[0.02] p-5 text-sm text-zinc-300 shadow-[0_30px_95px_rgba(0,0,0,0.50)]">
-            Vantera doesn’t just show homes.
-            <span className="text-zinc-500"> It shows value, liquidity and risk in plain language.</span>
-          </div>
-        </section>
+  <SectionLabel hint="Believable, not fake listings">Featured intelligence</SectionLabel>
+  <FeaturedIntelligencePanel />
+</section>
 
         <section className="mt-14 sm:mt-16">
           <SectionLabel hint="Plain-language intelligence">Why Vantera wins</SectionLabel>
@@ -578,8 +556,8 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
             </div>
             <div className="relative">
-              <CityCardsClient cities={CITIES} />
-            </div>
+  <CityCardsVirtualizedClient cities={CITIES} />
+</div>
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
