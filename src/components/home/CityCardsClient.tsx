@@ -23,7 +23,9 @@ function formatLocalTime(tz: string) {
   }
 }
 
-type EnrichedCity = RuntimeCity & { localTime?: string };
+type EnrichedCity = RuntimeCity & {
+  localTime?: string;
+};
 
 export default function CityCardsClient({
   cities,
@@ -42,9 +44,7 @@ export default function CityCardsClient({
   }, []);
 
   const enriched: EnrichedCity[] = useMemo(() => {
-    // tie memo to `now` so local times update once per minute
     void now;
-
     return (cities ?? []).map((city) => ({
       ...city,
       localTime: formatLocalTime(city.tz),
