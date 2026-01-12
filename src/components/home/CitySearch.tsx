@@ -132,7 +132,6 @@ export default function CitySearch({
 
     const left = clamp(r.left, 12, Math.max(12, vw - r.width - 12));
     const top = r.bottom + gap;
-
     const maxHeight = Math.max(200, vh - top - 12);
 
     setGeom({ left, top, width: r.width, maxHeight });
