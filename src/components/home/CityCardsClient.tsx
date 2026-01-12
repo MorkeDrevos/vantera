@@ -4,7 +4,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import CityCard from './CityCard';
-import type { City } from './cities';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -23,12 +22,37 @@ function formatLocalTime(tz: string) {
   }
 }
 
+// Runtime city shape (DB-driven). Keep this aligned with what CityCard actually uses.
+export type RuntimeCity = {
+  slug: string;
+  name: string;
+  country: string;
+  region?: string | null;
+  tz: string;
+
+  tier?: string;
+  status?: string;
+  priority?: number;
+
+  blurb?: string | null;
+
+  // CityCard + search thumbnail compatibility
+  image?: { src: string; alt?: string | null } | null;
+
+  // DB fields (optional)
+  heroImageSrc?: string | null;
+  heroImageAlt?: string | null;
+
+  // extra (computed)
+  localTime?: string;
+};
+
 export default function CityCardsClient({
   cities,
   columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
   className,
 }: {
-  cities: City[];
+  cities: RuntimeCity[];
   columns?: string;
   className?: string;
 }) {
@@ -61,7 +85,8 @@ export default function CityCardsClient({
               </div>
             ) : null}
 
-            <CityCard city={city} />
+            {/* CityCard is structurally typed - RuntimeCity matches the shape */}
+            <CityCard city={city as any} />
           </div>
         ))}
       </div>
