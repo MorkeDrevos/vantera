@@ -7,7 +7,7 @@ import ComingSoon from '@/components/ComingSoon';
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
 import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, type City as PrismaCity } from '@prisma/client';
 
 export const metadata: Metadata = (() => {
   const doc = SEO_INTENT.home();
@@ -34,25 +34,38 @@ export const metadata: Metadata = (() => {
   };
 })();
 
-const prisma = new PrismaClient();
+// Prisma singleton (prevents too many clients in dev / hot reload)
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-function toRuntimeCity(row: any): RuntimeCity {
+const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    // log: ['error', 'warn'], // enable if you want
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+function toRuntimeCity(row: PrismaCity): RuntimeCity {
   return {
     slug: row.slug,
     name: row.name,
     country: row.country,
     region: row.region,
     tz: row.tz,
+
     tier: row.tier,
     status: row.status,
     priority: row.priority ?? 0,
+
     blurb: row.blurb,
+
     image: row.heroImageSrc
       ? {
           src: row.heroImageSrc,
           alt: row.heroImageAlt,
         }
       : null,
+
     heroImageSrc: row.heroImageSrc,
     heroImageAlt: row.heroImageAlt,
   };
