@@ -18,9 +18,9 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
-function splitIntoRows<T>(items: T[], rows: number) {
-  const out: T[][] = Array.from({ length: rows }, () => []);
-  items.forEach((it, i) => out[i % rows].push(it));
+function splitIntoChunks<T>(items: T[], size: number) {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
   return out;
 }
 
@@ -28,7 +28,7 @@ export default function TrustMarquee({
   brands,
   eyebrow = 'Institutional benchmark',
   title = 'Measured against institutional real-estate standards',
-  subtitle = 'Vantera is evaluated against the operating, disclosure and presentation standards used by the world’s most established real-estate institutions.',
+  subtitle = 'Vantera is benchmarked against the disclosure, operating and presentation standards used by the world’s most established real-estate institutions.',
   note = 'Brand marks are used solely to illustrate reference standards. No affiliation or endorsement is implied.',
   className = '',
 }: {
@@ -50,8 +50,9 @@ export default function TrustMarquee({
       }, {})
     : null;
 
-  // Ungrouped fallback: 3 clean rows (legible + premium)
-  const rows = splitIntoRows(brands, 3);
+  // Ungrouped: stable, premium grid (no scattered collage).
+  // 12 items per "band" keeps it balanced across screen sizes.
+  const chunks = splitIntoChunks(brands, 12);
 
   return (
     <section className={cx('w-full', className)}>
@@ -59,20 +60,21 @@ export default function TrustMarquee({
         {/* premium ambient */}
         <div className="pointer-events-none absolute inset-0">
           {/* top museum light */}
-          <div className="absolute -top-48 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.11),transparent_72%)] blur-2xl" />
+          <div className="absolute -top-52 left-1/2 h-[620px] w-[1040px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.12),transparent_72%)] blur-2xl" />
           {/* violet discipline */}
-          <div className="absolute -top-40 right-[-260px] h-[620px] w-[820px] rounded-full bg-[radial-gradient(closest-side,rgba(120,76,255,0.18),transparent_72%)] blur-2xl" />
-          {/* subtle gold hint (very light) */}
-          <div className="absolute -top-56 left-[-220px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(closest-side,rgba(255,204,115,0.06),transparent_70%)] blur-2xl" />
-          {/* deep vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_680px_at_50%_0%,transparent_42%,rgba(0,0,0,0.60)_88%)]" />
+          <div className="absolute -top-56 right-[-320px] h-[720px] w-[980px] rounded-full bg-[radial-gradient(closest-side,rgba(120,76,255,0.18),transparent_74%)] blur-2xl" />
+          {/* tiny gold warmth (quiet) */}
+          <div className="absolute -top-72 left-[-260px] h-[720px] w-[720px] rounded-full bg-[radial-gradient(closest-side,rgba(255,204,115,0.055),transparent_72%)] blur-2xl" />
+          {/* vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_720px_at_50%_0%,transparent_42%,rgba(0,0,0,0.62)_88%)]" />
+
           {/* hairlines */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
 
         <div className="relative mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14">
+          <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-14">
             {/* left narrative */}
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-3">
@@ -117,42 +119,40 @@ export default function TrustMarquee({
               </div>
             </div>
 
-            {/* right "wow" reference wall */}
+            {/* right premium reference plate */}
             <div className="lg:col-span-7">
-              <div className="relative overflow-hidden rounded-[28px] border border-white/12 bg-white/[0.018] shadow-[0_30px_120px_rgba(0,0,0,0.65)]">
-                {/* glass + grid */}
+              <div className="relative overflow-hidden rounded-[30px] border border-white/12 bg-white/[0.018] shadow-[0_36px_140px_rgba(0,0,0,0.68)]">
+                {/* plate lighting + grid */}
                 <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_25%_0%,rgba(255,255,255,0.10),transparent_64%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_380px_at_80%_10%,rgba(120,76,255,0.16),transparent_66%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_22%_0%,rgba(255,255,255,0.12),transparent_64%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_82%_10%,rgba(120,76,255,0.16),transparent_66%)]" />
 
-                  {/* subtle technical grid */}
-                  <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px]" />
+                  {/* ultra-subtle grid */}
+                  <div className="absolute inset-0 opacity-[0.20] [background-image:linear-gradient(to_right,rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] [background-size:52px_52px]" />
+
+                  {/* vignette edges */}
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_42%,transparent_36%,rgba(0,0,0,0.58)_88%)]" />
 
                   {/* top sheen */}
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-                  {/* vignette edges */}
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_480px_at_50%_40%,transparent_38%,rgba(0,0,0,0.55)_88%)]" />
                 </div>
 
                 <div className="relative p-6 sm:p-8">
                   <div className="flex items-center justify-between gap-4">
                     <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
-                      REFERENCE WALL
+                      REFERENCE PLATE
                     </div>
                     <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent sm:block" />
-                    <div className="text-[11px] font-medium text-zinc-400">
-                      Comparable disclosure depth • Comparable presentation rigor
+                    <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-400">
+                      Benchmark only
                     </div>
                   </div>
 
-                  {/* If groups exist, render grouped blocks. If not, render clean rows. */}
-                  {grouped ? (
-                    <div className="mt-7 space-y-7">
-                      {Object.entries(grouped).map(([groupName, groupBrands]) => (
-                        <div
-                          key={groupName}
-                          className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-5"
-                        >
+                  {/* content */}
+                  <div className="mt-7 space-y-7">
+                    {grouped ? (
+                      Object.entries(grouped).map(([groupName, groupBrands]) => (
+                        <div key={groupName} className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-5">
                           <div className="flex items-center gap-4">
                             <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-400">
                               {groupName.toUpperCase()}
@@ -160,17 +160,18 @@ export default function TrustMarquee({
                             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                           </div>
 
-                          <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-7 sm:grid-cols-3 lg:grid-cols-4">
+                          <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                             {groupBrands.map((b) => (
                               <div key={`${groupName}:${b.domain}`} className="group flex items-center justify-center">
                                 <Image
                                   src={brandfetchLogoUrl(b.domain)}
                                   alt={`${b.name} logo`}
-                                  width={320}
-                                  height={90}
+                                  width={340}
+                                  height={100}
                                   unoptimized
                                   className={cx(
-                                    'h-7 w-auto max-w-[190px] object-contain opacity-70 grayscale transition',
+                                    // bigger, clearer, still tasteful
+                                    'h-7 w-auto max-w-[200px] object-contain opacity-80 grayscale-[0.35] transition',
                                     'group-hover:opacity-100 group-hover:grayscale-0',
                                     (b.invert ?? true) && 'invert'
                                   )}
@@ -179,34 +180,28 @@ export default function TrustMarquee({
                             ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="mt-8 space-y-7">
-                      {rows.map((row, i) => (
-                        <div key={i} className="relative">
-                          {i !== 0 && (
-                            <div className="absolute -top-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                          )}
+                      ))
+                    ) : (
+                      chunks.map((chunk, idx) => (
+                        <div key={idx} className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-5">
+                          <div className="flex items-center gap-4">
+                            <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-400">
+                              GLOBAL REFERENCE SET
+                            </div>
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                          </div>
 
-                          <div
-                            className={cx(
-                              'flex flex-wrap items-center gap-x-12 gap-y-7',
-                              i === 0 && 'justify-center sm:justify-start',
-                              i === 1 && 'justify-center',
-                              i === 2 && 'justify-center sm:justify-end'
-                            )}
-                          >
-                            {row.map((b) => (
+                          <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
+                            {chunk.map((b) => (
                               <div key={b.domain} className="group flex items-center justify-center">
                                 <Image
                                   src={brandfetchLogoUrl(b.domain)}
                                   alt={`${b.name} logo`}
-                                  width={320}
-                                  height={90}
+                                  width={340}
+                                  height={100}
                                   unoptimized
                                   className={cx(
-                                    'h-7 w-auto max-w-[200px] object-contain opacity-70 grayscale transition',
+                                    'h-7 w-auto max-w-[210px] object-contain opacity-80 grayscale-[0.35] transition',
                                     'group-hover:opacity-100 group-hover:grayscale-0',
                                     (b.invert ?? true) && 'invert'
                                   )}
@@ -215,27 +210,22 @@ export default function TrustMarquee({
                             ))}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      ))
+                    )}
+                  </div>
 
-                  {/* bottom quiet stamp */}
-                  <div className="mt-10 flex items-center justify-between gap-4">
+                  {/* bottom stamp */}
+                  <div className="mt-8 flex items-center justify-between gap-4">
                     <div className="text-xs text-zinc-500">
-                      Benchmarked for clarity, discipline and client confidence
+                      Disclosure depth • Data discipline • Presentation rigor
                     </div>
                     <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent sm:block" />
-                    <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-400">
-                      Reference only
-                    </div>
+                    <div className="text-xs text-zinc-500">Monochrome display for impartiality</div>
                   </div>
                 </div>
               </div>
 
-              {/* tiny outside caption for extra polish */}
-              <div className="mt-4 text-right text-xs text-zinc-500">
-                Logos are displayed in monochrome to keep the reference frame quiet and impartial
-              </div>
+              {/* remove the extra outside caption - it was weakening the plate */}
             </div>
           </div>
         </div>
