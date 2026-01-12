@@ -50,28 +50,30 @@ export default function TrustMarquee({
       }, {})
     : null;
 
-  // If not grouped, build a "wow" logo field: 3 gentle rows with staggered spacing.
+  // Ungrouped fallback: 3 clean rows (legible + premium)
   const rows = splitIntoRows(brands, 3);
 
   return (
     <section className={cx('w-full', className)}>
-      <div className="relative overflow-hidden border-y border-white/10 bg-[#06070B]">
+      <div className="relative overflow-hidden border-y border-white/10 bg-[#05060A]">
         {/* premium ambient */}
         <div className="pointer-events-none absolute inset-0">
-          {/* museum-light sweep */}
-          <div className="absolute -top-40 left-1/2 h-[520px] w-[920px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.10),transparent_72%)] blur-2xl" />
+          {/* top museum light */}
+          <div className="absolute -top-48 left-1/2 h-[560px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.11),transparent_72%)] blur-2xl" />
           {/* violet discipline */}
-          <div className="absolute -top-28 right-[-220px] h-[520px] w-[740px] rounded-full bg-[radial-gradient(closest-side,rgba(120,76,255,0.18),transparent_70%)] blur-2xl" />
+          <div className="absolute -top-40 right-[-260px] h-[620px] w-[820px] rounded-full bg-[radial-gradient(closest-side,rgba(120,76,255,0.18),transparent_72%)] blur-2xl" />
+          {/* subtle gold hint (very light) */}
+          <div className="absolute -top-56 left-[-220px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(closest-side,rgba(255,204,115,0.06),transparent_70%)] blur-2xl" />
           {/* deep vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_0%,transparent_40%,rgba(0,0,0,0.55)_86%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_680px_at_50%_0%,transparent_42%,rgba(0,0,0,0.60)_88%)]" />
           {/* hairlines */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
 
-        <div className="relative mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-16">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* narrative column */}
+        <div className="relative mx-auto w-full max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14">
+            {/* left narrative */}
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-3">
                 <div className="h-px w-10 bg-gradient-to-r from-transparent via-white/18 to-transparent" />
@@ -80,7 +82,7 @@ export default function TrustMarquee({
                 </div>
               </div>
 
-              <h2 className="mt-4 text-balance text-[26px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-[32px]">
+              <h2 className="mt-4 text-balance text-[28px] font-semibold tracking-[-0.03em] text-zinc-50 sm:text-[36px]">
                 {title}
               </h2>
 
@@ -88,8 +90,7 @@ export default function TrustMarquee({
                 {subtitle}
               </p>
 
-              {/* credibility bullets (quiet, not salesy) */}
-              <div className="mt-6 space-y-3">
+              <div className="mt-7 space-y-3.5">
                 <div className="flex items-start gap-3">
                   <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/35" />
                   <p className="text-sm leading-relaxed text-zinc-300">
@@ -105,101 +106,136 @@ export default function TrustMarquee({
                 <div className="flex items-start gap-3">
                   <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/35" />
                   <p className="text-sm leading-relaxed text-zinc-300">
-                    A reference framework that keeps Vantera disciplined as coverage expands
+                    A reference framework that stays disciplined as coverage expands
                   </p>
                 </div>
               </div>
 
-              <div className="mt-8 max-w-md">
+              <div className="mt-9 max-w-md">
                 <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 <p className="mt-3 text-xs leading-relaxed text-zinc-500">{note}</p>
               </div>
             </div>
 
-            {/* logo field */}
+            {/* right "wow" reference wall */}
             <div className="lg:col-span-7">
-              {grouped ? (
-                <div className="space-y-8">
-                  {Object.entries(grouped).map(([groupName, groupBrands]) => (
-                    <div key={groupName} className="rounded-3xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
-                          {groupName.toUpperCase()}
-                        </div>
-                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                      </div>
+              <div className="relative overflow-hidden rounded-[28px] border border-white/12 bg-white/[0.018] shadow-[0_30px_120px_rgba(0,0,0,0.65)]">
+                {/* glass + grid */}
+                <div className="pointer-events-none absolute inset-0">
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_25%_0%,rgba(255,255,255,0.10),transparent_64%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_380px_at_80%_10%,rgba(120,76,255,0.16),transparent_66%)]" />
 
-                      <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
-                        {groupBrands.map((b) => (
-                          <div
-                            key={`${groupName}:${b.domain}`}
-                            className="group flex items-center justify-center"
-                            aria-label={b.name}
-                          >
-                            <Image
-                              src={brandfetchLogoUrl(b.domain)}
-                              alt={`${b.name} logo`}
-                              width={260}
-                              height={70}
-                              unoptimized
-                              className={cx(
-                                'h-6 w-auto max-w-[160px] object-contain opacity-55 grayscale transition',
-                                'group-hover:opacity-100 group-hover:grayscale-0',
-                                (b.invert ?? true) && 'invert'
-                              )}
-                            />
-                          </div>
-                        ))}
-                      </div>
+                  {/* subtle technical grid */}
+                  <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px]" />
+
+                  {/* top sheen */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+                  {/* vignette edges */}
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_480px_at_50%_40%,transparent_38%,rgba(0,0,0,0.55)_88%)]" />
+                </div>
+
+                <div className="relative p-6 sm:p-8">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
+                      REFERENCE WALL
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02] p-6 sm:p-8">
-                  {/* subtle inner light */}
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(700px_260px_at_30%_0%,rgba(255,255,255,0.09),transparent_65%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent sm:block" />
+                    <div className="text-[11px] font-medium text-zinc-400">
+                      Comparable disclosure depth • Comparable presentation rigor
+                    </div>
                   </div>
 
-                  {/* staggered rows = "wow" without being loud */}
-                  <div className="relative space-y-6">
-                    {rows.map((row, i) => (
-                      <div
-                        key={i}
-                        className={cx(
-                          'flex flex-wrap items-center justify-center gap-x-10 gap-y-6',
-                          i === 0 && 'sm:justify-start',
-                          i === 1 && 'sm:justify-center',
-                          i === 2 && 'sm:justify-end'
-                        )}
-                      >
-                        {row.map((b) => (
-                          <div key={b.domain} className="group flex items-center justify-center">
-                            <Image
-                              src={brandfetchLogoUrl(b.domain)}
-                              alt={`${b.name} logo`}
-                              width={260}
-                              height={70}
-                              unoptimized
-                              className={cx(
-                                'h-6 w-auto max-w-[180px] object-contain opacity-55 grayscale transition',
-                                'group-hover:opacity-100 group-hover:grayscale-0',
-                                (b.invert ?? true) && 'invert'
-                              )}
-                            />
+                  {/* If groups exist, render grouped blocks. If not, render clean rows. */}
+                  {grouped ? (
+                    <div className="mt-7 space-y-7">
+                      {Object.entries(grouped).map(([groupName, groupBrands]) => (
+                        <div
+                          key={groupName}
+                          className="rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-5"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-400">
+                              {groupName.toUpperCase()}
+                            </div>
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                           </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
 
-                  {/* micro-caption */}
-                  <div className="relative mt-8 text-center text-xs text-zinc-400 sm:text-right">
-                    Comparable disclosure depth • Comparable presentation rigor
+                          <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-7 sm:grid-cols-3 lg:grid-cols-4">
+                            {groupBrands.map((b) => (
+                              <div key={`${groupName}:${b.domain}`} className="group flex items-center justify-center">
+                                <Image
+                                  src={brandfetchLogoUrl(b.domain)}
+                                  alt={`${b.name} logo`}
+                                  width={320}
+                                  height={90}
+                                  unoptimized
+                                  className={cx(
+                                    'h-7 w-auto max-w-[190px] object-contain opacity-70 grayscale transition',
+                                    'group-hover:opacity-100 group-hover:grayscale-0',
+                                    (b.invert ?? true) && 'invert'
+                                  )}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="mt-8 space-y-7">
+                      {rows.map((row, i) => (
+                        <div key={i} className="relative">
+                          {i !== 0 && (
+                            <div className="absolute -top-3 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                          )}
+
+                          <div
+                            className={cx(
+                              'flex flex-wrap items-center gap-x-12 gap-y-7',
+                              i === 0 && 'justify-center sm:justify-start',
+                              i === 1 && 'justify-center',
+                              i === 2 && 'justify-center sm:justify-end'
+                            )}
+                          >
+                            {row.map((b) => (
+                              <div key={b.domain} className="group flex items-center justify-center">
+                                <Image
+                                  src={brandfetchLogoUrl(b.domain)}
+                                  alt={`${b.name} logo`}
+                                  width={320}
+                                  height={90}
+                                  unoptimized
+                                  className={cx(
+                                    'h-7 w-auto max-w-[200px] object-contain opacity-70 grayscale transition',
+                                    'group-hover:opacity-100 group-hover:grayscale-0',
+                                    (b.invert ?? true) && 'invert'
+                                  )}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* bottom quiet stamp */}
+                  <div className="mt-10 flex items-center justify-between gap-4">
+                    <div className="text-xs text-zinc-500">
+                      Benchmarked for clarity, discipline and client confidence
+                    </div>
+                    <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent sm:block" />
+                    <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-400">
+                      Reference only
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* tiny outside caption for extra polish */}
+              <div className="mt-4 text-right text-xs text-zinc-500">
+                Logos are displayed in monochrome to keep the reference frame quiet and impartial
+              </div>
             </div>
           </div>
         </div>
