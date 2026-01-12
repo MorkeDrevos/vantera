@@ -1,6 +1,5 @@
 // src/app/page.tsx
 import type { Metadata } from 'next';
-import { PrismaClient } from '@prisma/client';
 
 import HomePage, { type RuntimeCity } from '@/components/home/HomePage';
 import ComingSoon from '@/components/ComingSoon';
@@ -8,16 +7,7 @@ import ComingSoon from '@/components/ComingSoon';
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
 import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
 
-// ---- Prisma (safe singleton for Next dev/hot reload) ----
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
-
-const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+import { PrismaClient } from '@prisma/client';
 
 export const metadata: Metadata = (() => {
   const doc = SEO_INTENT.home();
@@ -25,11 +15,8 @@ export const metadata: Metadata = (() => {
   return {
     title: doc.title,
     description: doc.description,
-    alternates: {
-      canonical: doc.canonical,
-    },
+    alternates: { canonical: doc.canonical },
     robots: doc.robots,
-
     openGraph: {
       type: 'website',
       title: doc.title,
@@ -38,7 +25,6 @@ export const metadata: Metadata = (() => {
       siteName: 'Vantera',
       images: [doc.ogImage],
     },
-
     twitter: {
       card: 'summary_large_image',
       title: doc.title,
@@ -48,44 +34,27 @@ export const metadata: Metadata = (() => {
   };
 })();
 
+const prisma = new PrismaClient();
+
 function toRuntimeCity(row: any): RuntimeCity {
-  // We intentionally treat DB rows as `any` here so this file won’t break
-  // if schema field names evolve (you can tighten typing later).
-  const imageSrc =
-    (row?.imageSrc as string | undefined) ??
-    (row?.image_url as string | undefined) ??
-    (row?.image as string | undefined) ??
-    (row?.heroImageSrc as string | undefined) ??
-    null;
-
-  const imageAlt =
-    (row?.imageAlt as string | undefined) ??
-    (row?.image_alt as string | undefined) ??
-    (row?.heroImageAlt as string | undefined) ??
-    null;
-
   return {
-    slug: String(row.slug),
-    name: String(row.name),
-    country: String(row.country ?? ''),
-    region: (row.region ?? null) as string | null,
-    tz: String(row.tz ?? 'UTC'),
-
-    tier: (row.tier ?? undefined) as any,
-    status: (row.status ?? undefined) as any,
-    priority: typeof row.priority === 'number' ? row.priority : undefined,
-
-    blurb: (row.blurb ?? null) as string | null,
-
-    image: imageSrc
+    slug: row.slug,
+    name: row.name,
+    country: row.country,
+    region: row.region,
+    tz: row.tz,
+    tier: row.tier,
+    status: row.status,
+    priority: row.priority ?? 0,
+    blurb: row.blurb,
+    image: row.heroImageSrc
       ? {
-          src: imageSrc,
-          alt: imageAlt,
+          src: row.heroImageSrc,
+          alt: row.heroImageAlt,
         }
       : null,
-
-    heroImageSrc: (row.heroImageSrc ?? null) as string | null,
-    heroImageAlt: (row.heroImageAlt ?? null) as string | null,
+    heroImageSrc: row.heroImageSrc,
+    heroImageAlt: row.heroImageAlt,
   };
 }
 
@@ -109,12 +78,11 @@ export default async function Page() {
 
   if (comingSoon) return <ComingSoon />;
 
-  // DB -> RuntimeCity[]
-  const rows = (await prisma.city.findMany({
+  const rows = await prisma.city.findMany({
     orderBy: [{ priority: 'desc' }, { name: 'asc' }],
-  })) as any[];
+  });
 
-  const cities: RuntimeCity[] = rows.map(toRuntimeCity);
+  const cities = rows.map(toRuntimeCity);
 
   return (
     <>
