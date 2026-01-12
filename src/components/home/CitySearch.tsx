@@ -7,13 +7,34 @@ import { useRouter } from 'next/navigation';
 
 import SafeImage from './SafeImage';
 import CityLocalTime from './CityLocalTime';
-import { CITIES, type City } from './cities';
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
 }
 
-function rank(city: City, q: string) {
+// Runtime city shape (DB-driven). Keep aligned with what the dropdown renders.
+export type RuntimeCity = {
+  slug: string;
+  name: string;
+  country: string;
+  region?: string | null;
+  tz: string;
+
+  tier?: string;
+  status?: string;
+  priority?: number;
+
+  blurb?: string | null;
+
+  // Dropdown thumbnail compatibility
+  image?: { src: string; alt?: string | null } | null;
+
+  // DB fields (optional)
+  heroImageSrc?: string | null;
+  heroImageAlt?: string | null;
+};
+
+function rank(city: RuntimeCity, q: string) {
   const qq = normalize(q);
   if (!qq) return 0;
 
@@ -54,7 +75,13 @@ type PanelGeom = {
   maxHeight: number;
 };
 
-export default function CitySearch() {
+export default function CitySearch({
+  cities,
+  defaultCount = 7,
+}: {
+  cities: RuntimeCity[];
+  defaultCount?: number;
+}) {
   const router = useRouter();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -86,15 +113,20 @@ export default function CitySearch() {
 
   const results = useMemo(() => {
     const qq = normalize(q);
-    if (!qq) return CITIES.slice(0, 7);
 
-    return [...CITIES]
+    const base = [...(cities ?? [])].sort(
+      (a, b) => (b.priority ?? 0) - (a.priority ?? 0) || a.name.localeCompare(b.name),
+    );
+
+    if (!qq) return base.slice(0, defaultCount);
+
+    return base
       .map((c) => ({ c, s: rank(c, qq) }))
       .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s || a.c.name.localeCompare(b.c.name))
       .slice(0, 10)
       .map((x) => x.c);
-  }, [q]);
+  }, [q, cities, defaultCount]);
 
   const examples = useMemo(() => ['Madrid', 'Paris', 'Dubai', 'NYC'], []);
 
@@ -140,13 +172,9 @@ export default function CitySearch() {
     const onResize = () => computeGeom();
     const onScrollCapture = () => computeGeom();
 
-    // Resize
     window.addEventListener('resize', onResize, { passive: true });
-
-    // Capture scroll from any container (important for nested scroll areas)
     window.addEventListener('scroll', onScrollCapture, { passive: true, capture: true });
 
-    // Also respond to viewport changes on mobile (address bar)
     const vv = window.visualViewport;
     const onVV = () => computeGeom();
     vv?.addEventListener('resize', onVV, { passive: true });
@@ -198,7 +226,7 @@ export default function CitySearch() {
               left: geom.left,
               top: geom.top,
               width: geom.width,
-              zIndex: 9999, // above hero/video and any sticky bars
+              zIndex: 9999,
             }}
             className={[
               'relative overflow-hidden rounded-2xl border border-white/10 bg-black/60',
@@ -207,13 +235,11 @@ export default function CitySearch() {
             role="listbox"
             aria-label="City search results"
           >
-            {/* dropdown polish */}
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] via-white/[0.02] to-transparent" />
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent" />
             </div>
 
-            {/* Scroll container */}
             <div
               className="relative p-2"
               style={{
@@ -229,7 +255,7 @@ export default function CitySearch() {
                     <li key={c.slug}>
                       <button
                         type="button"
-                        onMouseDown={(e) => e.preventDefault()} // keep input focused
+                        onMouseDown={(e) => e.preventDefault()}
                         onMouseEnter={() => setActive(idx)}
                         onClick={() => go(c.slug)}
                         className={[
@@ -297,7 +323,6 @@ export default function CitySearch() {
         ref={anchorRef}
         className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-2 shadow-[0_22px_80px_rgba(0,0,0,0.50)] backdrop-blur-2xl"
       >
-        {/* top highlight + subtle polish */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-b from-white/[0.10] via-white/[0.02] to-transparent" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
@@ -381,7 +406,6 @@ export default function CitySearch() {
         </div>
       </div>
 
-      {/* Portal dropdown (fixes: clipped "behind" + adds real scrolling) */}
       {dropdown}
     </div>
   );
