@@ -7,32 +7,11 @@ import { useRouter } from 'next/navigation';
 
 import SafeImage from './SafeImage';
 import CityLocalTime from './CityLocalTime';
+import type { RuntimeCity } from './HomePage';
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
 }
-
-// Runtime city shape (DB-driven). Keep aligned with what the dropdown renders.
-export type RuntimeCity = {
-  slug: string;
-  name: string;
-  country: string;
-  region?: string | null;
-  tz: string;
-
-  tier?: string;
-  status?: string;
-  priority?: number;
-
-  blurb?: string | null;
-
-  // Dropdown thumbnail compatibility
-  image?: { src: string; alt?: string | null } | null;
-
-  // DB fields (optional)
-  heroImageSrc?: string | null;
-  heroImageAlt?: string | null;
-};
 
 function rank(city: RuntimeCity, q: string) {
   const qq = normalize(q);
@@ -92,7 +71,6 @@ export default function CitySearch({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
 
-  // SSR-safe portal
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
@@ -100,7 +78,6 @@ export default function CitySearch({
     if (!q.trim()) setActive(0);
   }, [q]);
 
-  // TopBar can dispatch this event
   useEffect(() => {
     const onFocusSearch = () => {
       setOpen(true);
@@ -141,7 +118,6 @@ export default function CitySearch({
     if (pick) go(pick.slug);
   }
 
-  // Compute portal panel geometry (fixed positioning + scrollable maxHeight)
   const [geom, setGeom] = useState<PanelGeom | null>(null);
 
   function computeGeom() {
@@ -157,13 +133,11 @@ export default function CitySearch({
     const left = clamp(r.left, 12, Math.max(12, vw - r.width - 12));
     const top = r.bottom + gap;
 
-    // leave space for bottom padding
     const maxHeight = Math.max(200, vh - top - 12);
 
     setGeom({ left, top, width: r.width, maxHeight });
   }
 
-  // Keep it pinned during open: scroll/resize/layout
   useEffect(() => {
     if (!open) return;
 
@@ -189,7 +163,6 @@ export default function CitySearch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, q, results.length]);
 
-  // Close on outside click/tap (needed because portal is outside component tree)
   useEffect(() => {
     if (!open) return;
 
