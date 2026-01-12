@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import CityCard from './CityCard';
+import type { RuntimeCity } from './HomePage';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -22,30 +23,7 @@ function formatLocalTime(tz: string) {
   }
 }
 
-// Runtime city shape (DB-driven). Keep this aligned with what CityCard actually uses.
-export type RuntimeCity = {
-  slug: string;
-  name: string;
-  country: string;
-  region?: string | null;
-  tz: string;
-
-  tier?: string;
-  status?: string;
-  priority?: number;
-
-  blurb?: string | null;
-
-  // CityCard + search thumbnail compatibility
-  image?: { src: string; alt?: string | null } | null;
-
-  // DB fields (optional)
-  heroImageSrc?: string | null;
-  heroImageAlt?: string | null;
-
-  // extra (computed)
-  localTime?: string;
-};
+type EnrichedCity = RuntimeCity & { localTime?: string };
 
 export default function CityCardsClient({
   cities,
@@ -63,11 +41,11 @@ export default function CityCardsClient({
     return () => clearInterval(id);
   }, []);
 
-  const enriched = useMemo(() => {
+  const enriched: EnrichedCity[] = useMemo(() => {
     // tie memo to `now` so local times update once per minute
     void now;
 
-    return cities.map((city) => ({
+    return (cities ?? []).map((city) => ({
       ...city,
       localTime: formatLocalTime(city.tz),
     }));
@@ -78,15 +56,13 @@ export default function CityCardsClient({
       <div className={cx('grid gap-4 sm:gap-5', columns)}>
         {enriched.map((city) => (
           <div key={city.slug} className="relative">
-            {/* Optional: tiny local time badge (does not affect CityCard props) */}
             {city.localTime ? (
               <div className="pointer-events-none absolute right-3 top-3 z-10 rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[11px] text-zinc-200/90 backdrop-blur-xl">
                 {city.localTime}
               </div>
             ) : null}
 
-            {/* CityCard is structurally typed - RuntimeCity matches the shape */}
-            <CityCard city={city as any} />
+            <CityCard city={city} />
           </div>
         ))}
       </div>
