@@ -477,7 +477,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                       <div className="relative z-30 mt-4">
                         <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                           {/* NOTE: keep props-free to avoid build break if CitySearch is still no-props */}
-                          <CitySearch />
+                          <CitySearch cities={cities as any} defaultCount={10} />
                         </div>
                       </div>
 
