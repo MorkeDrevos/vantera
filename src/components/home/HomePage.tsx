@@ -1,6 +1,6 @@
 // src/components/home/HomePage.tsx
 import Image from 'next/image';
-import { Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
@@ -38,7 +38,7 @@ export type RuntimeCity = {
   heroImageAlt?: string | null;
 };
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#0B0E13] text-zinc-100">
       {/* Ambient: graphite, ivory, violet signal */}
@@ -63,7 +63,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
+function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     <div className="mb-5 flex items-end justify-between gap-3">
       <div>
@@ -102,7 +102,7 @@ function HeroVideo() {
       <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_15%_16%,rgba(120,76,255,0.18),transparent_56%)]" />
       <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_85%_22%,rgba(62,196,255,0.13),transparent_56%)]" />
 
-      {/* Animated stardust (cheap but looks high-end) */}
+      {/* Animated stardust */}
       <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:18px_18px] animate-[pulse_6s_ease-in-out_infinite]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#0B0E13]" />
     </div>
@@ -136,7 +136,7 @@ function PremiumBadgeRow() {
 function SignalStrip({
   items,
 }: {
-  items: Array<{ k: string; v: React.ReactNode; hint?: string }>;
+  items: Array<{ k: string; v: ReactNode; hint?: string }>;
 }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
@@ -279,7 +279,10 @@ function PortalVsTruth() {
           </div>
           <div className="mt-4 grid gap-2">
             {['Looks amazing', 'Easy to scroll', 'Hard to verify'].map((t) => (
-              <div key={t} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200">
+              <div
+                key={t}
+                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200"
+              >
                 {t}
               </div>
             ))}
@@ -297,7 +300,10 @@ function PortalVsTruth() {
           </div>
           <div className="mt-4 grid gap-2">
             {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
-              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
+              <div
+                key={t}
+                className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200"
+              >
                 {t}
               </div>
             ))}
@@ -342,6 +348,71 @@ function FeatureCard({
               <span className="text-zinc-200">{b}</span>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CTA() {
+  return (
+    <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 shadow-[0_42px_130px_rgba(0,0,0,0.70)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(1000px_320px_at_22%_0%,rgba(255,255,255,0.07),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_88%_18%,rgba(120,76,255,0.12),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      </div>
+
+      <div className="relative grid gap-6 p-6 lg:grid-cols-12 lg:items-center">
+        <div className="lg:col-span-7">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE LAUNCH</div>
+          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">
+            The portal that protects the decision
+          </div>
+          <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
+            Vantera is building the intelligence layer luxury real estate never had. A quiet system that makes buyers
+            smarter, sellers cleaner and advisors faster.
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-zinc-200">
+            {['Buyers', 'Sellers', 'Advisors', 'Developers'].map((t) => (
+              <span key={t} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-5">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">STATUS</div>
+                <div className="mt-1 text-sm text-zinc-200">Private build, expanding coverage</div>
+              </div>
+              <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300">
+                Coming soon
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {[
+                { k: 'Truth Cards', v: 'In progress' },
+                { k: 'Private listings', v: 'Phase 1' },
+                { k: 'Permit checks', v: 'Phase 2' },
+                { k: 'Price models', v: 'Phase 2' },
+              ].map((x) => (
+                <div key={x.k} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
+                  <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{x.k.toUpperCase()}</div>
+                  <div className="mt-1 text-sm text-zinc-100">{x.v}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 text-xs text-zinc-500">
+              For now: explore coverage, open city intelligence and watch the index come alive.
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -394,16 +465,19 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SEARCH</div>
-                          <div className="mt-1 text-xs text-zinc-500">Start with a city. Then open the home&apos;s intelligence.</div>
+                          <div className="mt-1 text-xs text-zinc-500">
+                            Start with a city. Then open the home&apos;s intelligence.
+                          </div>
                         </div>
                         <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-300 sm:inline-flex">
                           Press <span className="font-mono text-zinc-100">/</span>
                         </div>
                       </div>
 
-                      <div className="mt-4 relative z-30">
+                      <div className="relative z-30 mt-4">
                         <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                          <CitySearch cities={cities} />
+                          {/* NOTE: keep props-free to avoid build break if CitySearch is still no-props */}
+                          <CitySearch cities={cities as any} defaultCount={10} />
                         </div>
                       </div>
 
@@ -426,7 +500,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   />
                 </div>
 
-                {/* Cute, sexy, welcoming: "Before you go further" */}
                 <div className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-3">
                   <Pillar title="Paperwork" body="See what is missing before you waste time." />
                   <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
@@ -439,7 +512,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
 
               {/* RIGHT */}
-              <div className="lg:col-span-5 space-y-4">
+              <div className="space-y-4 lg:col-span-5">
                 <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.70)] sm:p-6">
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_35%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
@@ -461,7 +534,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
             </div>
 
-            {/* Big WOW: above portals */}
             <div className="mt-10">
               <SectionLabel hint="This is why we sit above luxury portals">Portal vs intelligence</SectionLabel>
               <PortalVsTruth />
@@ -513,4 +585,70 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects
+              bullets={[
+                'Tracks velocity and reductions',
+                'Separates value from persuasion',
+                'Protects buyers from regret',
+              ]}
+            />
+            <FeatureCard
+              eyebrow="Verification"
+              title="Permits, ownership and risk flags"
+              body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
+              bullets={[
+                'Turns paperwork into plain language',
+                'Surfaces missing documents fast',
+                'Flags resale killers early',
+              ]}
+            />
+            <FeatureCard
+              eyebrow="Liquidity"
+              title="A private read on demand"
+              body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
+              bullets={[
+                'Demand signals over hype',
+                'Comparables that match reality',
+                'Designed for advisors and sellers',
+              ]}
+            />
+          </div>
+        </section>
+
+        <section className="mt-14 sm:mt-16">
+          <SectionLabel hint="Coverage that feels alive">Explore the index</SectionLabel>
+
+          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
+            </div>
+
+            <div className="relative flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">CITIES</div>
+                <div className="mt-2 text-lg font-medium text-zinc-100">Browse coverage with signal</div>
+                <div className="mt-1 text-sm text-zinc-300">
+                  Fast scan for where value is forming, where risk is hiding and where liquidity is strongest.
+                </div>
+              </div>
+
+              <div className="hidden sm:block">
+                <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                  <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
+                </div>
+              </div>
+            </div>
+
+            <div className="relative mt-6">
+              <CityCardsVirtualizedClient cities={cities as any} />
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-14 sm:mt-16">
+          <CTA />
+        </section>
+      </div>
+    </Shell>
+  );
+}
