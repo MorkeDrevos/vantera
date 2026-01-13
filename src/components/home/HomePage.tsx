@@ -529,7 +529,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
         <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.72))] shadow-[0_55px_150px_rgba(0,0,0,0.74)]">
           <HeroVideo />
-          <HeroGoldEdge />
+<LuxLiveBackdrop />
+<HeroShine />
 
           <div className="relative w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
