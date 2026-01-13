@@ -137,6 +137,34 @@ function HeroVideo() {
   );
 }
 
+function HeroShine() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* quiet top halo */}
+      <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.13),transparent_62%)] blur-2xl" />
+
+      {/* violet + cyan bloom */}
+      <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.20),transparent_62%)] blur-2xl" />
+      <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.14),transparent_60%)] blur-2xl" />
+
+      {/* premium sheen */}
+      <div className="absolute inset-0 opacity-35 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_45%,transparent_62%)]" />
+
+      {/* optional ghost mark (only if the asset exists) */}
+      <div className="absolute right-[-90px] top-[-70px] opacity-[0.05] blur-[0.2px]">
+        <Image
+          src="/brand/vantera-logo-dark.png"
+          alt=""
+          width={560}
+          height={180}
+          className="w-[560px]"
+          priority={false}
+        />
+      </div>
+    </div>
+  );
+}
+
 function HeroGoldEdge() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0">
