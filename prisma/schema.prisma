@@ -6,7 +6,12 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+
+  // Pooled (runtime, edge/serverless friendly)
+  url = env("DATABASE_URL")
+
+  // Non-pooled (required for prisma migrate deploy)
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model ContactMessage {

@@ -134,6 +134,7 @@ export default function TopBar() {
         setMegaOpen(false);
       }
 
+      // Keep your shortcuts, but we’ll label them in plain language
       if (onCityPage && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
         const url = new URL(window.location.href);
@@ -265,27 +266,32 @@ export default function TopBar() {
     setMegaOpen((v) => !v);
   }
 
-  // Styling tokens
-  const barBg = scrolled ? 'bg-[#07080B]/92' : 'bg-[#07080B]/72';
-  const goldText =
-    'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7B8] via-[#E7C982] to-[#B8893B]';
-  const softBorder = 'ring-1 ring-inset ring-white/10';
-  const softFill = 'bg-white/[0.03] hover:bg-white/[0.05]';
+  // Royal styling tokens (quiet luxury)
+  const barBg = scrolled ? 'bg-[#06070A]/92' : 'bg-[#06070A]/72';
 
-  // Consistent one-line nav items (fixes baseline drift + wrapping)
+  // Softer, champagne gold (less “yellow”, more “bank vault”)
+  const goldText =
+    'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]';
+
+  const softBorder = 'ring-1 ring-inset ring-white/10';
+  const softFill = 'bg-white/[0.035] hover:bg-white/[0.06]';
+
+  // Nav items: calmer, fewer uppercase vibes, still premium
   const navItemBase =
-    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[13px] uppercase tracking-[0.20em] text-zinc-200/75 hover:text-zinc-50 transition';
+    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[13px] tracking-[0.14em] text-zinc-200/75 hover:text-zinc-50 transition';
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[18px]', barBg)}>
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+        {/* Quiet “gold edge” + glass */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6C980]/20 to-transparent" />
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(1000px_220px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1100px_260px_at_50%_0%,rgba(230,201,128,0.12),transparent_62%)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/6" />
         </div>
 
         <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-4 sm:px-8 sm:py-5">
+          {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
             <Image
               src="/brand/vantera-logo-dark.svg"
@@ -293,13 +299,14 @@ export default function TopBar() {
               width={620}
               height={180}
               priority={false}
-              className="h-[72px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.70)] sm:h-[78px] md:h-[86px]"
+              className="h-[70px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.72)] sm:h-[76px] md:h-[84px]"
             />
           </Link>
 
+          {/* Desktop nav */}
           <div className="hidden flex-1 items-center justify-center lg:flex">
             <div className="flex items-center gap-10">
-              {/* Destinations */}
+              {/* Places mega */}
               <div
                 ref={wrapRef}
                 className="relative"
@@ -315,7 +322,7 @@ export default function TopBar() {
                   aria-haspopup="menu"
                 >
                   <Globe className="h-4 w-4 opacity-75" />
-                  <span>Destinations</span>
+                  <span>Places</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
                 </button>
 
@@ -329,7 +336,7 @@ export default function TopBar() {
                   onPointerLeave={closeMegaSoon}
                   className={cx(
                     'absolute left-1/2 z-[80] mt-5 w-[1120px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
-                    'rounded-[28px] bg-[#05060A]',
+                    'rounded-[28px] bg-[#04050A]',
                     'shadow-[0_90px_240px_rgba(0,0,0,0.92)]',
                     'ring-1 ring-inset ring-white/12',
                     'overflow-hidden',
@@ -339,14 +346,14 @@ export default function TopBar() {
                       : 'pointer-events-none -translate-y-1 scale-[0.99] opacity-0',
                   )}
                   role="menu"
-                  aria-label="Destinations menu"
+                  aria-label="Places menu"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_50%_0%,rgba(231,201,130,0.13),transparent_60%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_50%_0%,rgba(230,201,128,0.14),transparent_60%)]" />
 
                   <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-7 py-5">
                     <div className="min-w-0">
                       <div className="text-[11px] font-semibold tracking-[0.30em] text-zinc-200/80 uppercase">
-                        Explore by country
+                        Pick a country
                       </div>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {countries.map((c) => (
@@ -355,7 +362,7 @@ export default function TopBar() {
                             href={countryHref(c)}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="rounded-full bg-white/[0.03] px-3.5 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.06] hover:ring-white/14 transition"
+                            className="rounded-full bg-white/[0.035] px-3.5 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
                             role="menuitem"
                           >
                             {c}
@@ -379,6 +386,7 @@ export default function TopBar() {
                   </div>
 
                   <div className="relative grid grid-cols-12 gap-7 px-7 py-7">
+                    {/* Regions */}
                     <div className="col-span-3">
                       <div className="mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
                         Regions
@@ -390,7 +398,7 @@ export default function TopBar() {
                             href={`/coming-soon?region=${encodeURIComponent(r)}`}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="rounded-2xl bg-white/[0.02] px-3.5 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 hover:text-white transition"
+                            className="rounded-2xl bg-white/[0.03] px-3.5 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 hover:text-white transition"
                             role="menuitem"
                           >
                             {r}
@@ -399,6 +407,7 @@ export default function TopBar() {
                       </div>
                     </div>
 
+                    {/* Cities */}
                     <div className="col-span-5">
                       <div className="mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
                         Cities
@@ -411,7 +420,7 @@ export default function TopBar() {
                             href={`/city/${c.slug}`}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="group rounded-2xl bg-white/[0.02] ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition px-3.5 py-3"
+                            className="group rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition px-3.5 py-3"
                             role="menuitem"
                           >
                             <div className="flex items-center justify-between gap-3">
@@ -421,14 +430,16 @@ export default function TopBar() {
                                 </div>
                                 <div className="truncate text-[11px] text-zinc-400">{c.country}</div>
                               </div>
-                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-85" />
+                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90" />
                             </div>
                           </Link>
                         ))}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.02] ring-1 ring-inset ring-white/10 px-4 py-3">
-                        <div className="text-xs text-zinc-400">Curated entry points, expanding.</div>
+                      <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/10 px-4 py-3">
+                        <div className="text-xs text-zinc-400">
+                          Quick entry points. We add more every week.
+                        </div>
                         <Link
                           href="/"
                           prefetch
@@ -440,16 +451,16 @@ export default function TopBar() {
                       </div>
                     </div>
 
-                    {/* Explore / Private sellers inside mega */}
+                    {/* Browse / Sell */}
                     <div className="col-span-4">
                       <div className="grid gap-3">
-                        <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+                        <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
                           <div className="border-b border-white/10 px-4 py-3">
                             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                              Explore
+                              Browse
                             </div>
                             <div className="mt-1 text-xs text-zinc-400">
-                              Browse homes, then open their intelligence.
+                              Search homes and see the key facts fast.
                             </div>
                           </div>
                           <div className="grid gap-2 p-4">
@@ -481,24 +492,24 @@ export default function TopBar() {
                               href="/coming-soon?section=for-sale"
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.02] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
                             >
                               <span className="inline-flex items-center gap-2">
                                 <MapPin className="h-4 w-4 opacity-80" />
-                                Browse for sale
+                                Homes for sale
                               </span>
                               <ArrowRight className="h-4 w-4 opacity-75" />
                             </Link>
                           </div>
                         </div>
 
-                        <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+                        <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
                           <div className="border-b border-white/10 px-4 py-3">
                             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                              Private sellers
+                              Sell your home
                             </div>
                             <div className="mt-1 text-xs text-zinc-400">
-                              One listing at a time. Pay by card. Direct enquiries.
+                              One home at a time. Pay by card. Get direct enquiries.
                             </div>
                           </div>
                           <div className="p-4">
@@ -506,13 +517,15 @@ export default function TopBar() {
                               href="/coming-soon?flow=sell"
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16 transition"
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.04] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16 transition"
                             >
                               <span className={goldText}>List your home</span>
-                              <ArrowRight className="h-4 w-4 opacity-85 text-zinc-100" />
+                              <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
                             </Link>
 
-                            <div className="mt-2 text-[11px] text-zinc-500">No middle layer. Direct enquiries.</div>
+                            <div className="mt-2 text-[11px] text-zinc-500">
+                              You keep control. No middle layer.
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -521,7 +534,7 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Explore (desktop nav) */}
+              {/* Browse */}
               <button
                 type="button"
                 onClick={() => {
@@ -534,9 +547,10 @@ export default function TopBar() {
                 }}
                 className={navItemBase}
               >
-                <span>Explore</span>
+                <span>Browse</span>
               </button>
 
+              {/* Sell */}
               <Link href="/coming-soon?flow=sell" prefetch className={navItemBase}>
                 <span>Sell</span>
               </Link>
@@ -574,13 +588,13 @@ export default function TopBar() {
                 prefetch
                 className={cx(
                   'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition',
-                  'bg-white/[0.03] ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16',
-                  'shadow-[0_30px_140px_rgba(0,0,0,0.55)]',
+                  'bg-white/[0.04] ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16',
+                  'shadow-[0_30px_140px_rgba(0,0,0,0.58)]',
                 )}
                 aria-label="List your home"
               >
                 <span className={goldText}>List your home</span>
-                <ArrowRight className="h-4 w-4 opacity-85 text-zinc-100" />
+                <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
               </Link>
             </div>
 
@@ -623,16 +637,16 @@ export default function TopBar() {
         <div
           className={cx(
             'absolute right-0 top-0 h-full w-[92vw] max-w-[420px]',
-            'bg-[#05060A] ring-1 ring-inset ring-white/12',
+            'bg-[#04050A] ring-1 ring-inset ring-white/12',
             'shadow-[-30px_0_120px_rgba(0,0,0,0.85)]',
             'transition-transform duration-300',
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(230,201,128,0.14),transparent_60%)]" />
 
           <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-5">
-            <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Vantera</div>
+            <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -648,11 +662,11 @@ export default function TopBar() {
           </div>
 
           <div className="relative space-y-4 px-5 py-5">
-            {/* Explore */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+            {/* Browse */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Explore</div>
-                <div className="mt-1 text-xs text-zinc-400">Browse homes, then open intelligence.</div>
+                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Browse</div>
+                <div className="mt-1 text-xs text-zinc-400">Search homes and see the key facts.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <button
@@ -684,45 +698,45 @@ export default function TopBar() {
                   href="/coming-soon?section=for-sale"
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.02] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <MapPin className="h-4 w-4 opacity-80" />
-                    Browse for sale
+                    Homes for sale
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-75" />
                 </Link>
               </div>
             </div>
 
-            {/* Private sellers */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+            {/* Sell */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                  Private sellers
+                  Sell your home
                 </div>
-                <div className="mt-1 text-xs text-zinc-400">One listing at a time. Pay by card. Direct enquiries.</div>
+                <div className="mt-1 text-xs text-zinc-400">Pay by card. Get direct enquiries.</div>
               </div>
               <div className="p-4">
                 <Link
                   href="/coming-soon?flow=sell"
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.06] hover:ring-white/16 transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.04] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16 transition"
                 >
                   <span className={goldText}>List your home</span>
-                  <ArrowRight className="h-4 w-4 opacity-85 text-zinc-100" />
+                  <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
                 </Link>
 
-                <div className="mt-2 text-[11px] text-zinc-500">Direct enquiries. No middle layer.</div>
+                <div className="mt-2 text-[11px] text-zinc-500">You keep control. No middle layer.</div>
               </div>
             </div>
 
-            {/* Destinations */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+            {/* Places */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                  Destinations
+                  Places
                 </div>
                 <div className="mt-1 text-xs text-zinc-400">Countries and top cities.</div>
               </div>
@@ -735,7 +749,7 @@ export default function TopBar() {
                       href={countryHref(c)}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-full bg-white/[0.03] px-3 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.06] hover:ring-white/14 transition"
+                      className="rounded-full bg-white/[0.04] px-3 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.08] hover:ring-white/14 transition"
                     >
                       {c}
                     </Link>
@@ -749,7 +763,7 @@ export default function TopBar() {
                       href={`/city/${c.slug}`}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-2xl bg-white/[0.02] px-3.5 py-3 ring-1 ring-inset ring-white/10 hover:bg-white/[0.05] hover:ring-white/14 transition"
+                      className="rounded-2xl bg-white/[0.03] px-3.5 py-3 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -764,11 +778,14 @@ export default function TopBar() {
               </div>
             </div>
 
+            {/* City page mode switch (keep behavior, simplify labels) */}
             {onCityPage ? (
-              <div className="overflow-hidden rounded-[22px] bg-white/[0.02] ring-1 ring-inset ring-white/10">
+              <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
                 <div className="border-b border-white/10 px-4 py-3">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">City mode</div>
-                  <div className="mt-1 text-xs text-zinc-400">Switch view (T or L).</div>
+                  <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
+                    City view
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-400">Switch: facts (T) or live market (L).</div>
                 </div>
                 <div className="flex items-center gap-2 p-4">
                   <button
@@ -783,11 +800,11 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'truth'
-                        ? 'bg-white/[0.06] text-white ring-white/14'
-                        : 'bg-white/[0.02] text-zinc-300 ring-white/10 hover:bg-white/[0.05] hover:ring-white/14',
+                        ? 'bg-white/[0.07] text-white ring-white/14'
+                        : 'bg-white/[0.03] text-zinc-300 ring-white/10 hover:bg-white/[0.07] hover:ring-white/14',
                     )}
                   >
-                    Insight <span className="ml-1 font-mono text-[11px] opacity-80">T</span>
+                    Facts <span className="ml-1 font-mono text-[11px] opacity-80">T</span>
                   </button>
 
                   <button
@@ -802,18 +819,18 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'supply'
-                        ? 'bg-white/[0.06] text-white ring-white/14'
-                        : 'bg-white/[0.02] text-zinc-300 ring-white/10 hover:bg-white/[0.05] hover:ring-white/14',
+                        ? 'bg-white/[0.07] text-white ring-white/14'
+                        : 'bg-white/[0.03] text-zinc-300 ring-white/10 hover:bg-white/[0.07] hover:ring-white/14',
                     )}
                   >
-                    Live supply <span className="ml-1 font-mono text-[11px] opacity-80">L</span>
+                    Live market <span className="ml-1 font-mono text-[11px] opacity-80">L</span>
                   </button>
                 </div>
               </div>
             ) : null}
 
             <div className="pt-2 text-[11px] text-zinc-500">
-              Vantera is built for buyers, private sellers and advisors. Signal over noise.
+              Built for buyers and sellers who want clean facts, not noise.
             </div>
           </div>
         </div>
