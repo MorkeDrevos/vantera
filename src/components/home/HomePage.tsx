@@ -98,7 +98,7 @@ function HeroVideo() {
       </video>
 
       {/* Film + spectral layers */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.44),rgba(0,0,0,0.78))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.44),rgba(0,0,0,0.82))]" />
       <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_18%,rgba(255,255,255,0.10),transparent_55%)]" />
       <div className="absolute inset-0 opacity-75 [background:radial-gradient(920px_420px_at_15%_18%,rgba(120,76,255,0.16),transparent_56%)]" />
       <div className="absolute inset-0 opacity-75 [background:radial-gradient(920px_420px_at_85%_22%,rgba(62,196,255,0.11),transparent_56%)]" />
@@ -112,16 +112,11 @@ function HeroVideo() {
 function HeroShine() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* quiet top halo */}
       <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_62%)] blur-2xl" />
-      {/* violet + cyan bloom */}
       <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.18),transparent_62%)] blur-2xl" />
       <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.13),transparent_60%)] blur-2xl" />
-
-      {/* premium sheen (static but expensive) */}
       <div className="absolute inset-0 opacity-30 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_45%,transparent_62%)]" />
 
-      {/* ghost mark */}
       <div className="absolute right-[-90px] top-[-70px] opacity-[0.05] blur-[0.2px]">
         <Image src="/brand/vantera-logo-dark.png" alt="" width={560} height={180} className="w-[560px]" />
       </div>
@@ -177,6 +172,95 @@ function Pillar({ title, body }: { title: string; body: string }) {
   );
 }
 
+function TwoColCard({
+  leftTitle,
+  leftBody,
+  rightTitle,
+  rightBody,
+}: {
+  leftTitle: string;
+  leftBody: string;
+  rightTitle: string;
+  rightBody: string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      </div>
+
+      <div className="relative grid gap-0 sm:grid-cols-2">
+        <div className="border-b border-white/10 p-5 sm:border-b-0 sm:border-r sm:border-white/10">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">LISTINGS</div>
+          <div className="mt-2 text-sm font-medium text-zinc-100">{leftTitle}</div>
+          <div className="mt-1 text-sm leading-relaxed text-zinc-300">{leftBody}</div>
+        </div>
+        <div className="p-5">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
+          <div className="mt-2 text-sm font-medium text-zinc-100">{rightTitle}</div>
+          <div className="mt-1 text-sm leading-relaxed text-zinc-300">{rightBody}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TruthCardPreview() {
+  return (
+    <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 shadow-[0_42px_130px_rgba(0,0,0,0.70)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_20%_0%,rgba(255,255,255,0.07),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      </div>
+
+      <div className="relative p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">PROPERTY REPORT</div>
+            <div className="mt-2 text-lg font-medium text-zinc-100">Truth Card (preview)</div>
+            <div className="mt-1 text-sm text-zinc-300">
+              One page that shows the facts, the risks and what to check next.
+            </div>
+          </div>
+
+          <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300">
+            Sample
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {[
+            { k: 'Ownership', v: 'Looks clear', note: 'No obvious conflicts found' },
+            { k: 'Permits', v: 'Needs review', note: 'Missing one document' },
+            { k: 'Price check', v: 'High', note: 'Above similar homes nearby' },
+            { k: 'Time to sell', v: 'Normal', note: 'Demand is steady' },
+            { k: 'Noise / access', v: 'Low', note: 'No major issues flagged' },
+            { k: 'Proof', v: '3 sources', note: 'Registry, agent docs, on-site' },
+          ].map((row) => (
+            <div
+              key={row.k}
+              className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3"
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <div className="text-[10px] font-semibold tracking-[0.24em] text-zinc-500">{row.k.toUpperCase()}</div>
+                <div className="text-sm text-zinc-100">{row.v}</div>
+              </div>
+              <div className="mt-1 text-xs text-zinc-500">{row.note}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-[12px] text-zinc-300">
+          This is what goes missing in glossy listings: paperwork, price reality and risk.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FeatureCard({
   eyebrow,
   title,
@@ -223,9 +307,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
   return (
     <Shell>
-      {/* HERO - full bleed, mobile-first */}
+      {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.66))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
+        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.70))] shadow-[0_55px_150px_rgba(0,0,0,0.72)]">
           <HeroVideo />
           <HeroShine />
 
@@ -235,23 +319,24 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               <div className="lg:col-span-7">
                 <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                   <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
-                  <span className="tracking-wide text-zinc-200">Luxury property portal</span>
+                  <span className="tracking-wide text-zinc-200">Luxury homes</span>
                   <span className="text-zinc-600">·</span>
-                  <span className="text-zinc-300">Truth-first intelligence</span>
+                  <span className="text-zinc-300">Clear facts</span>
                   <span className="text-zinc-600">·</span>
-                  <span className="text-zinc-300">Signal over noise</span>
+                  <span className="text-zinc-300">Less risk</span>
                 </div>
 
                 <h1 className="mt-6 text-balance text-[40px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
-                  Private intelligence for the world&apos;s{' '}
-                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
-                    most valuable assets
+                  Know what you&apos;re{' '}
+                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.80),rgba(120,76,255,0.72))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.10)]">
+                    buying
                   </span>
+                  .
                 </h1>
 
                 <p className="mt-4 max-w-2xl text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
-                  Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
+                  Photos don&apos;t show legal problems, hidden costs or bad pricing.
+                  <span className="text-zinc-400"> Vantera shows the facts, the risks and what to check next.</span>
                 </p>
 
                 {/* Search terminal card */}
@@ -269,7 +354,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         <div className="min-w-0">
                           <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SEARCH</div>
                           <div className="mt-1 text-xs text-zinc-500">
-                            Start with a city. Then open the home&apos;s intelligence.
+                            Start with a city. Then open a property report.
                           </div>
                         </div>
 
@@ -285,40 +370,42 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                       </div>
 
                       <div className="mt-3 rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-[12px] text-zinc-300">
-                        Browse homes, then open their intelligence - value, liquidity, risk and leverage in seconds.
+                        Pick a city, then open a report for a home - price check, paperwork and risk.
                       </div>
 
                       <div className="mt-4 grid gap-2 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/10 bg-black/28 px-3 py-2">
                           <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">EXAMPLE</div>
-                          <div className="mt-1 font-mono text-[12px] text-zinc-200">SAFE • UNDERVALUED • UPSIDE</div>
-                          <div className="mt-1 text-[12px] text-zinc-400">Near schools, strong demand, 5-year lift.</div>
+                          <div className="mt-1 font-mono text-[12px] text-zinc-200">CLEAN • FAIR PRICE • LOW RISK</div>
+                          <div className="mt-1 text-[12px] text-zinc-400">Strong demand, good access, paperwork ok.</div>
                         </div>
                         <div className="rounded-2xl border border-white/10 bg-black/28 px-3 py-2">
                           <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">YOU GET</div>
-                          <div className="mt-1 text-[12px] text-zinc-200">Homes, timing guidance and leverage clarity</div>
-                          <div className="mt-1 text-[12px] text-zinc-400">A truth layer you can act on.</div>
+                          <div className="mt-1 text-[12px] text-zinc-200">A clear view before you commit</div>
+                          <div className="mt-1 text-[12px] text-zinc-400">So you don&apos;t buy blind.</div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* Coverage strip */}
                 <div className="mt-4 max-w-2xl">
                   <SignalStrip
                     left={[
-                      { k: 'COVERAGE', v: <span className="text-zinc-100">{cities.length} cities</span> },
+                      { k: 'CITIES', v: <span className="text-zinc-100">{cities.length}</span> },
                       { k: 'REGIONS', v: <span className="text-zinc-100">{regionCount}</span> },
                       { k: 'TIMEZONES', v: <span className="text-zinc-100">{timezoneCount}</span> },
                     ]}
-                    right={[{ k: 'MODE', v: <span className="text-zinc-100">TRUTH-FIRST</span> }]}
+                    right={[{ k: 'UPDATED', v: <span className="text-zinc-100">LIVE</span> }]}
                   />
                 </div>
 
+                {/* Before you buy */}
                 <div className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-3">
-                  <Pillar title="Reality" body="Fair value is modelled from signals, not asking prices." />
-                  <Pillar title="Liquidity" body="We estimate time-to-sell and what is driving it." />
-                  <Pillar title="Integrity" body="Anti-gaming rules keep the surface loyal to reality." />
+                  <Pillar title="Paperwork" body="See what is missing before you waste time." />
+                  <Pillar title="Price check" body="Spot overpriced homes fast." />
+                  <Pillar title="Risk" body="Catch problems that photos don’t show." />
                 </div>
               </div>
 
@@ -332,43 +419,41 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   </div>
 
                   <div className="relative">
-                    <SectionLabel hint="Private index">Selected cities</SectionLabel>
+                    <SectionLabel hint="Quick start">Selected cities</SectionLabel>
 
                     <CityCardsClient cities={cities.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
 
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-                      Curated entry points.
-                      <span className="text-zinc-500"> Coverage expands as the index becomes real.</span>
+                      Start here.
+                      <span className="text-zinc-500"> More cities added steadily.</span>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
-                        <div className="text-[11px] tracking-[0.18em] text-zinc-400">TRUTH CARD</div>
-                        <div className="mt-2 text-zinc-200">Value, risk and leverage</div>
-                        <div className="mt-1 text-xs text-zinc-500">A universal intelligence layer per home.</div>
-                      </div>
-
-                      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-300 shadow-[0_22px_70px_rgba(0,0,0,0.55)]">
-                        <div className="text-[11px] tracking-[0.18em] text-zinc-400">CONFIDENCE</div>
-                        <div className="mt-2 text-zinc-200">Probability over promises</div>
-                        <div className="mt-1 text-xs text-zinc-500">Clarity that stays honest under pressure.</div>
-                      </div>
+                    <div className="mt-4">
+                      <TwoColCard
+                        leftTitle="Looks great"
+                        leftBody="Photos, lifestyle and sales copy."
+                        rightTitle="Is it safe?"
+                        rightBody="Paperwork, price check and risk flags."
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[28px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
-                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">THE DIFFERENCE</div>
+                <div className="mt-4">
+                  <TruthCardPreview />
+                </div>
+
+                <div className="mt-4 rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">WHY THIS MATTERS</div>
                   <div className="mt-2 text-sm leading-relaxed text-zinc-300">
-                    Most portals optimise for attention. Vantera optimises for outcomes by modelling value, liquidity and
-                    incentives without bias.
+                    Most sites help you scroll. Vantera helps you decide.
                   </div>
 
                   <div className="mt-4 grid gap-2">
                     {[
-                      'Understands intent, not filters',
-                      'Understands value, not asking price',
-                      'Understands probability, not promises',
+                      'Spot overpriced homes fast',
+                      'Catch missing paperwork early',
+                      'Avoid problems that kill resale value',
                     ].map((t) => (
                       <div
                         key={t}
@@ -383,9 +468,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 <div className="mt-4 rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">LIVE PREVIEW</div>
+                      <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FAST CHECK</div>
                       <div className="mt-2 text-sm text-zinc-300">
-                        The same home looks different once you can see its incentives.
+                        A simple read that saves time and mistakes.
                       </div>
                     </div>
                     <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300">
@@ -395,18 +480,34 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                      <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">VALUE BAND</div>
-                      <div className="mt-2 text-zinc-200">Tight</div>
-                      <div className="mt-1 text-xs text-zinc-500">Little room for theatre.</div>
+                      <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">PRICE</div>
+                      <div className="mt-2 text-zinc-200">High</div>
+                      <div className="mt-1 text-xs text-zinc-500">Above nearby sales.</div>
                     </div>
                     <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                      <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">LIQUIDITY</div>
-                      <div className="mt-2 text-zinc-200">Fast</div>
-                      <div className="mt-1 text-xs text-zinc-500">Deep buyer pool, high velocity.</div>
+                      <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">RISK</div>
+                      <div className="mt-2 text-zinc-200">Low</div>
+                      <div className="mt-1 text-xs text-zinc-500">No major flags.</div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* “Above listings” section under hero (still inside hero band) */}
+            <div className="mt-10 grid gap-4 lg:grid-cols-2">
+              <TwoColCard
+                leftTitle="Great photos"
+                leftBody="Photos sell the dream. They don’t show risk."
+                rightTitle="Clear facts"
+                rightBody="Paperwork, pricing and risk - in one place."
+              />
+              <TwoColCard
+                leftTitle="Filter and browse"
+                leftBody="You can scroll forever and still miss the key issues."
+                rightTitle="Check and decide"
+                rightBody="See what matters first, then move fast."
+              />
             </div>
           </div>
 
@@ -443,35 +544,43 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
 
         <section className="mt-10 sm:mt-12">
-          <SectionLabel hint="Believable, not fake listings">Featured intelligence</SectionLabel>
+          <SectionLabel hint="Real examples">Featured reports</SectionLabel>
           <FeaturedIntelligencePanel />
         </section>
 
         <section className="mt-14 sm:mt-16">
-          <SectionLabel hint="Plain-language intelligence">Why Vantera wins</SectionLabel>
+          <SectionLabel hint="Simple reasons">Why Vantera is different</SectionLabel>
 
           <div className="grid gap-4 lg:grid-cols-3">
             <FeatureCard
-              eyebrow="Truth-first"
-              title="Pricing without illusions"
-              body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects both sides from bad pricing']}
-            />
-            <FeatureCard
-              eyebrow="AI-native"
-              title="Intent-based matching"
-              body="Forget filters. Describe what you want. Vantera returns homes, timing guidance and the smartest next move."
+              eyebrow="Price"
+              title="Spot overpriced homes"
+              body="We compare homes to the market around them. You see if the price looks high, fair or low."
               bullets={[
-                'Understands intent, not checkboxes',
-                'Suggests strategy, not just options',
-                'Gives wait-or-buy clarity',
+                'Tracks price cuts and days on market',
+                'Compares to nearby sales and listings',
+                'Helps you negotiate with facts',
               ]}
             />
             <FeatureCard
-              eyebrow="Integrity"
-              title="Anti-gaming by design"
-              body="The truth layer is protected. Manipulation guards and audit trails keep the surface loyal to reality when incentives push the other way."
-              bullets={['Detects coordinated distortions', 'Maintains an auditable history', 'Optimised for outcomes, not clicks']}
+              eyebrow="Time"
+              title="Save weeks of back and forth"
+              body="See missing paperwork early. Don’t waste time chasing homes that can’t close cleanly."
+              bullets={[
+                'Shows what is missing',
+                'Highlights what needs checking',
+                'Keeps a clear paper trail',
+              ]}
+            />
+            <FeatureCard
+              eyebrow="Risk"
+              title="Avoid problems that don’t show in photos"
+              body="Noise, access, legal issues and resale killers. The stuff you find out too late."
+              bullets={[
+                'Flags common resale risks',
+                'Shows where the info came from',
+                'Built to stay honest under pressure',
+              ]}
             />
           </div>
         </section>
@@ -490,34 +599,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Pillar title="Global-first" body="Multi-currency, multi-legal and multi-market reality built in." />
-            <Pillar title="Liquidity clarity" body="Estimated time-to-sell and demand pressure, not wishful thinking." />
-            <Pillar title="Confidence score" body="Confidence tightens as signal density improves." />
-          </div>
-        </section>
-
-        <section className="mt-14 sm:mt-16">
-          <SectionLabel hint="Curated lanes">Curated routes</SectionLabel>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { title: 'European capitals', subtitle: 'Prime districts and resilient demand' },
-              { title: 'Coastal living', subtitle: 'Lifestyle markets with real liquidity clarity' },
-              { title: '24-hour cities', subtitle: 'Deep buyer pools and global connectivity' },
-              { title: 'High-growth hubs', subtitle: 'Emerging signal density, measured honestly' },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-4 text-sm text-zinc-200 shadow-[0_22px_60px_rgba(0,0,0,0.50)] transition hover:translate-y-[-2px] hover:border-white/14"
-              >
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_180px_at_20%,rgba(255,255,255,0.06),transparent_60%)]" />
-                <div className="relative">
-                  <div className="text-[11px] tracking-[0.18em] text-zinc-400">FEATURED</div>
-                  <div className="mt-2 font-medium">{item.title}</div>
-                  <div className="mt-1 text-xs text-zinc-500">{item.subtitle}</div>
-                </div>
-              </div>
-            ))}
+            <Pillar title="Global" body="Built for different countries, currencies and rules." />
+            <Pillar title="Liquidity" body="A feel for how fast homes move, not just what they cost." />
+            <Pillar title="Confidence" body="The more proof we have, the tighter the call." />
           </div>
         </section>
       </div>
