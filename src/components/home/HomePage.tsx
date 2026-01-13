@@ -87,51 +87,24 @@ function LuxLiveBackdrop() {
       {/* Base film */}
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.30),rgba(0,0,0,0.82))]" />
 
-      {/* Aurora ribbons (slow luxury motion) */}
+      {/* Aurora ribbons */}
       <div className="absolute inset-0 opacity-[0.70]">
-        <div className="absolute -left-[20%] top-[-25%] h-[520px] w-[880px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)] animate-[vanteraFloatA_18s_ease-in-out_infinite]" />
-        <div className="absolute -right-[25%] top-[-18%] h-[520px] w-[920px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)] animate-[vanteraFloatB_22s_ease-in-out_infinite]" />
-        <div className="absolute left-[10%] bottom-[-35%] h-[700px] w-[1100px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)] animate-[vanteraFloatC_26s_ease-in-out_infinite]" />
+        <div className="vantera-float-a absolute -left-[20%] top-[-25%] h-[520px] w-[880px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)]" />
+        <div className="vantera-float-b absolute -right-[25%] top-[-18%] h-[520px] w-[920px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)]" />
+        <div className="vantera-float-c absolute left-[10%] bottom-[-35%] h-[700px] w-[1100px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)]" />
       </div>
 
-      {/* Luxury spotlight sweep */}
-      <div className="absolute inset-0 opacity-[0.22] mix-blend-screen animate-[vanteraSweep_14s_ease-in-out_infinite] [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.22)_45%,transparent_62%)]" />
+      {/* Spotlight sweep */}
+      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.22)_45%,transparent_62%)]" />
 
-      {/* Micro particles (very subtle) */}
-      <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:20px_20px] animate-[vanteraDrift_30s_linear_infinite]" />
+      {/* Micro particles */}
+      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:20px_20px]" />
 
-      {/* Vignette edge */}
+      {/* Vignette */}
       <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_40%,rgba(0,0,0,0.82)_78%)]" />
 
-      {/* Tiny grain to keep it cinematic */}
-      <div className="absolute inset-0 opacity-[0.10] mix-blend-overlay [background-image:url('/noise/noise-1.png')] [background-size:240px_240px]" />
-
-      <style jsx global>{`
-        @keyframes vanteraFloatA {
-          0% { transform: translate3d(0,0,0) scale(1); }
-          50% { transform: translate3d(6%,3%,0) scale(1.04); }
-          100% { transform: translate3d(0,0,0) scale(1); }
-        }
-        @keyframes vanteraFloatB {
-          0% { transform: translate3d(0,0,0) scale(1); }
-          50% { transform: translate3d(-5%,4%,0) scale(1.05); }
-          100% { transform: translate3d(0,0,0) scale(1); }
-        }
-        @keyframes vanteraFloatC {
-          0% { transform: translate3d(0,0,0) scale(1); }
-          50% { transform: translate3d(4%,-3%,0) scale(1.06); }
-          100% { transform: translate3d(0,0,0) scale(1); }
-        }
-        @keyframes vanteraSweep {
-          0% { transform: translate3d(-18%,0,0); opacity: 0.14; }
-          45% { opacity: 0.24; }
-          100% { transform: translate3d(18%,0,0); opacity: 0.14; }
-        }
-        @keyframes vanteraDrift {
-          0% { transform: translate3d(0,0,0); }
-          100% { transform: translate3d(-40px,30px,0); }
-        }
-      `}</style>
+      {/* Optional grain - ONLY if you actually have this file */}
+      {/* <div className="absolute inset-0 opacity-[0.10] mix-blend-overlay [background-image:url('/noise/noise-1.png')] [background-size:240px_240px]" /> */}
     </div>
   );
 }
