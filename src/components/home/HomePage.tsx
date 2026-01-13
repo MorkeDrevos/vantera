@@ -419,6 +419,51 @@ function CTA() {
   );
 }
 
+function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
+  // Pick “hot” cities, but guarantee unique tz.
+  const preferred = [
+    'marbella', // Europe/Madrid
+    'dubai', // Asia/Dubai
+    'miami', // America/New_York
+    'tokyo', // Asia/Tokyo
+    'london', // Europe/London (fallback)
+    'new-york',
+    'singapore',
+    'los-angeles',
+    'hong-kong',
+    'paris',
+    'madrid',
+    'monaco',
+  ];
+
+  const map = new Map(all.map((c) => [c.slug, c]));
+  const out: RuntimeCity[] = [];
+  const usedTz = new Set<string>();
+
+  function tryAdd(c?: RuntimeCity | null) {
+    if (!c) return;
+    const tz = c.tz || '';
+    if (!tz) return;
+    if (usedTz.has(tz)) return;
+    usedTz.add(tz);
+    out.push(c);
+  }
+
+  for (const slug of preferred) {
+    tryAdd(map.get(slug) || null);
+    if (out.length >= max) return out;
+  }
+
+  // Fallback: scan by priority then stable order, still enforcing unique tz
+  const sorted = [...all].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  for (const c of sorted) {
+    tryAdd(c);
+    if (out.length >= max) break;
+  }
+
+  return out;
+}
+
 export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
@@ -522,7 +567,35 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                   <div className="relative">
                     <SectionLabel hint="Private index">Selected cities</SectionLabel>
-                    <CityCardsClient cities={cities.slice(0, 4)} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
+                    {(() => {
+  const hot = pickHotCitiesDistinctTimezones(cities, 4);
+
+  return (
+    <>
+      {/* More portal-like frame around the grid */}
+      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/18 p-3 shadow-[0_26px_90px_rgba(0,0,0,0.55)]">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_88%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+        </div>
+
+        <div className="relative">
+          <CityCardsClient
+            cities={hot}
+            columns="grid gap-4 grid-cols-1 sm:grid-cols-2"
+          />
+        </div>
+      </div>
+
+      {/* Make the “curated” line feel more premium and real */}
+      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
+        Four hot markets. Four time zones.
+        <span className="text-zinc-500"> This is the index wall - updated as signals get verified.</span>
+      </div>
+    </>
+  );
+})()}
                     <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                       Curated entry points.
                       <span className="text-zinc-500"> Coverage expands as the index becomes real.</span>
