@@ -5,13 +5,13 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
+  provider = "postgresql"
 
-  // Recommended for Neon/Vercel:
-  // - DATABASE_URL can be pooled (good for runtime)
-  // - DIRECT_URL should be non-pooled (required for prisma migrate deploy)
-  directUrl = env("DIRECT_URL")
+  // Pooled (runtime, edge/serverless friendly)
+  url = env("DATABASE_URL")
+
+  // Non-pooled (required for prisma migrate deploy)
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 model ContactMessage {
@@ -171,7 +171,11 @@ model CityMetric {
 
 /**
  * Listing
- * Luxury-first listing model.
+ * Luxury-first listing model. Works for:
+ * - Verified inventory
+ * - Private sellers (one-off)
+ * - Off-market (visibility PRIVATE)
+ * - Agents (later)
  */
 model Listing {
   id        String   @id @default(cuid())
@@ -190,7 +194,7 @@ model Listing {
   headline     String?
   description  String?
 
-  // Location
+  // Location (keep address private if needed)
   neighborhood  String?
   address       String?
   addressHidden Boolean @default(false)
@@ -199,30 +203,30 @@ model Listing {
   lng           Float?
 
   // Core specs
-  propertyType String?
+  propertyType String? // villa, penthouse, apartment, estate, townhouse
   bedrooms     Int?
   bathrooms    Int?
   builtM2      Int?
   plotM2       Int?
 
-  // Pricing
+  // Pricing (whole currency units for now)
   price        Int?
   currency     String  @default("EUR")
 
-  // Running costs
+  // Running costs (Spain luxury reality)
   communityFeesMonthly Int?
   ibiYearly            Int?
   garbageTaxYearly     Int?
 
-  // Truth fields
+  // Truth fields (expand later)
   yearBuilt      Int?
   renovationYear Int?
   energyRating   String?
 
-  // Media
+  // Media (named relation because we also relate Listing <-> ListingMedia as "ListingCover")
   media        ListingMedia[] @relation("ListingMedia")
 
-  // Cover media
+  // Cover media (optional 1:1)
   coverMediaId  String? @unique
   coverMedia    ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
 
@@ -233,22 +237,29 @@ model Listing {
 
 /**
  * ListingMedia
+ * Images first. Video later.
  */
 model ListingMedia {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
+  // Main media -> listing relation (named to avoid ambiguity with "ListingCover")
   listingId String
   listing   Listing  @relation("ListingMedia", fields: [listingId], references: [id], onDelete: Cascade)
 
+  // Image URL and metadata
   url       String
   alt       String?
   width     Int?
   height    Int?
 
+  // Ordering for galleries
   sortOrder Int @default(0)
+
+  // Optional type for future: image, floorplan, video
   kind      String @default("image")
 
+  // Reverse relation for coverMedia
   coverOf   Listing? @relation("ListingCover")
 
   @@index([listingId, sortOrder])
