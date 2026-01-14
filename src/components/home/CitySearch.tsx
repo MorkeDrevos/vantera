@@ -54,12 +54,18 @@ type PanelGeom = {
   maxHeight: number;
 };
 
+type Destination = 'city' | 'browse';
+
 export default function CitySearch({
   cities,
   defaultCount = 7,
+  destination = 'city',
+  onSelect,
 }: {
   cities: RuntimeCity[];
   defaultCount?: number;
+  destination?: Destination;
+  onSelect?: (city: RuntimeCity) => void;
 }) {
   const router = useRouter();
 
@@ -107,15 +113,52 @@ export default function CitySearch({
 
   const examples = useMemo(() => ['Madrid', 'Paris', 'Dubai', 'NYC'], []);
 
-  function go(slug: string) {
+  function close() {
     setOpen(false);
+  }
+
+  function goCity(slug: string) {
+    close();
     router.push(`/city/${slug}`);
   }
 
+  function goBrowseWithCity(slug: string) {
+    close();
+    const params = new URLSearchParams();
+    params.set('city', slug);
+    router.push(`/browse?${params.toString()}`);
+  }
+
+  function goBrowseWithQuery(query: string) {
+    close();
+    const params = new URLSearchParams();
+    params.set('q', query);
+    router.push(`/browse?${params.toString()}`);
+  }
+
+  function go(city: RuntimeCity) {
+    onSelect?.(city);
+
+    if (destination === 'browse') {
+      goBrowseWithCity(city.slug);
+      return;
+    }
+
+    goCity(city.slug);
+  }
+
   function onSubmit() {
-    if (results.length === 0) return;
+    if (results.length === 0) {
+      // In browse mode, let Enter become a search if nothing matches.
+      if (destination === 'browse') {
+        const qq = q.trim();
+        if (qq) goBrowseWithQuery(qq);
+      }
+      return;
+    }
+
     const pick = results[Math.max(0, Math.min(active, results.length - 1))];
-    if (pick) go(pick.slug);
+    if (pick) go(pick);
   }
 
   const [geom, setGeom] = useState<PanelGeom | null>(null);
@@ -175,7 +218,7 @@ export default function CitySearch({
       if (anchor && anchor.contains(t)) return;
       if (panel && panel.contains(t)) return;
 
-      setOpen(false);
+      close();
     };
 
     window.addEventListener('mousedown', onDown, { passive: true });
@@ -229,7 +272,7 @@ export default function CitySearch({
                         type="button"
                         onMouseDown={(e) => e.preventDefault()}
                         onMouseEnter={() => setActive(idx)}
-                        onClick={() => go(c.slug)}
+                        onClick={() => go(c)}
                         className={[
                           'group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition',
                           idx === active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.05]',
@@ -268,7 +311,7 @@ export default function CitySearch({
                             className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-100 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl"
                           />
                           <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-zinc-300 shadow-[0_10px_30px_rgba(0,0,0,0.30)]">
-                            /city/{c.slug}
+                            {destination === 'browse' ? `/browse?city=${c.slug}` : `/city/${c.slug}`}
                           </span>
                         </div>
                       </button>
@@ -281,6 +324,17 @@ export default function CitySearch({
                   <div className="mt-1 text-xs text-zinc-500">
                     Try {examples.map((x, i) => (i === examples.length - 1 ? x : `${x}, `))}
                   </div>
+
+                  {destination === 'browse' && q.trim() ? (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => goBrowseWithQuery(q.trim())}
+                      className="mt-3 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-left text-[12px] text-zinc-200 hover:border-white/16 hover:bg-white/[0.05]"
+                    >
+                      Search worldwide for “{q.trim()}”
+                    </button>
+                  ) : null}
                 </div>
               )}
             </div>
@@ -343,13 +397,13 @@ export default function CitySearch({
               }
               if (e.key === 'Escape') {
                 e.preventDefault();
-                setOpen(false);
+                close();
                 setQ('');
                 setActive(0);
                 inputRef.current?.blur();
               }
             }}
-            placeholder="Search a city..."
+            placeholder={destination === 'browse' ? 'Search a city (or a wishline)...' : 'Search a city...'}
             className="h-11 w-full bg-transparent px-3 text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
             spellCheck={false}
             autoComplete="off"
@@ -373,7 +427,7 @@ export default function CitySearch({
             <span className="pointer-events-none absolute inset-0 opacity-70">
               <span className="absolute -left-1/3 top-0 h-full w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/12 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
             </span>
-            <span className="relative">Open</span>
+            <span className="relative">{destination === 'browse' ? 'Search' : 'Open'}</span>
           </button>
         </div>
       </div>
