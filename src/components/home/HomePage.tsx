@@ -81,39 +81,52 @@ function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }
   );
 }
 
+/**
+ * Royal “alive” portal layer (server-safe).
+ * Uses only Tailwind + inline gradients, no styled-jsx.
+ */
 function LuxLiveBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {/* Base film */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.30),rgba(0,0,0,0.82))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.86))]" />
 
-      {/* Aurora ribbons */}
-      <div className="absolute inset-0 opacity-[0.70]">
-        <div className="vantera-float-a absolute -left-[20%] top-[-25%] h-[520px] w-[880px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)]" />
-        <div className="vantera-float-b absolute -right-[25%] top-[-18%] h-[520px] w-[920px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)]" />
-        <div className="vantera-float-c absolute left-[10%] bottom-[-35%] h-[700px] w-[1100px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)]" />
+      {/* Royal orbit rings (slow spin) */}
+      <div className="absolute inset-0 opacity-[0.55]">
+        <div className="absolute left-1/2 top-[-38%] h-[980px] w-[980px] -translate-x-1/2 rounded-full border border-white/10 bg-[conic-gradient(from_90deg,rgba(231,201,130,0.14),rgba(120,76,255,0.14),rgba(62,196,255,0.10),rgba(231,201,130,0.14))] blur-[1px] animate-spin [animation-duration:46s]" />
+        <div className="absolute left-1/2 top-[-35%] h-[1180px] w-[1180px] -translate-x-1/2 rounded-full border border-white/5 bg-[conic-gradient(from_210deg,rgba(255,255,255,0.10),rgba(120,76,255,0.10),rgba(231,201,130,0.10),rgba(255,255,255,0.10))] opacity-[0.55] blur-[2px] animate-spin [animation-duration:70s] [animation-direction:reverse]" />
       </div>
 
-      {/* Spotlight sweep */}
-      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.22)_45%,transparent_62%)]" />
+      {/* Aurora ribbons (floating glow bodies) */}
+      <div className="absolute inset-0 opacity-[0.75]">
+        <div className="absolute -left-[22%] top-[-26%] h-[520px] w-[900px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)] animate-pulse [animation-duration:7.5s]" />
+        <div className="absolute -right-[26%] top-[-18%] h-[520px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)] animate-pulse [animation-duration:9.5s]" />
+        <div className="absolute left-[10%] bottom-[-36%] h-[720px] w-[1120px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)] animate-pulse [animation-duration:11s]" />
+      </div>
 
-      {/* Micro particles */}
-      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:20px_20px]" />
+      {/* Spotlight sweep (subtle moving sheen) */}
+      <div className="absolute inset-0 opacity-[0.24] mix-blend-screen">
+        <div className="absolute inset-0 -translate-x-[30%] animate-[pulse_8s_ease-in-out_infinite] [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_62%)]" />
+      </div>
+
+      {/* Constellation grid (luxury tech feel) */}
+      <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.70)_1px,transparent_0)] [background-size:22px_22px]" />
+      <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:140px_140px]" />
 
       {/* Vignette */}
-      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_40%,rgba(0,0,0,0.82)_78%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_18%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
 
-      {/* Optional grain - ONLY if you actually have this file */}
-      {/* <div className="absolute inset-0 opacity-[0.10] mix-blend-overlay [background-image:url('/noise/noise-1.png')] [background-size:240px_240px]" /> */}
+      {/* Bottom fade into page */}
+      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#0B0E13]" />
     </div>
   );
 }
 
 function HeroVideo() {
   return (
-    <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
+    <div aria-hidden className="absolute inset-0 -z-20 overflow-hidden">
       <video
-        className="h-full w-full object-cover opacity-[0.60]"
+        className="h-full w-full object-cover opacity-[0.58]"
         autoPlay
         muted
         loop
@@ -125,14 +138,13 @@ function HeroVideo() {
       </video>
 
       {/* Film + spectral layers */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),rgba(0,0,0,0.82))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),rgba(0,0,0,0.84))]" />
       <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_16%,rgba(255,255,255,0.10),transparent_55%)]" />
       <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_15%_16%,rgba(120,76,255,0.18),transparent_56%)]" />
       <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_85%_22%,rgba(62,196,255,0.13),transparent_56%)]" />
 
-      {/* Animated stardust */}
+      {/* Stardust */}
       <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:18px_18px] animate-[pulse_6s_ease-in-out_infinite]" />
-      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#0B0E13]" />
     </div>
   );
 }
@@ -140,18 +152,18 @@ function HeroVideo() {
 function HeroShine() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* quiet top halo */}
-      <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.13),transparent_62%)] blur-2xl" />
+      {/* Quiet top halo */}
+      <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_62%)] blur-2xl" />
 
-      {/* violet + cyan bloom */}
+      {/* Violet + cyan bloom */}
       <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.20),transparent_62%)] blur-2xl" />
       <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.14),transparent_60%)] blur-2xl" />
 
-      {/* premium sheen */}
+      {/* Premium sheen */}
       <div className="absolute inset-0 opacity-35 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_45%,transparent_62%)]" />
 
-      {/* optional ghost mark (only if the asset exists) */}
-      <div className="absolute right-[-90px] top-[-70px] opacity-[0.05] blur-[0.2px]">
+      {/* Ghost mark (only if asset exists) */}
+      <div className="absolute right-[-90px] top-[-70px] opacity-[0.06] blur-[0.2px]">
         <Image
           src="/brand/vantera-logo-dark.png"
           alt=""
@@ -168,7 +180,7 @@ function HeroShine() {
 function HeroGoldEdge() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0">
-      <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/40 to-transparent" />
+      <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/45 to-transparent" />
       <div className="mx-auto mt-1 h-px w-[82%] bg-gradient-to-r from-transparent via-white/12 to-transparent" />
     </div>
   );
@@ -528,10 +540,11 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
     <Shell>
       {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.72))] shadow-[0_55px_150px_rgba(0,0,0,0.74)]">
+        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.74))] shadow-[0_55px_150px_rgba(0,0,0,0.76)]">
           <HeroVideo />
-<LuxLiveBackdrop />
-<HeroShine />
+          <LuxLiveBackdrop />
+          <HeroShine />
+          <HeroGoldEdge />
 
           <div className="relative w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
@@ -578,7 +591,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                       <div className="relative z-30 mt-4">
                         <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                          {/* NOTE: keep props-free to avoid build break if CitySearch is still no-props */}
                           <CitySearch cities={cities as any} defaultCount={10} />
                         </div>
                       </div>
@@ -624,39 +636,32 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                   <div className="relative">
                     <SectionLabel hint="Private index">Selected cities</SectionLabel>
+
                     {(() => {
-  const hot = pickHotCitiesDistinctTimezones(cities, 4);
+                      const hot = pickHotCitiesDistinctTimezones(cities, 4);
 
-  return (
-    <>
-      {/* More portal-like frame around the grid */}
-      <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/18 p-3 shadow-[0_26px_90px_rgba(0,0,0,0.55)]">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_88%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-        </div>
+                      return (
+                        <>
+                          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/18 p-3 shadow-[0_26px_90px_rgba(0,0,0,0.55)]">
+                            <div className="pointer-events-none absolute inset-0">
+                              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
+                              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_88%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
+                              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+                              <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.70)_1px,transparent_0)] [background-size:24px_24px]" />
+                            </div>
 
-        <div className="relative">
-          <CityCardsClient
-            cities={hot}
-            columns="grid gap-4 grid-cols-1 sm:grid-cols-2"
-          />
-        </div>
-      </div>
+                            <div className="relative">
+                              <CityCardsClient cities={hot} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
+                            </div>
+                          </div>
 
-      {/* Make the “curated” line feel more premium and real */}
-      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-        Four hot markets. Four time zones.
-        <span className="text-zinc-500"> This is the index wall - updated as signals get verified.</span>
-      </div>
-    </>
-  );
-})()}
-                    <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-                      Curated entry points.
-                      <span className="text-zinc-500"> Coverage expands as the index becomes real.</span>
-                    </div>
+                          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
+                            Four hot markets. Four time zones.
+                            <span className="text-zinc-500"> This is the index wall - updated as signals get verified.</span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -715,31 +720,19 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </section>
