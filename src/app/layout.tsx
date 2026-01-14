@@ -3,8 +3,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 import ComingSoon from '@/components/ComingSoon';
-import { jsonLd } from '@/lib/seo/seo.jsonld';
+
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
+import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
@@ -24,18 +25,9 @@ export const metadata: Metadata = {
     icon: [
       { url: '/brand/favicon.ico' },
       { url: '/brand/favicon.svg', type: 'image/svg+xml' },
-      {
-        url: '/brand/favicon-96x96.png',
-        type: 'image/png',
-        sizes: '96x96',
-      },
+      { url: '/brand/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
     ],
-    apple: [
-      {
-        url: '/brand/apple-touch-icon.png',
-        sizes: '180x180',
-      },
-    ],
+    apple: [{ url: '/brand/apple-touch-icon.png', sizes: '180x180' }],
     shortcut: [{ url: '/brand/favicon.ico' }],
   },
 
@@ -51,26 +43,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   const isProd = process.env.NODE_ENV === 'production';
   const comingSoon = isProd && process.env.NEXT_PUBLIC_COMING_SOON === '1';
 
-  const websiteJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'Vantera',
-    url: SEO_CONFIG.domain,
-    description:
-      'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence built to model value, liquidity, and risk without noise.',
-    publisher: {
-      '@type': 'Organization',
-      name: 'Vantera',
-      url: SEO_CONFIG.domain,
-    },
+  // Global schemas (1 script tag each)
+  const site = {
+    ...websiteJsonLd(),
+    // Add SearchAction at the WebSite level (helps Google understand your internal search)
     potentialAction: {
       '@type': 'SearchAction',
       target: `${SEO_CONFIG.domain}/listings?q={search_term_string}`,
@@ -78,10 +58,13 @@ export default function RootLayout({
     },
   };
 
+  const org = organizationJsonLd();
+
   return (
     <html lang="en">
       <body>
-        {jsonLd(websiteJsonLd)}
+        {jsonLd(site)}
+        {jsonLd(org)}
         {comingSoon ? <ComingSoon /> : children}
       </body>
     </html>
