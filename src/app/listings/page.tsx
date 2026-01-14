@@ -1,16 +1,16 @@
 // src/app/listings/page.tsx
 
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { prisma } from '@/lib/prisma';
 
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: 'Listings · Vantera',
-  description: 'Browse protocol-grade listing surfaces built from normalized provider data.',
+  description: 'Browse premium listings with protocol-grade presentation.',
 };
-
-export const revalidate = 300;
 
 function formatMoney(n: number, currency: string) {
   try {
@@ -25,16 +25,22 @@ function formatMoney(n: number, currency: string) {
   }
 }
 
-export default async function ListingsPage() {
-  const listings = await prisma.listing.findMany({
+async function getListings() {
+  // IMPORTANT: your Listing model has NO slug yet.
+  // So we query + route by id only.
+  return prisma.listing.findMany({
     where: { status: 'LIVE', visibility: 'PUBLIC' },
-    orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
-    take: 60,
+    orderBy: { createdAt: 'desc' },
     include: {
       city: { select: { name: true, slug: true, country: true, region: true } },
       coverMedia: { select: { url: true, alt: true, width: true, height: true } },
     },
+    take: 60,
   });
+}
+
+export default async function ListingsPage() {
+  const listings = await getListings();
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -48,10 +54,10 @@ export default async function ListingsPage() {
           <div>
             <div className="text-xs uppercase tracking-[0.18em] text-zinc-400">Listings</div>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
-              Protocol-grade listing surfaces
+              Protocol-grade listings surface
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300">
-              This page is now wired to Prisma. Next step is ingesting real provider inventory and expanding coverage.
+              Now reading from Prisma. Next step is provider ingestion and normalization.
             </p>
           </div>
 
@@ -67,104 +73,63 @@ export default async function ListingsPage() {
         <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)]">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs text-zinc-400">Public live listings</div>
+              <div className="text-xs text-zinc-400">Total listings</div>
               <div className="mt-1 text-lg font-semibold text-zinc-100">{listings.length}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs text-zinc-400">Render mode</div>
-              <div className="mt-1 text-lg font-semibold text-amber-100">Server + cached</div>
+              <div className="text-xs text-zinc-400">Price style</div>
+              <div className="mt-1 text-lg font-semibold text-amber-100">Currency-aware</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-              <div className="text-xs text-zinc-400">Source</div>
-              <div className="mt-1 text-lg font-semibold text-emerald-200">Prisma</div>
+              <div className="text-xs text-zinc-400">Status</div>
+              <div className="mt-1 text-lg font-semibold text-emerald-200">Live</div>
             </div>
           </div>
         </div>
 
-        {listings.length === 0 ? (
-          <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8 text-sm text-zinc-300">
-            No public live listings yet.
-            <div className="mt-2 text-xs text-zinc-500">
-              Next: run seed (for placeholders) or ingest ATTOM (for real Miami inventory).
-            </div>
-          </div>
-        ) : (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((l) => {
-              const price =
-                typeof l.price === 'number' ? formatMoney(l.price, l.currency || 'USD') : 'Price on request';
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {listings.map((l) => {
+            const priceLabel =
+              typeof l.price === 'number' ? formatMoney(l.price, l.currency || 'EUR') : null;
 
-              return (
-                <Link
-                  key={l.id}
-                  href={`/listing/${l.slug}`}
-                  className="group overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
-                  prefetch
-                >
-                  <div className="relative aspect-[4/3] w-full bg-black/20">
-                    {l.coverMedia?.url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={l.coverMedia.url}
-                        alt={l.coverMedia.alt || l.title}
-                        className="h-full w-full object-cover opacity-[0.92] transition group-hover:opacity-100"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="absolute inset-0">
-                        <div className="absolute -top-24 left-1/2 h-[380px] w-[520px] -translate-x-1/2 rounded-full bg-amber-400/10 blur-[120px]" />
-                        <div className="absolute -bottom-24 left-1/2 h-[380px] w-[560px] -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-[130px]" />
-                      </div>
-                    )}
-
-                    <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-[11px] text-zinc-100 backdrop-blur">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[rgba(232,190,92,0.9)]" />
-                      {l.verification === 'VERIFIED_DOCS' || l.verification === 'VERIFIED_ON_SITE'
-                        ? 'Verified'
-                        : 'Unverified'}
-                    </div>
-
-                    <div className="absolute right-4 top-4 rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100 backdrop-blur">
-                      {price}
+            return (
+              <Link
+                key={l.id}
+                href={`/listing/${l.id}`}
+                className="group rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
+                prefetch
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
+                    <div className="mt-1 truncate text-xs text-zinc-400">
+                      {l.city.name}, {l.city.country}
+                      {l.city.region ? ` · ${l.city.region}` : ''}
                     </div>
                   </div>
 
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
-                        <div className="mt-1 truncate text-xs text-zinc-400">
-                          {l.city.name}, {l.city.country}
-                          {l.city.region ? ` · ${l.city.region}` : ''}
-                        </div>
-                      </div>
-                    </div>
+                  <span className="rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
+                    {priceLabel ?? 'Price on request'}
+                  </span>
+                </div>
 
-                    <div className="mt-4 grid grid-cols-3 gap-2 text-[11px] text-zinc-400">
-                      <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                        <div className="text-zinc-500">Beds</div>
-                        <div className="mt-0.5 text-zinc-200">{l.bedrooms ?? '—'}</div>
-                      </div>
-                      <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                        <div className="text-zinc-500">Baths</div>
-                        <div className="mt-0.5 text-zinc-200">{l.bathrooms ?? '—'}</div>
-                      </div>
-                      <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-                        <div className="text-zinc-500">Built</div>
-                        <div className="mt-0.5 text-zinc-200">{l.builtM2 ? `${l.builtM2} m²` : '—'}</div>
-                      </div>
-                    </div>
+                <div className="mt-4 h-px w-full bg-white/10" />
 
-                    <div className="mt-4 text-xs text-zinc-500">{`/listing/${l.slug}`}</div>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className="text-xs text-zinc-400">{`/listing/${l.id}`}</div>
+                  <div className="text-xs text-zinc-500">
+                    {l.verification === 'VERIFIED_DOCS' || l.verification === 'VERIFIED_ON_SITE'
+                      ? 'Verified'
+                      : 'Seed'}
                   </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                </div>
+              </Link>
+            );
+          })}
+        </div>
 
         <div className="mt-10 text-xs text-zinc-500">
-          SEO note: these are stable slugs backed by your DB. Provider ingestion updates records without changing URLs.
+          SEO note: once we add a real Listing.slug column we can switch canonical URLs to slug-first.
         </div>
       </div>
     </div>
