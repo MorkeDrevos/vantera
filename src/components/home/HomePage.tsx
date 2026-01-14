@@ -83,7 +83,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
       {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-black/40 shadow-[0_55px_160px_rgba(0,0,0,0.78)]">
-          <HeroMedia />
+
           <RoyalPortalBackdrop />
           <HeroGoldCrown />
 
