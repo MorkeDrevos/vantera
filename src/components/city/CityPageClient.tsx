@@ -133,7 +133,12 @@ function StateBanner({
           : 'border-white/10 bg-white/[0.03]';
 
   return (
-    <div className={cx('relative overflow-hidden rounded-[26px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.55)]', cls)}>
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[26px] border p-5 shadow-[0_22px_70px_rgba(0,0,0,0.55)]',
+        cls
+      )}
+    >
       <div className="pointer-events-none absolute inset-0 opacity-50 [background:radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
       <div className="relative flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -205,19 +210,26 @@ export default function CityPageClient({
                 alt={safeAlt(city)}
                 fill
                 sizes="(max-width: 768px) 100vw, 1200px"
-                className="object-cover opacity-95"
+                // Keep cover for the JamesEdition hero vibe, but avoid harsh overlay banding
+                className="object-cover object-[50%_45%] opacity-95"
                 priority={false}
-                fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
+                fallback={
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+                }
               />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+            {/* Smooth, non-banding overlay (fixes the “sliced” look) */}
+            <div className="pointer-events-none absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_18%,rgba(0,0,0,0.18),transparent_60%),linear-gradient(to_top,rgba(0,0,0,0.82)_0%,rgba(0,0,0,0.62)_16%,rgba(0,0,0,0.40)_32%,rgba(0,0,0,0.22)_46%,rgba(0,0,0,0.10)_60%,rgba(0,0,0,0.00)_78%)]" />
           </div>
 
           <div className="p-6 sm:p-8">
             <div className="flex flex-col gap-2">
-              <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">{city.name}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
+                {city.name}
+              </h1>
 
               <div className="text-sm text-zinc-300">
                 <span className="text-zinc-200">{city.country}</span>
@@ -226,7 +238,9 @@ export default function CityPageClient({
                 <span className="text-zinc-600">{` · ${tier}`}</span>
               </div>
 
-              {city.blurb ? <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-200">{city.blurb}</p> : null}
+              {city.blurb ? (
+                <p className="mt-3 max-w-3xl text-sm leading-relaxed text-zinc-200">{city.blurb}</p>
+              ) : null}
             </div>
 
             <div className="mt-6 h-px w-full bg-white/10" />
@@ -310,7 +324,8 @@ export default function CityPageClient({
             <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">WHY LOCK</div>
             <div className="mt-2">
               Vantera does not show unverified supply. This prevents fake inventory, inflated pricing and marketing theatre.
-              The moment the first verified listing is published, this city flips to <span className="text-zinc-100">Verified supply only</span>.
+              The moment the first verified listing is published, this city flips to{' '}
+              <span className="text-zinc-100">Verified supply only</span>.
             </div>
           </div>
         )}
