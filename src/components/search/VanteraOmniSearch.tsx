@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Command, MapPin, Sparkles, X } from 'lucide-react';
 
 type PlaceKind = 'city' | 'region';
@@ -43,7 +44,6 @@ type NeedTag =
 type ParseResult = {
   raw: string;
   tokens: string[];
-  // extracted
   placeQuery?: string;
   budgetMax?: number;
   bedroomsMin?: number;
@@ -66,8 +66,14 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+function fold(s: string) {
+  // remove accents/diacritics: Benahavís -> benahavis
+  // eslint-disable-next-line no-control-regex
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function normalize(s: string) {
-  return s.trim().toLowerCase();
+  return fold(s).trim().toLowerCase();
 }
 
 function tokenize(input: string) {
@@ -79,7 +85,6 @@ function tokenize(input: string) {
 }
 
 function parseBudgetMax(raw: string): number | undefined {
-  // Supports: 2m, 2.5m, 500k, €2m, under 3m, <3m, max 3m
   const s = normalize(raw).replace(/€/g, '').replace(/\s+/g, ' ');
 
   const m = s.match(/(?:under|max|<|<=)\s*([0-9]+(?:\.[0-9]+)?)\s*(m|k)?/);
@@ -104,7 +109,6 @@ function parseBudgetMax(raw: string): number | undefined {
 }
 
 function parseBedroomsMin(tokens: string[]) {
-  // "3 bed", "4br", "3 bedrooms"
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
     const m = t.match(/^([0-9]{1,2})(?:br|bed|beds)$/);
@@ -121,7 +125,7 @@ function parseBedroomsMin(tokens: string[]) {
 }
 
 function parsePropertyType(tokens: string[]): ParseResult['propertyType'] {
-  const map: Array<[Needle: string, type: NonNullable<ParseResult['propertyType']>]> = [
+  const map: Array<[string, NonNullable<ParseResult['propertyType']>]> = [
     ['villa', 'villa'],
     ['villas', 'villa'],
     ['apartment', 'apartment'],
@@ -149,7 +153,7 @@ function extractNeeds(tokens: string[]): NeedTag[] {
   const dict: Array<[NeedTag, string[]]> = [
     ['beach', ['beach', 'beachfront']],
     ['waterfront', ['waterfront', 'seafront']],
-    ['sea_view', ['seaview', 'sea', 'view', 'views']],
+    ['sea_view', ['seaview', 'views', 'view']],
     ['golf', ['golf']],
     ['schools', ['schools', 'school', 'international', 'kids', 'family']],
     ['walkable', ['walkable', 'walk', 'walking']],
@@ -166,41 +170,7 @@ function extractNeeds(tokens: string[]): NeedTag[] {
   for (const [tag, words] of dict) {
     if (words.some((w) => tokens.includes(w))) found.push(tag);
   }
-
-  // If user writes "sea views" we don't want "sea" triggering too easily.
-  // We keep it simple but we de-dupe.
   return Array.from(new Set(found));
-}
-
-function looksLikePlaceQuery(raw: string, tokens: string[]) {
-  // Strategy:
-  // - If the user starts with a capitalised phrase in UI we don't have that; so we infer:
-  // - The first chunk before "-" or " - " or "|" is commonly the place.
-  // - If query includes known separators, treat first chunk as placeQuery.
-  const parts = raw.split(/-|—|\||,/).map((x) => x.trim()).filter(Boolean);
-  if (parts.length >= 2) return parts[0];
-
-  // If the first token isn't a number and isn't a known keyword, treat first 1-3 tokens as place-ish
-  const stop = new Set([
-    'under',
-    'max',
-    'rent',
-    'sell',
-    'buy',
-    'villa',
-    'apartment',
-    'penthouse',
-    'plot',
-    'house',
-    'beds',
-    'bed',
-    'bedrooms',
-    'br',
-  ]);
-
-  const head = tokens.slice(0, 3).filter((t) => !stop.has(t) && !/^[0-9]+(?:\.[0-9]+)?$/.test(t));
-  const place = head.join(' ').trim();
-  return place.length >= 3 ? place : undefined;
 }
 
 function formatMoney(n?: number) {
@@ -215,9 +185,9 @@ function scoreTextMatch(q: string, text: string) {
   const tt = normalize(text);
   if (!qq) return 0;
 
-  if (tt === qq) return 120;
-  if (tt.startsWith(qq)) return 90;
-  if (tt.includes(qq)) return 65;
+  if (tt === qq) return 140;
+  if (tt.startsWith(qq)) return 110;
+  if (tt.includes(qq)) return 85;
 
   // token overlap
   const qTokens = new Set(tokenize(qq));
@@ -226,7 +196,150 @@ function scoreTextMatch(q: string, text: string) {
   qTokens.forEach((x) => {
     if (tTokens.has(x)) overlap++;
   });
-  return overlap > 0 ? 40 + overlap * 10 : 0;
+
+  return overlap > 0 ? 50 + overlap * 12 : 0;
+}
+
+function placeStopwords() {
+  // Anything after these is almost never part of the place
+  return new Set([
+    // budget
+    'under',
+    'max',
+    'below',
+    'less',
+    'over',
+    'min',
+    'from',
+    'to',
+    '<',
+    '<=',
+    // mode
+    'buy',
+    'rent',
+    'sell',
+    'rental',
+    'lease',
+    // beds
+    'bed',
+    'beds',
+    'bedroom',
+    'bedrooms',
+    'br',
+    // property types
+    'villa',
+    'villas',
+    'apartment',
+    'apartments',
+    'penthouse',
+    'plot',
+    'land',
+    'house',
+    'home',
+    // common needs words
+    'beach',
+    'beachfront',
+    'waterfront',
+    'seafront',
+    'seaview',
+    'view',
+    'views',
+    'golf',
+    'school',
+    'schools',
+    'international',
+    'kids',
+    'family',
+    'walk',
+    'walkable',
+    'walking',
+    'privacy',
+    'private',
+    'gated',
+    'security',
+    'guarded',
+    'investment',
+    'invest',
+    'yield',
+    'roi',
+    'cashflow',
+    'new',
+    'newbuild',
+    'development',
+    'offplan',
+    'off-plan',
+    'quiet',
+    'calm',
+    'prime',
+    'trophy',
+    // connectors that often introduce filters
+    'near',
+    'by',
+    'next',
+    'close',
+    'around',
+    'in',
+    'at',
+    'with',
+  ]);
+}
+
+function extractPlaceQuery(raw: string) {
+  // Prefer explicit separators first: "Marbella - ..." or "Marbella | ..."
+  const sepParts = raw
+    .split(/-|—|\||,/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+  if (sepParts.length >= 2 && sepParts[0].length >= 2) return sepParts[0];
+
+  // Otherwise: take the first 1..4 tokens until we hit a stopword/number
+  const tokens = tokenize(raw);
+  if (tokens.length === 0) return undefined;
+
+  const stop = placeStopwords();
+
+  const out: string[] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const t = tokens[i];
+
+    if (/^[0-9]+(?:\.[0-9]+)?$/.test(t)) break;
+    if (stop.has(t)) break;
+
+    out.push(t);
+    if (out.length >= 4) break;
+  }
+
+  const place = out.join(' ').trim();
+  return place.length >= 2 ? place : undefined;
+}
+
+function buildInterpretation(parse: ParseResult) {
+  const chips: Array<{ k: string; v: string }> = [];
+
+  chips.push({ k: 'MODE', v: parse.mode.toUpperCase() });
+  chips.push({ k: 'PLACE', v: parse.placeQuery ? parse.placeQuery : 'Any market' });
+  chips.push({ k: 'BUDGET', v: formatMoney(parse.budgetMax) });
+  chips.push({ k: 'BEDS', v: parse.bedroomsMin ? `${parse.bedroomsMin}+` : '—' });
+  chips.push({ k: 'TYPE', v: (parse.propertyType ?? 'any').toUpperCase() });
+
+  const needs = parse.needs.length > 0 ? parse.needs.map((x) => x.replace('_', ' ')).join(' · ') : '—';
+
+  return { chips, needs };
+}
+
+function cityMatchText(c: OmniCity) {
+  // Give the matcher more hooks: name + slug + country + region + a few cheap aliases
+  const slugAlias = c.slug.replace(/-/g, ' ');
+  const name = c.name;
+  const base = `${name} ${slugAlias} ${c.country} ${c.region ?? ''}`.trim();
+  return base;
+}
+
+function clusterMatchText(r: OmniRegionCluster) {
+  const slugAlias = r.slug.replace(/-/g, ' ');
+  const base = `${r.name} ${slugAlias} ${r.country ?? ''} ${r.region ?? ''}`.trim();
+  return base;
 }
 
 function buildPlaceHits(args: {
@@ -236,20 +349,35 @@ function buildPlaceHits(args: {
   limit: number;
 }): PlaceHit[] {
   const { parse, cities, clusters, limit } = args;
-  const q = parse.placeQuery ? parse.placeQuery : parse.raw;
+
+  const placeQ = parse.placeQuery?.trim();
+  const rawQ = parse.raw.trim();
+
+  // Place-first: if we have a place chunk, score that hard.
+  // Raw query becomes a weak tie-breaker, not the primary.
+  const primaryQ = placeQ && placeQ.length >= 2 ? placeQ : rawQ;
+  const hasPlace = Boolean(placeQ && placeQ.length >= 2);
 
   const hits: PlaceHit[] = [];
 
   for (const c of cities) {
-    const base = scoreTextMatch(q, `${c.name} ${c.country} ${c.region ?? ''}`.trim());
-    if (base <= 0) continue;
+    const placeScore = scoreTextMatch(primaryQ, cityMatchText(c));
+    if (placeScore <= 0) continue;
 
-    const pr = typeof c.priority === 'number' ? Math.min(40, Math.round(c.priority / 3)) : 0;
-    const score = base + pr;
+    // Priority boost (bounded)
+    const pr = typeof c.priority === 'number' ? Math.min(40, Math.round((c.priority ?? 0) / 3)) : 0;
+
+    // Tie-breaker: if user typed a long raw query, let a city that also matches raw edges win slightly
+    const rawTie = hasPlace && rawQ ? Math.min(18, Math.round(scoreTextMatch(rawQ, cityMatchText(c)) / 10)) : 0;
+
+    // If we have a place query, discourage weak fuzzy hits
+    const placeConfidenceBoost = hasPlace ? 18 : 0;
+
+    const score = placeScore + pr + rawTie + placeConfidenceBoost;
 
     const reasons: string[] = [];
-    if (base >= 90) reasons.push('Direct match');
-    else if (base >= 65) reasons.push('Strong match');
+    if (placeScore >= 110) reasons.push('Direct match');
+    else if (placeScore >= 85) reasons.push('Strong match');
     else reasons.push('Relevant');
 
     if (pr > 0) reasons.push('Featured market');
@@ -266,15 +394,16 @@ function buildPlaceHits(args: {
   }
 
   for (const r of clusters) {
-    const base = scoreTextMatch(q, `${r.name} ${r.country ?? ''} ${r.region ?? ''}`.trim());
-    if (base <= 0) continue;
+    const placeScore = scoreTextMatch(primaryQ, clusterMatchText(r));
+    if (placeScore <= 0) continue;
 
-    const pr = typeof r.priority === 'number' ? Math.min(35, Math.round(r.priority * 4)) : 0;
-    const score = base + pr;
+    const pr = typeof r.priority === 'number' ? Math.min(35, Math.round((r.priority ?? 0) * 4)) : 0;
+    const rawTie = hasPlace && rawQ ? Math.min(14, Math.round(scoreTextMatch(rawQ, clusterMatchText(r)) / 12)) : 0;
+    const score = placeScore + pr + rawTie;
 
     const reasons: string[] = [];
-    if (base >= 90) reasons.push('Direct match');
-    else if (base >= 65) reasons.push('Strong match');
+    if (placeScore >= 110) reasons.push('Direct match');
+    else if (placeScore >= 85) reasons.push('Strong match');
     else reasons.push('Relevant');
 
     reasons.push(`${r.citySlugs.length} cities`);
@@ -294,23 +423,6 @@ function buildPlaceHits(args: {
   return hits.slice(0, limit);
 }
 
-function buildInterpretation(parse: ParseResult) {
-  const chips: Array<{ k: string; v: string }> = [];
-
-  chips.push({ k: 'MODE', v: parse.mode.toUpperCase() });
-  chips.push({ k: 'PLACE', v: parse.placeQuery ? parse.placeQuery : 'Any market' });
-  chips.push({ k: 'BUDGET', v: formatMoney(parse.budgetMax) });
-  chips.push({ k: 'BEDS', v: parse.bedroomsMin ? `${parse.bedroomsMin}+` : '—' });
-  chips.push({ k: 'TYPE', v: (parse.propertyType ?? 'any').toUpperCase() });
-
-  const needs =
-    parse.needs.length > 0
-      ? parse.needs.map((x) => x.replace('_', ' ')).join(' · ')
-      : '—';
-
-  return { chips, needs };
-}
-
 export default function VanteraOmniSearch({
   cities,
   clusters,
@@ -328,8 +440,10 @@ export default function VanteraOmniSearch({
   autoFocus?: boolean;
   limit?: number;
 }) {
+  const router = useRouter();
+
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const listRef = useRef<HTMLDivElement | null>(null);
 
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
@@ -344,7 +458,9 @@ export default function VanteraOmniSearch({
     const budgetMax = parseBudgetMax(raw);
     const propertyType = parsePropertyType(tokens);
     const needs = extractNeeds(tokens);
-    const placeQuery = looksLikePlaceQuery(raw, tokens);
+
+    // new: stronger place extraction
+    const placeQuery = extractPlaceQuery(raw);
 
     return {
       raw,
@@ -360,8 +476,8 @@ export default function VanteraOmniSearch({
 
   const hits = useMemo(() => {
     if (!open) return [];
+
     if (!q.trim()) {
-      // When empty: show curated top cities + top clusters
       const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
       const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
 
@@ -394,6 +510,22 @@ export default function VanteraOmniSearch({
 
   const interpretation = useMemo(() => buildInterpretation(parse), [parse]);
 
+  function focusAndOpen() {
+    inputRef.current?.focus();
+    setOpen(true);
+  }
+
+  // TopBar integration: focus search from anywhere
+  useEffect(() => {
+    const onFocus = () => focusAndOpen();
+    window.addEventListener('vantera:focus-search', onFocus as any);
+    window.addEventListener('locus:focus-search', onFocus as any);
+    return () => {
+      window.removeEventListener('vantera:focus-search', onFocus as any);
+      window.removeEventListener('locus:focus-search', onFocus as any);
+    };
+  }, []);
+
   // Hotkeys: "/" focuses, Esc closes
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -406,8 +538,7 @@ export default function VanteraOmniSearch({
 
       if (!isTyping && e.key === '/') {
         e.preventDefault();
-        inputRef.current?.focus();
-        setOpen(true);
+        focusAndOpen();
       }
 
       if (e.key === 'Escape') {
@@ -420,11 +551,29 @@ export default function VanteraOmniSearch({
   }, []);
 
   useEffect(() => {
-    if (autoFocus) {
-      inputRef.current?.focus();
-      setOpen(true);
-    }
+    if (autoFocus) focusAndOpen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFocus]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+      const root = rootRef.current;
+      if (root && root.contains(t)) return;
+      setOpen(false);
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [open]);
 
   // Keyboard navigation inside panel
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -441,9 +590,11 @@ export default function VanteraOmniSearch({
       return;
     }
     if (e.key === 'Enter') {
+      e.preventDefault();
       const h = hits[active];
       if (!h) return;
-      window.location.href = h.href;
+      setOpen(false);
+      router.push(h.href);
       return;
     }
   }
@@ -453,19 +604,14 @@ export default function VanteraOmniSearch({
     if (active >= hits.length) setActive(0);
   }, [hits.length, active]);
 
-  function close() {
-    setOpen(false);
-  }
-
   function clear() {
     setQ('');
     setActive(0);
-    inputRef.current?.focus();
-    setOpen(true);
+    focusAndOpen();
   }
 
   return (
-    <div className={cx('relative w-full', className)}>
+    <div ref={rootRef} className={cx('relative w-full', className)}>
       {/* Input shell */}
       <div
         className={cx(
@@ -485,9 +631,7 @@ export default function VanteraOmniSearch({
           </div>
 
           <div className="min-w-0 flex-1">
-            <div className="mb-1 text-[10px] font-semibold tracking-[0.26em] text-zinc-400">
-              VANTERA SEARCH
-            </div>
+            <div className="mb-1 text-[10px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA SEARCH</div>
             <input
               id={id}
               ref={inputRef}
@@ -499,10 +643,7 @@ export default function VanteraOmniSearch({
               onFocus={() => setOpen(true)}
               onKeyDown={onInputKeyDown}
               placeholder={placeholder}
-              className={cx(
-                'w-full bg-transparent text-[14px] text-zinc-100 outline-none',
-                'placeholder:text-zinc-500',
-              )}
+              className={cx('w-full bg-transparent text-[14px] text-zinc-100 outline-none', 'placeholder:text-zinc-500')}
               autoComplete="off"
               spellCheck={false}
             />
@@ -557,9 +698,8 @@ export default function VanteraOmniSearch({
         )}
       >
         <div
-          ref={listRef}
           className={cx(
-            'overflow-hidden rounded-[24px] border border-white/12 bg-[#04050A]',
+            'relative overflow-hidden rounded-[24px] border border-white/12 bg-[#04050A]',
             'shadow-[0_90px_240px_rgba(0,0,0,0.92)]',
           )}
         >
@@ -567,17 +707,13 @@ export default function VanteraOmniSearch({
 
           <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-4">
             <div>
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-200/80">
-                RESULTS
-              </div>
-              <div className="mt-1 text-xs text-zinc-400">
-                Places ranked by match. Press Enter to open.
-              </div>
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-200/80">RESULTS</div>
+              <div className="mt-1 text-xs text-zinc-400">Places ranked by match. Press Enter to open.</div>
             </div>
 
             <button
               type="button"
-              onClick={close}
+              onClick={() => setOpen(false)}
               className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200 hover:bg-white/[0.07] transition"
             >
               <X className="h-4 w-4 opacity-80" />
@@ -597,6 +733,7 @@ export default function VanteraOmniSearch({
                   href={h.href}
                   prefetch
                   onMouseEnter={() => setActive(idx)}
+                  onClick={() => setOpen(false)}
                   className={cx(
                     'group relative rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3',
                     'hover:bg-white/[0.05] hover:border-white/14 transition',
@@ -614,9 +751,7 @@ export default function VanteraOmniSearch({
                           )}
                         </span>
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-zinc-100">
-                            {h.title}
-                          </div>
+                          <div className="truncate text-sm font-semibold text-zinc-100">{h.title}</div>
                           <div className="truncate text-[11px] text-zinc-400">{h.subtitle}</div>
                         </div>
                       </div>
