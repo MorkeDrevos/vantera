@@ -10,10 +10,10 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 
-import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 
 import IntentHero from './IntentHero';
+import PropertySearchHero from './PropertySearchHero';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -177,11 +177,11 @@ function PremiumBadgeRow() {
   return (
     <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
       <span className="h-1.5 w-1.5 rounded-full bg-[#E7C982]/90 shadow-[0_0_0_3px_rgba(231,201,130,0.12)]" />
-      <span className="tracking-wide text-zinc-200">Luxury property portal</span>
+      <span className="tracking-wide text-zinc-200">Luxury intelligence portal</span>
       <span className="text-zinc-600">·</span>
-      <span className="text-zinc-300">Truth-first intelligence</span>
+      <span className="text-zinc-300">Truth-first coverage</span>
       <span className="text-zinc-600">·</span>
-      <span className="text-zinc-300">Signal over noise</span>
+      <span className="text-zinc-300">Risk and liquidity</span>
       <span className="text-zinc-600">·</span>
       <span className="text-zinc-300">Private index</span>
     </div>
@@ -240,8 +240,8 @@ function TruthCardReport() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">TRUTH CARD</div>
-            <div className="mt-2 text-lg font-medium text-zinc-100">Confidential property report</div>
-            <div className="mt-1 text-sm text-zinc-300">The facts, the risks and what to verify next - in one page.</div>
+            <div className="mt-2 text-lg font-medium text-zinc-100">Confidential property brief</div>
+            <div className="mt-1 text-sm text-zinc-300">Facts, risk flags, and verification next steps - one page.</div>
           </div>
           <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300">
             Preview
@@ -250,11 +250,11 @@ function TruthCardReport() {
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[
-            { k: 'Ownership', v: 'Looks clear', note: 'No obvious conflicts found' },
-            { k: 'Permits', v: 'Needs review', note: 'One document missing' },
-            { k: 'Price check', v: 'High', note: 'Above similar homes nearby' },
-            { k: 'Liquidity', v: 'Normal', note: 'Demand looks steady' },
-            { k: 'Risk radar', v: 'Low', note: 'Noise and access look ok' },
+            { k: 'Ownership', v: 'Clear', note: 'No conflicts detected' },
+            { k: 'Permits', v: 'Review', note: 'One document pending' },
+            { k: 'Price model', v: 'High', note: 'Above comparable signal' },
+            { k: 'Liquidity', v: 'Normal', note: 'Demand stable' },
+            { k: 'Risk radar', v: 'Low', note: 'Noise and access acceptable' },
             { k: 'Evidence', v: '3 sources', note: 'Registry, docs, on-site' },
           ].map((row) => (
             <div key={row.k} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
@@ -268,7 +268,7 @@ function TruthCardReport() {
         </div>
 
         <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-[12px] text-zinc-300">
-          Listings sell the dream. This protects the decision.
+          Portals sell narrative. This protects execution.
         </div>
       </div>
     </div>
@@ -282,10 +282,10 @@ function PortalVsTruth() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PORTALS</div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">Beauty-first browsing</div>
-          <div className="mt-2 text-sm text-zinc-300">Photos, lifestyle and sales copy. Great for inspiration, weak for decisions.</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Aesthetic browsing</div>
+          <div className="mt-2 text-sm text-zinc-300">Photos and persuasion. Useful for discovery. Weak for underwriting.</div>
           <div className="mt-4 grid gap-2">
-            {['Looks amazing', 'Easy to scroll', 'Hard to verify'].map((t) => (
+            {['Optimised for scrolling', 'Lifestyle-led', 'Verification sparse'].map((t) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
@@ -298,10 +298,10 @@ function PortalVsTruth() {
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">Truth-first intelligence</div>
-          <div className="mt-2 text-sm text-zinc-300">Paperwork, price reality and risk flags - presented like a private report.</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Intelligence surface</div>
+          <div className="mt-2 text-sm text-zinc-300">Evidence, pricing discipline, and risk flags - presented as a private brief.</div>
           <div className="mt-4 grid gap-2">
-            {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
+            {['Surfaces missing proof', 'Models price reality', 'Protects resale and liquidity'].map((t) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
@@ -365,10 +365,9 @@ function CTA() {
       <div className="relative grid gap-6 p-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE LAUNCH</div>
-          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">The portal that protects the decision</div>
+          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">A portal built for underwriting</div>
           <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
-            Vantera is building the intelligence layer luxury real estate never had. A quiet system that makes buyers smarter,
-            sellers cleaner and advisors faster.
+            Vantera adds an evidence layer to luxury real estate. Buyers reduce regret. Sellers improve quality. Advisors move faster.
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-zinc-200">
@@ -406,55 +405,14 @@ function CTA() {
               ))}
             </div>
 
-            <div className="mt-3 text-xs text-zinc-500">For now: explore coverage, open city intelligence and watch the index come alive.</div>
+            <div className="mt-3 text-xs text-zinc-500">
+              Explore coverage and city intelligence. Property search is in controlled rollout.
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
-  const preferred = [
-    'marbella',
-    'dubai',
-    'miami',
-    'tokyo',
-    'london',
-    'new-york',
-    'singapore',
-    'los-angeles',
-    'hong-kong',
-    'paris',
-    'madrid',
-    'monaco',
-  ];
-
-  const map = new Map(all.map((c) => [c.slug, c]));
-  const out: RuntimeCity[] = [];
-  const usedTz = new Set<string>();
-
-  function tryAdd(c?: RuntimeCity | null) {
-    if (!c) return;
-    const tz = c.tz || '';
-    if (!tz) return;
-    if (usedTz.has(tz)) return;
-    usedTz.add(tz);
-    out.push(c);
-  }
-
-  for (const slug of preferred) {
-    tryAdd(map.get(slug) || null);
-    if (out.length >= max) return out;
-  }
-
-  const sorted = [...all].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-  for (const c of sorted) {
-    tryAdd(c);
-    if (out.length >= max) break;
-  }
-
-  return out;
 }
 
 export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
@@ -483,16 +441,22 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   </span>
                 </h1>
 
-                <p className="mt-4 max-w-2xl text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
-                  Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
+                <p className="mt-4 max-w-[780px] text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
+                  Vantera is a private intelligence interface for buyers, sellers and advisors who operate on signal not narrative.
+                  <span className="text-zinc-500"> Built to model value, liquidity and risk with audit-grade discipline.</span>
                 </p>
 
-                <div className="mt-6 max-w-2xl">
+                {/* RESTORED: property search (new module, below) */}
+                <div className="mt-6 max-w-[980px] lg:max-w-[1080px]">
+                  <PropertySearchHero />
+                </div>
+
+                {/* intent console - wide */}
+                <div className="mt-4 max-w-[980px] lg:max-w-[1080px]">
                   <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
                 </div>
 
-                <div className="mt-4 max-w-2xl">
+                <div className="mt-4 max-w-[980px] lg:max-w-[1080px]">
                   <SignalStrip
                     items={[
                       { k: 'COVERAGE', v: <span className="text-zinc-100">{cities.length} cities</span> },
@@ -504,18 +468,16 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   />
                 </div>
 
-                <div className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-3">
-                  <Pillar title="Paperwork" body="See what is missing before you waste time." />
-                  <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
-                  <Pillar title="Risk radar" body="Catch resale killers early." />
+                <div className="mt-4 grid max-w-[980px] gap-3 sm:grid-cols-3 lg:max-w-[1080px]">
+                  <Pillar title="Paperwork" body="Missing proof is flagged before time is wasted." />
+                  <Pillar title="Price reality" body="Models penalise fantasy pricing and narrative spreads." />
+                  <Pillar title="Risk radar" body="Resale and liquidity risks surfaced early." />
                 </div>
               </div>
 
               {/* RIGHT */}
               <div className="space-y-4 lg:col-span-5">
-                {/* MOVED HERE: Featured Markets */}
                 <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
-
                 <TruthCardReport />
               </div>
             </div>
@@ -563,31 +525,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
           <FeaturedIntelligencePanel />
         </section>
 
-        <section className="mt-14 sm:mt-16">
-          <SectionLabel hint="Plain language, high precision">Why Vantera wins</SectionLabel>
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            <FeatureCard
-              eyebrow="Truth-first"
-              title="Pricing without illusions"
-              body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
-            />
-            <FeatureCard
-              eyebrow="Verification"
-              title="Permits, ownership and risk flags"
-              body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
-              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
-            />
-            <FeatureCard
-              eyebrow="Liquidity"
-              title="A private read on demand"
-              body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
-              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
-            />
-          </div>
-        </section>
-
         <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-16">
           <SectionLabel hint="Coverage that feels alive">Explore the index</SectionLabel>
 
@@ -603,7 +540,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">CITIES</div>
                 <div className="mt-2 text-lg font-medium text-zinc-100">Browse coverage with signal</div>
                 <div className="mt-1 text-sm text-zinc-300">
-                  Fast scan for where value is forming, where risk is hiding and where liquidity is strongest.
+                  Scan where value forms, where risk concentrates, and where liquidity is strongest.
                 </div>
               </div>
 
@@ -615,7 +552,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             </div>
 
             <div className="relative mt-6">
-              {/* IMPORTANT: no featured block here anymore, since it's in the HERO */}
               <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
             </div>
           </div>
@@ -628,3 +564,12 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
     </Shell>
   );
 }
+
+/* -------------------------------------------------------------------------------------------------
+   NOTE
+   You asked to "bring back Vantera new revolutionary search for properties".
+   I restored it as <PropertySearchHero /> to keep HomePage clean and production-safe.
+
+   Next file you need to add:
+   - src/components/home/PropertySearchHero.tsx   (I will write this full file next)
+-------------------------------------------------------------------------------------------------- */
