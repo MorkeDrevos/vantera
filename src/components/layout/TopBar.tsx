@@ -28,7 +28,7 @@ function isEditableTarget(el: Element | null) {
  */
 function dispatchFocusSearch() {
   window.dispatchEvent(new CustomEvent('vantera:focus-search'));
-  window.dispatchEvent(new CustomEvent('locus:focus-search'));
+  window.dispatchEvent(new CustomEvent('locus:focus-search')); // legacy bridge
 }
 
 function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof useRouter>) {
@@ -63,7 +63,7 @@ function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof
 
 function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('vantera:tab', { detail: { tab } }));
-  window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
+  window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } })); // legacy bridge
 }
 
 type CityLite = {
@@ -278,26 +278,30 @@ export default function TopBar() {
   }
 
   // Royal styling tokens (quiet luxury)
-  const barBg = scrolled ? 'bg-[#06070A]/92' : 'bg-[#06070A]/72';
+  const barBg = scrolled ? 'bg-[#06070A]/90' : 'bg-[#06070A]/70';
 
-  // Softer, champagne gold (less “yellow”, more “bank vault”)
+  // Softer, champagne gold (less “yellow”, more “vault”)
   const goldText =
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]';
 
   const softBorder = 'ring-1 ring-inset ring-white/10';
-  const softFill = 'bg-white/[0.035] hover:bg-white/[0.06]';
+  const softFill = 'bg-white/[0.03] hover:bg-white/[0.055]';
 
-  // Nav items: calmer, fewer uppercase vibes, still premium
+  // Nav items: sentence case, low theatre
   const navItemBase =
-    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[13px] tracking-[0.14em] text-zinc-200/75 hover:text-zinc-50 transition';
+    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[13px] tracking-[0.08em] text-zinc-200/75 hover:text-zinc-50 transition';
+
+  // Copy tone: intelligence-first, not marketplace
+  const sellLabel = 'Submit an asset';
+  const sellHref = '/coming-soon?flow=sell';
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[18px]', barBg)}>
         {/* Quiet “gold edge” + glass */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6C980]/20 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6C980]/18 to-transparent" />
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(1100px_260px_at_50%_0%,rgba(230,201,128,0.12),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1100px_260px_at_50%_0%,rgba(230,201,128,0.10),transparent_62%)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/6" />
         </div>
 
@@ -310,7 +314,7 @@ export default function TopBar() {
               width={620}
               height={180}
               priority={false}
-              className="h-[70px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.72)] sm:h-[76px] md:h-[84px]"
+              className="h-[64px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.72)] sm:h-[70px] md:h-[76px]"
             />
           </Link>
 
@@ -359,11 +363,11 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Places menu"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_50%_0%,rgba(230,201,128,0.14),transparent_60%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_50%_0%,rgba(230,201,128,0.12),transparent_60%)]" />
 
                   <div className="relative flex items-center justify-between gap-4 border-b border-white/10 px-7 py-5">
                     <div className="min-w-0">
-                      <div className="text-[11px] font-semibold tracking-[0.30em] text-zinc-200/80 uppercase">
+                      <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-200/80 uppercase">
                         Pick a country
                       </div>
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -373,7 +377,7 @@ export default function TopBar() {
                             href={countryHref(c)}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="rounded-full bg-white/[0.035] px-3.5 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
+                            className="rounded-full bg-white/[0.03] px-3.5 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
                             role="menuitem"
                           >
                             {c}
@@ -399,7 +403,7 @@ export default function TopBar() {
                   <div className="relative grid grid-cols-12 gap-7 px-7 py-7">
                     {/* Regions */}
                     <div className="col-span-3">
-                      <div className="mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                      <div className="mb-3 text-[11px] font-semibold tracking-[0.26em] uppercase text-zinc-200/70">
                         Regions
                       </div>
                       <div className="grid gap-2">
@@ -409,7 +413,7 @@ export default function TopBar() {
                             href={`/coming-soon?region=${encodeURIComponent(r)}`}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="rounded-2xl bg-white/[0.03] px-3.5 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 hover:text-white transition"
+                            className="rounded-2xl bg-white/[0.028] px-3.5 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 hover:text-white transition"
                             role="menuitem"
                           >
                             {r}
@@ -420,7 +424,7 @@ export default function TopBar() {
 
                     {/* Cities */}
                     <div className="col-span-5">
-                      <div className="mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                      <div className="mb-3 text-[11px] font-semibold tracking-[0.26em] uppercase text-zinc-200/70">
                         Cities
                       </div>
 
@@ -431,7 +435,7 @@ export default function TopBar() {
                             href={`/city/${c.slug}`}
                             prefetch
                             onClick={() => setMegaOpen(false)}
-                            className="group rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition px-3.5 py-3"
+                            className="group rounded-2xl bg-white/[0.028] ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition px-3.5 py-3"
                             role="menuitem"
                           >
                             <div className="flex items-center justify-between gap-3">
@@ -447,8 +451,8 @@ export default function TopBar() {
                         ))}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/10 px-4 py-3">
-                        <div className="text-xs text-zinc-400">Quick entry points. We add more every week.</div>
+                      <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.028] ring-1 ring-inset ring-white/10 px-4 py-3">
+                        <div className="text-xs text-zinc-400">Entry points only. Intelligence expands weekly.</div>
                         <Link
                           href="/"
                           prefetch
@@ -460,15 +464,15 @@ export default function TopBar() {
                       </div>
                     </div>
 
-                    {/* Browse / Sell */}
+                    {/* Actions */}
                     <div className="col-span-4">
                       <div className="grid gap-3">
-                        <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+                        <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
                           <div className="border-b border-white/10 px-4 py-3">
-                            <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                              Browse
+                            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                              Intelligence
                             </div>
-                            <div className="mt-1 text-xs text-zinc-400">Search homes and see the key facts fast.</div>
+                            <div className="mt-1 text-xs text-zinc-400">Start with a place. Open the truth surface.</div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <button
@@ -485,47 +489,47 @@ export default function TopBar() {
                             >
                               <span className="inline-flex items-center gap-2">
                                 <Command className="h-4 w-4 opacity-85" />
-                                Search homes
+                                Open search
                               </span>
                               <ArrowRight className="h-4 w-4 opacity-75" />
                             </button>
 
                             <Link
-                              href="/coming-soon?section=for-sale"
+                              href="/coming-soon?section=listings"
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.028] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
                             >
                               <span className="inline-flex items-center gap-2">
                                 <MapPin className="h-4 w-4 opacity-80" />
-                                Homes for sale
+                                Listings (coming soon)
                               </span>
                               <ArrowRight className="h-4 w-4 opacity-75" />
                             </Link>
                           </div>
                         </div>
 
-                        <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+                        <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
                           <div className="border-b border-white/10 px-4 py-3">
-                            <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                              Sell your home
+                            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                              Submissions
                             </div>
                             <div className="mt-1 text-xs text-zinc-400">
-                              One home at a time. Pay by card. Get direct enquiries.
+                              Submit a property for verification and private matching.
                             </div>
                           </div>
                           <div className="p-4">
                             <Link
-                              href="/coming-soon?flow=sell"
+                              href={sellHref}
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.04] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16 transition"
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.038] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16 transition"
                             >
-                              <span className={goldText}>List your home</span>
+                              <span className={goldText}>{sellLabel}</span>
                               <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
                             </Link>
 
-                            <div className="mt-2 text-[11px] text-zinc-500">You keep control. No middle layer.</div>
+                            <div className="mt-2 text-[11px] text-zinc-500">Private by default. Signal over noise.</div>
                           </div>
                         </div>
                       </div>
@@ -534,14 +538,14 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Browse */}
+              {/* Search */}
               <button type="button" onClick={openSearchFromAnywhere} className={navItemBase}>
-                <span>Browse</span>
+                <span>Search</span>
               </button>
 
-              {/* Sell */}
-              <Link href="/coming-soon?flow=sell" prefetch className={navItemBase}>
-                <span>Sell</span>
+              {/* Submit */}
+              <Link href={sellHref} prefetch className={navItemBase}>
+                <span>Submit</span>
               </Link>
             </div>
           </div>
@@ -566,16 +570,16 @@ export default function TopBar() {
               </button>
 
               <Link
-                href="/coming-soon?flow=sell"
+                href={sellHref}
                 prefetch
                 className={cx(
                   'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition',
-                  'bg-white/[0.04] ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16',
+                  'bg-white/[0.038] ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16',
                   'shadow-[0_30px_140px_rgba(0,0,0,0.58)]',
                 )}
-                aria-label="List your home"
+                aria-label={sellLabel}
               >
-                <span className={goldText}>List your home</span>
+                <span className={goldText}>{sellLabel}</span>
                 <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
               </Link>
             </div>
@@ -619,10 +623,10 @@ export default function TopBar() {
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(230,201,128,0.14),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(230,201,128,0.12),transparent_60%)]" />
 
           <div className="relative flex items-center justify-between border-b border-white/10 px-5 py-5">
-            <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Menu</div>
+            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -638,11 +642,13 @@ export default function TopBar() {
           </div>
 
           <div className="relative space-y-4 px-5 py-5">
-            {/* Browse */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+            {/* Intelligence */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Browse</div>
-                <div className="mt-1 text-xs text-zinc-400">Search homes and see the key facts.</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                  Intelligence
+                </div>
+                <div className="mt-1 text-xs text-zinc-400">Open search and jump to cities fast.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <button
@@ -659,54 +665,54 @@ export default function TopBar() {
                 >
                   <span className="inline-flex items-center gap-2">
                     <Command className="h-4 w-4 opacity-85" />
-                    Search homes
+                    Open search
                     <span className="ml-2 font-mono text-xs text-zinc-200/75">/</span>
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-75" />
                 </button>
 
                 <Link
-                  href="/coming-soon?section=for-sale"
+                  href="/coming-soon?section=listings"
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.028] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <MapPin className="h-4 w-4 opacity-80" />
-                    Homes for sale
+                    Listings (coming soon)
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-75" />
                 </Link>
               </div>
             </div>
 
-            {/* Sell */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+            {/* Submissions */}
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                  Sell your home
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                  Submissions
                 </div>
-                <div className="mt-1 text-xs text-zinc-400">Pay by card. Get direct enquiries.</div>
+                <div className="mt-1 text-xs text-zinc-400">Submit a property for verification.</div>
               </div>
               <div className="p-4">
                 <Link
-                  href="/coming-soon?flow=sell"
+                  href={sellHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.04] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.08] hover:ring-white/16 transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.038] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16 transition"
                 >
-                  <span className={goldText}>List your home</span>
+                  <span className={goldText}>{sellLabel}</span>
                   <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
                 </Link>
 
-                <div className="mt-2 text-[11px] text-zinc-500">You keep control. No middle layer.</div>
+                <div className="mt-2 text-[11px] text-zinc-500">Private by default. Signal over noise.</div>
               </div>
             </div>
 
             {/* Places */}
-            <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+            <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Places</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">Places</div>
                 <div className="mt-1 text-xs text-zinc-400">Countries and top cities.</div>
               </div>
 
@@ -718,7 +724,7 @@ export default function TopBar() {
                       href={countryHref(c)}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-full bg-white/[0.04] px-3 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.08] hover:ring-white/14 transition"
+                      className="rounded-full bg-white/[0.038] px-3 py-1.5 text-[12px] text-zinc-100/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.075] hover:ring-white/14 transition"
                     >
                       {c}
                     </Link>
@@ -732,7 +738,7 @@ export default function TopBar() {
                       href={`/city/${c.slug}`}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-2xl bg-white/[0.03] px-3.5 py-3 ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14 transition"
+                      className="rounded-2xl bg-white/[0.028] px-3.5 py-3 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
@@ -749,9 +755,9 @@ export default function TopBar() {
 
             {/* City page mode switch */}
             {onCityPage ? (
-              <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
+              <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
                 <div className="border-b border-white/10 px-4 py-3">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
+                  <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
                     City view
                   </div>
                   <div className="mt-1 text-xs text-zinc-400">Switch: facts (T) or live market (L).</div>
@@ -798,9 +804,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-2 text-[11px] text-zinc-500">
-              Built for buyers and sellers who want clean facts, not noise.
-            </div>
+            <div className="pt-2 text-[11px] text-zinc-500">Built for signal and verification, not theatre.</div>
           </div>
         </div>
       </div>
