@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { CITIES } from '@/components/home/cities';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
-import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
+import { jsonLd, webPageJsonLd, breadcrumbJsonLd } from '@/lib/seo/seo.jsonld';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -53,6 +53,68 @@ function ListingCard({
         View truth-first signals
       </div>
     </Link>
+  );
+}
+
+function ExploreNext({
+  citySlug,
+  cityName,
+}: {
+  citySlug: string;
+  cityName: string;
+}) {
+  const featured = CITIES.filter((c) => c.slug !== citySlug).slice(0, 6);
+
+  return (
+    <section className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+      <h2 className="text-lg font-semibold tracking-tight text-white">Explore next</h2>
+      <p className="mt-2 text-sm leading-relaxed text-zinc-300">
+        Vantera is an intelligence graph. These links keep authority flowing across hubs, city nodes, and buyer-seller surfaces.
+      </p>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <Link
+          href={`/city/${citySlug}`}
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
+        >
+          {cityName} city overview
+        </Link>
+
+        <Link
+          href="/luxury-real-estate"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
+        >
+          Global luxury hub
+        </Link>
+
+        <Link
+          href="/sell-luxury-property"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
+        >
+          Sell privately
+        </Link>
+
+        <Link
+          href="/agents"
+          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
+        >
+          For agents
+        </Link>
+      </div>
+
+      <div className="mt-6 text-xs text-zinc-500">Featured city luxury routes</div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {featured.map((c) => (
+          <Link
+            key={c.slug}
+            href={`/city/${c.slug}/luxury-real-estate`}
+            className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/[0.05]"
+          >
+            {c.name} luxury
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -131,6 +193,12 @@ export default async function CityLuxuryPage({ params }: Props) {
     ],
   });
 
+  const crumbs = breadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: city.name, url: `/city/${city.slug}` },
+    { name: 'Luxury real estate', url: `/city/${city.slug}/luxury-real-estate` },
+  ]);
+
   const subtitle = [city.region, city.country].filter(Boolean).join(', ');
 
   // Placeholder featured listings
@@ -170,6 +238,7 @@ export default async function CityLuxuryPage({ params }: Props) {
       </div>
 
       {jsonLd(pageJsonLd)}
+      {jsonLd(crumbs)}
 
       <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
         <div className="flex flex-col gap-6">
@@ -218,7 +287,7 @@ export default async function CityLuxuryPage({ params }: Props) {
 
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <Pill title="What defines luxury here">
-            Luxury in {city.name} is not price alone. It is scarcity, planning constraints, location power, privacy, and a buyer pool deep enough to stay liquid when the market cools.
+            Luxury in {city.name} is not price alone. It is scarcity, planning constraints, location power, privacy, and a buyer pool deep enough to stay liquid when the market will cool.
           </Pill>
 
           <Pill title="Prime vs marketed luxury">
@@ -262,6 +331,8 @@ export default async function CityLuxuryPage({ params }: Props) {
             Popular searches: luxury homes for sale in {city.name}, prime real estate {city.name}, high-end property {city.name}, exclusive homes {city.name}.
           </div>
         </div>
+
+        <ExploreNext citySlug={city.slug} cityName={city.name} />
 
         <div className="mt-12 text-xs text-zinc-600">
           <div>Canonical: {doc.canonical}</div>
