@@ -13,7 +13,7 @@ import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 
-import WorldSearchHero from './WorldSearchHero';
+import IntentHero from './IntentHero';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -299,9 +299,7 @@ function PortalVsTruth() {
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
           <div className="mt-2 text-lg font-medium text-zinc-100">Truth-first intelligence</div>
-          <div className="mt-2 text-sm text-zinc-300">
-            Paperwork, price reality and risk flags - presented like a private report.
-          </div>
+          <div className="mt-2 text-sm text-zinc-300">Paperwork, price reality and risk flags - presented like a private report.</div>
           <div className="mt-4 grid gap-2">
             {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
@@ -408,9 +406,7 @@ function CTA() {
               ))}
             </div>
 
-            <div className="mt-3 text-xs text-zinc-500">
-              For now: explore coverage, open city intelligence and watch the index come alive.
-            </div>
+            <div className="mt-3 text-xs text-zinc-500">For now: explore coverage, open city intelligence and watch the index come alive.</div>
           </div>
         </div>
       </div>
@@ -492,9 +488,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* New: WorldSearchHero */}
                 <div className="mt-6 max-w-2xl">
-                  <WorldSearchHero cities={cities as any} onKeepScanningId="explore-index" />
+                  <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
                 </div>
 
                 <div className="mt-4 max-w-2xl">
@@ -518,40 +513,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
               {/* RIGHT */}
               <div className="space-y-4 lg:col-span-5">
-                <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-5 sm:p-6 vantera-royal-ring">
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(780px_300px_at_35%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_300px_at_90%_20%,rgba(231,201,130,0.11),transparent_62%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_300px_at_90%_20%,rgba(120,76,255,0.16),transparent_62%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/30 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                  </div>
-
-                  <div className="relative">
-                    <SectionLabel hint="Private index">Selected cities</SectionLabel>
-
-                    {(() => {
-                      const hot = pickHotCitiesDistinctTimezones(cities, 4);
-
-                      return (
-                        <>
-                          <CityCardsClient
-                            cities={hot}
-                            variant="wall"
-                            showLocalTime
-                            columns="grid-cols-1 sm:grid-cols-2"
-                            className="w-full"
-                          />
-
-                          <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-                            Four hot markets. Four time zones.
-                            <span className="text-zinc-500"> Curated, image-first, signal layered on top.</span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                </div>
+                {/* MOVED HERE: Featured Markets */}
+                <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
 
                 <TruthCardReport />
               </div>
@@ -652,7 +615,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             </div>
 
             <div className="relative mt-6">
-              <CityCardsVirtualizedClient cities={cities as any} />
+              {/* IMPORTANT: no featured block here anymore, since it's in the HERO */}
+              <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
             </div>
           </div>
         </section>
