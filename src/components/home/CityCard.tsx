@@ -34,12 +34,12 @@ function TonePill({
 
   const cls =
     tone === 'good'
-      ? 'border-emerald-300/18 bg-emerald-500/10 text-emerald-50/90'
+      ? 'border-emerald-400/18 bg-emerald-500/10 text-emerald-100/95'
       : tone === 'warn'
-        ? 'border-amber-300/18 bg-amber-500/10 text-amber-50/90'
+        ? 'border-amber-400/18 bg-amber-500/10 text-amber-100/95'
         : tone === 'violet'
-          ? 'border-violet-300/18 bg-violet-500/10 text-violet-50/90'
-          : 'border-white/10 bg-white/[0.04] text-zinc-100/85';
+          ? 'border-violet-400/18 bg-violet-500/10 text-violet-100/95'
+          : 'border-white/10 bg-white/[0.04] text-zinc-200/90';
 
   return <span className={cx(base, cls)}>{label}</span>;
 }
@@ -55,20 +55,20 @@ function MiniSignal({
 }) {
   const dot =
     tone === 'good'
-      ? 'bg-emerald-200/90'
+      ? 'bg-emerald-200/85'
       : tone === 'warn'
-        ? 'bg-amber-200/90'
+        ? 'bg-amber-200/85'
         : tone === 'violet'
-          ? 'bg-violet-200/90'
-          : 'bg-white/80';
+          ? 'bg-violet-200/85'
+          : 'bg-white/75';
 
   const border =
     tone === 'good'
-      ? 'border-emerald-300/18'
+      ? 'border-emerald-400/18'
       : tone === 'warn'
-        ? 'border-amber-300/18'
+        ? 'border-amber-400/18'
         : tone === 'violet'
-          ? 'border-violet-300/18'
+          ? 'border-violet-400/18'
           : 'border-white/10';
 
   const bg =
@@ -83,14 +83,14 @@ function MiniSignal({
   return (
     <div
       className={cx(
-        'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] text-zinc-50/90 backdrop-blur-2xl',
+        'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] text-zinc-100/90 backdrop-blur-2xl',
         border,
         bg,
       )}
     >
       <span className={cx('h-1.5 w-1.5 rounded-full shadow-[0_0_0_3px_rgba(255,255,255,0.08)]', dot)} />
-      <span className="text-zinc-200/80">{k}:</span>
-      <span className="text-zinc-50/95">{v}</span>
+      <span className="text-zinc-300">{k}:</span>
+      <span className="text-zinc-100">{v}</span>
     </div>
   );
 }
@@ -122,7 +122,6 @@ function hashTo01(seed: string) {
 
 function deriveSignals(city: City, state: 'VERIFIED_ONLY' | 'LOCKED' | 'WARMING', stats?: CityListingsStats) {
   const r = hashTo01(city.slug);
-
   const verified = stats?.verifiedCount ?? 0;
   const bias = verified > 0 ? Math.min(1, verified / 12) : 0;
 
@@ -161,7 +160,17 @@ function deriveSignals(city: City, state: 'VERIFIED_ONLY' | 'LOCKED' | 'WARMING'
   ];
 }
 
-export default function CityCard({ city, stats }: { city: City; stats?: CityListingsStats }) {
+export default function CityCard({
+  city,
+  stats,
+  variant = 'default',
+  showLockedCta = true,
+}: {
+  city: City;
+  stats?: CityListingsStats;
+  variant?: 'default' | 'wall';
+  showLockedCta?: boolean;
+}) {
   const src = city.image?.src?.trim() ?? '';
   const tier = getCoverageTier(city);
   const state = deriveCityTruthState(city, stats);
@@ -186,113 +195,136 @@ export default function CityCard({ city, stats }: { city: City; stats?: CityList
         ? 'Explore the city intelligence now. Homes unlock as verified supply lands.'
         : 'We’re building coverage here. The intelligence gets sharper every week.');
 
+  const isWall = variant === 'wall';
+
   return (
-    <Link
-      href={`/city/${city.slug}`}
-      prefetch
-      className={cx(
-        'group relative block overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02]',
-        'shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_34px_120px_rgba(0,0,0,0.55)]',
-        'transition duration-500 hover:-translate-y-[3px] hover:border-white/18',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
-      )}
-      aria-label={`Open ${city.name} intelligence`}
-    >
-      {/* Premium edge polish */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent opacity-80" />
-        <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
-          <div className="absolute -left-24 -top-24 h-56 w-56 rounded-full bg-[rgba(120,76,255,0.10)] blur-3xl" />
-          <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[rgba(255,255,255,0.06)] blur-3xl" />
-        </div>
-      </div>
-
-      {/* Image (make it the hero) */}
-      <div className="relative aspect-[16/10] w-full">
-        {src ? (
-          <SafeImage
-            src={src}
-            alt={safeAlt(city)}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className={cx(
-              'object-cover opacity-[0.96] transition duration-700',
-              'group-hover:opacity-100 group-hover:scale-[1.03]',
-              '[filter:contrast(1.08)_saturate(1.06)]',
-            )}
-            priority={city.slug === 'madrid'}
-            fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+    <div className="group relative">
+      <Link
+        href={`/city/${city.slug}`}
+        prefetch
+        className={cx(
+          'group relative block overflow-hidden rounded-[28px] border border-white/10',
+          isWall ? 'bg-black/25' : 'bg-white/[0.03]',
+          'shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_34px_120px_rgba(0,0,0,0.55)]',
+          'transition duration-500 hover:-translate-y-[2px] hover:border-white/18',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
         )}
-
-        {/* Cinematic veils */}
-        <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_35%_0%,rgba(255,255,255,0.12),transparent_58%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.88),rgba(0,0,0,0.30),transparent)]" />
-        <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.65)_1px,transparent_0)] [background-size:22px_22px]" />
-
-        {/* Tier badge */}
-        <div className="absolute right-4 top-4">
-          <CoverageTierBadge tier={tier} />
-        </div>
-
-        {/* Signals (small + high, so they don't block the photo) */}
-        <div className="absolute left-4 top-4 flex flex-wrap gap-2 pr-20">
-          {signals.slice(0, 2).map((s) => (
-            <MiniSignal key={`${city.slug}:${s.k}`} k={s.k} v={s.v} tone={s.tone} />
-          ))}
-        </div>
-
-        {/* Bottom: cinematic caption (THIS is the luxury feel) */}
-        <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-          <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-black/30 px-4 py-3 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.55)]">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.10] via-white/[0.03] to-transparent" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
-            </div>
-
-            <div className="relative flex items-end justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate text-[16px] font-semibold tracking-tight text-zinc-50 sm:text-[17px]">
-                  {city.name}
-                </div>
-                <div className="mt-1 truncate text-xs text-zinc-200/80">
-                  {city.country}
-                  {city.region ? ` · ${city.region}` : ''}
-                </div>
-              </div>
-
-              {/* Enter (subtle, not a buttony prototype) */}
-              <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] text-zinc-100 shadow-[0_14px_40px_rgba(0,0,0,0.42)] transition group-hover:border-white/18">
-                <span className="relative">Enter</span>
-                <span className="relative translate-x-0 opacity-70 transition group-hover:translate-x-[2px] group-hover:opacity-100">
-                  →
-                </span>
-              </span>
-            </div>
-
-            {/* State pills (kept, but now they sit inside the caption) */}
-            <div className="relative mt-3 flex flex-wrap gap-2">{statePills}</div>
+        aria-label={`Open ${city.name} intelligence`}
+      >
+        {/* Premium edge polish + aura */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/16 to-transparent opacity-80" />
+          <div className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
+            <div className="absolute -left-24 -top-24 h-56 w-56 rounded-full bg-[rgba(120,76,255,0.12)] blur-3xl" />
+            <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[rgba(231,201,130,0.10)] blur-3xl" />
           </div>
         </div>
-      </div>
 
-      {/* Body (clean, minimal - no “private city intelligence”, no node IDs, no paths) */}
-      <div className="p-5">
-        <p className="text-sm leading-relaxed text-zinc-300 line-clamp-2">{friendlyBlurb}</p>
+        {/* Image */}
+        <div className={cx('relative w-full', isWall ? 'h-[240px] sm:h-[260px]' : 'h-[205px] sm:h-[235px]')}>
+          {src ? (
+            <SafeImage
+              src={src}
+              alt={safeAlt(city)}
+              fill
+              sizes={isWall ? '(max-width: 1024px) 100vw, 520px' : '(max-width: 768px) 100vw, 33vw'}
+              className={cx(
+                'object-cover opacity-[0.96] transition duration-700',
+                'group-hover:opacity-100 group-hover:scale-[1.02]',
+                '[filter:contrast(1.06)_saturate(1.06)]',
+              )}
+              priority={city.slug === 'marbella'}
+              fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+          )}
 
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+          {/* Cinematic veils - reduced so images show */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.78),rgba(0,0,0,0.22),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_30%_0%,rgba(255,255,255,0.09),transparent_56%)]" />
 
-        <div className="mt-4 flex items-center justify-between gap-3 text-xs text-zinc-400">
-          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] text-zinc-300">
-            Vantera index
-          </span>
-          <span className="text-zinc-500">Open intelligence →</span>
+          {/* Top right: tier */}
+          <div className="absolute right-4 top-4">
+            <CoverageTierBadge tier={tier} />
+          </div>
+
+          {/* Title + micro metadata (smaller glass, less blocking) */}
+          <div className="absolute left-4 right-4 top-4">
+            <div className="relative overflow-hidden rounded-[20px] border border-white/10 bg-black/20 px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.10] via-white/[0.03] to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/22 to-transparent" />
+              </div>
+
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="min-w-0 pr-16">
+                  <div className="truncate text-[15px] font-semibold tracking-tight text-zinc-50">{city.name}</div>
+                  <div className="mt-1 truncate text-xs text-zinc-200/85">
+                    {city.country}
+                    {city.region ? ` · ${city.region}` : ''}
+                  </div>
+                </div>
+
+                <span className="relative mt-0.5 inline-flex shrink-0 items-center gap-1.5 overflow-hidden rounded-full border border-white/12 bg-white/[0.05] px-3 py-1.5 text-[11px] text-zinc-100 shadow-[0_14px_40px_rgba(0,0,0,0.42)] backdrop-blur-2xl transition group-hover:border-white/18">
+                  <span className="pointer-events-none absolute inset-0 opacity-70">
+                    <span className="absolute -left-1/3 top-0 h-full w-1/2 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/14 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
+                  </span>
+                  <span className="relative">Enter</span>
+                  <span className="relative translate-x-0 opacity-70 transition group-hover:translate-x-[2px] group-hover:opacity-100">→</span>
+                </span>
+              </div>
+
+              {/* Micro signals row */}
+              <div className="relative mt-3 flex flex-wrap gap-2">
+                {signals.map((s) => (
+                  <MiniSignal key={`${city.slug}:${s.k}`} k={s.k} v={s.v} tone={s.tone} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom overlay: state pills */}
+          <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">{statePills}</div>
         </div>
-      </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-0 ring-white/10 transition group-hover:ring-1" />
-    </Link>
+        {/* Body (clean, no debug chips) */}
+        <div className={cx('p-5', isWall && 'pt-4')}>
+          <p className={cx('text-sm leading-relaxed text-zinc-300', isWall ? 'line-clamp-2' : 'line-clamp-2')}>
+            {friendlyBlurb}
+          </p>
+
+          {/* Keep it premium: remove nodeId/path + "Private city intelligence" */}
+          {!isWall ? (
+            <>
+              <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+              <div className="mt-4 flex items-center justify-between gap-2 text-xs text-zinc-400">
+                <span className="text-zinc-500">Private city intelligence</span>
+                <span className="rounded-md border border-white/10 bg-black/22 px-2 py-1 font-mono text-zinc-400">
+                  {`/city/${city.slug}`}
+                </span>
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-0 ring-white/10 transition group-hover:ring-1" />
+      </Link>
+
+      {/* LOCKED CTA - now optional (and OFF in the hero index wall) */}
+      {showLockedCta && state === 'LOCKED' ? (
+        <div className="mt-3">
+          <Link
+            href={`/sell?city=${encodeURIComponent(city.slug)}`}
+            className="relative inline-flex w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs font-semibold tracking-[0.14em] text-zinc-100 transition hover:bg-white/[0.06] hover:border-white/14"
+          >
+            <span className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100">
+              <span className="absolute -left-24 -top-24 h-56 w-56 rounded-full bg-[rgba(120,76,255,0.14)] blur-3xl" />
+            </span>
+            <span className="relative">Publish verified listing</span>
+          </Link>
+        </div>
+      ) : null}
+    </div>
   );
 }
