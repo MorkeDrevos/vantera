@@ -9,6 +9,15 @@ type Props = Omit<ImageProps, 'alt'> & {
   fallback?: React.ReactNode;
 };
 
+function isUnsplash(src: ImageProps['src']) {
+  if (typeof src !== 'string') return false;
+  return (
+    src.includes('images.unsplash.com') ||
+    src.includes('source.unsplash.com') ||
+    src.includes('plus.unsplash.com')
+  );
+}
+
 export default function SafeImage({ alt, fallback, ...props }: Props) {
   const [ok, setOk] = useState(true);
 
@@ -22,5 +31,9 @@ export default function SafeImage({ alt, fallback, ...props }: Props) {
 
   if (!ok) return <>{safeFallback}</>;
 
-  return <Image {...props} alt={alt} onError={() => setOk(false)} />;
+  // If Unsplash blocks Next's server-side optimizer, bypass optimization for Unsplash only.
+  // This keeps Brandfetch/local images optimized, while making Unsplash reliable.
+  const unoptimized = props.unoptimized ?? isUnsplash(props.src);
+
+  return <Image {...props} alt={alt} unoptimized={unoptimized} onError={() => setOk(false)} />;
 }
