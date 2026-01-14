@@ -2,6 +2,14 @@
 
 import { SEO_CONFIG } from './seo.config';
 
+function normalizeUrl(url: string) {
+  // Accept absolute or relative, always output absolute
+  if (!url) return SEO_CONFIG.domain;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const p = url.startsWith('/') ? url : `/${url}`;
+  return `${SEO_CONFIG.domain}${p}`;
+}
+
 export function jsonLd(json: unknown) {
   return (
     <script
@@ -55,7 +63,7 @@ export function webPageJsonLd(input: {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: input.name,
-    url: input.url,
+    url: normalizeUrl(input.url),
     description: input.description,
     isPartOf: {
       '@type': 'WebSite',
@@ -63,5 +71,47 @@ export function webPageJsonLd(input: {
       url: SEO_CONFIG.domain,
     },
     about: input.about ?? [],
+  };
+}
+
+/**
+ * BreadcrumbList JSON-LD
+ * Use on city -> luxury -> listing (and any future subpages)
+ *
+ * Example:
+ * jsonLd(
+ *   breadcrumbJsonLd([
+ *     { name: 'Home', url: '/' },
+ *     { name: 'Marbella', url: '/city/marbella' },
+ *     { name: 'Luxury real estate', url: '/city/marbella/luxury-real-estate' },
+ *   ])
+ * )
+ */
+export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
+  const safe = (items ?? [])
+    .map((i) => ({
+      name: String(i?.name ?? '').trim(),
+      url: normalizeUrl(String(i?.url ?? '').trim()),
+    }))
+    .filter((i) => i.name.length > 0 && i.url.length > 0);
+
+  // BreadcrumbList requires at least 2 items to be meaningful
+  if (safe.length < 2) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [],
+    };
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: safe.map((i, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: i.name,
+      item: i.url,
+    })),
   };
 }
