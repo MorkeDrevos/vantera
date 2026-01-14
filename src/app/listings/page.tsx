@@ -1,7 +1,7 @@
 // src/app/listings/page.tsx
+import Link from 'next/link';
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { prisma } from '@/lib/prisma';
 
@@ -9,7 +9,8 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Listings · Vantera',
-  description: 'Browse premium listings with protocol-grade presentation.',
+  description:
+    'Browse premium listings with protocol-grade presentation. This surface is now wired to Prisma (seed data) and will expand with provider ingestion.',
 };
 
 function formatMoney(n: number, currency: string) {
@@ -25,22 +26,16 @@ function formatMoney(n: number, currency: string) {
   }
 }
 
-async function getListings() {
-  // IMPORTANT: your Listing model has NO slug yet.
-  // So we query + route by id only.
-  return prisma.listing.findMany({
-    where: { status: 'LIVE', visibility: 'PUBLIC' },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      city: { select: { name: true, slug: true, country: true, region: true } },
-      coverMedia: { select: { url: true, alt: true, width: true, height: true } },
-    },
-    take: 60,
-  });
-}
-
 export default async function ListingsPage() {
-  const listings = await getListings();
+  const listings = await prisma.listing.findMany({
+    where: { status: 'LIVE' },
+    orderBy: { createdAt: 'desc' },
+    take: 60,
+    include: {
+      city: { select: { name: true, country: true, region: true, slug: true } },
+      coverMedia: { select: { url: true, alt: true } },
+    },
+  });
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -57,7 +52,7 @@ export default async function ListingsPage() {
               Protocol-grade listings surface
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300">
-              Now reading from Prisma. Next step is provider ingestion and normalization.
+              Now wired to Prisma. Seed data is live. Next step is provider ingestion and verification.
             </p>
           </div>
 
@@ -78,7 +73,7 @@ export default async function ListingsPage() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
               <div className="text-xs text-zinc-400">Price style</div>
-              <div className="mt-1 text-lg font-semibold text-amber-100">Currency-aware</div>
+              <div className="mt-1 text-lg font-semibold text-amber-100">Native currency</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
               <div className="text-xs text-zinc-400">Status</div>
@@ -90,38 +85,48 @@ export default async function ListingsPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((l) => {
             const priceLabel =
-              typeof l.price === 'number' ? formatMoney(l.price, l.currency || 'EUR') : null;
+              typeof l.price === 'number' ? formatMoney(l.price, l.currency || 'EUR') : 'Price on request';
+
+            // IMPORTANT:
+            // Your current DB schema does NOT have Listing.slug.
+            // We use id for URL stability until you add a slug column + migration.
+            const href = `/listing/${l.id}`;
 
             return (
               <Link
                 key={l.id}
-                href={`/listing/${l.id}`}
-                className="group rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
+                href={href}
+                className="group overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
                 prefetch
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
-                    <div className="mt-1 truncate text-xs text-zinc-400">
-                      {l.city.name}, {l.city.country}
-                      {l.city.region ? ` · ${l.city.region}` : ''}
+                {l.coverMedia?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={l.coverMedia.url}
+                    alt={l.coverMedia.alt || l.title}
+                    className="aspect-[16/9] w-full object-cover"
+                  />
+                ) : (
+                  <div className="aspect-[16/9] w-full bg-black/20" />
+                )}
+
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
+                      <div className="mt-1 truncate text-xs text-zinc-400">
+                        {l.city.name}, {l.city.country}
+                        {l.city.region ? ` · ${l.city.region}` : ''}
+                      </div>
                     </div>
+
+                    <span className="shrink-0 rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
+                      {priceLabel}
+                    </span>
                   </div>
 
-                  <span className="rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
-                    {priceLabel ?? 'Price on request'}
-                  </span>
-                </div>
-
-                <div className="mt-4 h-px w-full bg-white/10" />
-
-                <div className="mt-4 flex items-center justify-between gap-3">
-                  <div className="text-xs text-zinc-400">{`/listing/${l.id}`}</div>
-                  <div className="text-xs text-zinc-500">
-                    {l.verification === 'VERIFIED_DOCS' || l.verification === 'VERIFIED_ON_SITE'
-                      ? 'Verified'
-                      : 'Seed'}
-                  </div>
+                  <div className="mt-4 h-px w-full bg-white/10" />
+                  <div className="mt-4 text-xs text-zinc-400">{href}</div>
                 </div>
               </Link>
             );
@@ -129,7 +134,7 @@ export default async function ListingsPage() {
         </div>
 
         <div className="mt-10 text-xs text-zinc-500">
-          SEO note: once we add a real Listing.slug column we can switch canonical URLs to slug-first.
+          SEO note: once Listing.slug exists in Prisma + DB, we will switch URLs to /listing/:slug and keep 301s from id.
         </div>
       </div>
     </div>
