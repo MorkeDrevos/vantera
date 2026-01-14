@@ -50,7 +50,9 @@ export default function Footer() {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-2xl border border-white/10 bg-white/[0.05] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]" />
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold tracking-[0.18em] text-zinc-100">VANTERA</div>
+                    <div className="text-sm font-semibold tracking-[0.18em] text-zinc-100">
+                      VANTERA
+                    </div>
                     <div className="mt-0.5 text-xs text-zinc-400">
                       Private intelligence for high-value real estate.
                     </div>
@@ -72,10 +74,10 @@ export default function Footer() {
                 </Link>
 
                 <a
-                  href="mailto:hello@vantera.io"
+                  href="mailto:md@vantera.io"
                   className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-zinc-200 transition hover:border-white/18 hover:bg-white/[0.06]"
                 >
-                  hello@vantera.io
+                  md@vantera.io
                 </a>
               </div>
             </div>
@@ -86,7 +88,9 @@ export default function Footer() {
             {/* Link grid */}
             <div className="mt-7 grid gap-8 sm:grid-cols-3">
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">PRODUCT</div>
+                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">
+                  PRODUCT
+                </div>
                 <div className="mt-3 flex flex-col gap-2">
                   <FooterLink href="/">Cities</FooterLink>
                   <FooterLink href="/coming-soon">Signals</FooterLink>
@@ -96,17 +100,21 @@ export default function Footer() {
               </div>
 
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">COMPANY</div>
+                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">
+                  COMPANY
+                </div>
                 <div className="mt-3 flex flex-col gap-2">
                   <FooterLink href="/contact">Contact</FooterLink>
-                  <FooterLink href="mailto:hello@vantera.io">Email</FooterLink>
+                  <FooterLink href="mailto:md@vantera.io">Email</FooterLink>
                   <FooterLink href="/coming-soon">Press</FooterLink>
                   <FooterLink href="/coming-soon">Careers</FooterLink>
                 </div>
               </div>
 
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">LEGAL</div>
+                <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">
+                  LEGAL
+                </div>
                 <div className="mt-3 flex flex-col gap-2">
                   <FooterLink href="/coming-soon">Privacy</FooterLink>
                   <FooterLink href="/coming-soon">Terms</FooterLink>
@@ -118,7 +126,7 @@ export default function Footer() {
 
             {/* Bottom row */}
             <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-5 text-xs text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-              <span>© {year} Vantera</span>
+              <span>© {year} Vantera, Inc.</span>
               <span className="text-zinc-600">Coverage expands continuously.</span>
             </div>
           </div>

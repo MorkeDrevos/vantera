@@ -41,17 +41,22 @@ export default function CityCardsClient({
   cities,
   columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
   className,
+  variant = 'default',
+  showLocalTime = false, // JamesEdition-style: off by default
 }: {
   cities: RuntimeCity[];
   columns?: string;
   className?: string;
+  variant?: 'default' | 'wall';
+  showLocalTime?: boolean;
 }) {
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
+    if (!showLocalTime) return;
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
-  }, []);
+  }, [showLocalTime]);
 
   const enriched: EnrichedCity[] = useMemo(() => {
     void now;
@@ -59,50 +64,45 @@ export default function CityCardsClient({
     const list = (cities ?? []).map((city) => {
       const r = hashTo01(city.slug);
 
-      // Stable "curation score" that can later be replaced by real ranking.
       const sortScore =
         typeof city.priority === 'number' ? 10_000 + city.priority : Math.round(r * 10_000);
 
       return {
         ...city,
-        localTime: formatLocalTime(city.tz),
+        localTime: showLocalTime ? formatLocalTime(city.tz) : undefined,
         sortScore,
       };
     });
 
-    // Keep current order by default.
     return list;
-  }, [cities, now]);
+  }, [cities, now, showLocalTime]);
+
+  const isWall = variant === 'wall';
 
   return (
     <section className={cx('w-full', className)}>
-      <div className={cx('grid gap-4 sm:gap-5', columns)}>
-        {enriched.map((city, idx) => (
+      <div
+        className={cx(
+          'grid',
+          // JamesEdition rhythm: more breathing room
+          isWall ? 'gap-5' : 'gap-5 sm:gap-6',
+          columns,
+        )}
+      >
+        {enriched.map((city) => (
           <div key={city.slug} className="relative">
-            {/* Local time badge (smaller + higher class) */}
-            {city.localTime ? (
-              <div className="pointer-events-none absolute right-4 top-4 z-30">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/30 px-3 py-1.5 text-[11px] text-zinc-100/90 shadow-[0_16px_55px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
-                    <span className="text-zinc-300">Local</span>
-                  </span>
-                  <span className="text-zinc-500">·</span>
+            {/* Optional local time (kept minimal if enabled) */}
+            {showLocalTime && city.localTime ? (
+              <div className="pointer-events-none absolute right-4 top-4 z-30 hidden sm:block">
+                <div className="rounded-full border border-white/12 bg-black/35 px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
+                  <span className="text-zinc-300">Local</span>
+                  <span className="text-zinc-500"> · </span>
                   <span className="font-mono text-zinc-100">{city.localTime}</span>
                 </div>
               </div>
             ) : null}
 
-            {/* Subtle “index wall” rhythm on large screens */}
-            <div
-              className={cx(
-                'transition-transform duration-500',
-                idx % 3 === 1 && 'lg:translate-y-[6px]',
-                idx % 3 === 2 && 'lg:translate-y-[12px]',
-              )}
-            >
-              <CityCard city={city as any} />
-            </div>
+            <CityCard city={city as any} variant={isWall ? 'wall' : 'default'} showLockedCta={false} />
           </div>
         ))}
       </div>

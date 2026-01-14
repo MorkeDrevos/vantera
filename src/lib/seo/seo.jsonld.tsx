@@ -1,5 +1,4 @@
 // src/lib/seo/seo.jsonld.tsx
-
 import { SEO_CONFIG } from './seo.config';
 
 export function jsonLd(json: unknown) {
@@ -63,5 +62,29 @@ export function webPageJsonLd(input: {
       url: SEO_CONFIG.domain,
     },
     about: input.about ?? [],
+  };
+}
+
+/**
+ * Breadcrumb JSON-LD
+ * Use relative urls like "/city/marbella" and we will convert them to absolute.
+ */
+export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
+  function abs(u: string) {
+    if (!u) return SEO_CONFIG.domain;
+    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    const p = u.startsWith('/') ? u : `/${u}`;
+    return `${SEO_CONFIG.domain}${p}`;
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      name: it.name,
+      item: abs(it.url),
+    })),
   };
 }

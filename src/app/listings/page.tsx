@@ -1,22 +1,47 @@
-import Link from 'next/link';
+// src/app/listings/page.tsx
 
 import type { Metadata } from 'next';
-import { LISTINGS } from '../../components/home/listings';
+import Link from 'next/link';
+
+import { prisma } from '@/lib/prisma';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Listings - Locus',
-  description: 'Browse premium listings with protocol-grade presentation. Real provider wiring comes next.',
+  title: 'Listings · Vantera',
+  description: 'Browse premium listings with protocol-grade presentation.',
 };
 
-function formatEur(n: number) {
+function formatMoney(n: number, currency: string) {
   try {
-    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 0,
+    }).format(n);
   } catch {
-    return `€${Math.round(n).toLocaleString()}`;
+    const sym = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : '';
+    return `${sym}${Math.round(n).toLocaleString()}`;
   }
 }
 
-export default function ListingsPage() {
+async function getListings() {
+  // IMPORTANT: your Listing model has NO slug yet.
+  // So we query + route by id only.
+  return prisma.listing.findMany({
+    where: { status: 'LIVE', visibility: 'PUBLIC' },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      city: { select: { name: true, slug: true, country: true, region: true } },
+      coverMedia: { select: { url: true, alt: true, width: true, height: true } },
+    },
+    take: 60,
+  });
+}
+
+export default async function ListingsPage() {
+  const listings = await getListings();
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -32,7 +57,7 @@ export default function ListingsPage() {
               Protocol-grade listings surface
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300">
-              This is a mock dataset. Next step is wiring a provider and normalizing into this schema.
+              Now reading from Prisma. Next step is provider ingestion and normalization.
             </p>
           </div>
 
@@ -49,11 +74,11 @@ export default function ListingsPage() {
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
               <div className="text-xs text-zinc-400">Total listings</div>
-              <div className="mt-1 text-lg font-semibold text-zinc-100">{LISTINGS.length}</div>
+              <div className="mt-1 text-lg font-semibold text-zinc-100">{listings.length}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
               <div className="text-xs text-zinc-400">Price style</div>
-              <div className="mt-1 text-lg font-semibold text-amber-100">EUR</div>
+              <div className="mt-1 text-lg font-semibold text-amber-100">Currency-aware</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
               <div className="text-xs text-zinc-400">Status</div>
@@ -63,35 +88,48 @@ export default function ListingsPage() {
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {LISTINGS.map((l) => (
-            <Link
-              key={l.id}
-              href={`/listing/${l.id}`}
-              className="group rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
-              prefetch
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
-                  <div className="mt-1 truncate text-xs text-zinc-400">
-                    {l.city}, {l.country}
-                    {l.region ? ` · ${l.region}` : ''}
+          {listings.map((l) => {
+            const priceLabel =
+              typeof l.price === 'number' ? formatMoney(l.price, l.currency || 'EUR') : null;
+
+            return (
+              <Link
+                key={l.id}
+                href={`/listing/${l.id}`}
+                className="group rounded-3xl border border-white/10 bg-white/5 p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] transition hover:border-white/20"
+                prefetch
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-base font-semibold text-zinc-50">{l.title}</div>
+                    <div className="mt-1 truncate text-xs text-zinc-400">
+                      {l.city.name}, {l.city.country}
+                      {l.city.region ? ` · ${l.city.region}` : ''}
+                    </div>
                   </div>
+
+                  <span className="rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
+                    {priceLabel ?? 'Price on request'}
+                  </span>
                 </div>
 
-                <span className="rounded-full border border-amber-300/20 bg-gradient-to-b from-amber-300/10 to-white/5 px-2.5 py-1 text-[11px] font-semibold text-amber-100">
-                  {formatEur(l.priceEur)}
-                </span>
-              </div>
+                <div className="mt-4 h-px w-full bg-white/10" />
 
-              <div className="mt-4 h-px w-full bg-white/10" />
-              <div className="mt-4 text-xs text-zinc-400">{`/listing/${l.id}`}</div>
-            </Link>
-          ))}
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <div className="text-xs text-zinc-400">{`/listing/${l.id}`}</div>
+                  <div className="text-xs text-zinc-500">
+                    {l.verification === 'VERIFIED_DOCS' || l.verification === 'VERIFIED_ON_SITE'
+                      ? 'Verified'
+                      : 'Seed'}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         <div className="mt-10 text-xs text-zinc-500">
-          SEO note: next step adds Schema.org (Product/Residence) + canonical URLs per listing.
+          SEO note: once we add a real Listing.slug column we can switch canonical URLs to slug-first.
         </div>
       </div>
     </div>

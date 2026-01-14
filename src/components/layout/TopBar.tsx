@@ -21,11 +21,14 @@ function isEditableTarget(el: Element | null) {
   return false;
 }
 
-function focusGlobalSearch() {
-  const el =
-    (document.getElementById('vantera-city-search') as HTMLInputElement | null) ||
-    (document.getElementById('locus-city-search') as HTMLInputElement | null);
-  el?.focus();
+/**
+ * Unified search focus:
+ * - CitySearch listens to this event and will open + focus itself.
+ * - Avoid direct DOM focusing from the TopBar (more robust across layouts).
+ */
+function dispatchFocusSearch() {
+  window.dispatchEvent(new CustomEvent('vantera:focus-search'));
+  window.dispatchEvent(new CustomEvent('locus:focus-search'));
 }
 
 function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof useRouter>) {
@@ -45,11 +48,11 @@ function useHotkeyFocusSearch(pathname: string | null, router: ReturnType<typeof
 
         if (pathname !== '/') {
           router.push('/');
-          window.setTimeout(() => focusGlobalSearch(), 350);
+          window.setTimeout(() => dispatchFocusSearch(), 350);
           return;
         }
 
-        focusGlobalSearch();
+        dispatchFocusSearch();
       }
     };
 
@@ -134,7 +137,6 @@ export default function TopBar() {
         setMegaOpen(false);
       }
 
-      // Keep your shortcuts, but we’ll label them in plain language
       if (onCityPage && (e.key === 't' || e.key === 'T')) {
         e.preventDefault();
         const url = new URL(window.location.href);
@@ -264,6 +266,15 @@ export default function TopBar() {
   function toggleMega() {
     cancelTimers();
     setMegaOpen((v) => !v);
+  }
+
+  function openSearchFromAnywhere() {
+    if (pathname !== '/') {
+      router.push('/');
+      window.setTimeout(() => dispatchFocusSearch(), 350);
+      return;
+    }
+    dispatchFocusSearch();
   }
 
   // Royal styling tokens (quiet luxury)
@@ -437,9 +448,7 @@ export default function TopBar() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/10 px-4 py-3">
-                        <div className="text-xs text-zinc-400">
-                          Quick entry points. We add more every week.
-                        </div>
+                        <div className="text-xs text-zinc-400">Quick entry points. We add more every week.</div>
                         <Link
                           href="/"
                           prefetch
@@ -459,21 +468,14 @@ export default function TopBar() {
                             <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
                               Browse
                             </div>
-                            <div className="mt-1 text-xs text-zinc-400">
-                              Search homes and see the key facts fast.
-                            </div>
+                            <div className="mt-1 text-xs text-zinc-400">Search homes and see the key facts fast.</div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <button
                               type="button"
                               onClick={() => {
                                 setMegaOpen(false);
-                                if (pathname !== '/') {
-                                  router.push('/');
-                                  window.setTimeout(() => focusGlobalSearch(), 350);
-                                  return;
-                                }
-                                focusGlobalSearch();
+                                openSearchFromAnywhere();
                               }}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
@@ -523,9 +525,7 @@ export default function TopBar() {
                               <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
                             </Link>
 
-                            <div className="mt-2 text-[11px] text-zinc-500">
-                              You keep control. No middle layer.
-                            </div>
+                            <div className="mt-2 text-[11px] text-zinc-500">You keep control. No middle layer.</div>
                           </div>
                         </div>
                       </div>
@@ -535,18 +535,7 @@ export default function TopBar() {
               </div>
 
               {/* Browse */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (pathname !== '/') {
-                    router.push('/');
-                    window.setTimeout(() => focusGlobalSearch(), 350);
-                    return;
-                  }
-                  focusGlobalSearch();
-                }}
-                className={navItemBase}
-              >
+              <button type="button" onClick={openSearchFromAnywhere} className={navItemBase}>
                 <span>Browse</span>
               </button>
 
@@ -562,14 +551,7 @@ export default function TopBar() {
             <div className="hidden items-center gap-3 sm:flex">
               <button
                 type="button"
-                onClick={() => {
-                  if (pathname !== '/') {
-                    router.push('/');
-                    window.setTimeout(() => focusGlobalSearch(), 350);
-                    return;
-                  }
-                  focusGlobalSearch();
-                }}
+                onClick={openSearchFromAnywhere}
                 className={cx(
                   'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm text-zinc-200/90 transition',
                   softFill,
@@ -619,19 +601,13 @@ export default function TopBar() {
       {/* Mobile sheet */}
       <div
         id="vantera-mobile-menu"
-        className={cx(
-          'fixed inset-0 z-[70] lg:hidden',
-          mobileOpen ? 'pointer-events-auto' : 'pointer-events-none',
-        )}
+        className={cx('fixed inset-0 z-[70] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
       >
         <button
           type="button"
           aria-label="Close menu"
           onClick={() => setMobileOpen(false)}
-          className={cx(
-            'absolute inset-0 bg-black/70 transition-opacity',
-            mobileOpen ? 'opacity-100' : 'opacity-0',
-          )}
+          className={cx('absolute inset-0 bg-black/70 transition-opacity', mobileOpen ? 'opacity-100' : 'opacity-0')}
         />
 
         <div
@@ -672,12 +648,7 @@ export default function TopBar() {
                 <button
                   type="button"
                   onClick={() => {
-                    if (pathname !== '/') {
-                      router.push('/');
-                      window.setTimeout(() => focusGlobalSearch(), 350);
-                    } else {
-                      focusGlobalSearch();
-                    }
+                    openSearchFromAnywhere();
                     setMobileOpen(false);
                   }}
                   className={cx(
@@ -735,9 +706,7 @@ export default function TopBar() {
             {/* Places */}
             <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">
-                  Places
-                </div>
+                <div className="text-[11px] font-semibold tracking-[0.30em] uppercase text-zinc-200/70">Places</div>
                 <div className="mt-1 text-xs text-zinc-400">Countries and top cities.</div>
               </div>
 
@@ -778,7 +747,7 @@ export default function TopBar() {
               </div>
             </div>
 
-            {/* City page mode switch (keep behavior, simplify labels) */}
+            {/* City page mode switch */}
             {onCityPage ? (
               <div className="overflow-hidden rounded-[22px] bg-white/[0.03] ring-1 ring-inset ring-white/10">
                 <div className="border-b border-white/10 px-4 py-3">

@@ -14,6 +14,22 @@ function monthStartUTC(d = new Date()) {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0));
 }
 
+function slugify(s: string) {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/['"]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
+function uniqueSlug(base: string, i: number) {
+  // Deterministic-ish for seed (no random). Good enough for placeholders.
+  // If you reseed from scratch, slugs stay stable.
+  return i === 0 ? base : `${base}-${i + 1}`;
+}
+
 async function main() {
   // 1) Upsert clusters
   for (const c of REGION_CLUSTERS) {
@@ -46,7 +62,7 @@ async function main() {
   const clusters = await prisma.regionCluster.findMany();
   const clusterBySlug = new Map(clusters.map((x) => [x.slug, x.id]));
 
-  // 2) Upsert cities (includes watchlist because we use ALL_CITIES)
+  // 2) Upsert cities
   for (const city of ALL_CITIES) {
     const clusterId = city.clusterSlug ? clusterBySlug.get(city.clusterSlug) ?? null : null;
 
@@ -140,8 +156,8 @@ async function main() {
           price: 14500000,
         },
         {
-          title: 'Nueva Andalucía - Penthouse Near Golf',
-          neighborhood: 'Nueva Andalucía',
+          title: 'Nueva Andalucia - Penthouse Near Golf',
+          neighborhood: 'Nueva Andalucia',
           propertyType: 'penthouse',
           bedrooms: 4,
           bathrooms: 4,
@@ -151,26 +167,45 @@ async function main() {
         },
       ];
 
+      // Ensure unique slugs inside seed
+      const baseSlugCounts = new Map<string, number>();
+
       for (const s of samples) {
+        const base = slugify(`${s.title} marbella`);
+        const count = baseSlugCounts.get(base) ?? 0;
+        baseSlugCounts.set(base, count + 1);
+
+        const slug = uniqueSlug(base, count);
+
         await prisma.listing.create({
           data: {
-            cityId: marbella.id,
+            slug,
+            source: 'manual',
+
+            // IMPORTANT: connect relation instead of setting cityId directly
+            city: { connect: { id: marbella.id } },
+
             status: ListingStatus.LIVE,
             visibility: ListingVisibility.PUBLIC,
             verification: VerificationLevel.SELF_REPORTED,
+
             title: s.title,
             headline: 'Selected prime inventory - verification improves as the dataset matures.',
             description:
               'Premium placeholder listing seeded for product build. Replace with verified inventory, agent uploads or private seller submissions.',
+
             neighborhood: s.neighborhood,
             addressHidden: true,
+
             propertyType: s.propertyType,
             bedrooms: s.bedrooms,
             bathrooms: s.bathrooms,
             builtM2: s.builtM2,
             plotM2: s.plotM2 ?? undefined,
+
             price: s.price,
             currency: 'EUR',
+
             media: {
               create: [
                 {

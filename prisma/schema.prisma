@@ -182,6 +182,16 @@ model Listing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Stable SEO URL slug: /listing/<slug>
+  slug      String   @unique
+
+  // Provider identity (critical for ingestion + dedupe)
+  // Example sources: "manual", "attom"
+  source      String   @default("manual")
+  sourceId    String?  @unique
+  sourceUrl   String?
+  sourceUpdatedAt DateTime?
+
   cityId    String
   city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
@@ -233,6 +243,7 @@ model Listing {
   @@index([cityId, status])
   @@index([status, visibility])
   @@index([cityId, price])
+  @@index([source])
 }
 
 /**

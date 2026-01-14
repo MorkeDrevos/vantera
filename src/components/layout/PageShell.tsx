@@ -7,7 +7,6 @@ import { Suspense } from 'react';
 import TopBar from './TopBar';
 import ProtocolStrip from './ProtocolStrip';
 import Footer from './Footer';
-import ComingSoon from '@/components/ComingSoon';
 
 type PageShellProps = {
   children?: ReactNode;
@@ -28,17 +27,6 @@ export default function PageShell({
   heroOnly = false,
   bodyMaxWidthClassName = 'max-w-6xl',
 }: PageShellProps) {
-  const comingSoon = process.env.NEXT_PUBLIC_COMING_SOON === '1';
-
-  // 🚧 GLOBAL LOCK: EVERYTHING shows Coming Soon
-  if (comingSoon) {
-    return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-100">
-        <ComingSoon />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Ambient background */}
