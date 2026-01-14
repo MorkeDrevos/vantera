@@ -28,6 +28,61 @@ function FooterLink({
   );
 }
 
+function TrustImprint() {
+  return (
+    <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">
+            CORPORATE PRESENTATION
+          </div>
+
+          <div className="mt-3 text-sm leading-relaxed text-zinc-300/90">
+            For institutional clarity, Vantera is structured for a Delaware C-Corporation setup.
+            Public registry details are presented in the standard Delaware format.
+          </div>
+
+          <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-black/20">
+            <div className="px-4 py-3 text-xs font-semibold tracking-[0.22em] text-zinc-500">
+              OFFICIAL RECORD FORMAT
+            </div>
+            <div className="h-px w-full bg-white/10" />
+            <pre className="whitespace-pre-wrap px-4 py-4 text-[13px] leading-relaxed text-zinc-200">
+{`Vantera, Inc.
+Delaware, United States
+
+Registered Agent:
+Northwest Registered Agent LLC
+8 The Green, Suite A
+Dover, DE 19901`}
+            </pre>
+          </div>
+
+          <div className="mt-3 text-xs text-zinc-500">
+            Note: If the corporation is not yet filed, the registered agent line reflects the intended Delaware
+            registered office presentation upon incorporation.
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <a
+            href="mailto:md@vantera.io"
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-zinc-200 transition hover:border-white/18 hover:bg-white/[0.06]"
+          >
+            md@vantera.io
+          </a>
+          <a
+            href="mailto:info@vantera.io"
+            className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-zinc-200 transition hover:border-white/18 hover:bg-white/[0.06]"
+          >
+            info@vantera.io
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Footer() {
   const year = new Date().getFullYear();
 
@@ -72,13 +127,16 @@ export default function Footer() {
                 </Link>
 
                 <a
-                  href="mailto:hello@vantera.io"
+                  href="mailto:md@vantera.io"
                   className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-zinc-200 transition hover:border-white/18 hover:bg-white/[0.06]"
                 >
-                  hello@vantera.io
+                  md@vantera.io
                 </a>
               </div>
             </div>
+
+            {/* Trust imprint */}
+            <TrustImprint />
 
             {/* Divider */}
             <div className="mt-8 h-px w-full bg-white/10" />
@@ -99,7 +157,7 @@ export default function Footer() {
                 <div className="text-[11px] font-semibold tracking-[0.24em] text-zinc-500">COMPANY</div>
                 <div className="mt-3 flex flex-col gap-2">
                   <FooterLink href="/contact">Contact</FooterLink>
-                  <FooterLink href="mailto:hello@vantera.io">Email</FooterLink>
+                  <FooterLink href="mailto:md@vantera.io">Email</FooterLink>
                   <FooterLink href="/coming-soon">Press</FooterLink>
                   <FooterLink href="/coming-soon">Careers</FooterLink>
                 </div>
