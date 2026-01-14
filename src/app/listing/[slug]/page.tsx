@@ -11,7 +11,8 @@ import { jsonLd, webPageJsonLd, breadcrumbJsonLd } from '@/lib/seo/seo.jsonld';
 export const revalidate = 300;
 
 type Props = {
-  params: { slug: string };
+  // Next 15: params is a Promise
+  params: Promise<{ slug: string }>;
 };
 
 function shouldIndexListing(verificationLevel: string) {
@@ -57,8 +58,9 @@ async function getListing(id: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const listing = await getListing(params.slug);
+  const { slug } = await params;
 
+  const listing = await getListing(slug);
   if (!listing) {
     return { title: 'Not Found · Vantera', robots: { index: false, follow: false } };
   }
@@ -67,11 +69,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
 
   // Until Listing has a real slug, use id for canonical stability
-  const slug = listing.id;
+  const canonicalSlug = listing.id;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
-    slug,
+    slug: canonicalSlug,
     title: listing.title,
     cityName: listing.city.name,
     citySlug: listing.city.slug,
@@ -86,7 +88,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: doc.description,
     alternates: { canonical: doc.canonical },
     robots: { index: indexable, follow: true },
-
     openGraph: {
       type: 'article',
       title: doc.title,
@@ -95,7 +96,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: 'Vantera',
       images: [doc.ogImage],
     },
-
     twitter: {
       card: 'summary_large_image',
       title: doc.title,
@@ -106,17 +106,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ListingPage({ params }: Props) {
-  const listing = await getListing(params.slug);
+  const { slug } = await params;
+
+  const listing = await getListing(slug);
   if (!listing) return notFound();
 
   const priceLabel =
     typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
 
-  const slug = listing.id;
+  const canonicalSlug = listing.id;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
-    slug,
+    slug: canonicalSlug,
     title: listing.title,
     cityName: listing.city.name,
     citySlug: listing.city.slug,
@@ -141,7 +143,7 @@ export default async function ListingPage({ params }: Props) {
     { name: 'Home', url: '/' },
     { name: listing.city.name, url: `/city/${listing.city.slug}` },
     { name: 'Luxury real estate', url: `/city/${listing.city.slug}/luxury-real-estate` },
-    { name: listing.title, url: `/listing/${slug}` },
+    { name: listing.title, url: `/listing/${canonicalSlug}` },
   ]);
 
   // You don't have a `source` field yet, so we present a safe placeholder:
