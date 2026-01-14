@@ -6,11 +6,10 @@ import { notFound } from 'next/navigation';
 import { CITIES } from '@/components/home/cities';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
-import { jsonLd, webPageJsonLd, breadcrumbJsonLd } from '@/lib/seo/seo.jsonld';
+import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
+import { crumbsCityLuxury } from '@/lib/seo/seo.breadcrumbs';
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+type Props = { params: Promise<{ slug: string }> };
 
 function Pill({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -48,83 +47,16 @@ function ListingCard({
           </div>
         ) : null}
       </div>
-
-      <div className="mt-4 text-xs text-zinc-400 group-hover:text-zinc-300">
-        View truth-first signals
-      </div>
+      <div className="mt-4 text-xs text-zinc-400 group-hover:text-zinc-300">View truth-first signals</div>
     </Link>
-  );
-}
-
-function ExploreNext({
-  citySlug,
-  cityName,
-}: {
-  citySlug: string;
-  cityName: string;
-}) {
-  const featured = CITIES.filter((c) => c.slug !== citySlug).slice(0, 6);
-
-  return (
-    <section className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-      <h2 className="text-lg font-semibold tracking-tight text-white">Explore next</h2>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-        Vantera is an intelligence graph. These links keep authority flowing across hubs, city nodes, and buyer-seller surfaces.
-      </p>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        <Link
-          href={`/city/${citySlug}`}
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-        >
-          {cityName} city overview
-        </Link>
-
-        <Link
-          href="/luxury-real-estate"
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-        >
-          Global luxury hub
-        </Link>
-
-        <Link
-          href="/sell-luxury-property"
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-        >
-          Sell privately
-        </Link>
-
-        <Link
-          href="/agents"
-          className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-        >
-          For agents
-        </Link>
-      </div>
-
-      <div className="mt-6 text-xs text-zinc-500">Featured city luxury routes</div>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {featured.map((c) => (
-          <Link
-            key={c.slug}
-            href={`/city/${c.slug}/luxury-real-estate`}
-            className="rounded-full border border-white/10 bg-white/[0.02] px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/[0.05]"
-          >
-            {c.name} luxury
-          </Link>
-        ))}
-      </div>
-    </section>
   );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-
   const city = CITIES.find((c) => c.slug === slug);
-  if (!city) {
-    return { title: 'City Not Found · Vantera', robots: { index: false, follow: false } };
-  }
+
+  if (!city) return { title: 'City Not Found · Vantera', robots: { index: false, follow: false } };
 
   const doc = SEO_INTENT.luxuryCity({
     name: city.name,
@@ -138,7 +70,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: doc.description,
     alternates: { canonical: doc.canonical },
     robots: doc.robots,
-
     openGraph: {
       type: 'article',
       title: doc.title,
@@ -147,7 +78,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [doc.ogImage],
       siteName: 'Vantera',
     },
-
     twitter: {
       card: 'summary_large_image',
       title: doc.title,
@@ -193,41 +123,15 @@ export default async function CityLuxuryPage({ params }: Props) {
     ],
   });
 
-  const crumbs = breadcrumbJsonLd([
-    { name: 'Home', url: '/' },
-    { name: city.name, url: `/city/${city.slug}` },
-    { name: 'Luxury real estate', url: `/city/${city.slug}/luxury-real-estate` },
-  ]);
+  const breadcrumb = crumbsCityLuxury({ cityName: city.name, citySlug: city.slug });
 
   const subtitle = [city.region, city.country].filter(Boolean).join(', ');
 
-  // Placeholder featured listings
-  // Swap later to real data source without changing layout or SEO
   const featured = [
-    {
-      title: `Prime villa with views`,
-      price: '€4.2M',
-      meta: `${city.name} - Prime zone`,
-      href: `/listings?city=${city.slug}&tag=luxury`,
-    },
-    {
-      title: `Penthouse with terrace`,
-      price: '€2.8M',
-      meta: `${city.name} - Walkable core`,
-      href: `/listings?city=${city.slug}&tag=luxury`,
-    },
-    {
-      title: `Modern estate with privacy`,
-      price: '€6.9M',
-      meta: `${city.name} - Ultra prime`,
-      href: `/listings?city=${city.slug}&tag=luxury`,
-    },
-    {
-      title: `Architectural home, turnkey`,
-      price: '€3.6M',
-      meta: `${city.name} - Prime corridor`,
-      href: `/listings?city=${city.slug}&tag=luxury`,
-    },
+    { title: `Prime villa with views`, price: '€4.2M', meta: `${city.name} - Prime zone`, href: `/listings?city=${city.slug}&tag=luxury` },
+    { title: `Penthouse with terrace`, price: '€2.8M', meta: `${city.name} - Walkable core`, href: `/listings?city=${city.slug}&tag=luxury` },
+    { title: `Modern estate with privacy`, price: '€6.9M', meta: `${city.name} - Ultra prime`, href: `/listings?city=${city.slug}&tag=luxury` },
+    { title: `Architectural home, turnkey`, price: '€3.6M', meta: `${city.name} - Prime corridor`, href: `/listings?city=${city.slug}&tag=luxury` },
   ];
 
   return (
@@ -238,7 +142,7 @@ export default async function CityLuxuryPage({ params }: Props) {
       </div>
 
       {jsonLd(pageJsonLd)}
-      {jsonLd(crumbs)}
+      {jsonLd(breadcrumb)}
 
       <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
         <div className="flex flex-col gap-6">
@@ -262,24 +166,13 @@ export default async function CityLuxuryPage({ params }: Props) {
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href={`/city/${city.slug}`}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
+            <Link href={`/city/${city.slug}`} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10">
               City overview
             </Link>
-
-            <Link
-              href="/luxury-real-estate"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
+            <Link href="/luxury-real-estate" className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10">
               Global luxury hub
             </Link>
-
-            <Link
-              href={`/listings?city=${city.slug}`}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
+            <Link href={`/listings?city=${city.slug}`} className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10">
               View listings
             </Link>
           </div>
@@ -287,21 +180,16 @@ export default async function CityLuxuryPage({ params }: Props) {
 
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           <Pill title="What defines luxury here">
-            Luxury in {city.name} is not price alone. It is scarcity, planning constraints, location power, privacy, and a buyer pool deep enough to stay liquid when the market will cool.
+            Luxury in {city.name} is not price alone. It is scarcity, planning constraints, location power, privacy, and a buyer pool deep enough to stay liquid when the market cools.
           </Pill>
-
           <Pill title="Prime vs marketed luxury">
             Marketed luxury has photos. Prime luxury has durability. Vantera highlights the difference through price dispersion, reduction pressure, and district-level demand signals.
           </Pill>
-
           <Pill title="Liquidity matters more than finishes">
-            A property that looks perfect but cannot sell is not prime. Liquidity is the real luxury.
-            Vantera emphasizes demand depth and time-to-sell pressure so decisions are grounded in reality.
+            A property that looks perfect but cannot sell is not prime. Liquidity is the real luxury. Vantera emphasizes demand depth and time-to-sell pressure so decisions are grounded in reality.
           </Pill>
-
           <Pill title="Truth-first listings, sellers, and agents">
-            Vantera hosts listings from private sellers and vetted agents. The truth layer leads.
-            Every listing is framed against real value, liquidity, and risk context, not marketing narratives.
+            Vantera hosts listings from private sellers and vetted agents. The truth layer leads. Every listing is framed against real value, liquidity, and risk context, not marketing narratives.
           </Pill>
         </div>
 
@@ -326,13 +214,7 @@ export default async function CityLuxuryPage({ params }: Props) {
               <ListingCard key={f.title} title={f.title} price={f.price} meta={f.meta} href={f.href} />
             ))}
           </div>
-
-          <div className="mt-6 text-xs text-zinc-500">
-            Popular searches: luxury homes for sale in {city.name}, prime real estate {city.name}, high-end property {city.name}, exclusive homes {city.name}.
-          </div>
         </div>
-
-        <ExploreNext citySlug={city.slug} cityName={city.name} />
 
         <div className="mt-12 text-xs text-zinc-600">
           <div>Canonical: {doc.canonical}</div>
