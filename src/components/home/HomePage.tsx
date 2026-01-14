@@ -81,6 +81,34 @@ function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }
   );
 }
 
+function LuxLiveBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {/* Base film */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.30),rgba(0,0,0,0.82))]" />
+
+      {/* Aurora ribbons */}
+      <div className="absolute inset-0 opacity-[0.70]">
+        <div className="vantera-float-a absolute -left-[20%] top-[-25%] h-[520px] w-[880px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)]" />
+        <div className="vantera-float-b absolute -right-[25%] top-[-18%] h-[520px] w-[920px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)]" />
+        <div className="vantera-float-c absolute left-[10%] bottom-[-35%] h-[700px] w-[1100px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)]" />
+      </div>
+
+      {/* Spotlight sweep */}
+      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.22)_45%,transparent_62%)]" />
+
+      {/* Micro particles */}
+      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:20px_20px]" />
+
+      {/* Vignette */}
+      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_40%,rgba(0,0,0,0.82)_78%)]" />
+
+      {/* Optional grain - ONLY if you actually have this file */}
+      {/* <div className="absolute inset-0 opacity-[0.10] mix-blend-overlay [background-image:url('/noise/noise-1.png')] [background-size:240px_240px]" /> */}
+    </div>
+  );
+}
+
 function HeroVideo() {
   return (
     <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
@@ -105,6 +133,34 @@ function HeroVideo() {
       {/* Animated stardust */}
       <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:18px_18px] animate-[pulse_6s_ease-in-out_infinite]" />
       <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#0B0E13]" />
+    </div>
+  );
+}
+
+function HeroShine() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {/* quiet top halo */}
+      <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.13),transparent_62%)] blur-2xl" />
+
+      {/* violet + cyan bloom */}
+      <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.20),transparent_62%)] blur-2xl" />
+      <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.14),transparent_60%)] blur-2xl" />
+
+      {/* premium sheen */}
+      <div className="absolute inset-0 opacity-35 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_45%,transparent_62%)]" />
+
+      {/* optional ghost mark (only if the asset exists) */}
+      <div className="absolute right-[-90px] top-[-70px] opacity-[0.05] blur-[0.2px]">
+        <Image
+          src="/brand/vantera-logo-dark.png"
+          alt=""
+          width={560}
+          height={180}
+          className="w-[560px]"
+          priority={false}
+        />
+      </div>
     </div>
   );
 }
@@ -474,7 +530,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
         <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.72))] shadow-[0_55px_150px_rgba(0,0,0,0.74)]">
           <HeroVideo />
-          <HeroGoldEdge />
+<LuxLiveBackdrop />
+<HeroShine />
 
           <div className="relative w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
