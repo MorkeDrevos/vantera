@@ -4,26 +4,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------------------------------------
-   Base
--------------------------------------------------------- */
-
-:root {
-  color-scheme: dark;
-
-  /* Optional: consistent “royal” accent tokens */
-  --vantera-gold: 231 201 130;
-  --vantera-violet: 120 76 255;
-  --vantera-ice: 62 196 255;
-}
-
 html,
 body {
   height: 100%;
 }
 
+:root {
+  color-scheme: dark;
+}
+
 body {
   text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -34,25 +27,24 @@ body {
   background: rgba(255, 255, 255, 0.14);
 }
 
-/* -------------------------------------------------------
-   Reduced motion
--------------------------------------------------------- */
-
+/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
   }
 }
 
-/* -------------------------------------------------------
-   Vantera luxury motion (canonical)
-   Fixes:
-   - Removed duplicate @keyframes names (vanteraSweep/FloatA/B/C/Drift)
-   - Keeps one consistent definition per animation
-   - Adds the missing .vantera-beam class used by hero
--------------------------------------------------------- */
+/* =========================
+   VANTERA - Royal Portal FX
+   Single canonical animation set
+   ========================= */
 
 @keyframes vanteraPulse {
   0%,
@@ -66,7 +58,6 @@ body {
   }
 }
 
-/* Royal portal float set */
 @keyframes vanteraFloatA {
   0% {
     transform: translate3d(0, 0, 0) scale(1);
@@ -112,6 +103,7 @@ body {
   }
 }
 
+/* One sweep only (you had two with same name) */
 @keyframes vanteraSweep {
   0% {
     transform: translateX(-22%);
@@ -132,7 +124,7 @@ body {
   }
 }
 
-/* Subtle drifting noise / pattern layer (uses background-position) */
+/* Light star-drift / grain drift via background-position */
 @keyframes vanteraDrift {
   0% {
     background-position: 0 0;
@@ -147,7 +139,6 @@ body {
   }
 }
 
-/* Light beams */
 @keyframes vanteraBeam {
   0% {
     transform: translate3d(-8%, 0, 0) rotate(10deg);
@@ -168,7 +159,6 @@ body {
   }
 }
 
-/* Arc shimmer */
 @keyframes vanteraArc {
   0% {
     transform: translate3d(0, 0, 0) rotate(0deg);
@@ -184,39 +174,33 @@ body {
   }
 }
 
-/* Classes used across the hero */
+/* Utility classes used by HomePage.tsx */
 .vantera-float-a {
   animation: vanteraFloatA 22s ease-in-out infinite;
 }
-
 .vantera-float-b {
   animation: vanteraFloatB 28s ease-in-out infinite;
 }
-
 .vantera-float-c {
   animation: vanteraFloatC 34s ease-in-out infinite;
 }
-
 .vantera-sweep {
   animation: vanteraSweep 16s ease-in-out infinite;
 }
-
 .vantera-drift {
   animation: vanteraDrift 26s linear infinite;
 }
-
 .vantera-beam {
   animation: vanteraBeam 14s ease-in-out infinite;
 }
-
 .vantera-arc {
   animation: vanteraArc 20s ease-in-out infinite;
 }
 
-/* -------------------------------------------------------
-   VANTERA - Royal ring helper
-   Keeps your current look, with a slightly cleaner "gold" layer.
--------------------------------------------------------- */
+/* Optional pulse helper (if you ever use it) */
+.vantera-pulse {
+  animation: vanteraPulse 6s ease-in-out infinite;
+}
 
 .vantera-royal-ring {
   box-shadow:
