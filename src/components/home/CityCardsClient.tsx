@@ -59,12 +59,9 @@ export default function CityCardsClient({
     const list = (cities ?? []).map((city) => {
       const r = hashTo01(city.slug);
 
-      // Stable "curation score" that can later be replaced by real signal ranking.
-      // priority (if provided) wins, otherwise a deterministic score from slug.
+      // Stable "curation score" that can later be replaced by real ranking.
       const sortScore =
-        typeof city.priority === 'number'
-          ? 10_000 + city.priority
-          : Math.round(r * 10_000);
+        typeof city.priority === 'number' ? 10_000 + city.priority : Math.round(r * 10_000);
 
       return {
         ...city,
@@ -73,61 +70,41 @@ export default function CityCardsClient({
       };
     });
 
-    // Keep current order by default? If you want “index feel”, uncomment this:
-    // list.sort((a, b) => (b.sortScore ?? 0) - (a.sortScore ?? 0));
-
+    // Keep current order by default.
     return list;
   }, [cities, now]);
 
   return (
     <section className={cx('w-full', className)}>
-      {/* Cinematic wrapper so it feels like a premium index wall */}
-      <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_40px_140px_rgba(0,0,0,0.55)] sm:p-5">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(980px_340px_at_18%_0%,rgba(255,255,255,0.07),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(980px_340px_at_85%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-          <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:24px_24px]" />
-        </div>
-
-        <div className="relative">
-          <div className={cx('grid gap-4 sm:gap-5', columns)}>
-            {enriched.map((city, idx) => (
-              <div key={city.slug} className="relative">
-                {/* “Live” local time badge (premium, minimal) */}
-                {city.localTime ? (
-                  <div className="pointer-events-none absolute right-4 top-4 z-20">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[11px] text-zinc-100/90 shadow-[0_16px_55px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
-                        <span className="text-zinc-300">Local time</span>
-                      </span>
-                      <span className="text-zinc-500">·</span>
-                      <span className="font-mono text-zinc-100">{city.localTime}</span>
-                    </div>
-                  </div>
-                ) : null}
-
-                {/* Slight staggered “index wall” rhythm on large screens */}
-                <div
-                  className={cx(
-                    'transition-transform duration-500',
-                    idx % 3 === 1 && 'lg:translate-y-[6px]',
-                    idx % 3 === 2 && 'lg:translate-y-[12px]',
-                  )}
-                >
-                  <CityCard city={city as any} />
+      <div className={cx('grid gap-4 sm:gap-5', columns)}>
+        {enriched.map((city, idx) => (
+          <div key={city.slug} className="relative">
+            {/* Local time badge (smaller + higher class) */}
+            {city.localTime ? (
+              <div className="pointer-events-none absolute right-4 top-4 z-30">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/30 px-3 py-1.5 text-[11px] text-zinc-100/90 shadow-[0_16px_55px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
+                    <span className="text-zinc-300">Local</span>
+                  </span>
+                  <span className="text-zinc-500">·</span>
+                  <span className="font-mono text-zinc-100">{city.localTime}</span>
                 </div>
               </div>
-            ))}
-          </div>
+            ) : null}
 
-          {/* Footer hint: makes it feel curated, not like a directory */}
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/18 px-4 py-3 text-[12px] text-zinc-300">
-            This is a curated index - not a list.
-            <span className="text-zinc-500"> Cities expand as verified supply and signals come online.</span>
+            {/* Subtle “index wall” rhythm on large screens */}
+            <div
+              className={cx(
+                'transition-transform duration-500',
+                idx % 3 === 1 && 'lg:translate-y-[6px]',
+                idx % 3 === 2 && 'lg:translate-y-[12px]',
+              )}
+            >
+              <CityCard city={city as any} />
+            </div>
           </div>
-        </div>
+        ))}
       </div>
     </section>
   );
