@@ -31,32 +31,29 @@ function formatMoney(n: number, currency: string) {
   }
 }
 
-async function getListing(slugOrId: string) {
-  if (!slugOrId) return null;
+/**
+ * IMPORTANT:
+ * Your current Prisma Listing model does NOT include:
+ * - slug
+ * - source
+ *
+ * So this route treats [slug] as "id" (back-compat with your earlier /listing/<id> links).
+ * When you add a real `slug` column later, we can switch to slug-first resolution.
+ */
+async function getListing(id: string) {
+  if (!id) return null;
 
-  // Primary: stable slug
-  const bySlug = await prisma.listing.findUnique({
-    where: { slug: slugOrId },
+  return prisma.listing.findUnique({
+    where: { id },
     include: {
       city: { select: { name: true, slug: true, country: true, region: true } },
       coverMedia: { select: { url: true, alt: true, width: true, height: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true, alt: true, sortOrder: true, kind: true } },
+      media: {
+        orderBy: { sortOrder: 'asc' },
+        select: { url: true, alt: true, sortOrder: true, kind: true },
+      },
     },
   });
-
-  if (bySlug) return bySlug;
-
-  // Back-compat: if someone still hits /listing/<id>
-  const byId = await prisma.listing.findUnique({
-    where: { id: slugOrId },
-    include: {
-      city: { select: { name: true, slug: true, country: true, region: true } },
-      coverMedia: { select: { url: true, alt: true, width: true, height: true } },
-      media: { orderBy: { sortOrder: 'asc' }, select: { url: true, alt: true, sortOrder: true, kind: true } },
-    },
-  });
-
-  return byId;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -67,11 +64,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const priceLabel =
-    typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'USD') : null;
+    typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
+
+  // Until Listing has a real slug, use id for canonical stability
+  const slug = listing.id;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
-    slug: listing.slug,
+    slug,
     title: listing.title,
     cityName: listing.city.name,
     citySlug: listing.city.slug,
@@ -110,11 +110,13 @@ export default async function ListingPage({ params }: Props) {
   if (!listing) return notFound();
 
   const priceLabel =
-    typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'USD') : null;
+    typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
+
+  const slug = listing.id;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
-    slug: listing.slug,
+    slug,
     title: listing.title,
     cityName: listing.city.name,
     citySlug: listing.city.slug,
@@ -139,8 +141,14 @@ export default async function ListingPage({ params }: Props) {
     { name: 'Home', url: '/' },
     { name: listing.city.name, url: `/city/${listing.city.slug}` },
     { name: 'Luxury real estate', url: `/city/${listing.city.slug}/luxury-real-estate` },
-    { name: listing.title, url: `/listing/${listing.slug}` },
+    { name: listing.title, url: `/listing/${slug}` },
   ]);
+
+  // You don't have a `source` field yet, so we present a safe placeholder:
+  const sourceLabel =
+    listing.verification === 'VERIFIED_DOCS' || listing.verification === 'VERIFIED_ON_SITE'
+      ? 'Verified dataset'
+      : 'Seed dataset';
 
   return (
     <main className="min-h-screen bg-[#06060a] text-zinc-100">
@@ -175,12 +183,12 @@ export default async function ListingPage({ params }: Props) {
               <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
                 {priceLabel ?? 'Price on request'}
               </div>
+
               {listing.propertyType ? (
                 <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2">{listing.propertyType}</div>
               ) : null}
-              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2">
-                Source: {listing.source}
-              </div>
+
+              <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2">Source: {sourceLabel}</div>
             </div>
           </div>
 
@@ -212,7 +220,9 @@ export default async function ListingPage({ params }: Props) {
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <div className="text-xs text-zinc-400">Built</div>
-              <div className="mt-2 text-sm font-semibold text-white">{listing.builtM2 ? `${listing.builtM2} m²` : '—'}</div>
+              <div className="mt-2 text-sm font-semibold text-white">
+                {listing.builtM2 ? `${listing.builtM2} m²` : '—'}
+              </div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <div className="text-xs text-zinc-400">Plot</div>
