@@ -9,12 +9,12 @@ type Props = Omit<ImageProps, 'alt'> & {
   fallback?: React.ReactNode;
 };
 
-function isUnsplash(src: ImageProps['src']) {
+function isUnsplash(src: unknown) {
   if (typeof src !== 'string') return false;
   return (
-    src.includes('images.unsplash.com') ||
-    src.includes('source.unsplash.com') ||
-    src.includes('plus.unsplash.com')
+    src.startsWith('https://images.unsplash.com/') ||
+    src.startsWith('https://plus.unsplash.com/') ||
+    src.startsWith('https://source.unsplash.com/')
   );
 }
 
@@ -31,9 +31,24 @@ export default function SafeImage({ alt, fallback, ...props }: Props) {
 
   if (!ok) return <>{safeFallback}</>;
 
-  // If Unsplash blocks Next's server-side optimizer, bypass optimization for Unsplash only.
-  // This keeps Brandfetch/local images optimized, while making Unsplash reliable.
-  const unoptimized = props.unoptimized ?? isUnsplash(props.src);
+  // Unsplash sometimes breaks via the Next image optimizer (403/404/502).
+  // For Unsplash only, render a plain <img> so it loads directly.
+  if (isUnsplash(props.src)) {
+    const { src, className, style, width, height } = props as any;
 
-  return <Image {...props} alt={alt} unoptimized={unoptimized} onError={() => setOk(false)} />;
+    return (
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className as string | undefined}
+        style={style as React.CSSProperties | undefined}
+        loading="lazy"
+        onError={() => setOk(false)}
+      />
+    );
+  }
+
+  return <Image {...props} alt={alt} onError={() => setOk(false)} />;
 }
