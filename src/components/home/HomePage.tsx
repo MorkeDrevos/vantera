@@ -40,14 +40,14 @@ export type RuntimeCity = {
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[#0B0E13] text-zinc-100">
-      {/* Ambient: graphite, ivory, violet signal */}
+    <div className="min-h-[100dvh] bg-[#070A10] text-zinc-100">
+      {/* Global ambient (kept subtle - hero has its own royal system) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 h-[620px] w-[1080px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.07),transparent_62%)] blur-2xl" />
-        <div className="absolute -top-24 right-[-220px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.18),transparent_62%)] blur-2xl" />
-        <div className="absolute bottom-[-260px] left-[-260px] h-[740px] w-[740px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.12),transparent_60%)] blur-2xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.18),rgba(0,0,0,0.88))]" />
-        <div className="absolute inset-0 opacity-[0.055] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:26px_26px]" />
+        <div className="absolute -top-40 left-1/2 h-[720px] w-[1180px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)] blur-2xl" />
+        <div className="absolute -top-28 right-[-240px] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.16),transparent_62%)] blur-2xl" />
+        <div className="absolute bottom-[-300px] left-[-300px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.11),transparent_60%)] blur-2xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(0,0,0,0.90))]" />
+        <div className="absolute inset-0 opacity-[0.045] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
       <div className="relative">
@@ -70,7 +70,7 @@ function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }
         <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
           {String(children).toUpperCase()}
         </div>
-        <div className="mt-2 h-px w-28 bg-gradient-to-r from-white/18 via-white/10 to-transparent" />
+        <div className="mt-2 h-px w-28 bg-gradient-to-r from-[#E7C982]/30 via-white/10 to-transparent" />
       </div>
       {hint ? (
         <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[11px] text-zinc-300">
@@ -82,42 +82,60 @@ function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }
 }
 
 /**
- * Royal “alive” portal layer (server-safe).
- * Uses only Tailwind + inline gradients, no styled-jsx.
+ * Royal portal hero backdrop (server-safe)
+ * - uses global CSS keyframes from globals.css
+ * - no styled-jsx, no client-only
  */
-function LuxLiveBackdrop() {
+function RoyalPortalBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Base film */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.86))]" />
+      {/* Base video film / darkness control */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.90))]" />
 
-      {/* Royal orbit rings (slow spin) */}
-      <div className="absolute inset-0 opacity-[0.55]">
-        <div className="absolute left-1/2 top-[-38%] h-[980px] w-[980px] -translate-x-1/2 rounded-full border border-white/10 bg-[conic-gradient(from_90deg,rgba(231,201,130,0.14),rgba(120,76,255,0.14),rgba(62,196,255,0.10),rgba(231,201,130,0.14))] blur-[1px] animate-spin [animation-duration:46s]" />
-        <div className="absolute left-1/2 top-[-35%] h-[1180px] w-[1180px] -translate-x-1/2 rounded-full border border-white/5 bg-[conic-gradient(from_210deg,rgba(255,255,255,0.10),rgba(120,76,255,0.10),rgba(231,201,130,0.10),rgba(255,255,255,0.10))] opacity-[0.55] blur-[2px] animate-spin [animation-duration:70s] [animation-direction:reverse]" />
+      {/* Aurora ribbons (violet, gold, cyan) */}
+      <div className="absolute inset-0 opacity-[0.85]">
+        <div className="vantera-float-a absolute -left-[22%] top-[-26%] h-[560px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_60%)]" />
+        <div className="vantera-float-b absolute -right-[26%] top-[-20%] h-[560px] w-[1020px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.16),transparent_62%)]" />
+        <div className="vantera-float-c absolute left-[8%] bottom-[-38%] h-[760px] w-[1220px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.18),transparent_60%)]" />
       </div>
 
-      {/* Aurora ribbons (floating glow bodies) */}
-      <div className="absolute inset-0 opacity-[0.75]">
-        <div className="absolute -left-[22%] top-[-26%] h-[520px] w-[900px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.22),transparent_60%)] animate-pulse [animation-duration:7.5s]" />
-        <div className="absolute -right-[26%] top-[-18%] h-[520px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.14),transparent_62%)] animate-pulse [animation-duration:9.5s]" />
-        <div className="absolute left-[10%] bottom-[-36%] h-[720px] w-[1120px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.16),transparent_60%)] animate-pulse [animation-duration:11s]" />
-      </div>
+      {/* Slow cinematic light beams */}
+      <div className="vantera-beam absolute -left-[20%] top-[-10%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.22] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(231,201,130,0.28)_45%,transparent_70%)]" />
+      <div className="vantera-beam absolute -right-[22%] top-[-14%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.14] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_70%)]" />
 
-      {/* Spotlight sweep (subtle moving sheen) */}
-      <div className="absolute inset-0 opacity-[0.24] mix-blend-screen">
-        <div className="absolute inset-0 -translate-x-[30%] animate-[pulse_8s_ease-in-out_infinite] [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_62%)]" />
-      </div>
+      {/* Spotlight sweep */}
+      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_62%)]" />
 
-      {/* Constellation grid (luxury tech feel) */}
-      <div className="absolute inset-0 opacity-[0.12] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.70)_1px,transparent_0)] [background-size:22px_22px]" />
-      <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:140px_140px]" />
+      {/* Micro particles */}
+      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.80)_1px,transparent_0)] [background-size:20px_20px]" />
+
+      {/* Constellation arcs (SVG layer) */}
+      <div className="vantera-arc absolute inset-0 opacity-[0.35]">
+        <svg className="h-full w-full" viewBox="0 0 1200 650" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1">
+              <stop offset="0" stopColor="rgba(231,201,130,0)" />
+              <stop offset="0.5" stopColor="rgba(231,201,130,0.38)" />
+              <stop offset="1" stopColor="rgba(231,201,130,0)" />
+            </linearGradient>
+            <linearGradient id="g2" x1="0" x2="1">
+              <stop offset="0" stopColor="rgba(120,76,255,0)" />
+              <stop offset="0.5" stopColor="rgba(120,76,255,0.30)" />
+              <stop offset="1" stopColor="rgba(120,76,255,0)" />
+            </linearGradient>
+          </defs>
+
+          <path d="M-40,520 C260,300 460,260 760,360 C980,434 1110,420 1240,320" fill="none" stroke="url(#g1)" strokeWidth="2" />
+          <path d="M-60,420 C220,210 520,180 780,260 C1040,340 1120,330 1260,220" fill="none" stroke="url(#g2)" strokeWidth="2" />
+          <path d="M-80,560 C220,420 520,380 820,470 C1040,538 1120,526 1280,420" fill="none" stroke="url(#g1)" strokeWidth="1.5" opacity="0.7" />
+        </svg>
+      </div>
 
       {/* Vignette */}
-      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_18%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
 
-      {/* Bottom fade into page */}
-      <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-[#0B0E13]" />
+      {/* Bottom fade to page bg */}
+      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#070A10]" />
     </div>
   );
 }
@@ -126,7 +144,7 @@ function HeroVideo() {
   return (
     <div aria-hidden className="absolute inset-0 -z-20 overflow-hidden">
       <video
-        className="h-full w-full object-cover opacity-[0.58]"
+        className="h-full w-full object-cover opacity-[0.62]"
         autoPlay
         muted
         loop
@@ -137,59 +155,27 @@ function HeroVideo() {
         <source src="/hero/vantera-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* Film + spectral layers */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.40),rgba(0,0,0,0.84))]" />
-      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_16%,rgba(255,255,255,0.10),transparent_55%)]" />
-      <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_15%_16%,rgba(120,76,255,0.18),transparent_56%)]" />
-      <div className="absolute inset-0 opacity-80 [background:radial-gradient(920px_420px_at_85%_22%,rgba(62,196,255,0.13),transparent_56%)]" />
-
-      {/* Stardust */}
-      <div className="absolute inset-0 opacity-[0.07] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.75)_1px,transparent_0)] [background-size:18px_18px] animate-[pulse_6s_ease-in-out_infinite]" />
+      {/* Extra contrast shaping */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.70),rgba(0,0,0,0.30),rgba(0,0,0,0.55))]" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.88))]" />
     </div>
   );
 }
 
-function HeroShine() {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* Quiet top halo */}
-      <div className="absolute -top-32 left-1/2 h-[620px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_62%)] blur-2xl" />
-
-      {/* Violet + cyan bloom */}
-      <div className="absolute -top-16 right-[-280px] h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.20),transparent_62%)] blur-2xl" />
-      <div className="absolute bottom-[-240px] left-[-240px] h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.14),transparent_60%)] blur-2xl" />
-
-      {/* Premium sheen */}
-      <div className="absolute inset-0 opacity-35 [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.10)_45%,transparent_62%)]" />
-
-      {/* Ghost mark (only if asset exists) */}
-      <div className="absolute right-[-90px] top-[-70px] opacity-[0.06] blur-[0.2px]">
-        <Image
-          src="/brand/vantera-logo-dark.png"
-          alt=""
-          width={560}
-          height={180}
-          className="w-[560px]"
-          priority={false}
-        />
-      </div>
-    </div>
-  );
-}
-
-function HeroGoldEdge() {
+function HeroGoldCrown() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0">
-      <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/45 to-transparent" />
+      <div className="mx-auto mt-2 h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/45 to-transparent" />
       <div className="mx-auto mt-1 h-px w-[82%] bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+      <div className="mx-auto mt-6 h-px w-[60%] bg-gradient-to-r from-transparent via-[#E7C982]/20 to-transparent" />
     </div>
   );
 }
 
 function PremiumBadgeRow() {
   return (
-    <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/35 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-      <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
+    <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
+      <span className="h-1.5 w-1.5 rounded-full bg-[#E7C982]/90 shadow-[0_0_0_3px_rgba(231,201,130,0.12)]" />
       <span className="tracking-wide text-zinc-200">Luxury property portal</span>
       <span className="text-zinc-600">·</span>
       <span className="text-zinc-300">Truth-first intelligence</span>
@@ -231,6 +217,7 @@ function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-zinc-200 shadow-[0_22px_70px_rgba(0,0,0,0.55)] transition hover:translate-y-[-2px] hover:border-white/14">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_180px_at_20%,rgba(255,255,255,0.06),transparent_60%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       <div className="relative">
         <div className="text-[11px] tracking-[0.18em] text-zinc-400">{title.toUpperCase()}</div>
         <div className="mt-2 text-zinc-200">{body}</div>
@@ -245,15 +232,14 @@ function LuxuryPromptBar() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       </div>
 
       <div className="relative p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">ASK VANTERA</div>
-            <div className="mt-1 text-sm text-zinc-300">
-              Describe what you want. We return the smartest next move.
-            </div>
+            <div className="mt-1 text-sm text-zinc-300">Describe what you want. We return the smartest next move.</div>
           </div>
           <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300">
             Coming online
@@ -266,11 +252,7 @@ function LuxuryPromptBar() {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          {[
-            'Best upside areas in Marbella',
-            'Low-risk homes with clean permits',
-            'Sea views with privacy and fast resale',
-          ].map((t) => (
+          {['Best upside areas in Marbella', 'Low-risk homes with clean permits', 'Sea views with privacy and fast resale'].map((t) => (
             <div
               key={t}
               className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[12px] text-zinc-200"
@@ -290,7 +272,7 @@ function TruthCardReport() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_20%_0%,rgba(255,255,255,0.07),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       </div>
 
       <div className="relative p-5 sm:p-6">
@@ -298,9 +280,7 @@ function TruthCardReport() {
           <div>
             <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">TRUTH CARD</div>
             <div className="mt-2 text-lg font-medium text-zinc-100">Confidential property report</div>
-            <div className="mt-1 text-sm text-zinc-300">
-              The facts, the risks and what to verify next - in one page.
-            </div>
+            <div className="mt-1 text-sm text-zinc-300">The facts, the risks and what to verify next - in one page.</div>
           </div>
           <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300">
             Preview
@@ -347,10 +327,7 @@ function PortalVsTruth() {
           </div>
           <div className="mt-4 grid gap-2">
             {['Looks amazing', 'Easy to scroll', 'Hard to verify'].map((t) => (
-              <div
-                key={t}
-                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200"
-              >
+              <div key={t} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
             ))}
@@ -363,15 +340,10 @@ function PortalVsTruth() {
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
           <div className="mt-2 text-lg font-medium text-zinc-100">Truth-first intelligence</div>
-          <div className="mt-2 text-sm text-zinc-300">
-            Paperwork, price reality and risk flags - presented like a private report.
-          </div>
+          <div className="mt-2 text-sm text-zinc-300">Paperwork, price reality and risk flags - presented like a private report.</div>
           <div className="mt-4 grid gap-2">
             {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
-              <div
-                key={t}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200"
-              >
+              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
             ))}
@@ -398,7 +370,7 @@ function FeatureCard({
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       </div>
 
       <div className="relative">
@@ -412,7 +384,7 @@ function FeatureCard({
               key={b}
               className="flex items-start gap-2 rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200 transition group-hover:bg-white/[0.03]"
             >
-              <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-white/80 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
+              <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[#E7C982]/85 shadow-[0_0_0_4px_rgba(231,201,130,0.10)]" />
               <span className="text-zinc-200">{b}</span>
             </div>
           ))}
@@ -428,18 +400,16 @@ function CTA() {
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(1000px_320px_at_22%_0%,rgba(255,255,255,0.07),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_300px_at_88%_18%,rgba(120,76,255,0.12),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       </div>
 
       <div className="relative grid gap-6 p-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE LAUNCH</div>
-          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">
-            The portal that protects the decision
-          </div>
+          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">The portal that protects the decision</div>
           <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
-            Vantera is building the intelligence layer luxury real estate never had. A quiet system that makes buyers
-            smarter, sellers cleaner and advisors faster.
+            Vantera is building the intelligence layer luxury real estate never had. A quiet system that makes buyers smarter,
+            sellers cleaner and advisors faster.
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-zinc-200">
@@ -488,13 +458,12 @@ function CTA() {
 }
 
 function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
-  // Pick “hot” cities, but guarantee unique tz.
   const preferred = [
-    'marbella', // Europe/Madrid
-    'dubai', // Asia/Dubai
-    'miami', // America/New_York
-    'tokyo', // Asia/Tokyo
-    'london', // Europe/London (fallback)
+    'marbella',
+    'dubai',
+    'miami',
+    'tokyo',
+    'london',
     'new-york',
     'singapore',
     'los-angeles',
@@ -522,7 +491,6 @@ function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
     if (out.length >= max) return out;
   }
 
-  // Fallback: scan by priority then stable order, still enforcing unique tz
   const sorted = [...all].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
   for (const c of sorted) {
     tryAdd(c);
@@ -540,11 +508,10 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
     <Shell>
       {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        <div className="relative w-full overflow-visible border-y border-white/10 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.040),rgba(255,255,255,0.012),rgba(0,0,0,0.74))] shadow-[0_55px_150px_rgba(0,0,0,0.76)]">
+        <div className="relative w-full overflow-visible border-y border-white/10 bg-black/40 shadow-[0_55px_160px_rgba(0,0,0,0.78)]">
           <HeroVideo />
-          <LuxLiveBackdrop />
-          <HeroShine />
-          <HeroGoldEdge />
+          <RoyalPortalBackdrop />
+          <HeroGoldCrown />
 
           <div className="relative w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
@@ -552,27 +519,25 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               <div className="lg:col-span-7">
                 <PremiumBadgeRow />
 
-                {/* KEEP THIS H1 (unchanged text) */}
                 <h1 className="mt-6 text-balance text-[40px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
                   Private intelligence for the world&apos;s{' '}
-                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(255,255,255,0.12)]">
+                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(231,201,130,0.55),rgba(120,76,255,0.70))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(231,201,130,0.10)]">
                     most valuable assets
                   </span>
                 </h1>
 
-                {/* KEEP THIS PARAGRAPH (unchanged text) */}
                 <p className="mt-4 max-w-2xl text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
                   Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
                   <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* Search + welcome */}
+                {/* Search */}
                 <div className="mt-6 max-w-2xl">
                   <div className="relative overflow-visible rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
                     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px]">
                       <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
                       <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
                       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                     </div>
 
@@ -580,9 +545,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SEARCH</div>
-                          <div className="mt-1 text-xs text-zinc-500">
-                            Start with a city. Then open the home&apos;s intelligence.
-                          </div>
+                          <div className="mt-1 text-xs text-zinc-500">Start with a city. Then open the home&apos;s intelligence.</div>
                         </div>
                         <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-300 sm:inline-flex">
                           Press <span className="font-mono text-zinc-100">/</span>
@@ -625,13 +588,16 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 </div>
               </div>
 
-              {/* RIGHT */}
+              {/* RIGHT - Royal Index Wall */}
               <div className="space-y-4 lg:col-span-5">
-                <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.70)] sm:p-6">
+                <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-5 sm:p-6 vantera-royal-ring">
+                  {/* Gold frame + glass */}
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_35%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_90%_20%,rgba(120,76,255,0.14),transparent_60%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                    <div className="absolute inset-0 bg-[radial-gradient(780px_300px_at_35%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(760px_300px_at_90%_20%,rgba(231,201,130,0.11),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(760px_300px_at_90%_20%,rgba(120,76,255,0.16),transparent_62%)]" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/30 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                   </div>
 
                   <div className="relative">
@@ -642,12 +608,12 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                       return (
                         <>
-                          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/18 p-3 shadow-[0_26px_90px_rgba(0,0,0,0.55)]">
+                          <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 p-3 shadow-[0_30px_110px_rgba(0,0,0,0.65)]">
                             <div className="pointer-events-none absolute inset-0">
-                              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
-                              <div className="absolute inset-0 bg-[radial-gradient(820px_260px_at_88%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
-                              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
-                              <div className="absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.70)_1px,transparent_0)] [background-size:24px_24px]" />
+                              <div className="absolute inset-0 bg-[radial-gradient(820px_280px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
+                              <div className="absolute inset-0 bg-[radial-gradient(820px_280px_at_88%_10%,rgba(231,201,130,0.10),transparent_62%)]" />
+                              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/22 to-transparent" />
+                              <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.8)_1px,transparent_0)] [background-size:18px_18px]" />
                             </div>
 
                             <div className="relative">
@@ -675,7 +641,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             </div>
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#0B0E13]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#070A10]" />
         </div>
       </section>
 
@@ -744,6 +710,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.09),transparent_60%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
             </div>
 
             <div className="relative flex items-start justify-between gap-4">
