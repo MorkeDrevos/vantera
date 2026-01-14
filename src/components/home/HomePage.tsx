@@ -41,7 +41,6 @@ export type RuntimeCity = {
 function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#070A10] text-zinc-100">
-      {/* Global ambient (kept subtle - hero has its own royal system) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[720px] w-[1180px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.06),transparent_62%)] blur-2xl" />
         <div className="absolute -top-28 right-[-240px] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.16),transparent_62%)] blur-2xl" />
@@ -81,35 +80,24 @@ function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }
   );
 }
 
-/**
- * Royal portal hero backdrop (server-safe)
- * - uses global CSS keyframes from globals.css
- * - no styled-jsx, no client-only
- */
 function RoyalPortalBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Base video film / darkness control */}
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.90))]" />
 
-      {/* Aurora ribbons (violet, gold, cyan) */}
       <div className="absolute inset-0 opacity-[0.85]">
         <div className="vantera-float-a absolute -left-[22%] top-[-26%] h-[560px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_60%)]" />
         <div className="vantera-float-b absolute -right-[26%] top-[-20%] h-[560px] w-[1020px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.16),transparent_62%)]" />
         <div className="vantera-float-c absolute left-[8%] bottom-[-38%] h-[760px] w-[1220px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.18),transparent_60%)]" />
       </div>
 
-      {/* Slow cinematic light beams */}
       <div className="vantera-beam absolute -left-[20%] top-[-10%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.22] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(231,201,130,0.28)_45%,transparent_70%)]" />
       <div className="vantera-beam absolute -right-[22%] top-[-14%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.14] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_70%)]" />
 
-      {/* Spotlight sweep */}
       <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_62%)]" />
 
-      {/* Micro particles */}
       <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.80)_1px,transparent_0)] [background-size:20px_20px]" />
 
-      {/* Constellation arcs (SVG layer) */}
       <div className="vantera-arc absolute inset-0 opacity-[0.35]">
         <svg className="h-full w-full" viewBox="0 0 1200 650" preserveAspectRatio="none">
           <defs>
@@ -131,10 +119,7 @@ function RoyalPortalBackdrop() {
         </svg>
       </div>
 
-      {/* Vignette */}
       <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
-
-      {/* Bottom fade to page bg */}
       <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#070A10]" />
     </div>
   );
@@ -155,7 +140,6 @@ function HeroVideo() {
         <source src="/hero/vantera-hero.mp4" type="video/mp4" />
       </video>
 
-      {/* Extra contrast shaping */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.70),rgba(0,0,0,0.30),rgba(0,0,0,0.55))]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.88))]" />
     </div>
@@ -458,20 +442,7 @@ function CTA() {
 }
 
 function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
-  const preferred = [
-    'marbella',
-    'dubai',
-    'miami',
-    'tokyo',
-    'london',
-    'new-york',
-    'singapore',
-    'los-angeles',
-    'hong-kong',
-    'paris',
-    'madrid',
-    'monaco',
-  ];
+  const preferred = ['marbella', 'dubai', 'miami', 'tokyo', 'london', 'new-york', 'singapore', 'los-angeles', 'hong-kong', 'paris', 'madrid', 'monaco'];
 
   const map = new Map(all.map((c) => [c.slug, c]));
   const out: RuntimeCity[] = [];
@@ -588,10 +559,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 </div>
               </div>
 
-              {/* RIGHT - Royal Index Wall */}
+              {/* RIGHT - Selected Cities (clean, responsive, image-first) */}
               <div className="space-y-4 lg:col-span-5">
                 <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-5 sm:p-6 vantera-royal-ring">
-                  {/* Gold frame + glass */}
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-0 bg-[radial-gradient(780px_300px_at_35%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
                     <div className="absolute inset-0 bg-[radial-gradient(760px_300px_at_90%_20%,rgba(231,201,130,0.11),transparent_62%)]" />
@@ -608,22 +578,18 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                       return (
                         <>
-                          <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 p-3 shadow-[0_30px_110px_rgba(0,0,0,0.65)]">
-                            <div className="pointer-events-none absolute inset-0">
-                              <div className="absolute inset-0 bg-[radial-gradient(820px_280px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
-                              <div className="absolute inset-0 bg-[radial-gradient(820px_280px_at_88%_10%,rgba(231,201,130,0.10),transparent_62%)]" />
-                              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/22 to-transparent" />
-                              <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.8)_1px,transparent_0)] [background-size:18px_18px]" />
-                            </div>
-
-                            <div className="relative">
-                              <CityCardsClient cities={hot} columns="grid gap-4 grid-cols-1 sm:grid-cols-2" />
-                            </div>
-                          </div>
+                          {/* No nested heavy wrapper - lets the wall breathe */}
+                          <CityCardsClient
+                            cities={hot}
+                            variant="wall"
+                            showLocalTime
+                            columns="grid-cols-1 sm:grid-cols-2"
+                            className="w-full"
+                          />
 
                           <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
                             Four hot markets. Four time zones.
-                            <span className="text-zinc-500"> This is the index wall - updated as signals get verified.</span>
+                            <span className="text-zinc-500"> Curated, image-first, signal layered on top.</span>
                           </div>
                         </>
                       );
