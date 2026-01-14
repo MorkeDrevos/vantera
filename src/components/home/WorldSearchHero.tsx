@@ -41,7 +41,6 @@ function detectBudget(text: string) {
   // Very lightweight heuristic: €5m, 5m, 5 million, 5000000
   const t = text.toLowerCase();
 
-  // € / eur
   const euroM = t.match(/€\s*([0-9]+(\.[0-9]+)?)\s*m/);
   if (euroM?.[1]) return { currency: 'EUR', max: Number(euroM[1]) * 1_000_000 };
 
@@ -58,15 +57,12 @@ function detectBudget(text: string) {
 }
 
 function splitWish(text: string) {
-  // Split by commas, dots, or " and "
-  const raw = text
+  return text
     .replace(/\s+/g, ' ')
     .replace(/\s+and\s+/gi, ', ')
     .split(',')
     .map((x) => x.trim())
     .filter(Boolean);
-
-  return raw;
 }
 
 function prettyMoney(n?: number | null, currency?: string | null) {
@@ -84,10 +80,6 @@ function prettyMoney(n?: number | null, currency?: string | null) {
 }
 
 function preferenceToSignalRisk(p: PreferenceMode) {
-  // Keep the engine, change the surface.
-  // lifestyle = more lifestyle weight, lower risk
-  // balanced = default
-  // market = more signal weight, higher risk
   if (p === 'lifestyle') return { signal: 35, risk: 25 };
   if (p === 'market') return { signal: 75, risk: 60 };
   return { signal: 60, risk: 35 };
@@ -107,7 +99,7 @@ export default function WorldSearchHero({
   const [q, setQ] = useState('');
   const [tokens, setTokens] = useState<Token[]>([]);
 
-  // Engine controls (kept, but hidden by default)
+  // Engine controls (kept, hidden behind Refine)
   const [preference, setPreference] = useState<PreferenceMode>('balanced');
   const [risk, setRisk] = useState(35);
   const [signal, setSignal] = useState(65);
@@ -117,14 +109,16 @@ export default function WorldSearchHero({
 
   const [refineOpen, setRefineOpen] = useState(false);
 
+  // Live results panel
+  const [liveOpen, setLiveOpen] = useState(false);
+
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const cityIndex = useMemo(() => {
-    const arr = (cities ?? []).map((c) => ({
+    return (cities ?? []).map((c) => ({
       ...c,
       _n: normalize(`${c.name} ${c.country} ${c.region ?? ''} ${c.slug}`),
     }));
-    return arr;
   }, [cities]);
 
   const topCities = useMemo(() => {
@@ -132,16 +126,18 @@ export default function WorldSearchHero({
     return sorted.slice(0, 6);
   }, [cities]);
 
-  const citySuggestions = useMemo(() => {
+  const liveHits = useMemo(() => {
     const qq = normalize(q);
     if (!qq) return topCities;
+
     return cityIndex
       .filter((c) => c._n.includes(qq))
+      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
       .slice(0, 6)
       .map(({ _n, ...rest }) => rest);
   }, [q, cityIndex, topCities]);
 
-  // Convert the wishline into budget (quietly)
+  // Quiet budget extraction
   useEffect(() => {
     const t = q.trim();
     if (!t) return;
@@ -153,7 +149,7 @@ export default function WorldSearchHero({
     }
   }, [q]);
 
-  // When preference changes, map to engine values
+  // Preference maps to engine values
   useEffect(() => {
     const mapped = preferenceToSignalRisk(preference);
     setSignal(mapped.signal);
@@ -182,6 +178,7 @@ export default function WorldSearchHero({
     setRisk(35);
     setSignal(65);
     setRefineOpen(false);
+    setLiveOpen(false);
     inputRef.current?.focus();
   }
 
@@ -198,7 +195,13 @@ export default function WorldSearchHero({
     inputRef.current?.focus();
   }
 
-  function goSearch(overrideCitySlug?: string) {
+  // Open city directly (premium flow)
+  function openCity(slug: string) {
+    router.push(`/city/${slug}`);
+  }
+
+  // Keep /browse as fallback when there is no clear city hit
+  function goBrowse() {
     const params = new URLSearchParams();
 
     const free = q.trim();
@@ -208,7 +211,6 @@ export default function WorldSearchHero({
     const feats = tokens.filter((t) => t.kind === 'feature').map((t) => t.label);
     const intents = tokens.filter((t) => t.kind === 'intent').map((t) => t.label);
 
-    if (overrideCitySlug) params.set('city', overrideCitySlug);
     if (locs.length) params.set('loc', locs.join('|'));
     if (feats.length) params.set('feat', feats.join('|'));
     if (intents.length) params.set('intent', intents.join('|'));
@@ -218,11 +220,21 @@ export default function WorldSearchHero({
       params.set('cur', budgetCurrency);
     }
 
-    // Keep your existing engine params for compatibility
     params.set('risk', String(clamp(risk, 0, 100)));
     params.set('signal', String(clamp(signal, 0, 100)));
 
     router.push(`/browse?${params.toString()}`);
+  }
+
+  function primarySubmit() {
+    // If user is typing a city, treat that as intent and open it directly.
+    const top = liveHits[0];
+    if (top && q.trim().length >= 1) {
+      openCity(top.slug);
+      return;
+    }
+    // Otherwise use browse fallback
+    goBrowse();
   }
 
   const tokenPillTone = (k: Token['kind']) =>
@@ -290,7 +302,7 @@ export default function WorldSearchHero({
             </div>
           </div>
 
-          {/* Input */}
+          {/* Input + live results */}
           <div className="mt-4">
             <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/25 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
               <div className="pointer-events-none absolute inset-0 opacity-[0.9]">
@@ -306,31 +318,49 @@ export default function WorldSearchHero({
                 <input
                   ref={inputRef}
                   value={q}
-                  onChange={(e) => setQ(e.target.value)}
+                  onChange={(e) => {
+                    setQ(e.target.value);
+                    setLiveOpen(true);
+                  }}
+                  onFocus={() => setLiveOpen(true)}
+                  onBlur={() => {
+                    // allow click on panel items
+                    window.setTimeout(() => setLiveOpen(false), 120);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      if (q.trim().length >= 3) goSearch();
+                      e.preventDefault();
+                      const top = liveHits[0];
+                      if (top) openCity(top.slug);
+                      else primarySubmit();
+                      return;
                     }
                     if (e.key === 'Tab') {
                       e.preventDefault();
                       absorbWishline();
+                      return;
+                    }
+                    if (e.key === 'Escape') {
+                      setLiveOpen(false);
+                      return;
                     }
                   }}
                   placeholder="Oceanfront, quiet, family-safe, walkable, under €5m"
                   className="h-10 w-full bg-transparent text-[14px] text-zinc-100 placeholder:text-zinc-500 outline-none"
                   aria-label="World search"
+                  autoComplete="off"
+                  spellCheck={false}
                 />
 
                 <button
                   type="button"
-                  onClick={() => goSearch()}
+                  onClick={primarySubmit}
                   className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-[11px] font-semibold tracking-[0.14em] text-zinc-100 hover:border-white/20 hover:bg-white/[0.08]"
                 >
                   SEARCH →
                 </button>
               </div>
 
-              {/* Chips (only when they exist, no “tips” block) */}
               {hasChips ? (
                 <div className="relative border-t border-white/10 px-3 py-3">
                   <div className="flex flex-wrap gap-2">
@@ -380,18 +410,63 @@ export default function WorldSearchHero({
               ) : null}
             </div>
 
-            {/* Quiet helper row */}
+            {/* Live results panel */}
+            {liveOpen && q.trim().length > 0 ? (
+              <div className="mt-3 overflow-hidden rounded-2xl border border-white/10 bg-[#04050A] shadow-[0_70px_200px_rgba(0,0,0,0.85)]">
+                <div className="border-b border-white/10 px-4 py-3">
+                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">RESULTS</div>
+                  <div className="mt-1 text-[12px] text-zinc-500">Press Enter to open the top match.</div>
+                </div>
+
+                <div className="p-2">
+                  {liveHits.length === 0 ? (
+                    <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[12px] text-zinc-300">
+                      No matches. Try a city or region.
+                    </div>
+                  ) : (
+                    liveHits.map((c, idx) => (
+                      <button
+                        key={c.slug}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()} // keeps click working even with input blur
+                        onClick={() => openCity(c.slug)}
+                        className={cx(
+                          'w-full rounded-xl border px-4 py-3 text-left transition',
+                          idx === 0
+                            ? 'border-white/12 bg-white/[0.04]'
+                            : 'border-transparent bg-transparent hover:bg-white/[0.05] hover:border-white/10',
+                        )}
+                      >
+                        <div className="text-[13px] font-semibold text-zinc-100">{c.name}</div>
+                        <div className="mt-1 text-[11px] text-zinc-400">
+                          {c.country}
+                          {c.region ? ` · ${c.region}` : ''}
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
               <div>
                 Press <span className="text-zinc-200">Tab</span> to structure your wishline.
               </div>
               <div className="text-zinc-500">
-                Preference: <span className="text-zinc-200">{preference === 'market' ? 'Market-opportunistic' : preference === 'lifestyle' ? 'Lifestyle-first' : 'Balanced'}</span>
+                Preference:{' '}
+                <span className="text-zinc-200">
+                  {preference === 'market'
+                    ? 'Market-opportunistic'
+                    : preference === 'lifestyle'
+                      ? 'Lifestyle-first'
+                      : 'Balanced'}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Popular paths (calm, limited) */}
+          {/* Popular paths */}
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">POPULAR PATHS</div>
@@ -409,10 +484,7 @@ export default function WorldSearchHero({
                 <button
                   key={c.slug}
                   type="button"
-                  onClick={() => {
-                    addToken(c.name, 'location');
-                    inputRef.current?.focus();
-                  }}
+                  onClick={() => openCity(c.slug)}
                   className="rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[11px] text-zinc-200 hover:border-white/16 hover:bg-white/[0.05]"
                   title={`${c.name}, ${c.country}`}
                 >
@@ -424,15 +496,13 @@ export default function WorldSearchHero({
             </div>
           </div>
 
-          {/* Refine drawer (progressive disclosure) */}
+          {/* Refine drawer */}
           {refineOpen ? (
             <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/25">
               <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                 <div>
                   <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-300">REFINE</div>
-                  <div className="mt-1 text-[12px] text-zinc-400">
-                    Optional controls. Vantera will still work without them.
-                  </div>
+                  <div className="mt-1 text-[12px] text-zinc-400">Optional controls. Vantera works without them.</div>
                 </div>
                 <button
                   type="button"
@@ -444,7 +514,6 @@ export default function WorldSearchHero({
               </div>
 
               <div className="grid gap-4 p-4 sm:grid-cols-2">
-                {/* Preference */}
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                   <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">PREFERENCE</div>
                   <div className="mt-2 text-[12px] text-zinc-400">
@@ -474,19 +543,15 @@ export default function WorldSearchHero({
                     ))}
                   </div>
 
-                  {/* Keep engine values invisible but deterministic */}
                   <div className="mt-3 text-[11px] text-zinc-500">
                     Engine: <span className="font-mono text-zinc-200">signal {signal}</span>,{' '}
                     <span className="font-mono text-zinc-200">risk {risk}</span>
                   </div>
                 </div>
 
-                {/* Mandate + lock city */}
                 <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
                   <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">MANDATE</div>
-                  <div className="mt-2 text-[12px] text-zinc-400">
-                    Optional. Pick one, or leave it to Vantera.
-                  </div>
+                  <div className="mt-2 text-[12px] text-zinc-400">Optional. Pick one, or leave it to Vantera.</div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
                     {mandates.map((m) => (
@@ -502,29 +567,6 @@ export default function WorldSearchHero({
                     ))}
                   </div>
 
-                  <div className="mt-4 text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
-                    LOCK A CITY
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {citySuggestions.map((c) => (
-                      <button
-                        key={c.slug}
-                        type="button"
-                        onClick={() => {
-                          addToken(c.name, 'location');
-                          inputRef.current?.focus();
-                        }}
-                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-300 hover:border-white/16 hover:bg-white/[0.06]"
-                        title={`${c.name}, ${c.country}`}
-                      >
-                        <span className="text-zinc-100">{c.name}</span>
-                        <span className="text-zinc-600"> · </span>
-                        <span className="text-zinc-400">{c.country}</span>
-                      </button>
-                    ))}
-                  </div>
-
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                     <button
                       type="button"
@@ -536,7 +578,7 @@ export default function WorldSearchHero({
 
                     <button
                       type="button"
-                      onClick={() => goSearch()}
+                      onClick={goBrowse}
                       className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-[11px] font-semibold tracking-[0.14em] text-zinc-100 hover:border-white/20 hover:bg-white/[0.08]"
                     >
                       OPEN RESULTS →
@@ -547,7 +589,7 @@ export default function WorldSearchHero({
             </div>
           ) : null}
 
-          {/* Footer actions (kept, but calmer) */}
+          {/* Footer actions */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -563,7 +605,7 @@ export default function WorldSearchHero({
 
             <button
               type="button"
-              onClick={() => goSearch()}
+              onClick={goBrowse}
               className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-[11px] font-semibold tracking-[0.14em] text-zinc-100 hover:border-white/20 hover:bg-white/[0.08]"
             >
               OPEN RESULTS →
