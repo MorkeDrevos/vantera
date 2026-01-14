@@ -52,6 +52,11 @@ export default function CityCardsVirtualizedClient({
   columns = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3',
   initial = 18,
   step = 18,
+
+  // NEW
+  mode = 'full',
+  showFeatured = true,
+
   // Optional: plug this in once you have real DB/API
   statsByCity,
 }: {
@@ -60,20 +65,25 @@ export default function CityCardsVirtualizedClient({
   columns?: string;
   initial?: number;
   step?: number;
+
+  // NEW
+  mode?: 'full' | 'featured';
+  showFeatured?: boolean;
+
   statsByCity?: Record<string, CityListingsStats | undefined>;
 }) {
-  const input = cities ?? [];
-
   const sorted = useMemo(() => {
     // Stable sort: keep input order unless you want tier sorting later
-    return [...input];
-  }, [input]);
+    return [...cities];
+  }, [cities]);
 
   // Featured top 4:
   // - Monaco must be in top 4 (replace Marbella).
-  // - Deterministic selection by preferred slug list first.
+  // - We keep it deterministic by selecting from a preferred slug list first.
   const featured = useMemo(() => {
-    const preferred = ['miami', 'new-york', 'monaco', 'dubai']; // Monaco replaces Marbella in the top 4
+    if (!showFeatured && mode !== 'featured') return [] as City[];
+
+    const preferred = ['miami', 'new-york', 'monaco', 'dubai'];
     const map = new Map(sorted.map((c) => [c.slug, c] as const));
 
     const picked: City[] = [];
@@ -95,23 +105,70 @@ export default function CityCardsVirtualizedClient({
     }
 
     return picked.slice(0, 4);
-  }, [sorted]);
+  }, [sorted, mode, showFeatured]);
 
   const featuredSlugs = useMemo(() => new Set(featured.map((c) => c.slug)), [featured]);
 
   const rest = useMemo(() => {
+    // If featured is visible in this render, keep the full list below clean by excluding it.
+    // If featured is hidden, show everything in the grid.
+    if (featured.length === 0) return sorted;
     return sorted.filter((c) => !featuredSlugs.has(c.slug));
-  }, [sorted, featuredSlugs]);
+  }, [sorted, featuredSlugs, featured.length]);
 
+  // Featured-only mode: no virtualization, no "showing X of Y"
+  if (mode === 'featured') {
+    return (
+      <section className={cx('w-full', className)}>
+        <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[rgba(120,76,255,0.16)] blur-3xl" />
+            <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[rgba(231,201,130,0.12)] blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.35] [background:radial-gradient(900px_260px_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]" />
+          </div>
+
+          <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FEATURED MARKETS</div>
+              <div className="mt-2 text-[22px] font-semibold tracking-tight text-zinc-50 sm:text-[26px]">
+                Private intelligence, city by city
+              </div>
+              <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
+                Monaco now joins the flagship set. These markets lead our truth-first coverage and verification roadmap.
+              </div>
+            </div>
+
+            <div className="mt-2 flex items-center gap-2 sm:mt-0">
+              <span className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-200/90 backdrop-blur-2xl">
+                Top 4
+              </span>
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] text-zinc-400 backdrop-blur-2xl">
+                Updated weekly
+              </span>
+            </div>
+          </div>
+
+          <div className="relative mt-5 grid gap-4 md:grid-cols-2">
+            {featured.map((city) => {
+              const stats = statsByCity?.[city.slug];
+              return (
+                <div key={city.slug} className="md:[&>div]:h-full">
+                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Full mode (virtualized)
   const [count, setCount] = useState(() => Math.min(initial, rest.length));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Prevent observer from firing multiple times rapidly
-  const loadingRef = useRef(false);
-
   useEffect(() => {
     setCount(Math.min(initial, rest.length));
-    loadingRef.current = false;
   }, [initial, rest.length]);
 
   useEffect(() => {
@@ -123,18 +180,10 @@ export default function CityCardsVirtualizedClient({
         const hit = entries.some((e) => e.isIntersecting);
         if (!hit) return;
 
-        if (loadingRef.current) return;
-
-        loadingRef.current = true;
         setCount((c) => {
           const next = Math.min(c + step, rest.length);
           return next;
         });
-
-        // release lock next tick (prevents spam but still feels instant)
-        window.setTimeout(() => {
-          loadingRef.current = false;
-        }, 120);
       },
       { root: null, rootMargin: '900px 0px', threshold: 0.01 },
     );
@@ -148,51 +197,51 @@ export default function CityCardsVirtualizedClient({
 
   return (
     <section className={cx('w-full', className)}>
-      {/* Featured Markets - editorial / premium */}
-      <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-5 sm:p-6">
-        {/* Soft luxury aura */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[rgba(120,76,255,0.16)] blur-3xl" />
-          <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[rgba(231,201,130,0.12)] blur-3xl" />
-          <div className="absolute inset-0 opacity-[0.35] [background:radial-gradient(900px_260px_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]" />
-        </div>
-
-        <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FEATURED MARKETS</div>
-            <div className="mt-2 text-[22px] font-semibold tracking-tight text-zinc-50 sm:text-[26px]">
-              Private intelligence, city by city
-            </div>
-            <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
-              Monaco now joins the flagship set. These markets lead our truth-first coverage and verification roadmap.
-            </div>
+      {/* Featured Markets - editorial / premium (optional in full mode) */}
+      {showFeatured && featured.length > 0 ? (
+        <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-5 sm:p-6">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[rgba(120,76,255,0.16)] blur-3xl" />
+            <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[rgba(231,201,130,0.12)] blur-3xl" />
+            <div className="absolute inset-0 opacity-[0.35] [background:radial-gradient(900px_260px_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]" />
           </div>
 
-          <div className="mt-2 flex items-center gap-2 sm:mt-0">
-            <span className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-200/90 backdrop-blur-2xl">
-              Top 4
-            </span>
-            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] text-zinc-400 backdrop-blur-2xl">
-              Updated weekly
-            </span>
-          </div>
-        </div>
-
-        {/* Featured grid */}
-        <div className="relative mt-5 grid gap-4 md:grid-cols-2">
-          {featured.map((city) => {
-            const stats = statsByCity?.[city.slug];
-            return (
-              <div key={city.slug} className="md:[&>div]:h-full">
-                <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+          <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FEATURED MARKETS</div>
+              <div className="mt-2 text-[22px] font-semibold tracking-tight text-zinc-50 sm:text-[26px]">
+                Private intelligence, city by city
               </div>
-            );
-          })}
+              <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
+                Monaco now joins the flagship set. These markets lead our truth-first coverage and verification roadmap.
+              </div>
+            </div>
+
+            <div className="mt-2 flex items-center gap-2 sm:mt-0">
+              <span className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-200/90 backdrop-blur-2xl">
+                Top 4
+              </span>
+              <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] text-zinc-400 backdrop-blur-2xl">
+                Updated weekly
+              </span>
+            </div>
+          </div>
+
+          <div className="relative mt-5 grid gap-4 md:grid-cols-2">
+            {featured.map((city) => {
+              const stats = statsByCity?.[city.slug];
+              return (
+                <div key={city.slug} className="md:[&>div]:h-full">
+                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Everything else */}
-      <div className="mt-6">
+      <div className={cx(showFeatured && featured.length > 0 ? 'mt-6' : '')}>
         <div className={columns}>
           {visible.map((city) => {
             const stats = statsByCity?.[city.slug];
@@ -221,7 +270,6 @@ export default function CityCardsVirtualizedClient({
           )}
         </div>
 
-        {/* Scroll trigger */}
         <div ref={sentinelRef} className="h-px w-full" />
       </div>
     </section>
