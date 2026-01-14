@@ -60,10 +60,10 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     status: 'LIVE',
     priority: 10,
     headline: 'Flagship coverage',
-    blurb:
-      'Prime coastal markets, verified supply and the reference implementation for Vantera depth.',
+    blurb: 'Prime coastal markets, verified supply and the reference implementation for Vantera depth.',
     image: {
-      src: 'https://images.unsplash.com/photo-1728055891633-8a69471dd0fb?auto=format&fit=crop&w=2400&q=80',
+      // Keep cluster as broad coastline (fine)
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
       alt: 'Costa del Sol coastline',
     },
     citySlugs: ['marbella', 'benahavis', 'estepona', 'ibiza'],
@@ -77,11 +77,10 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     status: 'EXPANDING',
     priority: 6,
     headline: 'Coverage expanding',
-    blurb:
-      'A dense coastal luxury cluster. Market structure first, listings as the dataset matures.',
+    blurb: 'A dense coastal luxury cluster. Market structure first, listings as the dataset matures.',
     image: {
-      src: 'https://images.unsplash.com/photo-1689488340543-aabe6249fa16?auto=format&fit=crop&w=2400&q=80',
-      alt: 'French Riviera harbour',
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      alt: 'French Riviera coastline',
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
   },
@@ -94,10 +93,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     status: 'EXPANDING',
     priority: 5,
     headline: 'Coverage expanding',
-    blurb:
-      'Metro cluster coverage (Brickell, Miami Beach and waterfront districts) with a luxury-only lens.',
+    blurb: 'Metro cluster coverage (Brickell, Miami Beach and waterfront districts) with a luxury-only lens.',
     image: {
-      src: 'https://images.unsplash.com/photo-1748380606266-fc4bf7999f35?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
       alt: 'Miami skyline across the water',
     },
     citySlugs: ['miami', 'new-york'],
@@ -155,8 +153,9 @@ export const CITIES: City[] = [
     clusterSlug: 'costa-del-sol',
     blurb: 'Prime coastal living and global luxury demand. Vantera flagship dataset.',
     image: {
-      src: 'https://images.unsplash.com/photo-1728055891633-8a69471dd0fb?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Marbella coastline near Cabopino',
+      // NEW: distinct Marbella-feel coastal/old town vibe (no longer shared)
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Marbella coastline and Mediterranean horizon',
     },
   },
   {
@@ -171,8 +170,9 @@ export const CITIES: City[] = [
     clusterSlug: 'costa-del-sol',
     blurb: 'Gated estates, golf corridors and hillside privacy above the coast.',
     image: {
-      src: 'https://images.unsplash.com/photo-1728055891633-8a69471dd0fb?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Costa del Sol coastline',
+      // NEW: hills / inland tone (different from Marbella & Estepona)
+      src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Hills and valleys above the Costa del Sol',
     },
   },
   {
@@ -187,8 +187,9 @@ export const CITIES: City[] = [
     clusterSlug: 'costa-del-sol',
     blurb: 'Beachfront modern builds and a calmer luxury rhythm with strong value.',
     image: {
-      src: 'https://images.unsplash.com/photo-1728055891633-8a69471dd0fb?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Costa del Sol coastline',
+      // NEW: warmer coastal-town look (distinct from Marbella)
+      src: 'https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Sunlit coastal promenade on the Costa del Sol',
     },
   },
 
@@ -204,7 +205,7 @@ export const CITIES: City[] = [
     priority: 80,
     blurb: 'Ultra-prime density and global capital concentration.',
     image: {
-      src: 'https://images.unsplash.com/photo-1745276834246-59a4b0e65f62?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2400&q=80',
       alt: 'Monaco harbour with yachts and city skyline',
     },
   },
@@ -219,8 +220,8 @@ export const CITIES: City[] = [
     priority: 75,
     blurb: 'Modern skyline, speed and scale. Prime districts behave like a global asset class.',
     image: {
-      src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Dubai skyline at night',
+      src: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Dubai skyline at dusk',
     },
   },
   {
@@ -267,7 +268,7 @@ export const CITIES: City[] = [
     clusterSlug: 'miami-metro',
     blurb: 'Waterfront prime and global buyer flow. Metro cluster coverage.',
     image: {
-      src: 'https://images.unsplash.com/photo-1748380606266-fc4bf7999f35?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
       alt: 'Miami skyline across the water',
     },
   },
@@ -283,8 +284,8 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Riviera prime and yachting density. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1689488340543-aabe6249fa16?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Cannes harbour',
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Cannes waterfront',
     },
   },
   {
@@ -299,8 +300,9 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Coastal lifestyle and prime districts. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1689488340543-aabe6249fa16?auto=format&fit=crop&w=2400&q=80',
-      alt: 'French Riviera coastline',
+      // NEW: distinct Nice tone (Promenade / coastal city)
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Nice coastline and Promenade-style waterfront',
     },
   },
   {
@@ -315,8 +317,8 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Ultra-prime seasonal market. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1689488340543-aabe6249fa16?auto=format&fit=crop&w=2400&q=80',
-      alt: 'French Riviera harbour',
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Saint-Tropez harbour',
     },
   },
 ];
@@ -406,4 +408,6 @@ export const WATCHLIST_CITIES: City[] = [
 ];
 
 // Canonical combined list (use this everywhere you want "all cities")
-export const ALL_CITIES: City[] = [...CITIES, ...WATCHLIST_CITIES].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+export const ALL_CITIES: City[] = [...CITIES, ...WATCHLIST_CITIES].sort(
+  (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
+);
