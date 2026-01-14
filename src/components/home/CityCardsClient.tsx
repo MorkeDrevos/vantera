@@ -39,7 +39,7 @@ function hashTo01(seed: string) {
 
 export default function CityCardsClient({
   cities,
-  columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  columns = 'grid-cols-1 sm:grid-cols-2',
   className,
 }: {
   cities: RuntimeCity[];
@@ -59,9 +59,10 @@ export default function CityCardsClient({
     const list = (cities ?? []).map((city) => {
       const r = hashTo01(city.slug);
 
-      // Stable "curation score" that can later be replaced by real ranking.
       const sortScore =
-        typeof city.priority === 'number' ? 10_000 + city.priority : Math.round(r * 10_000);
+        typeof city.priority === 'number'
+          ? 10_000 + city.priority
+          : Math.round(r * 10_000);
 
       return {
         ...city,
@@ -70,41 +71,42 @@ export default function CityCardsClient({
       };
     });
 
-    // Keep current order by default.
     return list;
   }, [cities, now]);
 
   return (
     <section className={cx('w-full', className)}>
-      <div className={cx('grid gap-4 sm:gap-5', columns)}>
-        {enriched.map((city, idx) => (
-          <div key={city.slug} className="relative">
-            {/* Local time badge (smaller + higher class) */}
-            {city.localTime ? (
-              <div className="pointer-events-none absolute right-4 top-4 z-30">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/30 px-3 py-1.5 text-[11px] text-zinc-100/90 shadow-[0_16px_55px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
-                    <span className="text-zinc-300">Local</span>
-                  </span>
-                  <span className="text-zinc-500">·</span>
-                  <span className="font-mono text-zinc-100">{city.localTime}</span>
-                </div>
-              </div>
-            ) : null}
+      {/* Cleaner wrapper: still premium, but less “box in a box” */}
+      <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/18 p-3 shadow-[0_34px_120px_rgba(0,0,0,0.55)] sm:p-4">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(980px_340px_at_18%_0%,rgba(255,255,255,0.07),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(980px_340px_at_85%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+        </div>
 
-            {/* Subtle “index wall” rhythm on large screens */}
-            <div
-              className={cx(
-                'transition-transform duration-500',
-                idx % 3 === 1 && 'lg:translate-y-[6px]',
-                idx % 3 === 2 && 'lg:translate-y-[12px]',
-              )}
-            >
-              <CityCard city={city as any} />
-            </div>
+        <div className="relative">
+          <div className={cx('grid gap-4 sm:gap-5', columns)}>
+            {enriched.map((city) => (
+              <div key={city.slug} className="relative">
+                {/* Local time badge - only show from md up to avoid ugly stacking */}
+                {city.localTime ? (
+                  <div className="pointer-events-none absolute right-3 top-3 z-20 hidden md:block">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 text-[11px] text-zinc-100/90 shadow-[0_16px_55px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
+                        <span className="text-zinc-300">Local</span>
+                      </span>
+                      <span className="text-zinc-600">·</span>
+                      <span className="font-mono text-zinc-100">{city.localTime}</span>
+                    </div>
+                  </div>
+                ) : null}
+
+                <CityCard city={city as any} />
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );
