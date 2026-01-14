@@ -163,23 +163,35 @@ function IntentChip({
       type="button"
       onClick={onClick}
       className={cx(
-        'group relative overflow-hidden rounded-full px-4 py-2 text-left transition',
-        'ring-1 ring-inset',
+        'group relative overflow-hidden rounded-2xl px-4 py-2.5 text-left transition',
+        'border backdrop-blur-xl',
         active
-          ? 'bg-white/[0.08] ring-white/14'
-          : 'bg-white/[0.03] ring-white/10 hover:bg-white/[0.07] hover:ring-white/14',
+          ? 'border-white/18 bg-white/[0.06] text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
+          : 'border-white/10 bg-white/[0.03] text-white/80 hover:border-white/16 hover:bg-white/[0.05]',
       )}
     >
       <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
-        <div className="absolute inset-0 bg-[radial-gradient(420px_120px_at_30%_10%,rgba(231,201,130,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(420px_120px_at_80%_0%,rgba(120,76,255,0.14),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_86%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
       </div>
 
       <div className="relative">
-        <div className="text-[12px] text-zinc-100">{label}</div>
-        <div className="mt-0.5 text-[11px] text-zinc-500">{sub}</div>
+        <div className="text-[12px] leading-none text-zinc-100/95">{label}</div>
+        <div className="mt-1 text-[11px] leading-none text-zinc-400">{sub}</div>
       </div>
     </button>
+  );
+}
+
+function Token({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="inline-flex items-center rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200/90">
+      {children}
+    </span>
   );
 }
 
@@ -198,27 +210,27 @@ export default function IntentHero({
     () => [
       {
         id: 'quiet-accumulation' as const,
-        label: 'where quiet money is accumulating',
+        label: 'Quiet accumulation',
         sub: 'low noise, high signal',
       },
       {
         id: 'low-noise-prime' as const,
-        label: 'low-noise prime markets',
+        label: 'Low-noise prime',
         sub: 'clean demand structure',
       },
       {
         id: 'ahead-of-cycle' as const,
-        label: 'cities ahead of the cycle',
+        label: 'Ahead of cycle',
         sub: 'early momentum, disciplined',
       },
       {
         id: 'verification-strong' as const,
-        label: 'where verification is strong',
+        label: 'Verification strong',
         sub: 'truth-first coverage',
       },
       {
         id: 'liquidity-building' as const,
-        label: 'where liquidity is building',
+        label: 'Liquidity building',
         sub: 'velocity-led signals',
       },
     ],
@@ -235,10 +247,7 @@ export default function IntentHero({
       })
       .sort((a, b) => b.score - a.score);
 
-    const top = pickDistinctTimezones(
-      scored.map((x) => x.c),
-      defaultTop,
-    );
+    const top = pickDistinctTimezones(scored.map((x) => x.c), defaultTop);
 
     const maxScore = scored.length ? scored[0].score : 1;
     const minScore = scored.length ? scored[Math.min(scored.length - 1, 8)].score : 0;
@@ -260,43 +269,53 @@ export default function IntentHero({
 
   return (
     <div className="relative">
-      {/* Crown line for this module */}
-      <div aria-hidden className="pointer-events-none absolute -top-3 inset-x-0">
-        <div className="mx-auto h-px w-[78%] bg-gradient-to-r from-transparent via-[#E7C982]/22 to-transparent" />
+      {/* Crown line */}
+      <div aria-hidden className="pointer-events-none absolute -top-4 inset-x-0">
+        <div className="mx-auto h-px w-[86%] bg-gradient-to-r from-transparent via-[#E7C982]/26 to-transparent" />
+        <div className="mx-auto mt-2 h-px w-[72%] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
-      {/* Prompt surface */}
+      {/* Intelligence slab */}
       <div
         className={cx(
-          'relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02]',
-          'shadow-[0_34px_110px_rgba(0,0,0,0.62)]',
+          'relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03]',
+          'shadow-[0_42px_150px_rgba(0,0,0,0.70),inset_0_1px_0_rgba(255,255,255,0.06)]',
         )}
       >
+        {/* Ambient */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_360px_at_18%_-10%,rgba(255,255,255,0.07),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_360px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-black/45" />
+          <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.7)_1px,transparent_0)] [background-size:26px_26px]" />
         </div>
 
-        <div className="relative p-4 sm:p-5">
-          <div className="flex items-start justify-between gap-4">
+        <div className="relative p-5 sm:p-6 lg:p-8">
+          {/* Header */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 opacity-80" />
-                <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-300">SHOW ME</div>
+                <div className="text-[11px] font-semibold tracking-[0.30em] text-zinc-200/70">
+                  INTENT
+                </div>
               </div>
 
-              <div className="mt-2 text-sm text-zinc-300">
-                Pick an intent. Vantera re-weights markets and shows the smartest next move.
+              {/* colder copy */}
+              <div className="mt-2 text-[14px] leading-relaxed text-zinc-300/90">
+                Select a mandate. Vantera re-weights markets and surfaces the next
+                highest-probability path.
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-black/25 px-3 py-2 text-[11px] text-zinc-300 sm:inline-flex">
+            <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-zinc-300 sm:inline-flex">
               Press <span className="font-mono text-zinc-100">/</span> for city search
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          {/* Intent chips - more “console” */}
+          <div className="mt-5 flex flex-wrap gap-2.5">
             {intents.map((i) => (
               <IntentChip
                 key={i.id}
@@ -311,19 +330,21 @@ export default function IntentHero({
           {/* System line */}
           <div
             className={cx(
-              'mt-4 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-[12px] text-zinc-300 transition',
+              'mt-5 rounded-3xl border border-white/10 bg-black/30 px-5 py-4 text-[12px] text-zinc-300/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition',
               mode === 'response' ? 'opacity-100' : 'opacity-0 pointer-events-none',
             )}
             aria-hidden={mode !== 'response'}
           >
-            Re-weighting markets based on intent. Signal over noise.
+            Re-weighting coverage against selected mandate. Output is signal-first and evidence-scored.
           </div>
 
-          {/* Response mode tiles */}
+          {/* Results tiles */}
           <div
             className={cx(
-              'mt-4 grid gap-3 transition',
-              mode === 'response' ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none',
+              'mt-5 grid gap-3 transition',
+              mode === 'response'
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 -translate-y-1 pointer-events-none',
               'sm:grid-cols-2',
             )}
             aria-hidden={mode !== 'response'}
@@ -331,16 +352,22 @@ export default function IntentHero({
             {ranked.topWithScore.map(({ city, score01 }) => (
               <div
                 key={city.slug}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/25 p-4 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)] transition hover:bg-white/[0.03] hover:border-white/14"
+                className={cx(
+                  'group relative overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-5',
+                  'shadow-[0_28px_110px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]',
+                  'transition hover:bg-white/[0.04] hover:border-white/16',
+                )}
               >
                 <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
-                  <div className="absolute inset-0 bg-[radial-gradient(420px_140px_at_25%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(420px_140px_at_90%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
                 </div>
 
                 <div className="relative flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-zinc-100">{city.name}</div>
+                    <div className="truncate text-[13px] font-semibold text-zinc-100">
+                      {city.name}
+                    </div>
                     <div className="truncate text-[11px] text-zinc-500">
                       {city.country}
                       {city.region ? ` · ${city.region}` : ''}
@@ -350,57 +377,67 @@ export default function IntentHero({
                   <Link
                     href={`/city/${city.slug}`}
                     prefetch
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-200 hover:bg-white/[0.07] hover:border-white/14 transition"
+                    className={cx(
+                      'inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-[11px]',
+                      'border border-white/10 bg-white/[0.03] text-zinc-200',
+                      'transition hover:bg-white/[0.07] hover:border-white/16',
+                    )}
                   >
                     Open <ArrowRight className="h-3.5 w-3.5 opacity-80" />
                   </Link>
                 </div>
 
-                <div className="relative mt-3">
+                <div className="relative mt-4">
                   <ScoreBar score01={score01} />
                 </div>
 
-                <div className="relative mt-3 text-[12px] text-zinc-300">
+                <div className="relative mt-3 text-[12px] leading-relaxed text-zinc-300/90">
                   {city.blurb ? city.blurb : 'Private index coverage with truth-first emphasis.'}
                 </div>
 
-                <div className="relative mt-3 flex flex-wrap gap-2 text-[11px]">
-                  <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-zinc-200">
-                    {city.tier ?? 'TIER'}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-zinc-300">
-                    {city.status ?? 'STATUS'}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-black/25 px-2.5 py-1 text-zinc-400">
-                    {city.tz}
-                  </span>
+                <div className="relative mt-4 flex flex-wrap gap-2">
+                  <Token>{city.tier ?? 'TIER'}</Token>
+                  <Token>{city.status ?? 'STATUS'}</Token>
+                  <Token>{city.tz}</Token>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Actions */}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             {mode === 'response' ? (
               <>
                 <button
                   type="button"
                   onClick={() => setActive(null)}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-[12px] text-zinc-200 hover:bg-white/[0.07] hover:border-white/14 transition"
+                  className={cx(
+                    'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-[12px]',
+                    'border border-white/10 bg-white/[0.03] text-zinc-200',
+                    'transition hover:bg-white/[0.07] hover:border-white/16',
+                  )}
                 >
-                  Reset intent
+                  Reset
                 </button>
 
                 <a
                   href={`#${onKeepScanningId}`}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/25 px-4 py-2 text-[12px] text-zinc-200 hover:bg-white/[0.07] hover:border-white/14 transition"
+                  className={cx(
+                    'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-[12px]',
+                    'border border-white/10 bg-black/30 text-zinc-200',
+                    'transition hover:bg-white/[0.07] hover:border-white/16',
+                  )}
                 >
                   Keep scanning <ArrowRight className="h-4 w-4 opacity-80" />
                 </a>
+
+                <div className="ml-auto hidden lg:flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-[12px] text-zinc-300/80">
+                  Output is indicative. Proof expands with coverage.
+                </div>
               </>
             ) : (
               <div className="text-[12px] text-zinc-500">
-                You can still search cities, but the default is intent-first discovery.
+                Default mode is intent-first discovery. Direct city search is available.
               </div>
             )}
           </div>
