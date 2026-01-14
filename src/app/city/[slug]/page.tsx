@@ -6,7 +6,8 @@ import CityPageClient from '@/components/city/CityPageClient';
 import { CITIES } from '@/components/home/cities';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
-import { webPageJsonLd, jsonLd, breadcrumbJsonLd } from '@/lib/seo/seo.jsonld';
+import { webPageJsonLd, jsonLd } from '@/lib/seo/seo.jsonld';
+import { crumbsCity } from '@/lib/seo/seo.breadcrumbs';
 
 export async function generateMetadata({
   params,
@@ -21,7 +22,6 @@ export async function generateMetadata({
   }
 
   const city = CITIES[idx];
-
   const doc = SEO_INTENT.cityHub({
     name: city.name,
     slug: city.slug,
@@ -34,16 +34,14 @@ export async function generateMetadata({
     description: doc.description,
     alternates: { canonical: doc.canonical },
     robots: doc.robots,
-
     openGraph: {
-      type: 'website',
+      type: 'article',
       title: doc.title,
       description: doc.description,
       url: doc.canonical,
       images: [doc.ogImage],
       siteName: 'Vantera',
     },
-
     twitter: {
       card: 'summary_large_image',
       title: doc.title,
@@ -93,15 +91,12 @@ export default async function CityPage({
     ],
   });
 
-  const crumbs = breadcrumbJsonLd([
-    { name: 'Home', url: '/' },
-    { name: city.name, url: `/city/${city.slug}` },
-  ]);
+  const breadcrumb = crumbsCity({ cityName: city.name, citySlug: city.slug });
 
   return (
     <>
       {jsonLd(pageJsonLd)}
-      {jsonLd(crumbs)}
+      {jsonLd(breadcrumb)}
 
       <CityPageClient
         city={{
@@ -112,20 +107,11 @@ export default async function CityPage({
           tz: city.tz,
           blurb: city.blurb ?? null,
           image: city.image?.src
-            ? {
-                src: city.image.src,
-                alt: city.image.alt ?? null,
-              }
+            ? { src: city.image.src, alt: city.image.alt ?? null }
             : null,
         }}
-        prev={{
-          name: prev.name,
-          slug: prev.slug,
-        }}
-        next={{
-          name: next.name,
-          slug: next.slug,
-        }}
+        prev={{ name: prev.name, slug: prev.slug }}
+        next={{ name: next.name, slug: next.slug }}
       />
     </>
   );
