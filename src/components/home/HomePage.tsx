@@ -13,7 +13,7 @@ import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
 
-import IntentHero from './IntentHero';
+import WorldSearchHero from './WorldSearchHero';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -114,9 +114,25 @@ function RoyalPortalBackdrop() {
             </linearGradient>
           </defs>
 
-          <path d="M-40,520 C260,300 460,260 760,360 C980,434 1110,420 1240,320" fill="none" stroke="url(#g1)" strokeWidth="2" />
-          <path d="M-60,420 C220,210 520,180 780,260 C1040,340 1120,330 1260,220" fill="none" stroke="url(#g2)" strokeWidth="2" />
-          <path d="M-80,560 C220,420 520,380 820,470 C1040,538 1120,526 1280,420" fill="none" stroke="url(#g1)" strokeWidth="1.5" opacity="0.7" />
+          <path
+            d="M-40,520 C260,300 460,260 760,360 C980,434 1110,420 1240,320"
+            fill="none"
+            stroke="url(#g1)"
+            strokeWidth="2"
+          />
+          <path
+            d="M-60,420 C220,210 520,180 780,260 C1040,340 1120,330 1260,220"
+            fill="none"
+            stroke="url(#g2)"
+            strokeWidth="2"
+          />
+          <path
+            d="M-80,560 C220,420 520,380 820,470 C1040,538 1120,526 1280,420"
+            fill="none"
+            stroke="url(#g1)"
+            strokeWidth="1.5"
+            opacity="0.7"
+          />
         </svg>
       </div>
 
@@ -267,9 +283,7 @@ function PortalVsTruth() {
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PORTALS</div>
           <div className="mt-2 text-lg font-medium text-zinc-100">Beauty-first browsing</div>
-          <div className="mt-2 text-sm text-zinc-300">
-            Photos, lifestyle and sales copy. Great for inspiration, weak for decisions.
-          </div>
+          <div className="mt-2 text-sm text-zinc-300">Photos, lifestyle and sales copy. Great for inspiration, weak for decisions.</div>
           <div className="mt-4 grid gap-2">
             {['Looks amazing', 'Easy to scroll', 'Hard to verify'].map((t) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200">
@@ -285,7 +299,9 @@ function PortalVsTruth() {
         <div className="relative">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
           <div className="mt-2 text-lg font-medium text-zinc-100">Truth-first intelligence</div>
-          <div className="mt-2 text-sm text-zinc-300">Paperwork, price reality and risk flags - presented like a private report.</div>
+          <div className="mt-2 text-sm text-zinc-300">
+            Paperwork, price reality and risk flags - presented like a private report.
+          </div>
           <div className="mt-4 grid gap-2">
             {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
               <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
@@ -476,9 +492,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* Intent-first hero module */}
+                {/* New: WorldSearchHero */}
                 <div className="mt-6 max-w-2xl">
-                  <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
+                  <WorldSearchHero cities={cities as any} onKeepScanningId="explore-index" />
                 </div>
 
                 <div className="mt-4 max-w-2xl">
