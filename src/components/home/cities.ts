@@ -52,17 +52,34 @@ export type City = {
  */
 export const REGION_CLUSTERS: RegionCluster[] = [
   {
-    slug: 'costa-del-sol',
-    name: 'Costa del Sol',
-    country: 'Spain',
-    region: 'Europe',
+    slug: 'miami-metro',
+    name: 'Miami Metro',
+    country: 'United States',
+    region: 'North America',
     tier: 'TIER_0',
     status: 'LIVE',
     priority: 10,
     headline: 'Flagship coverage',
-    blurb: 'Prime coastal markets, verified supply and the reference implementation for Vantera depth.',
+    blurb:
+      'Prime waterfront districts, institutional buyer flow and the reference implementation for liquidity-led signals.',
     image: {
-      // Keep cluster as broad coastline (fine)
+      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Miami skyline across the water',
+    },
+    citySlugs: ['miami', 'new-york'],
+  },
+  {
+    slug: 'costa-del-sol',
+    name: 'Costa del Sol',
+    country: 'Spain',
+    region: 'Europe',
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 8,
+    headline: 'Coverage tracking',
+    blurb:
+      'Prime coastal markets, verified supply signals and a disciplined lens for second-home and relocation demand.',
+    image: {
       src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
       alt: 'Costa del Sol coastline',
     },
@@ -83,22 +100,6 @@ export const REGION_CLUSTERS: RegionCluster[] = [
       alt: 'French Riviera coastline',
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
-  },
-  {
-    slug: 'miami-metro',
-    name: 'Miami Metro',
-    country: 'United States',
-    region: 'North America',
-    tier: 'TIER_2',
-    status: 'EXPANDING',
-    priority: 5,
-    headline: 'Coverage expanding',
-    blurb: 'Metro cluster coverage (Brickell, Miami Beach and waterfront districts) with a luxury-only lens.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Miami skyline across the water',
-    },
-    citySlugs: ['miami', 'new-york'],
   },
 
   // Tier 3 region groupings (still included at launch)
@@ -140,20 +141,54 @@ export const REGION_CLUSTERS: RegionCluster[] = [
  * Core launch cities (Tiers 0-2)
  */
 export const CITIES: City[] = [
-  // Tier 0
+  // Tier 0 (flagship)
+  {
+    slug: 'miami',
+    name: 'Miami',
+    country: 'United States',
+    region: 'North America',
+    tz: 'America/New_York',
+    tier: 'TIER_0',
+    status: 'LIVE',
+    priority: 100,
+    clusterSlug: 'miami-metro',
+    blurb:
+      'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
+      alt: 'Miami skyline across the water',
+    },
+  },
+  {
+    slug: 'new-york',
+    name: 'New York',
+    country: 'United States',
+    region: 'North America',
+    tz: 'America/New_York',
+    tier: 'TIER_0',
+    status: 'LIVE',
+    priority: 95,
+    clusterSlug: 'miami-metro',
+    blurb: 'Prime districts only, with a truth-first lens and disciplined cross-border comparables.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=2400&q=80',
+      alt: 'New York skyline',
+    },
+  },
+
+  // Tier 1
   {
     slug: 'marbella',
     name: 'Marbella',
     country: 'Spain',
     region: 'Europe',
     tz: 'Europe/Madrid',
-    tier: 'TIER_0',
-    status: 'LIVE',
-    priority: 100,
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 80,
     clusterSlug: 'costa-del-sol',
-    blurb: 'Prime coastal living and global luxury demand. Vantera flagship dataset.',
+    blurb: 'Prime coastal living and global luxury demand. Signals tracking with disciplined verification.',
     image: {
-      // NEW: distinct Marbella-feel coastal/old town vibe (no longer shared)
       src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
       alt: 'Marbella coastline and Mediterranean horizon',
     },
@@ -164,13 +199,12 @@ export const CITIES: City[] = [
     country: 'Spain',
     region: 'Europe',
     tz: 'Europe/Madrid',
-    tier: 'TIER_0',
-    status: 'LIVE',
-    priority: 95,
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 78,
     clusterSlug: 'costa-del-sol',
     blurb: 'Gated estates, golf corridors and hillside privacy above the coast.',
     image: {
-      // NEW: hills / inland tone (different from Marbella & Estepona)
       src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2400&q=80',
       alt: 'Hills and valleys above the Costa del Sol',
     },
@@ -181,19 +215,16 @@ export const CITIES: City[] = [
     country: 'Spain',
     region: 'Europe',
     tz: 'Europe/Madrid',
-    tier: 'TIER_0',
-    status: 'LIVE',
-    priority: 90,
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 76,
     clusterSlug: 'costa-del-sol',
     blurb: 'Beachfront modern builds and a calmer luxury rhythm with strong value.',
     image: {
-      // NEW: warmer coastal-town look (distinct from Marbella)
       src: 'https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=2400&q=80',
       alt: 'Sunlit coastal promenade on the Costa del Sol',
     },
   },
-
-  // Tier 1
   {
     slug: 'monaco',
     name: 'Monaco',
@@ -202,7 +233,7 @@ export const CITIES: City[] = [
     tz: 'Europe/Monaco',
     tier: 'TIER_1',
     status: 'TRACKING',
-    priority: 80,
+    priority: 74,
     blurb: 'Ultra-prime density and global capital concentration.',
     image: {
       src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2400&q=80',
@@ -217,7 +248,7 @@ export const CITIES: City[] = [
     tz: 'Asia/Dubai',
     tier: 'TIER_1',
     status: 'TRACKING',
-    priority: 75,
+    priority: 72,
     blurb: 'Modern skyline, speed and scale. Prime districts behave like a global asset class.',
     image: {
       src: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=2400&q=80',
@@ -241,37 +272,6 @@ export const CITIES: City[] = [
   },
 
   // Tier 2
-  {
-    slug: 'new-york',
-    name: 'New York',
-    country: 'United States',
-    region: 'North America',
-    tz: 'America/New_York',
-    tier: 'TIER_2',
-    status: 'EXPANDING',
-    priority: 60,
-    blurb: 'Prime districts only, with a truth-first lens.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=2400&q=80',
-      alt: 'New York skyline',
-    },
-  },
-  {
-    slug: 'miami',
-    name: 'Miami',
-    country: 'United States',
-    region: 'North America',
-    tz: 'America/New_York',
-    tier: 'TIER_2',
-    status: 'EXPANDING',
-    priority: 55,
-    clusterSlug: 'miami-metro',
-    blurb: 'Waterfront prime and global buyer flow. Metro cluster coverage.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Miami skyline across the water',
-    },
-  },
   {
     slug: 'cannes',
     name: 'Cannes',
@@ -300,7 +300,6 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Coastal lifestyle and prime districts. Coverage expanding.',
     image: {
-      // NEW: distinct Nice tone (Promenade / coastal city)
       src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
       alt: 'Nice coastline and Promenade-style waterfront',
     },
