@@ -10,9 +10,10 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 
-import CitySearch from './CitySearch';
 import CityCardsClient from './CityCardsClient';
 import MarketBriefing from './MarketBriefing';
+
+import IntentHero from './IntentHero';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -210,46 +211,6 @@ function Pillar({ title, body }: { title: string; body: string }) {
   );
 }
 
-function LuxuryPromptBar() {
-  return (
-    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-      </div>
-
-      <div className="relative p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">ASK VANTERA</div>
-            <div className="mt-1 text-sm text-zinc-300">Describe what you want. We return the smartest next move.</div>
-          </div>
-          <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300">
-            Coming online
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-zinc-300">
-          <span className="text-zinc-500">Try:</span>{' '}
-          <span className="text-zinc-100">“Quiet villa near international schools under €4M”</span>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {['Best upside areas in Marbella', 'Low-risk homes with clean permits', 'Sea views with privacy and fast resale'].map((t) => (
-            <div
-              key={t}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[12px] text-zinc-200"
-            >
-              {t}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function TruthCardReport() {
   return (
     <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/25 shadow-[0_42px_130px_rgba(0,0,0,0.70)]">
@@ -442,7 +403,20 @@ function CTA() {
 }
 
 function pickHotCitiesDistinctTimezones(all: RuntimeCity[], max = 4) {
-  const preferred = ['marbella', 'dubai', 'miami', 'tokyo', 'london', 'new-york', 'singapore', 'los-angeles', 'hong-kong', 'paris', 'madrid', 'monaco'];
+  const preferred = [
+    'marbella',
+    'dubai',
+    'miami',
+    'tokyo',
+    'london',
+    'new-york',
+    'singapore',
+    'los-angeles',
+    'hong-kong',
+    'paris',
+    'madrid',
+    'monaco',
+  ];
 
   const map = new Map(all.map((c) => [c.slug, c]));
   const out: RuntimeCity[] = [];
@@ -502,38 +476,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* Search */}
+                {/* Intent-first hero module */}
                 <div className="mt-6 max-w-2xl">
-                  <div className="relative overflow-visible rounded-[24px] border border-white/10 bg-white/[0.02] shadow-[0_28px_90px_rgba(0,0,0,0.62)]">
-                    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[24px]">
-                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_85%_10%,rgba(120,76,255,0.12),transparent_60%)]" />
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                    </div>
-
-                    <div className="relative px-4 py-4 sm:px-5 sm:py-5">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SEARCH</div>
-                          <div className="mt-1 text-xs text-zinc-500">Start with a city. Then open the home&apos;s intelligence.</div>
-                        </div>
-                        <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-zinc-300 sm:inline-flex">
-                          Press <span className="font-mono text-zinc-100">/</span>
-                        </div>
-                      </div>
-
-                      <div className="relative z-30 mt-4">
-                        <div className="rounded-2xl border border-white/10 bg-black/35 p-2 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
-                          <CitySearch cities={cities as any} defaultCount={10} />
-                        </div>
-                      </div>
-
-                      <div className="mt-3 rounded-2xl border border-white/10 bg-black/30 px-3 py-2 text-[12px] text-zinc-300">
-                        Browse homes, then open their intelligence - value, liquidity, risk and leverage in seconds.
-                      </div>
-                    </div>
-                  </div>
+                  <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
                 </div>
 
                 <div className="mt-4 max-w-2xl">
@@ -553,13 +498,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
                   <Pillar title="Risk radar" body="Catch resale killers early." />
                 </div>
-
-                <div className="mt-4 max-w-2xl">
-                  <LuxuryPromptBar />
-                </div>
               </div>
 
-              {/* RIGHT - Selected Cities (clean, responsive, image-first) */}
+              {/* RIGHT */}
               <div className="space-y-4 lg:col-span-5">
                 <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-black/30 p-5 sm:p-6 vantera-royal-ring">
                   <div className="pointer-events-none absolute inset-0">
@@ -578,7 +519,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                       return (
                         <>
-                          {/* No nested heavy wrapper - lets the wall breathe */}
                           <CityCardsClient
                             cities={hot}
                             variant="wall"
@@ -669,7 +609,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
           </div>
         </section>
 
-        <section className="mt-14 sm:mt-16">
+        <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-16">
           <SectionLabel hint="Coverage that feels alive">Explore the index</SectionLabel>
 
           <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
