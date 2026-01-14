@@ -87,65 +87,7 @@ function RoyalPortalBackdrop() {
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.90))]" />
 
       <div className="absolute inset-0 opacity-[0.85]">
-        <div className="vantera-float-a absolute -left-[22%] top-[-26%] h-[560px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_60%)]" />
-        <div className="vantera-float-b absolute -right-[26%] top-[-20%] h-[560px] w-[1020px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.16),transparent_62%)]" />
-        <div className="vantera-float-c absolute left-[8%] bottom-[-38%] h-[760px] w-[1220px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.18),transparent_60%)]" />
-      </div>
-
-      <div className="vantera-beam absolute -left-[20%] top-[-10%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.22] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(231,201,130,0.28)_45%,transparent_70%)]" />
-      <div className="vantera-beam absolute -right-[22%] top-[-14%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.14] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_70%)]" />
-
-      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_62%)]" />
-
-      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.80)_1px,transparent_0)] [background-size:20px_20px]" />
-
-      <div className="vantera-arc absolute inset-0 opacity-[0.35]">
-        <svg className="h-full w-full" viewBox="0 0 1200 650" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0" stopColor="rgba(231,201,130,0)" />
-              <stop offset="0.5" stopColor="rgba(231,201,130,0.38)" />
-              <stop offset="1" stopColor="rgba(231,201,130,0)" />
-            </linearGradient>
-            <linearGradient id="g2" x1="0" x2="1">
-              <stop offset="0" stopColor="rgba(120,76,255,0)" />
-              <stop offset="0.5" stopColor="rgba(120,76,255,0.30)" />
-              <stop offset="1" stopColor="rgba(120,76,255,0)" />
-            </linearGradient>
-          </defs>
-
-          <path
-            d="M-40,520 C260,300 460,260 760,360 C980,434 1110,420 1240,320"
-            fill="none"
-            stroke="url(#g1)"
-            strokeWidth="2"
-          />
-          <path
-            d="M-60,420 C220,210 520,180 780,260 C1040,340 1120,330 1260,220"
-            fill="none"
-            stroke="url(#g2)"
-            strokeWidth="2"
-          />
-          <path
-            d="M-80,560 C220,420 520,380 820,470 C1040,538 1120,526 1280,420"
-            fill="none"
-            stroke="url(#g1)"
-            strokeWidth="1.5"
-            opacity="0.7"
-          />
-        </svg>
-      </div>
-
-      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#070A10]" />
-    </div>
-  );
-}
-
-function HeroVideo() {
-  return (
-    <div aria-hidden className="absolute inset-0 -z-20 overflow-hidden">
-      <video
+        <div className="vantera-float-a absolute -left-[22%] top-[-26%] hly")
         className="h-full w-full object-cover opacity-[0.62]"
         autoPlay
         muted
@@ -451,9 +393,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* RESTORED: revolutionary property search */}
+                {/* RESTORED: Vantera "revolutionary" property search */}
                 <div className="mt-6 max-w-[980px] lg:max-w-[1120px]">
-                  <WorldSearchHero />
+                  <WorldSearchHero cities={cities as any} onKeepScanningId="explore-index" />
                 </div>
 
                 {/* Intent console */}
