@@ -201,6 +201,9 @@ export default function CityCard({
 
   const isWall = variant === 'wall';
 
+  // Replaces the broken {nodeId}. Always defined, still feels "metadata / premium".
+  const metaLeft = `TIER_${String(tier).replace('TIER_', '')}`;
+
   return (
     <div className="group relative min-w-0">
       <Link
@@ -305,7 +308,7 @@ export default function CityCard({
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
             <span className="inline-flex items-center gap-2">
               <span className="rounded-md border border-white/10 bg-black/22 px-2 py-1 font-mono text-zinc-300/90">
-                {nodeId}
+                {metaLeft}
               </span>
               <span className="hidden sm:inline text-zinc-500">Private city intelligence</span>
             </span>
@@ -320,7 +323,7 @@ export default function CityCard({
       </Link>
 
       {/* Locked CTA (outside Link) - now looks “luxury / verified” */}
-      {state === 'LOCKED' ? (
+      {state === 'LOCKED' && showLockedCta ? (
         <div className="mt-3">
           <Link
             href={`/sell?city=${encodeURIComponent(city.slug)}`}
