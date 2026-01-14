@@ -2,8 +2,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
-import ComingSoon from '@/components/ComingSoon';
-
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
 import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld';
 
@@ -44,9 +42,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const isProd = process.env.NODE_ENV === 'production';
-  const comingSoon = isProd && process.env.NEXT_PUBLIC_COMING_SOON === '1';
-
   // Global schemas (1 script tag each)
   const site = {
     ...websiteJsonLd(),
@@ -65,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {jsonLd(site)}
         {jsonLd(org)}
-        {comingSoon ? <ComingSoon /> : children}
+        {children}
       </body>
     </html>
   );
