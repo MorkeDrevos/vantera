@@ -6,7 +6,7 @@ import CityPageClient from '@/components/city/CityPageClient';
 import { CITIES } from '@/components/home/cities';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
-import { webPageJsonLd, jsonLd } from '@/lib/seo/seo.jsonld';
+import { webPageJsonLd, jsonLd, breadcrumbJsonLd } from '@/lib/seo/seo.jsonld';
 
 export async function generateMetadata({
   params,
@@ -36,7 +36,7 @@ export async function generateMetadata({
     robots: doc.robots,
 
     openGraph: {
-      type: 'article',
+      type: 'website',
       title: doc.title,
       description: doc.description,
       url: doc.canonical,
@@ -93,9 +93,15 @@ export default async function CityPage({
     ],
   });
 
+  const crumbs = breadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: city.name, url: `/city/${city.slug}` },
+  ]);
+
   return (
     <>
       {jsonLd(pageJsonLd)}
+      {jsonLd(crumbs)}
 
       <CityPageClient
         city={{
