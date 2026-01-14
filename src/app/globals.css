@@ -1,6 +1,21 @@
+/* src/app/globals.css */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* -------------------------------------------------------
+   Base
+-------------------------------------------------------- */
+
+:root {
+  color-scheme: dark;
+
+  /* Optional: consistent “royal” accent tokens */
+  --vantera-gold: 231 201 130;
+  --vantera-violet: 120 76 255;
+  --vantera-ice: 62 196 255;
+}
 
 html,
 body {
@@ -11,12 +26,6 @@ body {
   text-rendering: geometricPrecision;
 }
 
-/* --- Premium baseline helpers --- */
-
-:root {
-  color-scheme: dark;
-}
-
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -25,6 +34,10 @@ body {
   background: rgba(255, 255, 255, 0.14);
 }
 
+/* -------------------------------------------------------
+   Reduced motion
+-------------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
@@ -32,10 +45,18 @@ body {
     animation: none !important;
   }
 }
-/* --- Vantera luxury motion --- */
+
+/* -------------------------------------------------------
+   Vantera luxury motion (canonical)
+   Fixes:
+   - Removed duplicate @keyframes names (vanteraSweep/FloatA/B/C/Drift)
+   - Keeps one consistent definition per animation
+   - Adds the missing .vantera-beam class used by hero
+-------------------------------------------------------- */
 
 @keyframes vanteraPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.85;
     transform: translateY(0);
   }
@@ -45,108 +66,161 @@ body {
   }
 }
 
-@keyframes vanteraSweep {
-  0%, 100% {
-    transform: translateX(-8%) translateY(-2%);
-    opacity: 0.18;
+/* Royal portal float set */
+@keyframes vanteraFloatA {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
   }
   50% {
-    transform: translateX(8%) translateY(2%);
-    opacity: 0.35;
+    transform: translate3d(18px, 12px, 0) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
   }
 }
 
-/* Vantera - premium living hero backdrop (server-safe) */
-@keyframes vanteraFloatA {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(6%,3%,0) scale(1.04); }
-  100% { transform: translate3d(0,0,0) scale(1); }
-}
-
 @keyframes vanteraFloatB {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(-5%,4%,0) scale(1.05); }
-  100% { transform: translate3d(0,0,0) scale(1); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate3d(-22px, 16px, 0) scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.75;
+  }
 }
 
 @keyframes vanteraFloatC {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(4%,-3%,0) scale(1.06); }
-  100% { transform: translate3d(0,0,0) scale(1); }
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate3d(14px, -10px, 0) scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.7;
+  }
 }
 
 @keyframes vanteraSweep {
-  0% { transform: translate3d(-18%,0,0); opacity: 0.14; }
-  45% { opacity: 0.24; }
-  100% { transform: translate3d(18%,0,0); opacity: 0.14; }
+  0% {
+    transform: translateX(-22%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.35;
+  }
+  80% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(22%);
+    opacity: 0;
+  }
 }
 
+/* Subtle drifting noise / pattern layer (uses background-position) */
 @keyframes vanteraDrift {
-  0% { transform: translate3d(0,0,0); }
-  100% { transform: translate3d(-40px,30px,0); }
+  0% {
+    background-position: 0 0;
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.12;
+  }
+  100% {
+    background-position: 120px 80px;
+    opacity: 0.08;
+  }
 }
 
-.vantera-float-a { animation: vanteraFloatA 18s ease-in-out infinite; }
-.vantera-float-b { animation: vanteraFloatB 22s ease-in-out infinite; }
-.vantera-float-c { animation: vanteraFloatC 26s ease-in-out infinite; }
-.vantera-sweep   { animation: vanteraSweep 14s ease-in-out infinite; }
-.vantera-drift   { animation: vanteraDrift 30s linear infinite; }
-
-/* =========================
-   VANTERA - Royal Portal FX
-   ========================= */
-
-@keyframes vanteraFloatA {
-  0% { transform: translate3d(0,0,0) scale(1); opacity: 0.85; }
-  50% { transform: translate3d(18px,12px,0) scale(1.04); opacity: 1; }
-  100% { transform: translate3d(0,0,0) scale(1); opacity: 0.85; }
-}
-@keyframes vanteraFloatB {
-  0% { transform: translate3d(0,0,0) scale(1); opacity: 0.75; }
-  50% { transform: translate3d(-22px,16px,0) scale(1.05); opacity: 1; }
-  100% { transform: translate3d(0,0,0) scale(1); opacity: 0.75; }
-}
-@keyframes vanteraFloatC {
-  0% { transform: translate3d(0,0,0) scale(1); opacity: 0.7; }
-  50% { transform: translate3d(14px,-10px,0) scale(1.03); opacity: 1; }
-  100% { transform: translate3d(0,0,0) scale(1); opacity: 0.7; }
-}
-@keyframes vanteraSweep {
-  0% { transform: translateX(-22%); opacity: 0; }
-  20% { opacity: 0.55; }
-  50% { opacity: 0.35; }
-  80% { opacity: 0.55; }
-  100% { transform: translateX(22%); opacity: 0; }
-}
-@keyframes vanteraDrift {
-  0% { background-position: 0 0; opacity: 0.08; }
-  50% { opacity: 0.12; }
-  100% { background-position: 120px 80px; opacity: 0.08; }
-}
+/* Light beams */
 @keyframes vanteraBeam {
-  0% { transform: translate3d(-8%,0,0) rotate(10deg); opacity: 0.0; }
-  15% { opacity: 0.35; }
-  50% { opacity: 0.20; }
-  85% { opacity: 0.35; }
-  100% { transform: translate3d(8%,0,0) rotate(10deg); opacity: 0.0; }
-}
-@keyframes vanteraArc {
-  0% { transform: translate3d(0,0,0) rotate(0deg); opacity: 0.25; }
-  50% { transform: translate3d(0,0,0) rotate(6deg); opacity: 0.40; }
-  100% { transform: translate3d(0,0,0) rotate(0deg); opacity: 0.25; }
+  0% {
+    transform: translate3d(-8%, 0, 0) rotate(10deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  85% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(8%, 0, 0) rotate(10deg);
+    opacity: 0;
+  }
 }
 
-.vantera-float-a { animation: vanteraFloatA 22s ease-in-out infinite; }
-.vantera-float-b { animation: vanteraFloatB 28s ease-in-out infinite; }
-.vantera-float-c { animation: vanteraFloatC 34s ease-in-out infinite; }
-.vantera-sweep { animation: vanteraSweep 16s ease-in-out infinite; }
-.vantera-drift { animation: vanteraDrift 26s linear infinite; }
-.vantera-beam { animation: vanteraBeam 14s ease-in-out infinite; }
-.vantera-arc { animation: vanteraArc 20s ease-in-out infinite; }
+/* Arc shimmer */
+@keyframes vanteraArc {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate3d(0, 0, 0) rotate(6deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0.25;
+  }
+}
+
+/* Classes used across the hero */
+.vantera-float-a {
+  animation: vanteraFloatA 22s ease-in-out infinite;
+}
+
+.vantera-float-b {
+  animation: vanteraFloatB 28s ease-in-out infinite;
+}
+
+.vantera-float-c {
+  animation: vanteraFloatC 34s ease-in-out infinite;
+}
+
+.vantera-sweep {
+  animation: vanteraSweep 16s ease-in-out infinite;
+}
+
+.vantera-drift {
+  animation: vanteraDrift 26s linear infinite;
+}
+
+.vantera-beam {
+  animation: vanteraBeam 14s ease-in-out infinite;
+}
+
+.vantera-arc {
+  animation: vanteraArc 20s ease-in-out infinite;
+}
+
+/* -------------------------------------------------------
+   VANTERA - Royal ring helper
+   Keeps your current look, with a slightly cleaner "gold" layer.
+-------------------------------------------------------- */
 
 .vantera-royal-ring {
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.06),
-    0 0 0 2px rgba(231,201,130,0.08),
-    0 40px 140px rgba(0,0,0,0.75);
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 2px rgba(231, 201, 130, 0.08),
+    0 40px 140px rgba(0, 0, 0, 0.75);
 }
