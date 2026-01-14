@@ -145,9 +145,7 @@ export default async function ListingPage({ params }: Props) {
             </div>
           </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-            {listing.title}
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">{listing.title}</h1>
 
           <p className="max-w-3xl text-base leading-relaxed text-zinc-300 sm:text-lg">
             Private intelligence for the world’s most valuable assets.
@@ -158,8 +156,8 @@ export default async function ListingPage({ params }: Props) {
           <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
             <h2 className="text-lg font-semibold tracking-tight text-white">Truth-first signals</h2>
             <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-              This is the listing surface. When the data layer goes live, this area will show:
-              pricing context, liquidity pressure, comparable tension, and risk flags.
+              This is the listing surface. When the data layer goes live, this area will show pricing context, liquidity
+              pressure, comparable tension, and risk flags.
             </p>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -207,9 +205,7 @@ export default async function ListingPage({ params }: Props) {
 
           <div className="mt-10 text-xs text-zinc-600">
             <div>Canonical: {doc.canonical}</div>
-            <div className="mt-1">
-              Robots: {indexable ? 'index, follow' : 'noindex, follow'} (truth-first gate)
-            </div>
+            <div className="mt-1">Robots: {indexable ? 'index, follow' : 'noindex, follow'} (truth-first gate)</div>
           </div>
         </div>
       </div>
