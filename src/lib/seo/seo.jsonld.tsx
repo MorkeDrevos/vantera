@@ -1,14 +1,5 @@
 // src/lib/seo/seo.jsonld.tsx
-
 import { SEO_CONFIG } from './seo.config';
-
-function normalizeUrl(url: string) {
-  // Accept absolute or relative, always output absolute
-  if (!url) return SEO_CONFIG.domain;
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const p = url.startsWith('/') ? url : `/${url}`;
-  return `${SEO_CONFIG.domain}${p}`;
-}
 
 export function jsonLd(json: unknown) {
   return (
@@ -63,7 +54,7 @@ export function webPageJsonLd(input: {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: input.name,
-    url: normalizeUrl(input.url),
+    url: input.url,
     description: input.description,
     isPartOf: {
       '@type': 'WebSite',
@@ -75,43 +66,25 @@ export function webPageJsonLd(input: {
 }
 
 /**
- * BreadcrumbList JSON-LD
- * Use on city -> luxury -> listing (and any future subpages)
- *
- * Example:
- * jsonLd(
- *   breadcrumbJsonLd([
- *     { name: 'Home', url: '/' },
- *     { name: 'Marbella', url: '/city/marbella' },
- *     { name: 'Luxury real estate', url: '/city/marbella/luxury-real-estate' },
- *   ])
- * )
+ * Breadcrumb JSON-LD
+ * Use relative urls like "/city/marbella" and we will convert them to absolute.
  */
 export function breadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
-  const safe = (items ?? [])
-    .map((i) => ({
-      name: String(i?.name ?? '').trim(),
-      url: normalizeUrl(String(i?.url ?? '').trim()),
-    }))
-    .filter((i) => i.name.length > 0 && i.url.length > 0);
-
-  // BreadcrumbList requires at least 2 items to be meaningful
-  if (safe.length < 2) {
-    return {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [],
-    };
+  function abs(u: string) {
+    if (!u) return SEO_CONFIG.domain;
+    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    const p = u.startsWith('/') ? u : `/${u}`;
+    return `${SEO_CONFIG.domain}${p}`;
   }
 
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: safe.map((i, idx) => ({
+    itemListElement: items.map((it, idx) => ({
       '@type': 'ListItem',
       position: idx + 1,
-      name: i.name,
-      item: i.url,
+      name: it.name,
+      item: abs(it.url),
     })),
   };
 }
