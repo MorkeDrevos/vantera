@@ -18,10 +18,7 @@ export type CityListingsStats = {
 // Curated “hero-grade” images for the Featured Markets (top 4 only)
 // This avoids relying on whatever is in cities.ts and guarantees premium visuals.
 // Non-destructive: only used in this component.
-const FEATURED_IMAGE_OVERRIDES: Record<
-  string,
-  { src: string; alt: string }
-> = {
+const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
   monaco: {
     src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2800&q=85',
     alt: 'Monaco harbour with yachts and skyline',
@@ -45,10 +42,7 @@ function withFeaturedOverrides(city: City): City {
   if (!o) return city;
   return {
     ...city,
-    image: {
-      src: o.src,
-      alt: o.alt,
-    },
+    image: { src: o.src, alt: o.alt },
   };
 }
 
@@ -58,7 +52,6 @@ export default function CityCardsVirtualizedClient({
   columns = 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3',
   initial = 18,
   step = 18,
-
   // Optional: plug this in once you have real DB/API
   statsByCity,
 }: {
@@ -69,14 +62,16 @@ export default function CityCardsVirtualizedClient({
   step?: number;
   statsByCity?: Record<string, CityListingsStats | undefined>;
 }) {
+  const input = cities ?? [];
+
   const sorted = useMemo(() => {
     // Stable sort: keep input order unless you want tier sorting later
-    return [...cities];
-  }, [cities]);
+    return [...input];
+  }, [input]);
 
   // Featured top 4:
   // - Monaco must be in top 4 (replace Marbella).
-  // - We keep it deterministic by selecting from a preferred slug list first.
+  // - Deterministic selection by preferred slug list first.
   const featured = useMemo(() => {
     const preferred = ['miami', 'new-york', 'monaco', 'dubai']; // Monaco replaces Marbella in the top 4
     const map = new Map(sorted.map((c) => [c.slug, c] as const));
@@ -111,8 +106,12 @@ export default function CityCardsVirtualizedClient({
   const [count, setCount] = useState(() => Math.min(initial, rest.length));
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  // Prevent observer from firing multiple times rapidly
+  const loadingRef = useRef(false);
+
   useEffect(() => {
     setCount(Math.min(initial, rest.length));
+    loadingRef.current = false;
   }, [initial, rest.length]);
 
   useEffect(() => {
@@ -124,12 +123,20 @@ export default function CityCardsVirtualizedClient({
         const hit = entries.some((e) => e.isIntersecting);
         if (!hit) return;
 
+        if (loadingRef.current) return;
+
+        loadingRef.current = true;
         setCount((c) => {
           const next = Math.min(c + step, rest.length);
           return next;
         });
+
+        // release lock next tick (prevents spam but still feels instant)
+        window.setTimeout(() => {
+          loadingRef.current = false;
+        }, 120);
       },
-      { root: null, rootMargin: '900px 0px', threshold: 0.01 }
+      { root: null, rootMargin: '900px 0px', threshold: 0.01 },
     );
 
     io.observe(el);
@@ -152,9 +159,7 @@ export default function CityCardsVirtualizedClient({
 
         <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
-              FEATURED MARKETS
-            </div>
+            <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FEATURED MARKETS</div>
             <div className="mt-2 text-[22px] font-semibold tracking-tight text-zinc-50 sm:text-[26px]">
               Private intelligence, city by city
             </div>
