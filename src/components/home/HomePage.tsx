@@ -9,6 +9,7 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
+
 import MarketBriefing from './MarketBriefing';
 
 import IntentHero from './IntentHero';
@@ -62,13 +63,7 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
-function SectionLabel({
-  children,
-  hint,
-}: {
-  children: ReactNode;
-  hint?: string;
-}) {
+function SectionLabel({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
     <div className="mb-5 flex items-end justify-between gap-3">
       <div>
@@ -88,76 +83,11 @@ function SectionLabel({
 
 function RoyalPortalBackdrop() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-    >
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.20),rgba(0,0,0,0.90))]" />
 
       <div className="absolute inset-0 opacity-[0.85]">
-        <div className="vantera-float-a absolute -left-[22%] top-[-26%] h-[560px] w-[980px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.24),transparent_60%)]" />
-        <div className="vantera-float-b absolute -right-[26%] top-[-20%] h-[560px] w-[1020px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.16),transparent_62%)]" />
-        <div className="vantera-float-c absolute left-[8%] bottom-[-38%] h-[760px] w-[1220px] rounded-full blur-3xl bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.18),transparent_60%)]" />
-      </div>
-
-      <div className="vantera-beam absolute -left-[20%] top-[-10%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.22] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(231,201,130,0.28)_45%,transparent_70%)]" />
-      <div className="vantera-beam absolute -right-[22%] top-[-14%] h-[140%] w-[70%] rotate-[10deg] opacity-[0.14] mix-blend-screen [background:linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.18)_45%,transparent_70%)]" />
-
-      <div className="vantera-sweep absolute inset-0 opacity-[0.22] mix-blend-screen [background:linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.24)_45%,transparent_62%)]" />
-
-      <div className="vantera-drift absolute inset-0 opacity-[0.10] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.80)_1px,transparent_0)] [background-size:20px_20px]" />
-
-      <div className="vantera-arc absolute inset-0 opacity-[0.35]">
-        <svg
-          className="h-full w-full"
-          viewBox="0 0 1200 650"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0" stopColor="rgba(231,201,130,0)" />
-              <stop offset="0.5" stopColor="rgba(231,201,130,0.38)" />
-              <stop offset="1" stopColor="rgba(231,201,130,0)" />
-            </linearGradient>
-            <linearGradient id="g2" x1="0" x2="1">
-              <stop offset="0" stopColor="rgba(120,76,255,0)" />
-              <stop offset="0.5" stopColor="rgba(120,76,255,0.30)" />
-              <stop offset="1" stopColor="rgba(120,76,255,0)" />
-            </linearGradient>
-          </defs>
-
-          <path
-            d="M-40,520 C260,300 460,260 760,360 C980,434 1110,420 1240,320"
-            fill="none"
-            stroke="url(#g1)"
-            strokeWidth="2"
-          />
-          <path
-            d="M-60,420 C220,210 520,180 780,260 C1040,340 1120,330 1260,220"
-            fill="none"
-            stroke="url(#g2)"
-            strokeWidth="2"
-          />
-          <path
-            d="M-80,560 C220,420 520,380 820,470 C1040,538 1120,526 1280,420"
-            fill="none"
-            stroke="url(#g1)"
-            strokeWidth="1.5"
-            opacity="0.7"
-          />
-        </svg>
-      </div>
-
-      <div className="absolute inset-0 [background:radial-gradient(1200px_520px_at_50%_20%,transparent_38%,rgba(0,0,0,0.86)_78%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-[#070A10]" />
-    </div>
-  );
-}
-
-function HeroVideo() {
-  return (
-    <div aria-hidden className="absolute inset-0 -z-20 overflow-hidden">
-      <video
+        <div className="vantera-float-a absolute -left-[22%] top-[-26%] hly")
         className="h-full w-full object-cover opacity-[0.62]"
         autoPlay
         muted
@@ -189,9 +119,7 @@ function PremiumBadgeRow() {
   return (
     <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-black/40 px-4 py-2 text-[11px] text-zinc-200 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
       <span className="h-1.5 w-1.5 rounded-full bg-[#E7C982]/90 shadow-[0_0_0_3px_rgba(231,201,130,0.12)]" />
-      <span className="tracking-wide text-zinc-200">
-        Luxury property intelligence
-      </span>
+      <span className="tracking-wide text-zinc-200">Luxury property intelligence</span>
       <span className="text-zinc-600">·</span>
       <span className="text-zinc-300">Truth-first verification</span>
       <span className="text-zinc-600">·</span>
@@ -214,9 +142,7 @@ function SignalStrip({
       <div className="relative flex flex-wrap items-center gap-3 px-4 py-4 sm:px-5">
         {items.map((x) => (
           <div key={x.k} className="flex items-baseline gap-2">
-            <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">
-              {x.k}
-            </div>
+            <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{x.k}</div>
             <div className="text-sm text-zinc-100">{x.v}</div>
             {x.hint ? (
               <span className="ml-1 rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-[10px] text-zinc-400">
@@ -236,9 +162,7 @@ function Pillar({ title, body }: { title: string; body: string }) {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_180px_at_20%,rgba(255,255,255,0.06),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
       <div className="relative">
-        <div className="text-[11px] tracking-[0.18em] text-zinc-400">
-          {title.toUpperCase()}
-        </div>
+        <div className="text-[11px] tracking-[0.18em] text-zinc-400">{title.toUpperCase()}</div>
         <div className="mt-2 text-zinc-200">{body}</div>
       </div>
     </div>
@@ -257,15 +181,9 @@ function TruthCardReport() {
       <div className="relative p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">
-              TRUTH CARD
-            </div>
-            <div className="mt-2 text-lg font-medium text-zinc-100">
-              Confidential property report
-            </div>
-            <div className="mt-1 text-sm text-zinc-300">
-              The facts, the risks and what to verify next - in one page.
-            </div>
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-400">TRUTH CARD</div>
+            <div className="mt-2 text-lg font-medium text-zinc-100">Confidential property report</div>
+            <div className="mt-1 text-sm text-zinc-300">The facts, the risks and what to verify next - in one page.</div>
           </div>
           <div className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-zinc-300">
             Preview
@@ -281,14 +199,9 @@ function TruthCardReport() {
             { k: 'Risk radar', v: 'Low', note: 'Noise and access look ok' },
             { k: 'Evidence', v: '3 sources', note: 'Registry, docs, on-site' },
           ].map((row) => (
-            <div
-              key={row.k}
-              className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3"
-            >
+            <div key={row.k} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
               <div className="flex items-baseline justify-between gap-3">
-                <div className="text-[10px] font-semibold tracking-[0.24em] text-zinc-500">
-                  {row.k.toUpperCase()}
-                </div>
+                <div className="text-[10px] font-semibold tracking-[0.24em] text-zinc-500">{row.k.toUpperCase()}</div>
                 <div className="text-sm text-zinc-100">{row.v}</div>
               </div>
               <div className="mt-1 text-xs text-zinc-500">{row.note}</div>
@@ -310,22 +223,14 @@ function PortalVsTruth() {
       <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
         <div className="relative">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">
-            PORTALS
-          </div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">
-            Beauty-first browsing
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PORTALS</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Beauty-first browsing</div>
           <div className="mt-2 text-sm text-zinc-300">
-            Photos, lifestyle and sales copy. Great for inspiration, weak for
-            decisions.
+            Photos, lifestyle and sales copy. Great for inspiration, weak for decisions.
           </div>
           <div className="mt-4 grid gap-2">
             {['Looks amazing', 'Easy to scroll', 'Hard to verify'].map((t) => (
-              <div
-                key={t}
-                className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200"
-              >
+              <div key={t} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
             ))}
@@ -336,26 +241,14 @@ function PortalVsTruth() {
       <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/25 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.70)]">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_300px_at_90%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
         <div className="relative">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">
-            VANTERA
-          </div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">
-            Truth-first intelligence
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Truth-first intelligence</div>
           <div className="mt-2 text-sm text-zinc-300">
-            Paperwork, price reality and risk flags - presented like a private
-            report.
+            Paperwork, price reality and risk flags - presented like a private report.
           </div>
           <div className="mt-4 grid gap-2">
-            {[
-              'Shows what is missing',
-              'Checks the price story',
-              'Protects resale value',
-            ].map((t) => (
-              <div
-                key={t}
-                className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200"
-              >
+            {['Shows what is missing', 'Checks the price story', 'Protects resale value'].map((t) => (
+              <div key={t} className="rounded-2xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[13px] text-zinc-200">
                 {t}
               </div>
             ))}
@@ -386,12 +279,8 @@ function FeatureCard({
       </div>
 
       <div className="relative">
-        <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
-          {eyebrow.toUpperCase()}
-        </div>
-        <div className="mt-2 text-lg font-medium text-zinc-100 sm:text-xl">
-          {title}
-        </div>
+        <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">{eyebrow.toUpperCase()}</div>
+        <div className="mt-2 text-lg font-medium text-zinc-100 sm:text-xl">{title}</div>
         <div className="mt-2 text-sm leading-relaxed text-zinc-300">{body}</div>
 
         <div className="mt-4 grid gap-2">
@@ -421,24 +310,16 @@ function CTA() {
 
       <div className="relative grid gap-6 p-6 lg:grid-cols-12 lg:items-center">
         <div className="lg:col-span-7">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">
-            PRIVATE LAUNCH
-          </div>
-          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">
-            The portal that protects the decision
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE LAUNCH</div>
+          <div className="mt-2 text-2xl font-semibold text-zinc-100 sm:text-3xl">The portal that protects the decision</div>
           <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
-            Vantera is building the intelligence layer luxury real estate never
-            had. A quiet system that makes buyers smarter, sellers cleaner and
-            advisors faster.
+            Vantera is building the intelligence layer luxury real estate never had. A quiet system that makes buyers smarter,
+            sellers cleaner and advisors faster.
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2 text-[12px] text-zinc-200">
             {['Buyers', 'Sellers', 'Advisors', 'Developers'].map((t) => (
-              <span
-                key={t}
-                className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5"
-              >
+              <span key={t} className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5">
                 {t}
               </span>
             ))}
@@ -449,12 +330,8 @@ function CTA() {
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
-                  STATUS
-                </div>
-                <div className="mt-1 text-sm text-zinc-200">
-                  Private build, expanding coverage
-                </div>
+                <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">STATUS</div>
+                <div className="mt-1 text-sm text-zinc-200">Private build, expanding coverage</div>
               </div>
               <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300">
                 Coming soon
@@ -468,21 +345,15 @@ function CTA() {
                 { k: 'Permit checks', v: 'Phase 2' },
                 { k: 'Price models', v: 'Phase 2' },
               ].map((x) => (
-                <div
-                  key={x.k}
-                  className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2"
-                >
-                  <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">
-                    {x.k.toUpperCase()}
-                  </div>
+                <div key={x.k} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2">
+                  <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{x.k.toUpperCase()}</div>
                   <div className="mt-1 text-sm text-zinc-100">{x.v}</div>
                 </div>
               ))}
             </div>
 
             <div className="mt-3 text-xs text-zinc-500">
-              For now: explore coverage, open city intelligence and use the
-              property search to jump straight into results.
+              For now: explore coverage, open city intelligence and use the property search to jump straight into listings.
             </div>
           </div>
         </div>
@@ -518,48 +389,27 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 </h1>
 
                 <p className="mt-4 max-w-[860px] text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
-                  Vantera is a quiet intelligence surface for buyers, sellers and
-                  advisors who value signal over noise.
-                  <span className="text-zinc-500">
-                    {' '}
-                    Built to model value, liquidity and risk without theatre.
-                  </span>
+                  Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
+                  <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* RESTORED: property search */}
+                {/* RESTORED: Vantera "revolutionary" property search */}
                 <div className="mt-6 max-w-[980px] lg:max-w-[1120px]">
-                  <WorldSearchHero
-                    cities={cities as any}
-                    onKeepScanningId="explore-index"
-                  />
+                  <WorldSearchHero cities={cities as any} onKeepScanningId="explore-index" />
                 </div>
 
                 {/* Intent console */}
                 <div className="mt-4 max-w-[980px] lg:max-w-[1120px]">
-                  <IntentHero
-                    cities={cities as any}
-                    defaultTop={6}
-                    onKeepScanningId="explore-index"
-                  />
+                  <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
                 </div>
 
                 <div className="mt-4 max-w-[980px] lg:max-w-[1120px]">
                   <SignalStrip
                     items={[
-                      {
-                        k: 'COVERAGE',
-                        v: <span className="text-zinc-100">{cities.length} cities</span>,
-                      },
+                      { k: 'COVERAGE', v: <span className="text-zinc-100">{cities.length} cities</span> },
                       { k: 'REGIONS', v: <span className="text-zinc-100">{regionCount}</span> },
-                      {
-                        k: 'TIMEZONES',
-                        v: <span className="text-zinc-100">{timezoneCount}</span>,
-                      },
-                      {
-                        k: 'UPDATES',
-                        v: <span className="text-zinc-100">Live</span>,
-                        hint: 'private index',
-                      },
+                      { k: 'TIMEZONES', v: <span className="text-zinc-100">{timezoneCount}</span> },
+                      { k: 'UPDATES', v: <span className="text-zinc-100">Live</span>, hint: 'private index' },
                       { k: 'PROOF', v: <span className="text-zinc-100">Registry + docs</span> },
                     ]}
                   />
@@ -580,9 +430,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             </div>
 
             <div className="mt-10">
-              <SectionLabel hint="This is why we sit above luxury portals">
-                Portal vs intelligence
-              </SectionLabel>
+              <SectionLabel hint="This is why we sit above luxury portals">Portal vs intelligence</SectionLabel>
               <PortalVsTruth />
             </div>
           </div>
@@ -620,47 +468,31 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
 
         <section className="mt-10 sm:mt-12">
-          <SectionLabel hint="Believable, not fake listings">
-            Featured intelligence
-          </SectionLabel>
+          <SectionLabel hint="Believable, not fake listings">Featured intelligence</SectionLabel>
           <FeaturedIntelligencePanel />
         </section>
 
         <section className="mt-14 sm:mt-16">
-          <SectionLabel hint="Plain language, high precision">
-            Why Vantera wins
-          </SectionLabel>
+          <SectionLabel hint="Plain language, high precision">Why Vantera wins</SectionLabel>
 
           <div className="grid gap-4 lg:grid-cols-3">
             <FeatureCard
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </section>
@@ -677,26 +509,16 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
             <div className="relative flex items-start justify-between gap-4">
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">
-                  CITIES
-                </div>
-                <div className="mt-2 text-lg font-medium text-zinc-100">
-                  Browse coverage with signal
-                </div>
+                <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">CITIES</div>
+                <div className="mt-2 text-lg font-medium text-zinc-100">Browse coverage with signal</div>
                 <div className="mt-1 text-sm text-zinc-300">
-                  Fast scan for where value is forming, where risk is hiding and
-                  where liquidity is strongest.
+                  Fast scan for where value is forming, where risk is hiding and where liquidity is strongest.
                 </div>
               </div>
 
               <div className="hidden sm:block">
                 <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
-                  <Image
-                    src="/brand/vantera-mark.png"
-                    alt="Vantera"
-                    fill
-                    className="object-cover"
-                  />
+                  <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
                 </div>
               </div>
             </div>
