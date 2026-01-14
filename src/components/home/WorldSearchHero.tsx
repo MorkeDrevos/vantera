@@ -19,6 +19,8 @@ type Token = {
   kind: 'location' | 'budget' | 'feature' | 'intent' | 'risk' | 'timeframe';
 };
 
+type PreferenceMode = 'lifestyle' | 'balanced' | 'market';
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
@@ -56,7 +58,7 @@ function detectBudget(text: string) {
 }
 
 function splitWish(text: string) {
-  // Split by commas, dots, or " and " when long
+  // Split by commas, dots, or " and "
   const raw = text
     .replace(/\s+/g, ' ')
     .replace(/\s+and\s+/gi, ', ')
@@ -81,6 +83,16 @@ function prettyMoney(n?: number | null, currency?: string | null) {
   }
 }
 
+function preferenceToSignalRisk(p: PreferenceMode) {
+  // Keep the engine, change the surface.
+  // lifestyle = more lifestyle weight, lower risk
+  // balanced = default
+  // market = more signal weight, higher risk
+  if (p === 'lifestyle') return { signal: 35, risk: 25 };
+  if (p === 'market') return { signal: 75, risk: 60 };
+  return { signal: 60, risk: 35 };
+}
+
 export default function WorldSearchHero({
   cities,
   onKeepScanningId,
@@ -94,10 +106,16 @@ export default function WorldSearchHero({
 
   const [q, setQ] = useState('');
   const [tokens, setTokens] = useState<Token[]>([]);
-  const [risk, setRisk] = useState(35); // 0 safe, 100 aggressive
-  const [signal, setSignal] = useState(65); // 0 lifestyle, 100 signal
+
+  // Engine controls (kept, but hidden by default)
+  const [preference, setPreference] = useState<PreferenceMode>('balanced');
+  const [risk, setRisk] = useState(35);
+  const [signal, setSignal] = useState(65);
+
   const [budgetMax, setBudgetMax] = useState<number | null>(null);
   const [budgetCurrency, setBudgetCurrency] = useState<string>('EUR');
+
+  const [refineOpen, setRefineOpen] = useState(false);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -111,19 +129,19 @@ export default function WorldSearchHero({
 
   const topCities = useMemo(() => {
     const sorted = [...(cities ?? [])].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
-    return sorted.slice(0, 8);
+    return sorted.slice(0, 6);
   }, [cities]);
 
-  const suggestions = useMemo(() => {
+  const citySuggestions = useMemo(() => {
     const qq = normalize(q);
-    if (!qq) return topCities.slice(0, 6);
+    if (!qq) return topCities;
     return cityIndex
       .filter((c) => c._n.includes(qq))
-      .slice(0, 8)
+      .slice(0, 6)
       .map(({ _n, ...rest }) => rest);
   }, [q, cityIndex, topCities]);
 
-  // Convert the wishline into tokens (lightweight)
+  // Convert the wishline into budget (quietly)
   useEffect(() => {
     const t = q.trim();
     if (!t) return;
@@ -134,6 +152,13 @@ export default function WorldSearchHero({
       setBudgetMax(b.max);
     }
   }, [q]);
+
+  // When preference changes, map to engine values
+  useEffect(() => {
+    const mapped = preferenceToSignalRisk(preference);
+    setSignal(mapped.signal);
+    setRisk(mapped.risk);
+  }, [preference]);
 
   function addToken(label: string, kind: Token['kind']) {
     const clean = label.trim();
@@ -153,8 +178,10 @@ export default function WorldSearchHero({
     setQ('');
     setTokens([]);
     setBudgetMax(null);
+    setPreference('balanced');
     setRisk(35);
     setSignal(65);
+    setRefineOpen(false);
     inputRef.current?.focus();
   }
 
@@ -162,7 +189,6 @@ export default function WorldSearchHero({
     const parts = splitWish(q);
     if (!parts.length) return;
 
-    // Put any city matches in location, others as features.
     for (const p of parts) {
       const matchCity = cityIndex.find((c) => c._n.includes(normalize(p)));
       if (matchCity) addToken(matchCity.name, 'location');
@@ -192,10 +218,10 @@ export default function WorldSearchHero({
       params.set('cur', budgetCurrency);
     }
 
-    params.set('risk', String(risk));
-    params.set('signal', String(signal));
+    // Keep your existing engine params for compatibility
+    params.set('risk', String(clamp(risk, 0, 100)));
+    params.set('signal', String(clamp(signal, 0, 100)));
 
-    // Use /browse as the canonical destination (matches your nav).
     router.push(`/browse?${params.toString()}`);
   }
 
@@ -208,9 +234,18 @@ export default function WorldSearchHero({
           ? 'border-amber-300/18 bg-amber-500/10 text-amber-100/95'
           : 'border-white/12 bg-white/[0.05] text-zinc-200/90';
 
+  const hasChips = Boolean(budgetMax || tokens.length);
+
+  const mandates = [
+    { label: 'Quiet accumulation', hint: 'low noise, high signal', value: 'Quiet accumulation' },
+    { label: 'Low-noise prime', hint: 'clean demand structure', value: 'Low-noise prime' },
+    { label: 'Ahead of cycle', hint: 'early momentum, disciplined', value: 'Ahead of cycle' },
+    { label: 'Verification strong', hint: 'truth-first coverage', value: 'Verification strong' },
+    { label: 'Liquidity building', hint: 'velocity-led signals', value: 'Liquidity building' },
+  ];
+
   return (
     <div className={cx('relative', className)}>
-      {/* Frame */}
       <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] shadow-[0_34px_120px_rgba(0,0,0,0.60)]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_22%_0%,rgba(255,255,255,0.08),transparent_60%)]" />
@@ -224,20 +259,35 @@ export default function WorldSearchHero({
             <div>
               <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">SEARCH</div>
               <div className="mt-2 text-[15px] font-medium text-zinc-100 sm:text-base">
-                Describe the place you want. We translate it into signal.
+                Describe the place you want. Vantera handles the structure.
               </div>
               <div className="mt-1 text-[12px] text-zinc-400">
-                Not “filters”. A wishline that becomes structured intelligence.
+                A wishline becomes a private intelligence brief.
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300 hover:border-white/16 hover:bg-white/[0.04]"
-            >
-              Reset
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setRefineOpen((v) => !v)}
+                className={cx(
+                  'rounded-full border px-3 py-1.5 text-[11px] text-zinc-200',
+                  refineOpen
+                    ? 'border-white/18 bg-white/[0.06]'
+                    : 'border-white/10 bg-black/25 hover:border-white/16 hover:bg-white/[0.04]',
+                )}
+              >
+                Refine
+              </button>
+
+              <button
+                type="button"
+                onClick={clearAll}
+                className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-[11px] text-zinc-300 hover:border-white/16 hover:bg-white/[0.04]"
+              >
+                Reset
+              </button>
+            </div>
           </div>
 
           {/* Input */}
@@ -262,24 +312,14 @@ export default function WorldSearchHero({
                       if (q.trim().length >= 3) goSearch();
                     }
                     if (e.key === 'Tab') {
-                      // Tab = absorb wishline into tokens (feels “new”)
                       e.preventDefault();
                       absorbWishline();
                     }
                   }}
-                  placeholder="Oceanfront, family safe, walkable, under €5m, low noise..."
+                  placeholder="Oceanfront, quiet, family-safe, walkable, under €5m"
                   className="h-10 w-full bg-transparent text-[14px] text-zinc-100 placeholder:text-zinc-500 outline-none"
                   aria-label="World search"
                 />
-
-                <button
-                  type="button"
-                  onClick={absorbWishline}
-                  className="hidden sm:inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-[11px] text-zinc-200 hover:border-white/16 hover:bg-white/[0.06]"
-                  title="Convert wishline to tokens"
-                >
-                  Tokenise (Tab)
-                </button>
 
                 <button
                   type="button"
@@ -290,31 +330,33 @@ export default function WorldSearchHero({
                 </button>
               </div>
 
-              {/* Token row */}
-              <div className="relative border-t border-white/10 px-3 py-3">
-                <div className="flex flex-wrap gap-2">
-                  {budgetMax ? (
-                    <span
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] leading-none backdrop-blur-2xl',
-                        tokenPillTone('budget'),
-                      )}
-                    >
-                      <span className="text-zinc-300">Max</span>
-                      <span className="font-mono text-zinc-100">{prettyMoney(budgetMax, budgetCurrency)}</span>
-                      <button
-                        type="button"
-                        onClick={() => setBudgetMax(null)}
-                        className="ml-1 rounded-full border border-white/10 bg-black/25 px-1.5 py-0.5 text-[10px] text-zinc-300 hover:bg-white/[0.06]"
-                        aria-label="Remove budget"
+              {/* Chips (only when they exist, no “tips” block) */}
+              {hasChips ? (
+                <div className="relative border-t border-white/10 px-3 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    {budgetMax ? (
+                      <span
+                        className={cx(
+                          'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] leading-none backdrop-blur-2xl',
+                          tokenPillTone('budget'),
+                        )}
                       >
-                        ×
-                      </button>
-                    </span>
-                  ) : null}
+                        <span className="text-zinc-300">Max</span>
+                        <span className="font-mono text-zinc-100">
+                          {prettyMoney(budgetMax, budgetCurrency)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setBudgetMax(null)}
+                          className="ml-1 rounded-full border border-white/10 bg-black/25 px-1.5 py-0.5 text-[10px] text-zinc-300 hover:bg-white/[0.06]"
+                          aria-label="Remove budget"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ) : null}
 
-                  {tokens.length ? (
-                    tokens.map((t) => (
+                    {tokens.map((t) => (
                       <span
                         key={t.id}
                         className={cx(
@@ -332,61 +374,38 @@ export default function WorldSearchHero({
                           ×
                         </button>
                       </span>
-                    ))
-                  ) : (
-                    <div className="text-[11px] text-zinc-500">
-                      Tip: type a wishline and press <span className="text-zinc-300">Tab</span> to convert into tokens.
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
+              ) : null}
+            </div>
+
+            {/* Quiet helper row */}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+              <div>
+                Press <span className="text-zinc-200">Tab</span> to structure your wishline.
+              </div>
+              <div className="text-zinc-500">
+                Preference: <span className="text-zinc-200">{preference === 'market' ? 'Market-opportunistic' : preference === 'lifestyle' ? 'Lifestyle-first' : 'Balanced'}</span>
               </div>
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SIGNAL BIAS</div>
-                <div className="font-mono text-[11px] text-zinc-300">{signal}%</div>
-              </div>
-              <div className="mt-2 text-[12px] text-zinc-400">Left = lifestyle. Right = market signal.</div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={signal}
-                onChange={(e) => setSignal(clamp(Number(e.target.value), 0, 100))}
-                className="mt-3 w-full accent-white"
-              />
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">RISK POSTURE</div>
-                <div className="font-mono text-[11px] text-zinc-300">{risk}%</div>
-              </div>
-              <div className="mt-2 text-[12px] text-zinc-400">Lower = stable. Higher = asymmetric upside.</div>
-              <input
-                type="range"
-                min={0}
-                max={100}
-                value={risk}
-                onChange={(e) => setRisk(clamp(Number(e.target.value), 0, 100))}
-                className="mt-3 w-full accent-white"
-              />
-            </div>
-          </div>
-
-          {/* “Never seen before” suggestion rail */}
+          {/* Popular paths (calm, limited) */}
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">SUGGESTIONS</div>
-              <div className="text-[11px] text-zinc-500">Click a city to lock location</div>
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">POPULAR PATHS</div>
+              <button
+                type="button"
+                onClick={() => setRefineOpen(true)}
+                className="text-[11px] text-zinc-400 hover:text-zinc-200"
+              >
+                Refine →
+              </button>
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
-              {suggestions.map((c) => (
+              {topCities.slice(0, 4).map((c) => (
                 <button
                   key={c.slug}
                   type="button"
@@ -403,29 +422,132 @@ export default function WorldSearchHero({
                 </button>
               ))}
             </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {[
-                'Oceanfront quiet',
-                'Ultra-prime walkable',
-                'Family safe schools',
-                'Tax efficient',
-                'Low noise, high privacy',
-                'Investor liquid',
-              ].map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => addToken(t, 'intent')}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-300 hover:border-white/16 hover:bg-white/[0.06]"
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Footer actions */}
+          {/* Refine drawer (progressive disclosure) */}
+          {refineOpen ? (
+            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/25">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-300">REFINE</div>
+                  <div className="mt-1 text-[12px] text-zinc-400">
+                    Optional controls. Vantera will still work without them.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRefineOpen(false)}
+                  className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200 hover:bg-white/[0.07]"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid gap-4 p-4 sm:grid-cols-2">
+                {/* Preference */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">PREFERENCE</div>
+                  <div className="mt-2 text-[12px] text-zinc-400">
+                    Choose the lens. The model adapts behind the scenes.
+                  </div>
+
+                  <div className="mt-3 grid gap-2">
+                    {[
+                      { k: 'lifestyle' as const, title: 'Lifestyle-first', sub: 'comfort, calm, fit' },
+                      { k: 'balanced' as const, title: 'Balanced', sub: 'default intelligence' },
+                      { k: 'market' as const, title: 'Market-opportunistic', sub: 'signal, timing, upside' },
+                    ].map((x) => (
+                      <button
+                        key={x.k}
+                        type="button"
+                        onClick={() => setPreference(x.k)}
+                        className={cx(
+                          'w-full rounded-2xl border px-3 py-3 text-left transition',
+                          preference === x.k
+                            ? 'border-white/18 bg-white/[0.06]'
+                            : 'border-white/10 bg-black/20 hover:border-white/16 hover:bg-white/[0.04]',
+                        )}
+                      >
+                        <div className="text-[12px] font-semibold text-zinc-100">{x.title}</div>
+                        <div className="mt-1 text-[11px] text-zinc-400">{x.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Keep engine values invisible but deterministic */}
+                  <div className="mt-3 text-[11px] text-zinc-500">
+                    Engine: <span className="font-mono text-zinc-200">signal {signal}</span>,{' '}
+                    <span className="font-mono text-zinc-200">risk {risk}</span>
+                  </div>
+                </div>
+
+                {/* Mandate + lock city */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+                  <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">MANDATE</div>
+                  <div className="mt-2 text-[12px] text-zinc-400">
+                    Optional. Pick one, or leave it to Vantera.
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {mandates.map((m) => (
+                      <button
+                        key={m.value}
+                        type="button"
+                        onClick={() => addToken(m.value, 'intent')}
+                        className="rounded-full border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-zinc-200 hover:border-white/16 hover:bg-white/[0.05]"
+                        title={m.hint}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 text-[11px] font-semibold tracking-[0.22em] text-zinc-400">
+                    LOCK A CITY
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {citySuggestions.map((c) => (
+                      <button
+                        key={c.slug}
+                        type="button"
+                        onClick={() => {
+                          addToken(c.name, 'location');
+                          inputRef.current?.focus();
+                        }}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-300 hover:border-white/16 hover:bg-white/[0.06]"
+                        title={`${c.name}, ${c.country}`}
+                      >
+                        <span className="text-zinc-100">{c.name}</span>
+                        <span className="text-zinc-600"> · </span>
+                        <span className="text-zinc-400">{c.country}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={absorbWishline}
+                      className="rounded-full border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-zinc-200 hover:border-white/16 hover:bg-white/[0.04]"
+                    >
+                      Structure wishline (Tab)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => goSearch()}
+                      className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-[11px] font-semibold tracking-[0.14em] text-zinc-100 hover:border-white/20 hover:bg-white/[0.08]"
+                    >
+                      OPEN RESULTS →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Footer actions (kept, but calmer) */}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
