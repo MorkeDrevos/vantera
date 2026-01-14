@@ -63,8 +63,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     blurb:
       'Prime waterfront districts, institutional buyer flow and the reference implementation for liquidity-led signals.',
     image: {
-      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Miami skyline across the water',
+      // Crisp skyline with strong contrast
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Miami Metro skyline at golden hour',
     },
     citySlugs: ['miami', 'new-york'],
   },
@@ -80,8 +81,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     blurb:
       'Prime coastal markets, verified supply signals and a disciplined lens for second-home and relocation demand.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Costa del Sol coastline',
+      // Cleaner, more “premium coast” look than the previous generic beach
+      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Costa del Sol coastline at dusk',
     },
     citySlugs: ['marbella', 'benahavis', 'estepona', 'ibiza'],
   },
@@ -96,8 +98,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     headline: 'Coverage expanding',
     blurb: 'A dense coastal luxury cluster. Market structure first, listings as the dataset matures.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'French Riviera coastline',
+      // More editorial coastline framing
+      src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2600&q=85',
+      alt: 'French Riviera coastal hillside and sea',
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
   },
@@ -114,8 +117,8 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     headline: 'Coverage expanding',
     blurb: 'Trophy lakefront assets. Market structure first, verified inventory later.',
     image: {
-      src: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Lake Como shoreline',
+      src: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Lake Como shoreline with villas',
     },
     citySlugs: ['lake-como'],
   },
@@ -130,8 +133,8 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     headline: 'Coverage expanding',
     blurb: 'Seasonal prime markets with strict truth signals and high verification standards.',
     image: {
-      src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Snowy mountain landscape',
+      src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Swiss Alps winter ridgeline',
     },
     citySlugs: ['swiss-alps'],
   },
@@ -139,6 +142,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
 
 /**
  * Core launch cities (Tiers 0-2)
+ *
+ * Note:
+ * - Monaco is intentionally promoted into the top 4 (replacing Marbella) via priority + list ordering.
  */
 export const CITIES: City[] = [
   // Tier 0 (flagship)
@@ -155,7 +161,7 @@ export const CITIES: City[] = [
     blurb:
       'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
     image: {
-      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2600&q=85',
       alt: 'Miami skyline across the water',
     },
   },
@@ -171,26 +177,28 @@ export const CITIES: City[] = [
     clusterSlug: 'miami-metro',
     blurb: 'Prime districts only, with a truth-first lens and disciplined cross-border comparables.',
     image: {
-      src: 'https://images.unsplash.com/photo-1533106418989-88406c7cc8ca?auto=format&fit=crop&w=2400&q=80',
-      alt: 'New York skyline',
+      src: 'https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=2600&q=85',
+      alt: 'New York skyline at blue hour',
     },
   },
 
-  // Tier 1
+  // Tier 1 (Monaco promoted into top 4)
   {
-    slug: 'marbella',
-    name: 'Marbella',
-    country: 'Spain',
+    slug: 'monaco',
+    name: 'Monaco',
+    country: 'Monaco',
     region: 'Europe',
-    tz: 'Europe/Madrid',
+    // Monaco aligns with Paris time. Using a widely-supported IANA tz avoids Intl issues.
+    tz: 'Europe/Paris',
     tier: 'TIER_1',
     status: 'TRACKING',
-    priority: 80,
-    clusterSlug: 'costa-del-sol',
-    blurb: 'Prime coastal living and global luxury demand. Signals tracking with disciplined verification.',
+    // Promote into top 4: above Marbella/Benahavis/Estepona
+    priority: 86,
+    blurb: 'Ultra-prime density and global capital concentration. Verified signals only.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Marbella coastline and Mediterranean horizon',
+      // Stronger "yachts + city" premium feel
+      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Monaco harbour with yachts and skyline',
     },
   },
   {
@@ -205,39 +213,9 @@ export const CITIES: City[] = [
     clusterSlug: 'costa-del-sol',
     blurb: 'Gated estates, golf corridors and hillside privacy above the coast.',
     image: {
-      src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2400&q=80',
+      // More cinematic hills than the previous generic landscape
+      src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2600&q=85',
       alt: 'Hills and valleys above the Costa del Sol',
-    },
-  },
-  {
-    slug: 'estepona',
-    name: 'Estepona',
-    country: 'Spain',
-    region: 'Europe',
-    tz: 'Europe/Madrid',
-    tier: 'TIER_1',
-    status: 'TRACKING',
-    priority: 76,
-    clusterSlug: 'costa-del-sol',
-    blurb: 'Beachfront modern builds and a calmer luxury rhythm with strong value.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Sunlit coastal promenade on the Costa del Sol',
-    },
-  },
-  {
-    slug: 'monaco',
-    name: 'Monaco',
-    country: 'Monaco',
-    region: 'Europe',
-    tz: 'Europe/Monaco',
-    tier: 'TIER_1',
-    status: 'TRACKING',
-    priority: 74,
-    blurb: 'Ultra-prime density and global capital concentration.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Monaco harbour with yachts and city skyline',
     },
   },
   {
@@ -248,10 +226,11 @@ export const CITIES: City[] = [
     tz: 'Asia/Dubai',
     tier: 'TIER_1',
     status: 'TRACKING',
-    priority: 72,
+    priority: 76,
     blurb: 'Modern skyline, speed and scale. Prime districts behave like a global asset class.',
     image: {
-      src: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=2400&q=80',
+      // Cleaner skyline shot, less touristy
+      src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Dubai skyline at dusk',
     },
   },
@@ -263,11 +242,46 @@ export const CITIES: City[] = [
     tz: 'Europe/London',
     tier: 'TIER_1',
     status: 'TRACKING',
-    priority: 70,
+    priority: 74,
     blurb: 'A global capital with deep prime neighbourhood structure and cross-border demand.',
     image: {
-      src: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=2400&q=80',
-      alt: 'London skyline with river',
+      src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2600&q=85',
+      alt: 'London skyline with river and lights',
+    },
+  },
+
+  // Marbella remains core, but no longer in the top 4
+  {
+    slug: 'marbella',
+    name: 'Marbella',
+    country: 'Spain',
+    region: 'Europe',
+    tz: 'Europe/Madrid',
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 70,
+    clusterSlug: 'costa-del-sol',
+    blurb: 'Prime coastal living and global luxury demand. Signals tracking with disciplined verification.',
+    image: {
+      // More premium Mediterranean palette than the older generic coast
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Mediterranean coastline near Marbella',
+    },
+  },
+  {
+    slug: 'estepona',
+    name: 'Estepona',
+    country: 'Spain',
+    region: 'Europe',
+    tz: 'Europe/Madrid',
+    tier: 'TIER_1',
+    status: 'TRACKING',
+    priority: 68,
+    clusterSlug: 'costa-del-sol',
+    blurb: 'Beachfront modern builds and a calmer luxury rhythm with strong value.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Sunlit coastal promenade on the Costa del Sol',
     },
   },
 
@@ -284,8 +298,8 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Riviera prime and yachting density. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Cannes waterfront',
+      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Cannes-style marina and waterfront',
     },
   },
   {
@@ -300,8 +314,8 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Coastal lifestyle and prime districts. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Nice coastline and Promenade-style waterfront',
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Nice coastline with promenade and sea',
     },
   },
   {
@@ -316,8 +330,8 @@ export const CITIES: City[] = [
     clusterSlug: 'french-riviera',
     blurb: 'Ultra-prime seasonal market. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
-      alt: 'Saint-Tropez harbour',
+      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Saint-Tropez harbour with yachts',
     },
   },
 ];
@@ -337,7 +351,7 @@ export const WATCHLIST_CITIES: City[] = [
     priority: 30,
     blurb: 'Prime districts only. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2600&q=85',
       alt: 'Paris Eiffel Tower view',
     },
   },
@@ -353,7 +367,7 @@ export const WATCHLIST_CITIES: City[] = [
     clusterSlug: 'lake-como-region',
     blurb: 'Trophy lakefront assets. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=2600&q=85',
       alt: 'Lake Como shoreline',
     },
   },
@@ -369,7 +383,7 @@ export const WATCHLIST_CITIES: City[] = [
     clusterSlug: 'swiss-alps-region',
     blurb: 'Seasonal prime with strict truth signals. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2600&q=85',
       alt: 'Snowy mountain landscape',
     },
   },
@@ -385,7 +399,7 @@ export const WATCHLIST_CITIES: City[] = [
     clusterSlug: 'costa-del-sol',
     blurb: 'Ultra-prime seasonal market. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Ibiza coastline',
     },
   },
@@ -400,7 +414,7 @@ export const WATCHLIST_CITIES: City[] = [
     priority: 15,
     blurb: 'Global capital with prime-only coverage. Coverage expanding.',
     image: {
-      src: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d0?auto=format&fit=crop&w=2400&q=80',
+      src: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d0?auto=format&fit=crop&w=2600&q=85',
       alt: 'Singapore skyline at dusk',
     },
   },
