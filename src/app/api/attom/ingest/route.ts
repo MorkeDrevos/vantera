@@ -152,7 +152,6 @@ export async function GET(req: Request) {
   });
 
   // 1) Radius search near Miami
-  // ATTOM "Address endpoint" example supports latitude/longitude/radius.  [oai_citation:3‡ATTOM Cloud Help](https://cloud-help.attomdata.com/article/598-endpoints?utm_source=chatgpt.com)
   const addressRes = await attomFetchJson<any>({
     path: '/address',
     query: {
@@ -197,7 +196,7 @@ export async function GET(req: Request) {
         continue;
       }
 
-      // 2) Property detail by address1/address2.  [oai_citation:4‡ATTOM Developer Platform](https://api.developer.attomdata.com/documentation?utm_source=chatgpt.com)
+      // 2) Property detail by address1/address2
       const detailRes = await attomFetchJson<any>({
         path: '/property/detail',
         query: {
@@ -233,7 +232,11 @@ export async function GET(req: Request) {
 
       const created = await prisma.listing.create({
         data: {
-          cityId: city.id,
+          // IMPORTANT: use relation connect, not cityId (fixes TypeScript "never" error)
+          city: {
+            connect: { id: city.id },
+          },
+
           status: 'LIVE',
           visibility: 'PUBLIC',
           verification: 'SELF_REPORTED',
@@ -258,7 +261,7 @@ export async function GET(req: Request) {
 
           // If we got a value, keep it as "price" with USD (temporary)
           price: d.avm ?? undefined,
-          currency: d.avm ? 'USD' : 'USD',
+          currency: 'USD',
         },
         select: { id: true },
       });
