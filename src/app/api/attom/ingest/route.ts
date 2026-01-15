@@ -107,168 +107,211 @@ function extractDetail(detail: any) {
   return { beds, baths, livingSqft, lotSqft, propertyType, avm, attomId };
 }
 
+function summarizeAttomError(e: any) {
+  const msg = e?.message || String(e);
+  const status = e?.status || e?.response?.status || e?.cause?.status || null;
+  const code = e?.code || null;
+  return { message: msg, status, code };
+}
+
 export async function GET(req: Request) {
-  const url = new URL(req.url);
+  try {
+    const url = new URL(req.url);
 
-  const cityKey = (url.searchParams.get('city') || 'miami').toLowerCase();
-  const radius = Number(url.searchParams.get('radius') || '0.5'); // miles
-  const limit = Math.min(Number(url.searchParams.get('limit') || '25'), 100);
-  const dryRun = url.searchParams.get('dryRun') === '1';
+    const cityKey = (url.searchParams.get('city') || 'miami').toLowerCase();
+    const radius = Number(url.searchParams.get('radius') || '0.5'); // miles
+    const limit = Math.min(Number(url.searchParams.get('limit') || '25'), 100);
+    const dryRun = url.searchParams.get('dryRun') === '1';
 
-  const preset = CITY_PRESETS[cityKey as keyof typeof CITY_PRESETS];
-  if (!preset) {
+    // Hard env guard so we never crash with a blank 500
+    if (!process.env.ATTOM_API_KEY) {
+      return NextResponse.json(
+        { ok: false, error: 'ATTOM_API_KEY missing in this environment (Preview/Development/Production)' },
+        { status: 500 },
+      );
+    }
+
+    const preset = CITY_PRESETS[cityKey as keyof typeof CITY_PRESETS];
+    if (!preset) {
+      return NextResponse.json(
+        { ok: false, error: `Unknown city preset "${cityKey}". Try: miami.` },
+        { status: 400 },
+      );
+    }
+
+    // Ensure city exists (explicit mapping keeps Prisma types happy)
+    const city = await prisma.city.upsert({
+      where: { slug: preset.slug },
+      update: {
+        name: preset.name,
+        slug: preset.slug,
+        country: preset.country,
+        region: preset.region,
+        tz: preset.tz,
+        lat: preset.lat,
+        lng: preset.lng,
+      },
+      create: {
+        name: preset.name,
+        slug: preset.slug,
+        country: preset.country,
+        region: preset.region,
+        tz: preset.tz,
+        lat: preset.lat,
+        lng: preset.lng,
+      },
+      select: { id: true, slug: true, name: true, country: true, region: true },
+    });
+
+    // 1) Radius search near preset center
+    let addressRes: any;
+    try {
+      addressRes = await attomFetchJson<any>({
+        path: '/address',
+        query: {
+          latitude: preset.lat,
+          longitude: preset.lng,
+          radius,
+        },
+      });
+    } catch (e: any) {
+      return NextResponse.json(
+        { ok: false, step: 'attom:/address', ...summarizeAttomError(e) },
+        { status: 502 },
+      );
+    }
+
+    const rawItems: any[] =
+      addressRes?.property || addressRes?.properties || addressRes?.address || addressRes?.results || [];
+
+    const items = Array.isArray(rawItems) ? rawItems.slice(0, limit) : [];
+
+    let scanned = items.length;
+    let created = 0;
+    let skipped = 0;
+    let errors = 0;
+    const errorSamples: Array<{ step: string; message: string }> = [];
+
+    for (const item of items) {
+      try {
+        const { address1, address2, lat, lng } = extractAddressItem(item);
+
+        if (!address1 || !address2) {
+          skipped += 1;
+          continue;
+        }
+
+        const address = safeJoin([address1, address2], ', ');
+        if (!address) {
+          skipped += 1;
+          continue;
+        }
+
+        // Dedupe (Listing model may NOT expose cityId scalar; use relation filter)
+        const existing = await prisma.listing.findFirst({
+          where: {
+            address,
+            city: { is: { id: city.id } },
+          },
+          select: { id: true },
+        });
+
+        if (existing) {
+          skipped += 1;
+          continue;
+        }
+
+        // 2) Property detail by address
+        let detailRes: any;
+        try {
+          detailRes = await attomFetchJson<any>({
+            path: '/property/detail',
+            query: { address1, address2 },
+          });
+        } catch (e: any) {
+          errors += 1;
+          if (errorSamples.length < 5) {
+            errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
+          }
+          continue;
+        }
+
+        const detail = detailRes?.property?.[0] || detailRes?.property || detailRes || null;
+        const d = extractDetail(detail);
+
+        // Stable slug: city + address (+ attomId if present)
+        const slug = slugify(`${preset.slug}-${address}${d.attomId ? `-${d.attomId}` : ''}`);
+
+        const title = `${preset.name} · ${d.propertyType ?? 'Property'}`;
+        const description = ['ATTOM import (trial)', d.attomId ? `ATTOM ID: ${d.attomId}` : null, address]
+          .filter(Boolean)
+          .join('\n');
+
+        if (dryRun) {
+          created += 1;
+          continue;
+        }
+
+        await prisma.listing.create({
+          data: {
+            slug,
+            source: 'attom',
+
+            // IMPORTANT: connect relation (avoids TS "never" errors when cityId scalar is not available)
+            city: { connect: { id: city.id } },
+
+            status: 'LIVE',
+            visibility: 'PUBLIC',
+            verification: 'SELF_REPORTED',
+
+            title,
+            headline: 'Imported from ATTOM - verification and media layers come next.',
+            description,
+
+            address,
+            addressHidden: true,
+
+            lat: lat ?? undefined,
+            lng: lng ?? undefined,
+
+            propertyType: d.propertyType ?? undefined,
+            bedrooms: d.beds ?? undefined,
+            bathrooms: d.baths ?? undefined,
+
+            // ATTOM gives sqft; storing into builtM2/plotM2 temporarily until you add sqft fields or convert in UI
+            builtM2: d.livingSqft ?? undefined,
+            plotM2: d.lotSqft ?? undefined,
+
+            price: d.avm ?? undefined,
+            currency: 'USD',
+          },
+        });
+
+        created += 1;
+      } catch (e: any) {
+        errors += 1;
+        if (errorSamples.length < 5) {
+          errorSamples.push({ step: 'loop', message: e?.message || String(e) });
+        }
+      }
+    }
+
+    return NextResponse.json({
+      ok: true,
+      city,
+      radius,
+      limit,
+      dryRun,
+      scanned,
+      created,
+      skipped,
+      errors,
+      errorSamples,
+    });
+  } catch (e: any) {
     return NextResponse.json(
-      { ok: false, error: `Unknown city preset "${cityKey}". Try: miami.` },
-      { status: 400 },
+      { ok: false, step: 'route', message: e?.message || String(e) },
+      { status: 500 },
     );
   }
-
-  // Ensure city exists (use explicit field mapping so Prisma types stay happy)
-  const city = await prisma.city.upsert({
-    where: { slug: preset.slug },
-    update: {
-      name: preset.name,
-      slug: preset.slug,
-      country: preset.country,
-      region: preset.region,
-      tz: preset.tz,
-      lat: preset.lat,
-      lng: preset.lng,
-    },
-    create: {
-      name: preset.name,
-      slug: preset.slug,
-      country: preset.country,
-      region: preset.region,
-      tz: preset.tz,
-      lat: preset.lat,
-      lng: preset.lng,
-    },
-    select: { id: true, slug: true, name: true, country: true, region: true },
-  });
-
-  // 1) Radius search near preset center
-  const addressRes = await attomFetchJson<any>({
-    path: '/address',
-    query: {
-      latitude: preset.lat,
-      longitude: preset.lng,
-      radius,
-    },
-  });
-
-  const rawItems: any[] =
-    addressRes?.property || addressRes?.properties || addressRes?.address || addressRes?.results || [];
-
-  const items = Array.isArray(rawItems) ? rawItems.slice(0, limit) : [];
-
-  let scanned = items.length;
-  let created = 0;
-  let skipped = 0;
-  let errors = 0;
-
-  for (const item of items) {
-    try {
-      const { address1, address2, lat, lng } = extractAddressItem(item);
-
-      if (!address1 || !address2) {
-        skipped += 1;
-        continue;
-      }
-
-      const address = safeJoin([address1, address2], ', ');
-      if (!address) {
-        skipped += 1;
-        continue;
-      }
-
-      // Dedupe (Listing model may NOT expose cityId scalar; use relation filter)
-      const existing = await prisma.listing.findFirst({
-        where: {
-          address,
-          city: { is: { id: city.id } },
-        },
-        select: { id: true },
-      });
-
-      if (existing) {
-        skipped += 1;
-        continue;
-      }
-
-      // 2) Property detail by address
-      const detailRes = await attomFetchJson<any>({
-        path: '/property/detail',
-        query: { address1, address2 },
-      });
-
-      const detail = detailRes?.property?.[0] || detailRes?.property || detailRes || null;
-      const d = extractDetail(detail);
-
-      // Stable slug: city + address (+ attomId if present)
-      const slug = slugify(`${preset.slug}-${address}${d.attomId ? `-${d.attomId}` : ''}`);
-
-      const title = `${preset.name} · ${d.propertyType ?? 'Property'}`;
-      const description = [`ATTOM import (trial)`, d.attomId ? `ATTOM ID: ${d.attomId}` : null, address]
-        .filter(Boolean)
-        .join('\n');
-
-      if (dryRun) {
-        created += 1;
-        continue;
-      }
-
-      await prisma.listing.create({
-        data: {
-          slug,
-          source: 'attom',
-
-          // IMPORTANT: connect relation (avoids TS "never" errors when cityId scalar is not available)
-          city: { connect: { id: city.id } },
-
-          status: 'LIVE',
-          visibility: 'PUBLIC',
-          verification: 'SELF_REPORTED',
-
-          title,
-          headline: 'Imported from ATTOM - verification and media layers come next.',
-          description,
-
-          address,
-          addressHidden: true,
-
-          lat: lat ?? undefined,
-          lng: lng ?? undefined,
-
-          propertyType: d.propertyType ?? undefined,
-          bedrooms: d.beds ?? undefined,
-          bathrooms: d.baths ?? undefined,
-
-          // ATTOM gives sqft; storing into builtM2/plotM2 temporarily until you add sqft fields or convert in UI
-          builtM2: d.livingSqft ?? undefined,
-          plotM2: d.lotSqft ?? undefined,
-
-          price: d.avm ?? undefined,
-          currency: 'USD',
-        },
-        select: { id: true },
-      });
-
-      created += 1;
-    } catch {
-      errors += 1;
-    }
-  }
-
-  return NextResponse.json({
-    ok: true,
-    city,
-    radius,
-    limit,
-    dryRun,
-    scanned,
-    created,
-    skipped,
-    errors,
-  });
 }
