@@ -11,6 +11,7 @@ import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import MarketBriefing from './MarketBriefing';
 import RoyalPortalBackdrop from './RoyalPortalBackdrop';
+import HeroGoldCrown from './HeroGoldCrown';
 
 import IntentHero from './IntentHero';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
@@ -44,6 +45,7 @@ export type RuntimeCity = {
 function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#070A10] text-zinc-100">
+      {/* GLOBAL BACKDROP */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[720px] w-[1180px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05),transparent_62%)] blur-2xl" />
         <div className="absolute -top-28 right-[-240px] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.14),transparent_62%)] blur-2xl" />
@@ -52,6 +54,7 @@ function Shell({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
+      {/* PAGE */}
       <div className="relative">
         <Suspense fallback={null}>
           <TopBar />
