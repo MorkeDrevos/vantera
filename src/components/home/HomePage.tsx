@@ -73,6 +73,58 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+/* ---------- FIX: SignalStrip (missing) ---------- */
+
+type SignalStripItem = {
+  k: string;
+  v: ReactNode;
+  hint?: string;
+};
+
+function SignalStrip({ items }: { items: SignalStripItem[] }) {
+  return (
+    <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.06),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/16 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-white/5" />
+      </div>
+
+      <div className="relative grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
+        {items.map((it) => (
+          <div
+            key={it.k}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 sm:px-3.5 sm:py-3"
+            title={it.hint || ''}
+          >
+            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+            </div>
+
+            <div className="relative flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">
+                  {it.k}
+                </div>
+                <div className="mt-1 truncate text-sm font-medium text-zinc-200">
+                  {it.v}
+                </div>
+              </div>
+
+              {it.hint ? (
+                <div className="ml-2 hidden shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] tracking-[0.18em] text-zinc-400 sm:block">
+                  INFO
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- HERO MEDIA / BACKDROP (unchanged) ---------- */
 /* ... NO CHANGES BELOW THIS LINE UNTIL SEARCH BLOCK ... */
 /* (HeroMedia, RoyalPortalBackdrop, GoldCrown, etc. remain identical) */
@@ -88,7 +140,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
       {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
         <div className="relative w-full overflow-hidden border-y border-white/10 bg-black/40 shadow-[0_55px_160px_rgba(0,0,0,0.78)]">
-
           <RoyalPortalBackdrop />
           <HeroGoldCrown />
 
