@@ -32,6 +32,16 @@ function regionLine(city: City) {
   return a.join(' · ');
 }
 
+function premiumFallback() {
+  return (
+    <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_90%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
+    </div>
+  );
+}
+
 export default function CityCard({
   city,
   stats,
@@ -48,10 +58,15 @@ export default function CityCard({
   const src = city.image?.src?.trim() ?? '';
   const isWall = variant === 'wall';
 
-  // JamesEdition: keep the surface clean.
-  // If verified inventory exists, show a subtle count. Otherwise show nothing.
   const verified = stats?.verifiedCount ?? 0;
   const showVerified = hasVerified(stats);
+
+  const isFeatured =
+    city.slug === 'miami' ||
+    city.slug === 'new-york' ||
+    city.slug === 'monaco' ||
+    city.slug === 'dubai' ||
+    city.slug === 'marbella';
 
   return (
     <div className="group relative min-w-0">
@@ -60,7 +75,6 @@ export default function CityCard({
         prefetch
         className={cx(
           'relative block overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02]',
-          // calmer shadow and less glass
           'shadow-[0_18px_70px_rgba(0,0,0,0.45)]',
           'transition duration-500 hover:-translate-y-[2px] hover:border-white/16 hover:shadow-[0_26px_92px_rgba(0,0,0,0.55)]',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
@@ -78,17 +92,16 @@ export default function CityCard({
               className={cx(
                 'object-cover transition duration-700',
                 'group-hover:scale-[1.03]',
-                // Slightly editorial, not punchy
                 '[filter:contrast(1.03)_saturate(1.03)]',
               )}
-              priority={city.slug === 'marbella'}
-              fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
+              priority={isFeatured}
+              fallback={premiumFallback()}
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+            premiumFallback()
           )}
 
-          {/* Editorial scrim like luxury portals */}
+          {/* Editorial scrim */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
 
           {/* Bottom content */}
@@ -111,7 +124,6 @@ export default function CityCard({
                 ) : null}
               </div>
 
-              {/* Minimal action cue (no button soup) */}
               <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/14 bg-white/[0.06] px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl transition group-hover:border-white/22 group-hover:bg-white/[0.08]">
                 <span className="opacity-90">View</span>
                 <span className="translate-x-0 opacity-70 transition group-hover:translate-x-[2px] group-hover:opacity-100">
@@ -122,7 +134,7 @@ export default function CityCard({
           </div>
         </div>
 
-        {/* Optional small description - keep it tight and calm */}
+        {/* Optional description */}
         {city.blurb?.trim() ? (
           <div className="px-5 pb-5 pt-4">
             <p className="text-[13px] leading-relaxed text-zinc-300 line-clamp-2">{city.blurb.trim()}</p>
