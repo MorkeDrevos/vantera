@@ -149,6 +149,69 @@ function Pillar({ title, body }: PillarProps) {
   );
 }
 
+/* ---------- FIX: TruthCardReport (missing) ---------- */
+
+function TruthCardReport() {
+  return (
+    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_86%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+      </div>
+
+      <div className="relative p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">TRUTH REPORT</div>
+            <div className="mt-2 text-lg font-medium text-zinc-100">Verification snapshot</div>
+            <div className="mt-1 text-sm leading-relaxed text-zinc-300">
+              A quick read on pricing sanity, paperwork gaps and liquidity signals.
+              <span className="text-zinc-500"> Built to reduce regret.</span>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5">
+            <div className="h-2 w-2 rounded-full bg-emerald-300/70" />
+            <div className="text-[11px] tracking-[0.22em] text-zinc-400">LIVE</div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid gap-3">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">WHAT YOU GET</div>
+            <ul className="mt-2 space-y-1.5 text-sm text-zinc-300">
+              <li className="flex gap-2">
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                Paperwork status in plain language
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                Price reality checks vs market behaviour
+              </li>
+              <li className="flex gap-2">
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                Risk flags that hurt resale
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm font-medium text-zinc-100">Example output</div>
+              <div className="text-[11px] text-zinc-500">Preview</div>
+            </div>
+            <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+              “Two permits missing. Asking price implies a 14% premium to local velocity. Liquidity is strongest in the
+              €3m-€6m band this quarter.”
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- HERO MEDIA / BACKDROP (unchanged) ---------- */
 /* ... NO CHANGES BELOW THIS LINE UNTIL SEARCH BLOCK ... */
 /* (HeroMedia, RoyalPortalBackdrop, GoldCrown, etc. remain identical) */
