@@ -10,6 +10,7 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import MarketBriefing from './MarketBriefing';
+import RoyalPortalBackdrop from './RoyalPortalBackdrop';
 
 import IntentHero from './IntentHero';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
