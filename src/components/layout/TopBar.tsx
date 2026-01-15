@@ -5,7 +5,18 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, ChevronDown, Command, Globe, MapPin, X } from 'lucide-react';
+import {
+  ArrowRight,
+  ChevronDown,
+  Command,
+  Globe,
+  MapPin,
+  ShieldCheck,
+  Users,
+  Building2,
+  BookOpen,
+  X,
+} from 'lucide-react';
 
 import { CITIES } from '@/components/home/cities';
 
@@ -277,35 +288,43 @@ export default function TopBar() {
     dispatchFocusSearch();
   }
 
-  // Royal styling tokens (quiet luxury)
-  const barBg = scrolled ? 'bg-[#06070A]/90' : 'bg-[#06070A]/70';
+  // Public top bar: JamesEdition-leaning (grand entrance)
+  const barBg = scrolled ? 'bg-[#06070A]/88' : 'bg-[#06070A]/62';
 
-  // Softer, champagne gold (less “yellow”, more “vault”)
+  // Softer champagne gold, quiet and expensive
   const goldText =
     'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]';
 
   const softBorder = 'ring-1 ring-inset ring-white/10';
-  const softFill = 'bg-white/[0.03] hover:bg-white/[0.055]';
+  const softFill = 'bg-white/[0.028] hover:bg-white/[0.055]';
+  const softFillStrong = 'bg-white/[0.038] hover:bg-white/[0.075]';
 
-  // Nav items: sentence case, low theatre
   const navItemBase =
-    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[13px] tracking-[0.08em] text-zinc-200/75 hover:text-zinc-50 transition';
+    'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[12px] tracking-[0.12em] text-zinc-200/70 hover:text-zinc-50 transition';
 
-  // Copy tone: intelligence-first, not marketplace
+  const navDot = <span className="text-white/10">·</span>;
+
+  // Copy
   const sellLabel = 'Submit an asset';
   const sellHref = '/coming-soon?flow=sell';
+
+  const agentHref = '/coming-soon?flow=agents';
+  const sellersHref = '/coming-soon?flow=private-sellers';
+  const intelligenceHref = '/coming-soon?section=intelligence';
+  const journalHref = '/coming-soon?section=journal';
+  const aboutHref = '/coming-soon?section=about';
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[18px]', barBg)}>
-        {/* Quiet “gold edge” + glass */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6C980]/18 to-transparent" />
+        {/* Gold hairline + glass */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E6C980]/22 to-transparent" />
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1100px_260px_at_50%_0%,rgba(230,201,128,0.10),transparent_62%)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/6" />
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-7xl items-center px-5 py-4 sm:px-8 sm:py-5">
+        <div className="relative mx-auto flex w-full max-w-7xl items-center px-4 py-3 sm:px-7 sm:py-3.5">
           {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
             <Image
@@ -314,13 +333,18 @@ export default function TopBar() {
               width={620}
               height={180}
               priority={false}
-              className="h-[64px] w-auto drop-shadow-[0_30px_120px_rgba(0,0,0,0.72)] sm:h-[70px] md:h-[76px]"
+              className={cx(
+                // Keep compact even before your SVG update
+                'h-[40px] w-auto',
+                'drop-shadow-[0_28px_120px_rgba(0,0,0,0.72)]',
+                'sm:h-[42px] md:h-[44px]',
+              )}
             />
           </Link>
 
-          {/* Desktop nav */}
+          {/* Desktop nav - richer, still restrained */}
           <div className="hidden flex-1 items-center justify-center lg:flex">
-            <div className="flex items-center gap-10">
+            <div className="flex items-center gap-8">
               {/* Places mega */}
               <div
                 ref={wrapRef}
@@ -350,7 +374,7 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'absolute left-1/2 z-[80] mt-5 w-[1120px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'absolute left-1/2 z-[80] mt-4 w-[1120px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'rounded-[28px] bg-[#04050A]',
                     'shadow-[0_90px_240px_rgba(0,0,0,0.92)]',
                     'ring-1 ring-inset ring-white/12',
@@ -472,7 +496,9 @@ export default function TopBar() {
                             <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
                               Intelligence
                             </div>
-                            <div className="mt-1 text-xs text-zinc-400">Start with a place. Open the truth surface.</div>
+                            <div className="mt-1 text-xs text-zinc-400">
+                              Start with a place. Open the truth surface.
+                            </div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <button
@@ -512,6 +538,48 @@ export default function TopBar() {
                         <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
                           <div className="border-b border-white/10 px-4 py-3">
                             <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
+                              Private network
+                            </div>
+                            <div className="mt-1 text-xs text-zinc-400">
+                              Sellers and advisors. Verification-first.
+                            </div>
+                          </div>
+                          <div className="grid gap-2 p-4">
+                            <Link
+                              href={sellersHref}
+                              prefetch
+                              onClick={() => setMegaOpen(false)}
+                              className={cx(
+                                'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                                softFill,
+                                softBorder,
+                              )}
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <Building2 className="h-4 w-4 opacity-85" />
+                                Private sellers
+                              </span>
+                              <ArrowRight className="h-4 w-4 opacity-75" />
+                            </Link>
+
+                            <Link
+                              href={agentHref}
+                              prefetch
+                              onClick={() => setMegaOpen(false)}
+                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.028] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <Users className="h-4 w-4 opacity-80" />
+                                Agents (coming soon)
+                              </span>
+                              <ArrowRight className="h-4 w-4 opacity-75" />
+                            </Link>
+                          </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
+                          <div className="border-b border-white/10 px-4 py-3">
+                            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
                               Submissions
                             </div>
                             <div className="mt-1 text-xs text-zinc-400">
@@ -523,7 +591,11 @@ export default function TopBar() {
                               href={sellHref}
                               prefetch
                               onClick={() => setMegaOpen(false)}
-                              className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.038] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16 transition"
+                              className={cx(
+                                'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                                softFillStrong,
+                                'ring-1 ring-inset ring-white/12 hover:ring-white/16',
+                              )}
                             >
                               <span className={goldText}>{sellLabel}</span>
                               <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
@@ -538,21 +610,45 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Search */}
-              <button type="button" onClick={openSearchFromAnywhere} className={navItemBase}>
-                <span>Search</span>
-              </button>
+              {navDot}
 
-              {/* Submit */}
-              <Link href={sellHref} prefetch className={navItemBase}>
-                <span>Submit</span>
+              <Link href={intelligenceHref} prefetch className={navItemBase}>
+                <ShieldCheck className="h-4 w-4 opacity-75" />
+                <span>Intelligence</span>
+              </Link>
+
+              {navDot}
+
+              <Link href={sellersHref} prefetch className={navItemBase}>
+                <Building2 className="h-4 w-4 opacity-75" />
+                <span>Private sellers</span>
+              </Link>
+
+              {navDot}
+
+              <Link href={agentHref} prefetch className={navItemBase}>
+                <Users className="h-4 w-4 opacity-75" />
+                <span>For agents</span>
+              </Link>
+
+              {navDot}
+
+              <Link href={journalHref} prefetch className={navItemBase}>
+                <BookOpen className="h-4 w-4 opacity-75" />
+                <span>Journal</span>
+              </Link>
+
+              {navDot}
+
+              <Link href={aboutHref} prefetch className={navItemBase}>
+                <span>About</span>
               </Link>
             </div>
           </div>
 
           {/* Right actions */}
-          <div className="ml-auto flex shrink-0 items-center gap-3">
-            <div className="hidden items-center gap-3 sm:flex">
+          <div className="ml-auto flex shrink-0 items-center gap-2.5">
+            <div className="hidden items-center gap-2.5 sm:flex">
               <button
                 type="button"
                 onClick={openSearchFromAnywhere}
@@ -565,16 +661,30 @@ export default function TopBar() {
               >
                 <Command className="h-4 w-4 opacity-80" />
                 <span>Search</span>
-                <span className="text-white/15">·</span>
+                <span className="text-white/12">·</span>
                 <span className="font-mono text-xs text-zinc-200">/</span>
               </button>
+
+              <Link
+                href={agentHref}
+                prefetch
+                className={cx(
+                  'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm text-zinc-200/90 transition',
+                  'bg-white/[0.018] ring-1 ring-inset ring-white/10 hover:bg-white/[0.045] hover:ring-white/14',
+                )}
+                aria-label="Agent login"
+              >
+                <Users className="h-4 w-4 opacity-80" />
+                <span>Agent login</span>
+              </Link>
 
               <Link
                 href={sellHref}
                 prefetch
                 className={cx(
                   'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition',
-                  'bg-white/[0.038] ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16',
+                  softFillStrong,
+                  'ring-1 ring-inset ring-white/12 hover:ring-white/16',
                   'shadow-[0_30px_140px_rgba(0,0,0,0.58)]',
                 )}
                 aria-label={sellLabel}
@@ -642,13 +752,13 @@ export default function TopBar() {
           </div>
 
           <div className="relative space-y-4 px-5 py-5">
-            {/* Intelligence */}
+            {/* Grand entrance actions */}
             <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
-                  Intelligence
+                  Start here
                 </div>
-                <div className="mt-1 text-xs text-zinc-400">Open search and jump to cities fast.</div>
+                <div className="mt-1 text-xs text-zinc-400">Search first. Verification and signal follows.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <button
@@ -672,40 +782,126 @@ export default function TopBar() {
                 </button>
 
                 <Link
-                  href="/coming-soon?section=listings"
+                  href={sellHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.028] px-4 py-3 text-sm text-zinc-200/90 ring-1 ring-inset ring-white/10 hover:bg-white/[0.065] hover:ring-white/14 transition"
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
+                    softFillStrong,
+                    'ring-1 ring-inset ring-white/12 hover:ring-white/16',
+                  )}
+                >
+                  <span className={goldText}>{sellLabel}</span>
+                  <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
+                </Link>
+
+                <Link
+                  href={agentHref}
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <MapPin className="h-4 w-4 opacity-80" />
-                    Listings (coming soon)
+                    <Users className="h-4 w-4 opacity-85" />
+                    Agent login
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-75" />
                 </Link>
               </div>
             </div>
 
-            {/* Submissions */}
+            {/* Public nav */}
             <div className="overflow-hidden rounded-[22px] bg-white/[0.028] ring-1 ring-inset ring-white/10">
               <div className="border-b border-white/10 px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">
-                  Submissions
-                </div>
-                <div className="mt-1 text-xs text-zinc-400">Submit a property for verification.</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-zinc-200/70">Navigation</div>
+                <div className="mt-1 text-xs text-zinc-400">Public entry points.</div>
               </div>
-              <div className="p-4">
+              <div className="grid gap-2 p-4">
                 <Link
-                  href={sellHref}
+                  href={intelligenceHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/[0.038] px-4 py-3 text-sm font-semibold ring-1 ring-inset ring-white/12 hover:bg-white/[0.075] hover:ring-white/16 transition"
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
                 >
-                  <span className={goldText}>{sellLabel}</span>
-                  <ArrowRight className="h-4 w-4 opacity-90 text-zinc-100" />
+                  <span className="inline-flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 opacity-85" />
+                    Intelligence
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-75" />
                 </Link>
 
-                <div className="mt-2 text-[11px] text-zinc-500">Private by default. Signal over noise.</div>
+                <Link
+                  href={sellersHref}
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Building2 className="h-4 w-4 opacity-85" />
+                    Private sellers
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-75" />
+                </Link>
+
+                <Link
+                  href={agentHref}
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <Users className="h-4 w-4 opacity-85" />
+                    For agents
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-75" />
+                </Link>
+
+                <Link
+                  href={journalHref}
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 opacity-85" />
+                    Journal
+                  </span>
+                  <ArrowRight className="h-4 w-4 opacity-75" />
+                </Link>
+
+                <Link
+                  href={aboutHref}
+                  prefetch
+                  onClick={() => setMobileOpen(false)}
+                  className={cx(
+                    'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm text-zinc-100/90 transition',
+                    softFill,
+                    softBorder,
+                  )}
+                >
+                  <span>About</span>
+                  <ArrowRight className="h-4 w-4 opacity-75" />
+                </Link>
               </div>
             </div>
 
@@ -804,7 +1000,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-2 text-[11px] text-zinc-500">Built for signal and verification, not theatre.</div>
+            <div className="pt-2 text-[11px] text-zinc-500">Public pages: luxury entrance. Logged-in: Swiss calm.</div>
           </div>
         </div>
       </div>
