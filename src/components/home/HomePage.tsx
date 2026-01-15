@@ -43,16 +43,27 @@ export type RuntimeCity = {
   heroImageAlt?: string | null;
 };
 
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[#070A10] text-zinc-100">
-      {/* GLOBAL BACKDROP */}
+    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
+      {/* GLOBAL BACKDROP - white editorial */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[720px] w-[1180px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05),transparent_62%)] blur-2xl" />
-        <div className="absolute -top-28 right-[-240px] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.14),transparent_62%)] blur-2xl" />
-        <div className="absolute bottom-[-300px] left-[-300px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_60%)] blur-2xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.10),rgba(0,0,0,0.92))]" />
-        <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.55)_1px,transparent_0)] [background-size:28px_28px]" />
+        {/* warm paper bloom */}
+        <div className="absolute -top-56 left-1/2 h-[760px] w-[1200px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.26),transparent_62%)] blur-2xl" />
+        {/* violet hint */}
+        <div className="absolute -top-44 right-[-260px] h-[640px] w-[640px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.14),transparent_62%)] blur-2xl" />
+        {/* cool lift */}
+        <div className="absolute bottom-[-320px] left-[-320px] h-[840px] w-[840px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_60%)] blur-2xl" />
+
+        {/* subtle top-to-bottom editorial wash */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.00),rgba(0,0,0,0.035))]" />
+
+        {/* micro-grain */}
+        <div className="absolute inset-0 opacity-[0.045] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
       {/* PAGE */}
@@ -69,11 +80,7 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ');
-}
-
-/* ---------- FIX: SignalStrip (missing) ---------- */
+/* ---------- SignalStrip ---------- */
 
 type SignalStripItem = {
   k: string;
@@ -83,33 +90,47 @@ type SignalStripItem = {
 
 function SignalStrip({ items }: { items: SignalStripItem[] }) {
   return (
-    <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[22px]',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.06),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/16 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-white/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
       </div>
 
       <div className="relative grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
         {items.map((it) => (
           <div
             key={it.k}
-            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 sm:px-3.5 sm:py-3"
+            className={cx(
+              'group relative overflow-hidden rounded-2xl',
+              'border border-[color:var(--hairline)]',
+              'bg-white/70',
+              'px-3 py-2.5 sm:px-3.5 sm:py-3',
+            )}
             title={it.hint ?? undefined}
           >
             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.22),transparent_60%)]" />
             </div>
 
             <div className="relative flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">{it.k}</div>
-                <div className="mt-1 truncate text-sm font-medium text-zinc-200">{it.v}</div>
+                <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                  {it.k}
+                </div>
+                <div className="mt-1 truncate text-sm font-medium text-[color:var(--ink)]">{it.v}</div>
               </div>
 
               {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] tracking-[0.18em] text-zinc-400 sm:block">
+                <div className="ml-2 hidden shrink-0 rounded-full border border-[color:var(--hairline)] bg-white/70 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] sm:block">
                   INFO
                 </div>
               ) : null}
@@ -121,7 +142,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   );
 }
 
-/* ---------- FIX: Pillar (missing) ---------- */
+/* ---------- Pillar ---------- */
 
 type PillarProps = {
   title: string;
@@ -130,73 +151,91 @@ type PillarProps = {
 
 function Pillar({ title, body }: PillarProps) {
   return (
-    <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_28px_90px_rgba(0,0,0,0.55)]">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[22px] p-4',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_18px_46px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative">
-        <div className="text-[13px] font-semibold text-zinc-100">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-zinc-400">{body}</div>
+        <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
+        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
       </div>
     </div>
   );
 }
 
-/* ---------- FIX: TruthCardReport (missing) ---------- */
+/* ---------- TruthCardReport ---------- */
 
 function TruthCardReport() {
   return (
-    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] shadow-[0_34px_110px_rgba(0,0,0,0.55)]">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[26px]',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_86%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(700px_220px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative p-5 sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">TRUTH REPORT</div>
-            <div className="mt-2 text-lg font-medium text-zinc-100">Verification snapshot</div>
-            <div className="mt-1 text-sm leading-relaxed text-zinc-300">
+            <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+              TRUTH REPORT
+            </div>
+            <div className="mt-2 text-lg font-medium text-[color:var(--ink)]">Verification snapshot</div>
+            <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
               A quick read on pricing sanity, paperwork gaps and liquidity signals.
-              <span className="text-zinc-500"> Built to reduce regret.</span>
+              <span className="text-[color:var(--ink-3)]"> Built to reduce regret.</span>
             </div>
           </div>
 
-          <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full border border-white/10 bg-black/20 px-3 py-1.5">
-            <div className="h-2 w-2 rounded-full bg-emerald-300/70" />
-            <div className="text-[11px] tracking-[0.22em] text-zinc-400">LIVE</div>
+          <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full border border-[color:var(--hairline)] bg-white/70 px-3 py-1.5">
+            <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
+            <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">LIVE</div>
           </div>
         </div>
 
         <div className="mt-4 grid gap-3">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">WHAT YOU GET</div>
-            <ul className="mt-2 space-y-1.5 text-sm text-zinc-300">
+          <div className="rounded-2xl border border-[color:var(--hairline)] bg-white/70 p-4">
+            <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+              WHAT YOU GET
+            </div>
+            <ul className="mt-2 space-y-1.5 text-sm text-[color:var(--ink-2)]">
               <li className="flex gap-2">
-                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
                 Paperwork status in plain language
               </li>
               <li className="flex gap-2">
-                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
                 Price reality checks vs market behaviour
               </li>
               <li className="flex gap-2">
-                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+                <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
                 Risk flags that hurt resale
               </li>
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-[color:var(--hairline)] bg-[color:var(--surface-2)] p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-medium text-zinc-100">Example output</div>
-              <div className="text-[11px] text-zinc-500">Preview</div>
+              <div className="text-sm font-medium text-[color:var(--ink)]">Example output</div>
+              <div className="text-[11px] text-[color:var(--ink-3)]">Preview</div>
             </div>
-            <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
               “Two permits missing. Asking price implies a 14% premium to local velocity. Liquidity is strongest in the
               €3m-€6m band this quarter.”
             </div>
@@ -207,7 +246,7 @@ function TruthCardReport() {
   );
 }
 
-/* ---------- FIX: SectionLabel (missing) ---------- */
+/* ---------- SectionLabel ---------- */
 
 function SectionLabel({
   children,
@@ -219,70 +258,81 @@ function SectionLabel({
   return (
     <div className="mb-4 flex flex-col gap-2 sm:mb-5 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400 uppercase">{children}</div>
-        {hint ? <div className="mt-1 text-sm text-zinc-500">{hint}</div> : null}
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+          {children}
+        </div>
+        {hint ? <div className="mt-1 text-sm text-[color:var(--ink-2)]">{hint}</div> : null}
       </div>
 
       <div className="hidden sm:block">
-        <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+        <div className="h-px w-40 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
       </div>
     </div>
   );
 }
 
-/* ---------- FIX: PortalVsTruth (missing) ---------- */
+/* ---------- PortalVsTruth ---------- */
 
 function PortalVsTruth() {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[28px] p-5 sm:p-6',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.05),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[22px] border border-white/10 bg-black/20 p-5">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">LUXURY PORTALS</div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">Beautiful inventory</div>
-          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+        <div className="rounded-[22px] border border-[color:var(--hairline)] bg-white/75 p-5">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+            LUXURY PORTALS
+          </div>
+          <div className="mt-2 text-lg font-medium text-[color:var(--ink)]">Beautiful inventory</div>
+          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
             Great for browsing, but vulnerable to presentation, persuasion and missing facts.
           </div>
 
-          <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+          <ul className="mt-4 space-y-2 text-sm text-[color:var(--ink-2)]">
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
               Asking price leads the story
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
               Verification is often external
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
               Risk hides in the fine print
             </li>
           </ul>
         </div>
 
-        <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-5">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
-          <div className="mt-2 text-lg font-medium text-zinc-100">Quiet intelligence</div>
-          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+        <div className="rounded-[22px] border border-[color:var(--hairline)] bg-[color:var(--surface-2)] p-5">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">VANTERA</div>
+          <div className="mt-2 text-lg font-medium text-[color:var(--ink)]">Quiet intelligence</div>
+          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
             Built for signal: value, liquidity and risk, with verification-first outputs.
           </div>
 
-          <ul className="mt-4 space-y-2 text-sm text-zinc-200">
+          <ul className="mt-4 space-y-2 text-sm text-[color:var(--ink-2)]">
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
               Fair value model, not theatre
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
               Paperwork status surfaced early
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
               Resale-killer risk flags
             </li>
           </ul>
@@ -292,7 +342,7 @@ function PortalVsTruth() {
   );
 }
 
-/* ---------- FIX: FeatureCard (missing) ---------- */
+/* ---------- FeatureCard ---------- */
 
 function FeatureCard({
   eyebrow,
@@ -306,21 +356,30 @@ function FeatureCard({
   bullets: string[];
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[26px] p-5 sm:p-6',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400 uppercase">{eyebrow}</div>
-        <div className="mt-2 text-lg font-medium text-zinc-100">{title}</div>
-        <div className="mt-2 text-sm leading-relaxed text-zinc-300">{body}</div>
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+          {eyebrow}
+        </div>
+        <div className="mt-2 text-lg font-medium text-[color:var(--ink)]">{title}</div>
+        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
-        <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+        <ul className="mt-4 space-y-2 text-sm text-[color:var(--ink-2)]">
           {bullets.map((b) => (
             <li key={b} className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[color:var(--gold)]" />
               {b}
             </li>
           ))}
@@ -330,24 +389,31 @@ function FeatureCard({
   );
 }
 
-/* ---------- FIX: CTA (missing) ---------- */
+/* ---------- CTA ---------- */
 
 function CTA() {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-6 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-8">
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[28px] p-6 sm:p-8',
+        'border border-[color:var(--hairline)]',
+        'bg-[color:var(--surface)] backdrop-blur-xl',
+        'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+      )}
+    >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_20%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_86%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/16 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_20%_0%,rgba(231,201,130,0.20),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE ACCESS</div>
-          <div className="mt-2 text-xl font-medium text-zinc-100">Bring a serious asset or a serious buyer</div>
-          <div className="mt-2 max-w-[64ch] text-sm leading-relaxed text-zinc-300">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PRIVATE ACCESS</div>
+          <div className="mt-2 text-xl font-medium text-[color:var(--ink)]">Bring a serious asset or a serious buyer</div>
+          <div className="mt-2 max-w-[64ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
             Vantera is built for private sellers, advisors and agents who want verification, clarity and speed.
-            <span className="text-zinc-500"> Signal only.</span>
+            <span className="text-[color:var(--ink-3)]"> Signal only.</span>
           </div>
         </div>
 
@@ -356,7 +422,9 @@ function CTA() {
             href="/coming-soon?flow=sell"
             className={cx(
               'inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition',
-              'bg-white/[0.05] ring-1 ring-inset ring-white/12 hover:bg-white/[0.09] hover:ring-white/16',
+              'bg-[color:var(--surface-2)] hover:bg-white',
+              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+              'text-[color:var(--ink)]',
             )}
           >
             Submit a private seller
@@ -366,7 +434,9 @@ function CTA() {
             href="/coming-soon?flow=agents"
             className={cx(
               'inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition',
-              'bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14',
+              'bg-white/70 hover:bg-white',
+              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+              'text-[color:var(--ink)]',
             )}
           >
             Agent access
@@ -376,10 +446,6 @@ function CTA() {
     </div>
   );
 }
-
-/* ---------- HERO MEDIA / BACKDROP (unchanged) ---------- */
-/* ... NO CHANGES BELOW THIS LINE UNTIL SEARCH BLOCK ... */
-/* (HeroMedia, RoyalPortalBackdrop, GoldCrown, etc. remain identical) */
 
 /* ---------- HOME PAGE ---------- */
 
@@ -391,9 +457,21 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
     <Shell>
       {/* HERO */}
       <section className="relative w-full pb-10 pt-8 sm:pb-14 sm:pt-10">
-        <div className="relative w-full overflow-hidden border-y border-white/10 bg-black/40 shadow-[0_55px_160px_rgba(0,0,0,0.78)]">
-          <RoyalPortalBackdrop />
-          <HeroGoldCrown />
+        <div
+          className={cx(
+            'relative w-full overflow-hidden',
+            'border-y border-[color:var(--hairline)]',
+            'bg-[color:var(--paper)]',
+            'shadow-[0_30px_90px_rgba(11,12,16,0.10)]',
+          )}
+        >
+          {/* Keep your existing portal media but run it as a subtle overlay on white */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply">
+            <RoyalPortalBackdrop />
+          </div>
+          <div className="pointer-events-none absolute inset-0 opacity-[0.20]">
+            <HeroGoldCrown />
+          </div>
 
           <div className="relative w-full px-5 py-10 sm:px-8 sm:py-14 lg:px-14 lg:py-20 2xl:px-20">
             <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
@@ -401,19 +479,19 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               <div className="lg:col-span-7">
                 <PremiumBadgeRow />
 
-                <h1 className="mt-6 text-balance text-[40px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
+                <h1 className="mt-6 text-balance text-[40px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-5xl lg:text-[72px] lg:leading-[1.02]">
                   Private intelligence for the world&apos;s{' '}
-                  <span className="relative bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.78),rgba(231,201,130,0.55),rgba(120,76,255,0.68))] bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(231,201,130,0.10)]">
+                  <span className="relative bg-[linear-gradient(90deg,rgba(11,12,16,0.92),rgba(11,12,16,0.72),rgba(231,201,130,0.90),rgba(139,92,246,0.75))] bg-clip-text text-transparent">
                     most valuable assets
                   </span>
                 </h1>
 
-                <p className="mt-4 max-w-[860px] text-pretty text-[15px] leading-relaxed text-zinc-300 sm:text-lg">
+                <p className="mt-4 max-w-[860px] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
                   Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-zinc-500"> Built to model value, liquidity and risk without theatre.</span>
+                  <span className="text-[color:var(--ink-3)]"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* 🔑 OMNI SEARCH (PRIMARY) */}
+                {/* OMNI SEARCH (PRIMARY) */}
                 <div className="mt-6 max-w-[980px] lg:max-w-[1120px]">
                   <VanteraOmniSearch cities={cities as any} clusters={REGION_CLUSTERS as any} autoFocus={false} />
                 </div>
@@ -426,11 +504,11 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 <div className="mt-4 max-w-[980px] lg:max-w-[1120px]">
                   <SignalStrip
                     items={[
-                      { k: 'COVERAGE', v: <span className="text-zinc-100">{cities.length} cities</span> },
-                      { k: 'REGIONS', v: <span className="text-zinc-100">{regionCount}</span> },
-                      { k: 'TIMEZONES', v: <span className="text-zinc-100">{timezoneCount}</span> },
-                      { k: 'UPDATES', v: <span className="text-zinc-100">Live</span>, hint: 'private index' },
-                      { k: 'PROOF', v: <span className="text-zinc-100">Registry + docs</span> },
+                      { k: 'COVERAGE', v: <span className="text-[color:var(--ink)]">{cities.length} cities</span> },
+                      { k: 'REGIONS', v: <span className="text-[color:var(--ink)]">{regionCount}</span> },
+                      { k: 'TIMEZONES', v: <span className="text-[color:var(--ink)]">{timezoneCount}</span> },
+                      { k: 'UPDATES', v: <span className="text-[color:var(--ink)]">Live</span>, hint: 'private index' },
+                      { k: 'PROOF', v: <span className="text-[color:var(--ink)]">Registry + docs</span> },
                     ]}
                   />
                 </div>
@@ -455,7 +533,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             </div>
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[#070A10]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[color:var(--paper)]" />
         </div>
       </section>
 
@@ -520,24 +598,31 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-16">
           <SectionLabel hint="Coverage that feels alive">Explore the index</SectionLabel>
 
-          <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+          <div
+            className={cx(
+              'relative overflow-hidden rounded-[28px] p-4 sm:p-6',
+              'border border-[color:var(--hairline)]',
+              'bg-[color:var(--surface)] backdrop-blur-xl',
+              'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+            )}
+          >
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.05),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/16 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
             </div>
 
             <div className="relative flex items-start justify-between gap-4">
               <div>
-                <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">CITIES</div>
-                <div className="mt-2 text-lg font-medium text-zinc-100">Browse coverage with signal</div>
-                <div className="mt-1 text-sm text-zinc-300">
+                <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">CITIES</div>
+                <div className="mt-2 text-lg font-medium text-[color:var(--ink)]">Browse coverage with signal</div>
+                <div className="mt-1 text-sm text-[color:var(--ink-2)]">
                   Fast scan for where value is forming, where risk is hiding and where liquidity is strongest.
                 </div>
               </div>
 
               <div className="hidden sm:block">
-                <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+                <div className="relative h-12 w-12 overflow-hidden rounded-2xl border border-[color:var(--hairline)] bg-white/80">
                   <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
                 </div>
               </div>
