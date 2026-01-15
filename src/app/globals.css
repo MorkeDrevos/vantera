@@ -9,22 +9,41 @@ body {
   height: 100%;
 }
 
+/* White / editorial baseline */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+
+  /* Paper system */
+  --paper: #fbfbfa; /* warm white */
+  --paper-2: #f6f6f4; /* subtle section alt */
+  --ink: #0b0c10; /* near-black */
+  --ink-2: rgba(11, 12, 16, 0.78); /* body */
+  --ink-3: rgba(11, 12, 16, 0.58); /* muted */
+  --hairline: rgba(11, 12, 16, 0.10);
+  --shadow: 0 24px 70px rgba(11, 12, 16, 0.10);
+
+  /* Brand accents (used sparingly on white) */
+  --gold: rgba(231, 201, 130, 0.9);
+  --violet: rgba(139, 92, 246, 0.85);
 }
 
 body {
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background: var(--paper);
+  color: var(--ink);
 }
 
+/* Prevent iOS tap flash */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Better selection for light canvas */
 ::selection {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(231, 201, 130, 0.35);
 }
 
 /* Respect reduced motion */
@@ -39,6 +58,36 @@ body {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ==========================================
+   Optional: tiny utilities for white luxury UI
+   (we'll use these when we flip components)
+   ========================================== */
+
+.v-paper {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.v-paper-2 {
+  background: var(--paper-2);
+}
+
+.v-ink-2 {
+  color: var(--ink-2);
+}
+
+.v-ink-3 {
+  color: var(--ink-3);
+}
+
+.v-hairline {
+  border-color: var(--hairline);
+}
+
+.v-shadow {
+  box-shadow: var(--shadow);
 }
 
 /* =========================
@@ -202,9 +251,10 @@ body {
   animation: vanteraPulse 6s ease-in-out infinite;
 }
 
+/* On white, this becomes a premium "ring + lift" rather than a dark glow */
 .vantera-royal-ring {
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 0 2px rgba(231, 201, 130, 0.08),
-    0 40px 140px rgba(0, 0, 0, 0.75);
+    0 0 0 1px rgba(11, 12, 16, 0.08),
+    0 0 0 2px rgba(231, 201, 130, 0.18),
+    0 26px 80px rgba(11, 12, 16, 0.18);
 }
