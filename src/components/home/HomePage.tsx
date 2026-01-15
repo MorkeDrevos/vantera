@@ -12,6 +12,7 @@ import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import MarketBriefing from './MarketBriefing';
 import RoyalPortalBackdrop from './RoyalPortalBackdrop';
 import HeroGoldCrown from './HeroGoldCrown';
+import PremiumBadgeRow from './PremiumBadgeRow';
 
 import IntentHero from './IntentHero';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
