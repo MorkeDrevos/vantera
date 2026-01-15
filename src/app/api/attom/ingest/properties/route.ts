@@ -1,4 +1,5 @@
 // src/app/api/attom/ingest/properties/route.ts
+
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
@@ -42,7 +43,7 @@ function clampInt(n: number, a: number, b: number) {
 }
 
 function sqftToM2Int(sqft: number | null) {
-  if (!sqft || !Number.isFinite(sqft)) return null;
+  if (sqft == null || !Number.isFinite(sqft)) return null;
   return Math.round(sqft * 0.092903);
 }
 
@@ -98,21 +99,14 @@ function readIdentifiers(p: any) {
 
 function readAddressFromSnapshot(p: any) {
   const address1 =
-    pickString(p?.address?.line1) ||
-    pickString(p?.address?.oneLine) ||
-    pickString(p?.address1) ||
-    null;
+    pickString(p?.address?.line1) || pickString(p?.address?.oneLine) || pickString(p?.address1) || null;
 
-  // ATTOM examples show line2 as "CITY, ST ZIP"
-  const address2 =
-    pickString(p?.address?.line2) ||
-    pickString(p?.address2) ||
-    null;
+  // Often "CITY, ST ZIP"
+  const address2 = pickString(p?.address?.line2) || pickString(p?.address2) || null;
 
   const latRaw = p?.location?.latitude ?? null;
   const lngRaw = p?.location?.longitude ?? null;
 
-  // ATTOM can return strings for lat/lng in snapshot examples
   const lat = typeof latRaw === 'number' ? latRaw : typeof latRaw === 'string' ? Number(latRaw) : null;
   const lng = typeof lngRaw === 'number' ? lngRaw : typeof lngRaw === 'string' ? Number(lngRaw) : null;
 
@@ -122,6 +116,21 @@ function readAddressFromSnapshot(p: any) {
     lat: Number.isFinite(lat as any) ? (lat as number) : null,
     lng: Number.isFinite(lng as any) ? (lng as number) : null,
   };
+}
+
+function normalizeLotSqft(raw: any): number | null {
+  // ATTOM can vary; best-effort:
+  // - lotsize2 is usually sqft in many packages
+  // - lotsize1 can be acres in some cases (especially if small decimal)
+  const lotsize2 = raw?.lot?.lotsize2;
+  if (typeof lotsize2 === 'number' && Number.isFinite(lotsize2) && lotsize2 > 0) return Math.round(lotsize2);
+
+  const lotsize1 = raw?.lot?.lotsize1;
+  if (typeof lotsize1 !== 'number' || !Number.isFinite(lotsize1) || lotsize1 <= 0) return null;
+
+  // Heuristic: if it's a small number (< 200), treat as acres, else assume sqft
+  if (lotsize1 < 200) return Math.round(lotsize1 * 43560);
+  return Math.round(lotsize1);
 }
 
 function computeDataCompleteness(input: {
@@ -201,7 +210,6 @@ export async function GET(req: Request) {
       market: preset.name,
       params,
       status: 'RUNNING',
-      startedAt: new Date(),
       message: 'Starting property ingest',
     },
     select: { id: true },
@@ -215,7 +223,6 @@ export async function GET(req: Request) {
   let errors = 0;
 
   try {
-    // Ensure city exists
     const city = await prisma.city.upsert({
       where: { slug: preset.slug },
       update: {
@@ -238,7 +245,7 @@ export async function GET(req: Request) {
       select: { id: true, slug: true, name: true, country: true, region: true },
     });
 
-    // STEP 1: Radius search - ATTOM uses /property/snapshot for lat/lng radius searches  [oai_citation:3‡ATTOM Developer Platform](https://api.developer.attomdata.com/docs/guides)
+    // STEP 1: Radius snapshot search
     let snapshotRes: any;
     try {
       snapshotRes = await attomFetchJson<any>({
@@ -252,6 +259,7 @@ export async function GET(req: Request) {
       });
     } catch (e: any) {
       const info = summarizeAttomError(e);
+
       await prisma.importRun.update({
         where: { id: run.id },
         data: {
@@ -298,7 +306,7 @@ export async function GET(req: Request) {
           continue;
         }
 
-        // Filter: type whitelist (compare to uppercase)
+        // Filter: type whitelist (uppercase contains match)
         if (typeWhitelist && typeWhitelist.length) {
           const t = (typeSnap || '').toUpperCase();
           const ok = typeWhitelist.some((allowed) => t.includes(allowed));
@@ -308,7 +316,7 @@ export async function GET(req: Request) {
           }
         }
 
-        // Dedupe: use sourceId if we have it (best), else address+city fallback
+        // Dedupe: prefer stable provider ID
         const bestSourceId = obPropId || attomId || null;
 
         const existing = await prisma.listing.findFirst({
@@ -323,22 +331,23 @@ export async function GET(req: Request) {
           continue;
         }
 
-        // Detail (by ID=obPropId) is the canonical way shown by ATTOM docs  [oai_citation:4‡ATTOM Developer Platform](https://api.developer.attomdata.com/docs/guides)
-        let detailRes: any = null;
+        // STEP 2: Detail by ID (best when obPropId exists)
+        let detail: any = null;
         if (obPropId) {
           try {
-            detailRes = await attomFetchJson<any>({
+            const detailRes = await attomFetchJson<any>({
               path: '/property/detail',
               query: { ID: obPropId },
             });
+            detail = detailRes?.property?.[0] || null;
           } catch (e: any) {
             errors += 1;
-            if (errorSamples.length < 5) errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
+            if (errorSamples.length < 5) {
+              errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
+            }
             continue;
           }
         }
-
-        const detail = detailRes?.property?.[0] || null;
 
         const propertyType =
           pickString(detail?.summary?.proptype) ||
@@ -348,9 +357,7 @@ export async function GET(req: Request) {
           null;
 
         const beds =
-          typeof detail?.building?.rooms?.beds === 'number'
-            ? detail.building.rooms.beds
-            : bedsSnap;
+          typeof detail?.building?.rooms?.beds === 'number' ? detail.building.rooms.beds : bedsSnap;
 
         const baths =
           typeof detail?.building?.rooms?.bathstotal === 'number'
@@ -362,25 +369,20 @@ export async function GET(req: Request) {
             ? detail.building.size.universalsize
             : builtSqftSnap;
 
-        const lotSqft =
-          typeof detail?.lot?.lotsize2 === 'number'
-            ? detail.lot.lotsize2
-            : typeof detail?.lot?.lotsize1 === 'number'
-              ? Math.round(detail.lot.lotsize1 * 43560) // lotsize1 can be acres in some datasets; best-effort
-              : null;
+        const lotSqft = detail ? normalizeLotSqft(detail) : null;
 
-        // AVM: /avm/detail?address1=...&address2=...  [oai_citation:5‡ATTOM Developer Platform](https://api.developer.attomdata.com/docs/guides)
+        // STEP 3: AVM (optional, but needed for minAvm and for priceConfidence)
         let avmValue: number | null = null;
         let priceConfidence: number | null = null;
 
-        if (minAvm != null || true) {
+        const canCallAvm = !!address1 && !!address2;
+        if (canCallAvm) {
           try {
             const avmRes = await attomFetchJson<any>({
               path: '/avm/detail',
-              query: { address1: address1 || '', address2: address2 || '' },
+              query: { address1, address2 },
             });
 
-            // Best-effort extraction (ATTOM examples vary by package)
             const v =
               avmRes?.property?.[0]?.avm?.amount?.value ??
               avmRes?.property?.avm?.amount?.value ??
@@ -390,12 +392,11 @@ export async function GET(req: Request) {
             avmValue = typeof v === 'number' ? v : null;
             if (avmValue != null) priceConfidence = 85;
           } catch {
-            // If AVM fails, we can still proceed without price (unless minAvm forces it)
             avmValue = null;
           }
         }
 
-        // min AVM filter
+        // min AVM filter (requires AVM)
         if (minAvm != null) {
           if (avmValue == null || avmValue < minAvm) {
             skipped += 1;
