@@ -65,6 +65,12 @@ enum VerificationLevel {
   VERIFIED_ON_SITE
 }
 
+enum ImportRunStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
 /**
  * RegionCluster
  * Ex: "Costa del Sol", "French Riviera", "Miami Metro"
@@ -170,6 +176,49 @@ model CityMetric {
 }
 
 /**
+ * ImportRun
+ * Tracks ingestion jobs for dashboards, audit, and debugging.
+ */
+model ImportRun {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // "attom"
+  source    String
+
+  // "cities" | "properties"
+  scope     String
+
+  // Optional scoping for dashboards
+  region    String?
+  market    String?
+
+  // Params used for the run (radius, limit, filters, etc.)
+  params    Json
+
+  // Status tracking
+  status    ImportRunStatus @default(RUNNING)
+
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+
+  // Counts
+  scanned   Int      @default(0)
+  created   Int      @default(0)
+  skipped   Int      @default(0)
+  errors    Int      @default(0)
+
+  // Small sample of errors for quick debugging
+  errorSamples Json?
+
+  message   String?
+
+  @@index([source, scope, createdAt])
+  @@index([status, createdAt])
+}
+
+/**
  * Listing
  * Luxury-first listing model. Works for:
  * - Verified inventory
@@ -182,13 +231,10 @@ model Listing {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Stable SEO URL slug: /listing/<slug>
   slug      String   @unique
 
-  // Provider identity (critical for ingestion + dedupe)
-  // Example sources: "manual", "attom"
   source      String   @default("manual")
-  sourceId    String?  @unique
+  sourceId    String?
   sourceUrl   String?
   sourceUpdatedAt DateTime?
 
@@ -199,12 +245,10 @@ model Listing {
   visibility   ListingVisibility @default(PUBLIC)
   verification VerificationLevel @default(SELF_REPORTED)
 
-  // Display
   title        String
   headline     String?
   description  String?
 
-  // Location (keep address private if needed)
   neighborhood  String?
   address       String?
   addressHidden Boolean @default(false)
@@ -212,38 +256,45 @@ model Listing {
   lat           Float?
   lng           Float?
 
-  // Core specs
-  propertyType String? // villa, penthouse, apartment, estate, townhouse
+  propertyType String?
   bedrooms     Int?
   bathrooms    Int?
+
+  // Canonical metric fields (m²)
   builtM2      Int?
   plotM2       Int?
 
-  // Pricing (whole currency units for now)
+  // Source-native size fields (sqft for ATTOM)
+  builtSqft    Int?
+  plotSqft     Int?
+
   price        Int?
   currency     String  @default("EUR")
 
-  // Running costs (Spain luxury reality)
+  // Confidence flags (0-100)
+  priceConfidence   Int?
+  dataCompleteness  Int?
+
   communityFeesMonthly Int?
   ibiYearly            Int?
   garbageTaxYearly     Int?
 
-  // Truth fields (expand later)
   yearBuilt      Int?
   renovationYear Int?
   energyRating   String?
 
-  // Media (named relation because we also relate Listing <-> ListingMedia as "ListingCover")
   media        ListingMedia[] @relation("ListingMedia")
 
-  // Cover media (optional 1:1)
   coverMediaId  String? @unique
   coverMedia    ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
 
+  @@unique([source, sourceId])
   @@index([cityId, status])
   @@index([status, visibility])
   @@index([cityId, price])
   @@index([source])
+  @@index([priceConfidence])
+  @@index([dataCompleteness])
 }
 
 /**
