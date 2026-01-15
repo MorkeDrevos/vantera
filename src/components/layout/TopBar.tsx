@@ -302,10 +302,8 @@ export default function TopBar() {
   const navItemBase =
     'inline-flex h-10 items-center gap-2 whitespace-nowrap leading-none text-[12px] tracking-[0.12em] text-zinc-200/70 hover:text-zinc-50 transition';
 
-  const navDot = <span className="text-white/10">·</span>;
-
   // Copy
-  const sellLabel = 'Submit an asset';
+  const sellLabel = 'List privately';
   const sellHref = '/coming-soon?flow=sell';
 
   const agentHref = '/coming-soon?flow=agents';
@@ -593,7 +591,7 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
-                                softFillStrong,
+                                'bg-white/[0.03] hover:bg-white/[0.06]',
                                 'ring-1 ring-inset ring-white/12 hover:ring-white/16',
                               )}
                             >
