@@ -48,15 +48,32 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* =========================================================
-   Royal layout primitives (wide, editorial, institutional)
+   VANTERA HOME (ROYAL PREMIUM)
+   - Ultra-wide editorial layout
+   - Intelligence-first hero (search + intent + signal strip)
+   - Clear scanning, fewer “blocks”, more “surface”
    ========================================================= */
 
+const ULTRA =
+  'mx-auto w-full max-w-[1960px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
+
 const GLASS =
   'bg-white/70 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_34px_100px_rgba(11,12,16,0.12)]';
 const GLASS_SOFT =
-  'bg-white/60 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_26px_80px_rgba(11,12,16,0.10)]';
+  'bg-white/62 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_26px_80px_rgba(11,12,16,0.10)]';
+
+function pickHeroCity(cities: RuntimeCity[]) {
+  // Prefer explicit hero images, then featured image, then first
+  const byPriority = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  return (
+    byPriority.find((c) => c.heroImageSrc) ||
+    byPriority.find((c) => c.image?.src) ||
+    byPriority[0] ||
+    null
+  );
+}
 
 function Shell({ children }: { children: ReactNode }) {
   return (
@@ -64,11 +81,11 @@ function Shell({ children }: { children: ReactNode }) {
       {/* ROYAL STAGE - global cinematic paper system */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* Crown light (warm) */}
-        <div className="absolute -top-64 left-1/2 h-[920px] w-[1500px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.30),transparent_62%)] blur-3xl" />
+        <div className="absolute -top-64 left-1/2 h-[920px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.30),transparent_62%)] blur-3xl" />
         {/* Violet edge (right) */}
-        <div className="absolute -top-56 right-[-320px] h-[780px] w-[780px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.16),transparent_64%)] blur-3xl" />
+        <div className="absolute -top-56 right-[-320px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.16),transparent_64%)] blur-3xl" />
         {/* Cool lift (left-bottom) */}
-        <div className="absolute bottom-[-420px] left-[-420px] h-[980px] w-[980px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_62%)] blur-3xl" />
+        <div className="absolute bottom-[-420px] left-[-420px] h-[1020px] w-[1020px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_62%)] blur-3xl" />
 
         {/* Editorial wash and vignette */}
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.0),rgba(11,12,16,0.035))]" />
@@ -77,7 +94,7 @@ function Shell({ children }: { children: ReactNode }) {
 
         {/* Micro grain */}
         <div className="absolute inset-0 opacity-[0.040] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
-        {/* Subtle grid (very faint, feels engineered) */}
+        {/* Subtle grid (engineered, faint) */}
         <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,rgba(11,12,16,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(11,12,16,0.18)_1px,transparent_1px)] [background-size:120px_120px]" />
       </div>
 
@@ -97,6 +114,14 @@ function Shell({ children }: { children: ReactNode }) {
 /* =========================================================
    Micro components (premium labels, plates, cards)
    ========================================================= */
+
+function GoldWord({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]">
+      {children}
+    </span>
+  );
+}
 
 function SectionKicker({
   title,
@@ -126,14 +151,6 @@ function SectionKicker({
   );
 }
 
-function GoldWord({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]">
-      {children}
-    </span>
-  );
-}
-
 type SignalStripItem = {
   k: string;
   v: React.ReactNode;
@@ -144,20 +161,20 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   return (
     <div
       className={cx(
-        'relative overflow-hidden rounded-[24px]',
+        'relative overflow-hidden rounded-[26px]',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
-        'bg-white/65 backdrop-blur-[18px]',
+        'bg-white/66 backdrop-blur-[18px]',
         'shadow-[0_28px_90px_rgba(11,12,16,0.12)]',
       )}
     >
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_280px_at_18%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_280px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
       </div>
 
-      <div className="relative grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
+      <div className="relative grid grid-cols-2 gap-2.5 p-3.5 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
         {items.map((it) => (
           <div
             key={it.k}
@@ -170,7 +187,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
             title={it.hint ?? undefined}
           >
             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.22),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_20%_0%,rgba(231,201,130,0.22),transparent_60%)]" />
             </div>
 
             <div className="relative flex items-start justify-between gap-2">
@@ -196,13 +213,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   );
 }
 
-function Pillar({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div
       className={cx(
@@ -219,9 +230,7 @@ function Pillar({
 
       <div className="relative">
         <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
       </div>
     </div>
   );
@@ -229,10 +238,10 @@ function Pillar({
 
 function IntelligencePlate({ children }: { children: React.ReactNode }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px]', GLASS)}>
+    <div className={cx('relative overflow-hidden rounded-[34px]', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1000px_360px_at_20%_0%,rgba(231,201,130,0.20),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_85%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.20),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_85%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
       </div>
@@ -245,7 +254,7 @@ function IntelligencePlate({ children }: { children: React.ReactNode }) {
 
 function PortalVsTruth() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-5 sm:p-6', GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden rounded-[34px] p-5 sm:p-6', GLASS_SOFT)}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
@@ -253,7 +262,7 @@ function PortalVsTruth() {
       </div>
 
       <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[24px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/72 p-6">
+        <div className="rounded-[26px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/72 p-6">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
             LUXURY PORTALS
           </div>
@@ -280,7 +289,7 @@ function PortalVsTruth() {
           </ul>
         </div>
 
-        <div className="rounded-[24px] ring-1 ring-inset ring-[color:var(--hairline)] bg-[color:var(--paper-2)] p-6">
+        <div className="rounded-[26px] ring-1 ring-inset ring-[color:var(--hairline)] bg-[color:var(--paper-2)] p-6">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
             VANTERA
           </div>
@@ -325,9 +334,9 @@ function FeatureCard({
   bullets: string[];
 }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-6', GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden rounded-[34px] p-6', GLASS_SOFT)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(780px_260px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
@@ -340,9 +349,7 @@ function FeatureCard({
           {title}
         </div>
 
-        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
         <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
           {bullets.map((b) => (
@@ -361,10 +368,10 @@ function FeatureCard({
 
 function CTA() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[32px] p-6 sm:p-10', GLASS)}>
+    <div className={cx('relative overflow-hidden rounded-[36px] p-6 sm:p-10', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_20%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_380px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
       </div>
 
@@ -415,6 +422,36 @@ function CTA() {
   );
 }
 
+/* ---------- Quick nav ---------- */
+
+function QuickNav() {
+  return (
+    <div className="mt-7 flex flex-wrap items-center gap-2">
+      {[
+        { href: '#briefing', label: 'Market briefing' },
+        { href: '#featured', label: 'Featured intelligence' },
+        { href: '#index', label: 'Explore index' },
+        { href: '#access', label: 'Private access' },
+      ].map((it) => (
+        <a
+          key={it.href}
+          href={it.href}
+          className={cx(
+            'group inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold',
+            'ring-1 ring-inset ring-[color:var(--hairline)]',
+            'bg-white/72 hover:bg-white',
+            'text-[color:var(--ink)]',
+            'transition',
+          )}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)] opacity-70 group-hover:opacity-100" />
+          <span className="tracking-[0.12em] uppercase">{it.label}</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 /* =========================================================
    HOME PAGE
    ========================================================= */
@@ -423,56 +460,80 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
 
+  const heroCity = pickHeroCity(cities);
+  const heroSrc = heroCity?.heroImageSrc || heroCity?.image?.src || null;
+  const heroAlt =
+    heroCity?.heroImageAlt ||
+    heroCity?.image?.alt ||
+    (heroCity ? `${heroCity.name} luxury real estate` : 'Vantera');
+
   return (
     <Shell>
       {/* =====================================================
-          HERO - Royal flagship, ultra-wide, JamesEdition vibe
+          HERO - Ultra-wide, cinematic, intelligence-forward
          ===================================================== */}
-      <section className="relative w-full pb-12 pt-10 sm:pb-16 sm:pt-12">
+      <section className="relative w-full pb-12 pt-8 sm:pb-16 sm:pt-10">
         {/* Hero edge separators (editorial, expensive) */}
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.18)] to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
 
-        <div className={cx('relative', WIDE)}>
-          <div className="relative overflow-hidden rounded-[36px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/55 shadow-[0_60px_160px_rgba(11,12,16,0.16)]">
+        <div className={cx('relative', ULTRA)}>
+          <div className="relative overflow-hidden rounded-[40px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/55 shadow-[0_70px_190px_rgba(11,12,16,0.18)]">
+            {/* Cinematic media (optional) */}
+            {heroSrc ? (
+              <div className="pointer-events-none absolute inset-0">
+                <Image
+                  src={heroSrc}
+                  alt={heroAlt}
+                  fill
+                  priority
+                  className="object-cover opacity-[0.18] saturate-[0.92] contrast-[1.02]"
+                />
+                <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.80),rgba(251,251,250,0.66),rgba(251,251,250,0.76))]" />
+                <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_0%,rgba(231,201,130,0.26),transparent_60%)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(980px_460px_at_85%_0%,rgba(139,92,246,0.14),transparent_62%)]" />
+              </div>
+            ) : null}
+
             {/* Cinematic portal layer (subtle, premium) */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.28] mix-blend-multiply">
+            <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply">
               <RoyalPortalBackdrop />
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply">
+            <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-multiply">
               <HeroGoldCrown />
             </div>
 
-            {/* Hero inner wash */}
+            {/* Inner wash for consistent contrast */}
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.26),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.14),transparent_62%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.70),rgba(255,255,255,0.55),rgba(255,255,255,0.35))]" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.74),rgba(255,255,255,0.58),rgba(255,255,255,0.38))]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.16)] to-transparent" />
             </div>
 
             <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-18 2xl:px-20 2xl:py-20">
-              <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+              <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
                 {/* LEFT: Narrative + Search */}
                 <div className="lg:col-span-7">
                   <PremiumBadgeRow />
 
-                  <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[76px] lg:leading-[1.01] 2xl:text-[84px]">
+                  <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[78px] lg:leading-[1.01] 2xl:text-[88px]">
                     Private intelligence for the world&apos;s{' '}
                     <span className="inline">
                       <GoldWord>most valuable assets</GoldWord>
                     </span>
                   </h1>
 
-                  <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
+                  <p className="mt-4 max-w-[80ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
                     Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value signal over noise.
                     <span className="text-[color:var(--ink-3)]">
                       {' '}
-                      Built to model value, liquidity, and risk without theatre.
+                      Model value, liquidity, and risk without theatre.
                     </span>
                   </p>
 
-                  {/* Primary: OmniSearch */}
-                  <div className="mt-7 max-w-[1200px]">
+                  <QuickNav />
+
+                  {/* Primary: OmniSearch (hero focal) */}
+                  <div className="mt-7 max-w-[1240px]">
                     <VanteraOmniSearch
                       cities={cities as any}
                       clusters={REGION_CLUSTERS as any}
@@ -481,15 +542,15 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   </div>
 
                   {/* Secondary: Intent console */}
-                  <div className="mt-5 max-w-[1200px]">
+                  <div className="mt-5 max-w-[1240px]">
                     <IntentHero
                       cities={cities as any}
                       defaultTop={6}
-                      onKeepScanningId="explore-index"
+                      onKeepScanningId="index"
                     />
                   </div>
 
-                  <div className="mt-6 max-w-[1200px]">
+                  <div className="mt-6 max-w-[1240px]">
                     <SignalStrip
                       items={[
                         { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
@@ -501,13 +562,13 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                     />
                   </div>
 
-                  <div className="mt-6 grid max-w-[1200px] gap-3 sm:grid-cols-3">
+                  <div className="mt-6 grid max-w-[1240px] gap-3 sm:grid-cols-3">
                     <Pillar title="Paperwork" body="See what is missing before you waste time." />
                     <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
                     <Pillar title="Risk radar" body="Catch resale killers early." />
                   </div>
 
-                  {/* Hard divider line like print layout */}
+                  {/* Print-style divider */}
                   <div className="mt-10 hidden lg:block h-px w-full bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
                 </div>
 
@@ -521,7 +582,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                             Featured markets
                           </div>
                           <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                            Private intelligence, city-first
+                            City-first intelligence
                           </div>
                           <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
                             Tap a market to open its intelligence - pricing reality, liquidity read, and risk flags.
@@ -540,7 +601,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
                       </div>
 
-                      <div className="mt-5 rounded-[22px] bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
+                      <div className="mt-5 rounded-[24px] bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
                         <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                           House rule
                         </div>
@@ -553,11 +614,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 </div>
               </div>
 
-              <div className="mt-10">
-                <SectionKicker
-                  title="Why this exists"
-                  subtitle="This is why we sit above luxury portals"
-                />
+              {/* “Why we exist” under hero, but still inside the hero stage */}
+              <div className="mt-12">
+                <SectionKicker title="Why this exists" subtitle="This is why we sit above luxury portals" />
                 <PortalVsTruth />
               </div>
             </div>
@@ -568,7 +627,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
       </section>
 
-      {/* TRUST - keep but make it feel like an institutional tape */}
+      {/* TRUST - feel like an institutional tape */}
       <div className={cx('relative', NARROW)}>
         <TrustMarquee
           className="-mt-6"
@@ -593,18 +652,36 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
       </div>
 
       {/* =====================================================
-          BODY - upgrade spacing, widen where it matters
+          BODY - Wide where it matters, calmer rhythm
          ===================================================== */}
 
-      {/* Market briefing wants room - give it wide */}
-      <section className="mt-12 sm:mt-14">
+      {/* Market briefing - give it air + anchor */}
+      <section id="briefing" className="mt-12 scroll-mt-24 sm:mt-14">
         <div className={WIDE}>
-          <MarketBriefing cities={cities as any} />
+          <SectionKicker
+            title="Market briefing"
+            subtitle="A clean read of what is moving, what is stalling, and why"
+            right={
+              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
+                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">SIGNAL SUMMARY</div>
+              </div>
+            }
+          />
+          <div className={cx('relative overflow-hidden rounded-[36px] p-4 sm:p-6', GLASS)}>
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(980px_380px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+            </div>
+            <div className="relative">
+              <MarketBriefing cities={cities as any} />
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Featured intelligence - wide, premium stage */}
-      <section className="mt-12 sm:mt-16">
+      <section id="featured" className="mt-12 scroll-mt-24 sm:mt-16">
         <div className={WIDE}>
           <SectionKicker
             title="Featured intelligence"
@@ -615,11 +692,20 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
             }
           />
-          <FeaturedIntelligencePanel />
+          <div className={cx('relative overflow-hidden rounded-[36px] p-5 sm:p-7', GLASS)}>
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(980px_380px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+            </div>
+            <div className="relative">
+              <FeaturedIntelligencePanel />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Why Vantera wins - keep clean but more expensive */}
+      {/* Why Vantera wins - clean but expensive */}
       <section className="mt-14 sm:mt-18">
         <div className={NARROW}>
           <SectionKicker title="Why Vantera wins" subtitle="Plain language, high precision" />
@@ -628,38 +714,26 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership, and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent, and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls, and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </div>
       </section>
 
       {/* Explore index - wide, feels alive */}
-      <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-18">
+      <section id="index" className="mt-14 scroll-mt-24 sm:mt-18">
         <div className={WIDE}>
           <SectionKicker
             title="Explore the index"
@@ -673,10 +747,10 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             }
           />
 
-          <div className={cx('relative overflow-hidden rounded-[34px] p-5 sm:p-7', GLASS)}>
+          <div className={cx('relative overflow-hidden rounded-[38px] p-5 sm:p-7', GLASS)}>
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.20),transparent_62%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(980px_380px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
             </div>
 
@@ -694,9 +768,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
 
               <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                  ENTRY POINTS
-                </div>
+                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">ENTRY POINTS</div>
               </div>
             </div>
 
@@ -707,8 +779,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
       </section>
 
-      {/* CTA - narrow is fine, but still royal */}
-      <section className="mt-14 sm:mt-18 pb-16 sm:pb-20">
+      {/* CTA - anchor */}
+      <section id="access" className="mt-14 scroll-mt-24 sm:mt-18 pb-16 sm:pb-20">
         <div className={NARROW}>
           <CTA />
         </div>
