@@ -51,12 +51,23 @@ function cx(...parts: Array<string | false | null | undefined>) {
    Royal layout primitives (wide, editorial, institutional)
    ========================================================= */
 
+const ULTRA = 'mx-auto w-full max-w-[1960px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 const GLASS =
   'bg-white/70 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_34px_100px_rgba(11,12,16,0.12)]';
 const GLASS_SOFT =
   'bg-white/60 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_26px_80px_rgba(11,12,16,0.10)]';
+
+function pickHeroCity(cities: RuntimeCity[]) {
+  const sorted = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+  return (
+    sorted.find((c) => typeof c.heroImageSrc === 'string' && c.heroImageSrc.trim()) ||
+    sorted.find((c) => typeof c.image?.src === 'string' && c.image?.src.trim()) ||
+    sorted[0] ||
+    null
+  );
+}
 
 function Shell({ children }: { children: ReactNode }) {
   return (
@@ -196,13 +207,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   );
 }
 
-function Pillar({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div
       className={cx(
@@ -219,9 +224,7 @@ function Pillar({
 
       <div className="relative">
         <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
       </div>
     </div>
   );
@@ -340,9 +343,7 @@ function FeatureCard({
           {title}
         </div>
 
-        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
         <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
           {bullets.map((b) => (
@@ -423,147 +424,256 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
 
+  const heroCity = pickHeroCity(cities);
+  const heroSrc = heroCity?.heroImageSrc || heroCity?.image?.src || null;
+  const heroAlt =
+    heroCity?.heroImageAlt ||
+    heroCity?.image?.alt ||
+    (heroCity ? `${heroCity.name} luxury real estate` : 'Vantera');
+
+  // If you add a real video file later, set this to e.g. '/brand/hero.mp4'
+  const HERO_VIDEO_SRC: string | null = null;
+
   return (
     <Shell>
       {/* =====================================================
-          HERO - Royal flagship, ultra-wide, JamesEdition vibe
+          HERO - FULL BLEED (screen-wide) with bg image/video
+          - Text sits on the image
+          - Intelligence UI sits in a floating glass deck
          ===================================================== */}
-      <section className="relative w-full pb-12 pt-10 sm:pb-16 sm:pt-12">
-        {/* Hero edge separators (editorial, expensive) */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.18)] to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+      <section className="relative w-screen min-h-[100svh] overflow-hidden">
+        {/* Background media */}
+        <div className="absolute inset-0">
+          {HERO_VIDEO_SRC ? (
+            <video
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+            >
+              <source src={HERO_VIDEO_SRC} type="video/mp4" />
+            </video>
+          ) : heroSrc ? (
+            <Image
+              src={heroSrc}
+              alt={heroAlt}
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+          ) : (
+            <div className="h-full w-full bg-[radial-gradient(1200px_800px_at_35%_15%,rgba(255,255,255,0.10),transparent_60%),linear-gradient(to_bottom,rgba(0,0,0,0.30),rgba(0,0,0,0.75))]" />
+          )}
+        </div>
 
-        <div className={cx('relative', WIDE)}>
-          <div className="relative overflow-hidden rounded-[36px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/55 shadow-[0_60px_160px_rgba(11,12,16,0.16)]">
-            {/* Cinematic portal layer (subtle, premium) */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.28] mix-blend-multiply">
-              <RoyalPortalBackdrop />
-            </div>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply">
-              <HeroGoldCrown />
-            </div>
+        {/* Premium overlays (legibility + luxury) */}
+        <div className="pointer-events-none absolute inset-0">
+          {/* Vignette */}
+          <div className="absolute inset-0 bg-[radial-gradient(1400px_900px_at_50%_40%,rgba(0,0,0,0.00),rgba(0,0,0,0.68))]" />
+          {/* Bottom density for UI */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.22),rgba(0,0,0,0.40),rgba(0,0,0,0.78))]" />
+          {/* Gold + violet light */}
+          <div className="absolute -top-64 left-1/2 h-[900px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.22),transparent_62%)] blur-3xl" />
+          <div className="absolute -top-56 right-[-340px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.18),transparent_64%)] blur-3xl" />
+          {/* Micro grain (cinematic) */}
+          <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)] [background-size:28px_28px]" />
 
-            {/* Hero inner wash */}
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.26),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.14),transparent_62%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.70),rgba(255,255,255,0.55),rgba(255,255,255,0.35))]" />
-            </div>
+          {/* Subtle crown motifs (very faint) */}
+          <div className="absolute inset-0 opacity-[0.16] mix-blend-screen">
+            <RoyalPortalBackdrop />
+          </div>
+          <div className="absolute inset-0 opacity-[0.14] mix-blend-screen">
+            <HeroGoldCrown />
+          </div>
 
-            <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-18 2xl:px-20 2xl:py-20">
-              <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-                {/* LEFT: Narrative + Search */}
-                <div className="lg:col-span-7">
-                  <PremiumBadgeRow />
+          {/* Top & bottom hairlines */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+        </div>
 
-                  <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[76px] lg:leading-[1.01] 2xl:text-[84px]">
-                    Private intelligence for the world&apos;s{' '}
-                    <span className="inline">
-                      <GoldWord>most valuable assets</GoldWord>
-                    </span>
-                  </h1>
+        {/* Foreground content */}
+        <div className="relative z-10">
+          <div className={ULTRA}>
+            <div className="flex min-h-[100svh] items-end pb-10 pt-24 sm:pb-14 sm:pt-28 lg:pb-16 lg:pt-32">
+              <div className="w-full">
+                <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+                  {/* LEFT: headline + search deck */}
+                  <div className="lg:col-span-7">
+                    {/* Keep your badge row (but we place it on a dark hero) */}
+                    <div className="inline-flex rounded-full bg-black/22 px-2.5 py-2 ring-1 ring-inset ring-white/14 backdrop-blur-[14px]">
+                      <PremiumBadgeRow />
+                    </div>
 
-                  <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                    Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value signal over noise.
-                    <span className="text-[color:var(--ink-3)]">
-                      {' '}
-                      Built to model value, liquidity, and risk without theatre.
-                    </span>
-                  </p>
+                    <h1 className="mt-6 text-balance text-[44px] font-semibold tracking-[-0.03em] text-white sm:text-6xl lg:text-[78px] lg:leading-[1.01] 2xl:text-[88px]">
+                      Private intelligence for the world&apos;s{' '}
+                      <span className="inline">
+                        <GoldWord>most valuable assets</GoldWord>
+                      </span>
+                    </h1>
 
-                  {/* Primary: OmniSearch */}
-                  <div className="mt-7 max-w-[1200px]">
-                    <VanteraOmniSearch
-                      cities={cities as any}
-                      clusters={REGION_CLUSTERS as any}
-                      autoFocus={false}
-                    />
-                  </div>
+                    <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-white/80 sm:text-lg">
+                      Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value signal over noise.
+                      <span className="text-white/60">
+                        {' '}
+                        Built to model value, liquidity, and risk without theatre.
+                      </span>
+                    </p>
 
-                  {/* Secondary: Intent console */}
-                  <div className="mt-5 max-w-[1200px]">
-                    <IntentHero
-                      cities={cities as any}
-                      defaultTop={6}
-                      onKeepScanningId="explore-index"
-                    />
-                  </div>
-
-                  <div className="mt-6 max-w-[1200px]">
-                    <SignalStrip
-                      items={[
-                        { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
-                        { k: 'REGIONS', v: <span>{regionCount}</span> },
-                        { k: 'TIMEZONES', v: <span>{timezoneCount}</span> },
-                        { k: 'UPDATES', v: <span>Live</span>, hint: 'Private index' },
-                        { k: 'PROOF', v: <span>Registry + docs</span> },
-                      ]}
-                    />
-                  </div>
-
-                  <div className="mt-6 grid max-w-[1200px] gap-3 sm:grid-cols-3">
-                    <Pillar title="Paperwork" body="See what is missing before you waste time." />
-                    <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
-                    <Pillar title="Risk radar" body="Catch resale killers early." />
-                  </div>
-
-                  {/* Hard divider line like print layout */}
-                  <div className="mt-10 hidden lg:block h-px w-full bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
-                </div>
-
-                {/* RIGHT: Intelligence plate + Featured markets */}
-                <div className="lg:col-span-5">
-                  <IntelligencePlate>
-                    <div className="px-6 py-6 sm:px-7 sm:py-7">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                          <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)] uppercase">
-                            Featured markets
-                          </div>
-                          <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                            Private intelligence, city-first
-                          </div>
-                          <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                            Tap a market to open its intelligence - pricing reality, liquidity read, and risk flags.
-                          </div>
+                    {/* FLOATING COMMAND DECK (keeps your existing components readable) */}
+                    <div className="mt-7 max-w-[1200px]">
+                      <div
+                        className={cx(
+                          'relative overflow-hidden rounded-[30px] p-3.5 sm:p-4',
+                          'bg-white/78 backdrop-blur-[18px]',
+                          'ring-1 ring-inset ring-white/35',
+                          'shadow-[0_40px_140px_rgba(0,0,0,0.45)]',
+                        )}
+                      >
+                        <div className="pointer-events-none absolute inset-0">
+                          <div className="absolute inset-0 bg-[radial-gradient(1000px_360px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+                          <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+                          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
                         </div>
 
-                        <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
-                          <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
-                          <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                            UPDATED WEEKLY
+                        <div className="relative">
+                          {/* Primary: OmniSearch */}
+                          <VanteraOmniSearch
+                            cities={cities as any}
+                            clusters={REGION_CLUSTERS as any}
+                            autoFocus={false}
+                          />
+
+                          {/* Secondary: Intent console */}
+                          <div className="mt-4">
+                            <IntentHero
+                              cities={cities as any}
+                              defaultTop={6}
+                              onKeepScanningId="explore-index"
+                            />
                           </div>
-                        </div>
-                      </div>
 
-                      <div className="mt-5">
-                        <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
-                      </div>
+                          <div className="mt-4">
+                            <SignalStrip
+                              items={[
+                                { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
+                                { k: 'REGIONS', v: <span>{regionCount}</span> },
+                                { k: 'TIMEZONES', v: <span>{timezoneCount}</span> },
+                                { k: 'UPDATES', v: <span>Live</span>, hint: 'Private index' },
+                                { k: 'PROOF', v: <span>Registry + docs</span> },
+                              ]}
+                            />
+                          </div>
 
-                      <div className="mt-5 rounded-[22px] bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
-                        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-                          House rule
-                        </div>
-                        <div className="mt-1 text-sm text-[color:var(--ink-2)]">
-                          Signal beats story. If it cannot be verified, it cannot lead.
+                          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                            <Pillar title="Paperwork" body="See what is missing before you waste time." />
+                            <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
+                            <Pillar title="Risk radar" body="Catch resale killers early." />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </IntelligencePlate>
+
+                    <div className="mt-8 hidden lg:block h-px w-full bg-gradient-to-r from-transparent via-white/14 to-transparent" />
+                  </div>
+
+                  {/* RIGHT: Featured markets plate (still readable) */}
+                  <div className="lg:col-span-5">
+                    <div className="relative">
+                      <div className="pointer-events-none absolute -inset-6 opacity-70">
+                        <div className="absolute inset-0 rounded-[40px] bg-[radial-gradient(900px_320px_at_20%_0%,rgba(231,201,130,0.20),transparent_62%)] blur-2xl" />
+                      </div>
+
+                      <div
+                        className={cx(
+                          'relative overflow-hidden rounded-[34px]',
+                          'bg-white/78 backdrop-blur-[18px]',
+                          'ring-1 ring-inset ring-white/35',
+                          'shadow-[0_44px_160px_rgba(0,0,0,0.45)]',
+                        )}
+                      >
+                        <div className="pointer-events-none absolute inset-0">
+                          <div className="absolute inset-0 bg-[radial-gradient(1000px_360px_at_20%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+                          <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_85%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+                          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
+                        </div>
+
+                        <div className="relative px-6 py-6 sm:px-7 sm:py-7">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0">
+                              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)] uppercase">
+                                Featured markets
+                              </div>
+                              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                                Private intelligence, city-first
+                              </div>
+                              <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                                Tap a market to open its intelligence - pricing reality, liquidity read, and risk flags.
+                              </div>
+                            </div>
+
+                            <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
+                              <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
+                              <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+                                UPDATED WEEKLY
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-5">
+                            <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
+                          </div>
+
+                          <div className="mt-5 rounded-[22px] bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
+                            <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+                              House rule
+                            </div>
+                            <div className="mt-1 text-sm text-[color:var(--ink-2)]">
+                              Signal beats story. If it cannot be verified, it cannot lead.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tiny caption like editorial */}
+                      <div className="mt-4 hidden lg:block text-[11px] tracking-[0.22em] text-white/55 uppercase">
+                        Intelligence is the product.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Why this exists (still in hero, but not boxed) */}
+                <div className="mt-10">
+                  <div className="mb-4 flex items-end justify-between">
+                    <div>
+                      <div className="text-[11px] font-semibold tracking-[0.26em] text-white/70 uppercase">
+                        Why this exists
+                      </div>
+                      <div className="mt-1 text-sm text-white/70">
+                        This is why we sit above luxury portals
+                      </div>
+                    </div>
+                    <div className="hidden sm:block h-px w-44 bg-gradient-to-r from-transparent via-white/18 to-transparent" />
+                  </div>
+
+                  <div className="rounded-[30px] bg-white/78 backdrop-blur-[18px] ring-1 ring-inset ring-white/35 shadow-[0_40px_140px_rgba(0,0,0,0.42)]">
+                    <div className="p-5 sm:p-6">
+                      <PortalVsTruth />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scroll cue */}
+                <div className="mt-8 flex items-center gap-3 text-white/60">
+                  <div className="h-px w-16 bg-white/18" />
+                  <div className="text-[11px] tracking-[0.24em] uppercase">Scroll for index</div>
+                  <div className="h-px flex-1 bg-white/10" />
                 </div>
               </div>
-
-              <div className="mt-10">
-                <SectionKicker
-                  title="Why this exists"
-                  subtitle="This is why we sit above luxury portals"
-                />
-                <PortalVsTruth />
-              </div>
             </div>
-
-            {/* Bottom fade */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[rgba(251,251,250,0.95)]" />
           </div>
         </div>
       </section>
@@ -628,31 +738,19 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership, and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent, and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls, and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </div>
@@ -694,9 +792,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
 
               <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                  ENTRY POINTS
-                </div>
+                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">ENTRY POINTS</div>
               </div>
             </div>
 
