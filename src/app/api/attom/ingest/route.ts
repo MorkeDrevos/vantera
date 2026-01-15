@@ -38,20 +38,58 @@ function slugify(input: string) {
 }
 
 function extractAddressItem(item: any) {
+  // Snapshot responses may have address nested in different places.
   const address1 =
     pickString(item?.address1) ||
     pickString(item?.address?.line1) ||
     pickString(item?.address?.oneLine) ||
-    pickString(item?.property?.address1);
+    pickString(item?.address?.line) ||
+    pickString(item?.property?.address1) ||
+    pickString(item?.property?.address?.line1) ||
+    pickString(item?.property?.address?.oneLine);
 
   const address2 =
     pickString(item?.address2) ||
     pickString(item?.address?.line2) ||
     pickString(item?.address?.locality) ||
-    pickString(item?.property?.address2);
+    pickString(item?.property?.address2) ||
+    pickString(item?.property?.address?.line2) ||
+    pickString(item?.property?.address?.locality) ||
+    // Some ATTOM payloads put city/state/zip in separate fields; keep it light.
+    safeJoin(
+      [
+        pickString(item?.address?.locality),
+        pickString(item?.address?.countrySubd),
+        pickString(item?.address?.postal1),
+      ],
+      ' ',
+    ) ||
+    safeJoin(
+      [
+        pickString(item?.property?.address?.locality),
+        pickString(item?.property?.address?.countrySubd),
+        pickString(item?.property?.address?.postal1),
+      ],
+      ' ',
+    );
 
-  const lat = typeof item?.location?.latitude === 'number' ? item.location.latitude : null;
-  const lng = typeof item?.location?.longitude === 'number' ? item.location.longitude : null;
+  const lat =
+    typeof item?.location?.latitude === 'number'
+      ? item.location.latitude
+      : typeof item?.location?.lat === 'number'
+        ? item.location.lat
+        : typeof item?.property?.location?.latitude === 'number'
+          ? item.property.location.latitude
+          : null;
+
+  const lng =
+    typeof item?.location?.longitude === 'number'
+      ? item.location.longitude
+      : typeof item?.location?.lon === 'number'
+        ? item.location.lon
+        : typeof item?.property?.location?.longitude === 'number'
+          ? item.property.location.longitude
+          : null;
 
   return { address1, address2, lat, lng };
 }
@@ -114,6 +152,26 @@ function summarizeAttomError(e: any) {
   return { message: msg, status, code };
 }
 
+function extractSnapshotItems(payload: any): any[] {
+  // ATTOM payloads vary; this keeps it resilient.
+  const candidates = [
+    payload?.property,
+    payload?.properties,
+    payload?.results,
+    payload?.response?.property,
+    payload?.response?.properties,
+    payload?.response?.results,
+    payload?.Response?.property,
+    payload?.Response?.properties,
+    payload?.Response?.results,
+  ];
+
+  for (const c of candidates) {
+    if (Array.isArray(c)) return c;
+  }
+  return [];
+}
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -126,7 +184,11 @@ export async function GET(req: Request) {
     // Hard env guard so we never crash with a blank 500
     if (!process.env.ATTOM_API_KEY) {
       return NextResponse.json(
-        { ok: false, error: 'ATTOM_API_KEY missing in this environment (Preview/Development/Production)' },
+        {
+          ok: false,
+          error:
+            'ATTOM_API_KEY missing in this environment (Preview/Development/Production)',
+        },
         { status: 500 },
       );
     }
@@ -163,28 +225,28 @@ export async function GET(req: Request) {
       select: { id: true, slug: true, name: true, country: true, region: true },
     });
 
-    // 1) Radius search near preset center
-    let addressRes: any;
+    // 1) Geo radius search near preset center
+    // IMPORTANT: /address does NOT accept latitude/longitude/radius and returns 404.
+    // Use snapshot for geo search.
+    let snapshotRes: any;
     try {
-      addressRes = await attomFetchJson<any>({
-        path: '/address',
+      snapshotRes = await attomFetchJson<any>({
+        path: '/property/snapshot',
         query: {
           latitude: preset.lat,
           longitude: preset.lng,
           radius,
+          pagesize: limit,
         },
       });
     } catch (e: any) {
       return NextResponse.json(
-        { ok: false, step: 'attom:/address', ...summarizeAttomError(e) },
+        { ok: false, step: 'attom:/property/snapshot', ...summarizeAttomError(e) },
         { status: 502 },
       );
     }
 
-    const rawItems: any[] =
-      addressRes?.property || addressRes?.properties || addressRes?.address || addressRes?.results || [];
-
-    const items = Array.isArray(rawItems) ? rawItems.slice(0, limit) : [];
+    const items = extractSnapshotItems(snapshotRes).slice(0, limit);
 
     let scanned = items.length;
     let created = 0;
@@ -221,8 +283,8 @@ export async function GET(req: Request) {
           continue;
         }
 
-        // 2) Property detail by address
-        let detailRes: any;
+        // 2) Property detail by address (optional - keep it, but don't fail the whole run)
+        let detailRes: any = null;
         try {
           detailRes = await attomFetchJson<any>({
             path: '/property/detail',
@@ -231,7 +293,10 @@ export async function GET(req: Request) {
         } catch (e: any) {
           errors += 1;
           if (errorSamples.length < 5) {
-            errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
+            errorSamples.push({
+              step: 'attom:/property/detail',
+              message: summarizeAttomError(e).message,
+            });
           }
           continue;
         }
