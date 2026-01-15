@@ -21,9 +21,9 @@ export type CityListingsStats = {
 const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
   // Fix Monaco "for good" by using a local image (no Unsplash 403/optimizer issues)
   monaco: {
-    src: '/cities/monaco.jpg',
-    alt: 'Monaco harbour with yachts and skyline',
-  },
+  src: 'https://source.unsplash.com/RpAU8kvUX7g/2800x1600',
+  alt: 'Monaco harbour at night with yachts and city lights',
+},
   miami: {
     src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2800&q=85',
     alt: 'Miami skyline across the water',
