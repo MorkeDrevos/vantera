@@ -75,7 +75,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 /* ---------- FIX: SignalStrip (missing) ---------- */
 
-// Use React.ReactNode so we don't need to import ReactNode
 type SignalStripItem = {
   k: string;
   v: React.ReactNode;
@@ -105,12 +104,8 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
 
             <div className="relative flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">
-                  {it.k}
-                </div>
-                <div className="mt-1 truncate text-sm font-medium text-zinc-200">
-                  {it.v}
-                </div>
+                <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-400">{it.k}</div>
+                <div className="mt-1 truncate text-sm font-medium text-zinc-200">{it.v}</div>
               </div>
 
               {it.hint ? (
@@ -212,6 +207,176 @@ function TruthCardReport() {
   );
 }
 
+/* ---------- FIX: SectionLabel (missing) ---------- */
+
+function SectionLabel({
+  children,
+  hint,
+}: {
+  children: React.ReactNode;
+  hint?: string;
+}) {
+  return (
+    <div className="mb-4 flex flex-col gap-2 sm:mb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400 uppercase">{children}</div>
+        {hint ? <div className="mt-1 text-sm text-zinc-500">{hint}</div> : null}
+      </div>
+
+      <div className="hidden sm:block">
+        <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+      </div>
+    </div>
+  );
+}
+
+/* ---------- FIX: PortalVsTruth (missing) ---------- */
+
+function PortalVsTruth() {
+  return (
+    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(255,255,255,0.05),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(120,76,255,0.08),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+      </div>
+
+      <div className="relative grid gap-4 lg:grid-cols-2">
+        <div className="rounded-[22px] border border-white/10 bg-black/20 p-5">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">LUXURY PORTALS</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Beautiful inventory</div>
+          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+            Great for browsing, but vulnerable to presentation, persuasion and missing facts.
+          </div>
+
+          <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              Asking price leads the story
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              Verification is often external
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/40" />
+              Risk hides in the fine print
+            </li>
+          </ul>
+        </div>
+
+        <div className="rounded-[22px] border border-white/10 bg-white/[0.03] p-5">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">VANTERA</div>
+          <div className="mt-2 text-lg font-medium text-zinc-100">Quiet intelligence</div>
+          <div className="mt-2 text-sm leading-relaxed text-zinc-300">
+            Built for signal: value, liquidity and risk, with verification-first outputs.
+          </div>
+
+          <ul className="mt-4 space-y-2 text-sm text-zinc-200">
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              Fair value model, not theatre
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              Paperwork status surfaced early
+            </li>
+            <li className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              Resale-killer risk flags
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- FIX: FeatureCard (missing) ---------- */
+
+function FeatureCard({
+  eyebrow,
+  title,
+  body,
+  bullets,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+  bullets: string[];
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-6">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+      </div>
+
+      <div className="relative">
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400 uppercase">{eyebrow}</div>
+        <div className="mt-2 text-lg font-medium text-zinc-100">{title}</div>
+        <div className="mt-2 text-sm leading-relaxed text-zinc-300">{body}</div>
+
+        <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+          {bullets.map((b) => (
+            <li key={b} className="flex gap-2">
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[#E7C982]/70" />
+              {b}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- FIX: CTA (missing) ---------- */
+
+function CTA() {
+  return (
+    <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.02] p-6 shadow-[0_34px_110px_rgba(0,0,0,0.55)] sm:p-8">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_20%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_280px_at_86%_10%,rgba(120,76,255,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/16 to-transparent" />
+      </div>
+
+      <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-zinc-400">PRIVATE ACCESS</div>
+          <div className="mt-2 text-xl font-medium text-zinc-100">Bring a serious asset or a serious buyer</div>
+          <div className="mt-2 max-w-[64ch] text-sm leading-relaxed text-zinc-300">
+            Vantera is built for private sellers, advisors and agents who want verification, clarity and speed.
+            <span className="text-zinc-500"> Signal only.</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <a
+            href="/coming-soon?flow=sell"
+            className={cx(
+              'inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition',
+              'bg-white/[0.05] ring-1 ring-inset ring-white/12 hover:bg-white/[0.09] hover:ring-white/16',
+            )}
+          >
+            Submit a private seller
+          </a>
+
+          <a
+            href="/coming-soon?flow=agents"
+            className={cx(
+              'inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition',
+              'bg-white/[0.03] ring-1 ring-inset ring-white/10 hover:bg-white/[0.07] hover:ring-white/14',
+            )}
+          >
+            Agent access
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- HERO MEDIA / BACKDROP (unchanged) ---------- */
 /* ... NO CHANGES BELOW THIS LINE UNTIL SEARCH BLOCK ... */
 /* (HeroMedia, RoyalPortalBackdrop, GoldCrown, etc. remain identical) */
@@ -250,11 +415,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                 {/* 🔑 OMNI SEARCH (PRIMARY) */}
                 <div className="mt-6 max-w-[980px] lg:max-w-[1120px]">
-                  <VanteraOmniSearch
-                    cities={cities as any}
-                    clusters={REGION_CLUSTERS as any}
-                    autoFocus={false}
-                  />
+                  <VanteraOmniSearch cities={cities as any} clusters={REGION_CLUSTERS as any} autoFocus={false} />
                 </div>
 
                 {/* Intent console (secondary layer) */}
