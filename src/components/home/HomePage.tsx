@@ -126,6 +126,29 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   );
 }
 
+/* ---------- FIX: Pillar (missing) ---------- */
+
+type PillarProps = {
+  title: string;
+  body: string;
+};
+
+function Pillar({ title, body }: PillarProps) {
+  return (
+    <div className="relative overflow-hidden rounded-[22px] border border-white/10 bg-white/[0.02] p-4 shadow-[0_28px_90px_rgba(0,0,0,0.55)]">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/14 to-transparent" />
+      </div>
+
+      <div className="relative">
+        <div className="text-[13px] font-semibold text-zinc-100">{title}</div>
+        <div className="mt-1 text-sm leading-relaxed text-zinc-400">{body}</div>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- HERO MEDIA / BACKDROP (unchanged) ---------- */
 /* ... NO CHANGES BELOW THIS LINE UNTIL SEARCH BLOCK ... */
 /* (HeroMedia, RoyalPortalBackdrop, GoldCrown, etc. remain identical) */
