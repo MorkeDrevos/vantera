@@ -75,9 +75,10 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 /* ---------- FIX: SignalStrip (missing) ---------- */
 
+// Use React.ReactNode so we don't need to import ReactNode
 type SignalStripItem = {
   k: string;
-  v: ReactNode;
+  v: React.ReactNode;
   hint?: string;
 };
 
@@ -96,7 +97,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
           <div
             key={it.k}
             className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5 sm:px-3.5 sm:py-3"
-            title={it.hint || ''}
+            title={it.hint ?? undefined}
           >
             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
