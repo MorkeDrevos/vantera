@@ -70,10 +70,13 @@ function SignalChip({
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px]',
+        // no rounded corners
+        'inline-flex items-center gap-2 px-3 py-1.5 text-[11px]',
         'bg-white/82 backdrop-blur-2xl',
         'ring-1 ring-inset',
         toneCls,
+        // make pills feel tighter/sexier (engineered)
+        'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
       )}
     >
       <span className="tracking-[0.18em] uppercase text-[10px] text-[color:var(--ink-3)]">{label}</span>
@@ -115,7 +118,8 @@ export default function CityCard({
         href={`/city/${city.slug}`}
         prefetch
         className={cx(
-          'relative block overflow-hidden rounded-[30px]',
+          // no rounded corners
+          'relative block overflow-hidden',
           // white editorial card shell
           'bg-white/72 backdrop-blur-[14px]',
           RING,
@@ -125,8 +129,8 @@ export default function CityCard({
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Media */}
-        <div className={cx('relative w-full', isWall ? 'h-[360px]' : 'h-[310px] sm:h-[360px]')}>
+        {/* Media (less tall) */}
+        <div className={cx('relative w-full', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
           {src ? (
             <SafeImage
               src={src}
@@ -151,7 +155,7 @@ export default function CityCard({
             <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
             <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.16)_1px,transparent_0)] [background-size:34px_34px]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,251,250,0.00)_38%,rgba(251,251,250,0.70)_86%,rgba(251,251,250,0.92)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,251,250,0.00)_36%,rgba(251,251,250,0.70)_84%,rgba(251,251,250,0.94)_100%)]" />
           </div>
 
           {/* Premium refractor sweep on hover */}
@@ -164,7 +168,8 @@ export default function CityCard({
             <div className="absolute left-4 top-4">
               <div
                 className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] tracking-[0.22em] uppercase',
+                  // no rounded corners
+                  'inline-flex items-center gap-2 px-3 py-1.5 text-[11px] tracking-[0.22em] uppercase',
                   'bg-white/82 backdrop-blur-2xl',
                   RING,
                   'text-[color:var(--ink-3)]',
@@ -184,7 +189,7 @@ export default function CityCard({
                 </div>
                 <div className="mt-1 truncate text-[12px] text-[color:var(--ink-2)]">{regionLine(city)}</div>
 
-                {/* Signal row */}
+                {/* Signal row (sexier, tighter) */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {showVerified ? (
                     <SignalChip label="Verified" value={`${verified}`} tone="gold" />
@@ -196,10 +201,10 @@ export default function CityCard({
                 </div>
               </div>
 
-              {/* CTA pill (luxury control) */}
+              {/* CTA chip (no rounded) */}
               <span
                 className={cx(
-                  'inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-[12px] font-semibold',
+                  'inline-flex shrink-0 items-center gap-2 px-4 py-2.5 text-[12px] font-semibold',
                   'bg-white/86 backdrop-blur-2xl',
                   'text-[color:var(--ink)]',
                   RING,
@@ -232,9 +237,9 @@ export default function CityCard({
           </div>
         </div>
 
-        {/* hover ring */}
-        <div className="pointer-events-none absolute inset-0 rounded-[30px] opacity-0 transition group-hover:opacity-100">
-          <div className="absolute inset-0 rounded-[30px] ring-1 ring-inset ring-[rgba(231,201,130,0.26)]" />
+        {/* hover ring (no rounded) */}
+        <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
+          <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(231,201,130,0.26)]" />
         </div>
       </Link>
     </div>
