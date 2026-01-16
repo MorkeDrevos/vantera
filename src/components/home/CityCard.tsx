@@ -32,9 +32,11 @@ function hasVerified(stats?: CityListingsStats) {
   return n > 0;
 }
 
-const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+// Light UI ring token (do not depend on CSS vars)
+const RING = 'ring-1 ring-inset ring-black/[0.08]';
 
 function goldText() {
+  // keep your gold tokens, just ensure it is not relying on ink vars
   return 'bg-clip-text text-transparent bg-[linear-gradient(180deg,var(--gold-1)_0%,var(--gold-2)_45%,var(--gold-3)_100%)]';
 }
 
@@ -58,30 +60,29 @@ function SignalChip({
   value?: string;
   tone?: 'neutral' | 'gold' | 'violet' | 'emerald';
 }) {
-  const toneCls =
+  const ringCls =
     tone === 'gold'
-      ? 'ring-[rgba(231,201,130,0.32)] text-[color:var(--ink)]'
+      ? 'ring-[rgba(231,201,130,0.38)]'
       : tone === 'emerald'
-        ? 'ring-[rgba(16,185,129,0.22)] text-[color:var(--ink)]'
+        ? 'ring-[rgba(16,185,129,0.22)]'
         : tone === 'violet'
-          ? 'ring-[rgba(139,92,246,0.18)] text-[color:var(--ink)]'
-          : 'ring-[color:var(--hairline)] text-[color:var(--ink)]';
+          ? 'ring-[rgba(139,92,246,0.18)]'
+          : 'ring-black/[0.08]';
 
   return (
     <span
       className={cx(
-        // no rounded corners
         'inline-flex items-center gap-2 px-3 py-1.5 text-[11px]',
-        'bg-white/82 backdrop-blur-2xl',
+        'bg-white/90 backdrop-blur-2xl',
         'ring-1 ring-inset',
-        toneCls,
-        // make pills feel tighter/sexier (engineered)
+        ringCls,
         'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
+        'text-slate-900',
       )}
     >
-      <span className="tracking-[0.18em] uppercase text-[10px] text-[color:var(--ink-3)]">{label}</span>
+      <span className="tracking-[0.18em] uppercase text-[10px] text-slate-500">{label}</span>
       <span className="h-3 w-px bg-black/10" />
-      <span className="font-semibold tracking-[-0.01em]">{value}</span>
+      <span className="font-semibold tracking-[-0.01em] text-slate-900">{value}</span>
     </span>
   );
 }
@@ -118,18 +119,16 @@ export default function CityCard({
         href={`/city/${city.slug}`}
         prefetch
         className={cx(
-          // no rounded corners
           'relative block overflow-hidden',
-          // white editorial card shell
-          'bg-white/72 backdrop-blur-[14px]',
+          'bg-white/78 backdrop-blur-[14px]',
           RING,
           'shadow-[0_26px_90px_rgba(11,12,16,0.10)]',
           'transition duration-500 hover:-translate-y-[2px] hover:shadow-[0_34px_120px_rgba(11,12,16,0.14)]',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.18)]',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Media (less tall) */}
+        {/* Media */}
         <div className={cx('relative w-full', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
           {src ? (
             <SafeImage
@@ -140,7 +139,6 @@ export default function CityCard({
               className={cx(
                 'object-cover transition duration-700',
                 'group-hover:scale-[1.03]',
-                // normalize photos for a premium white UI
                 '[filter:contrast(1.03)_saturate(1.04)]',
               )}
               priority={isFeatured}
@@ -150,29 +148,30 @@ export default function CityCard({
             premiumFallback()
           )}
 
-          {/* Photo finishing: highlight edge + grain + calm vignette */}
+          {/* Photo finishing */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
             <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.16)_1px,transparent_0)] [background-size:34px_34px]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,251,250,0.00)_36%,rgba(251,251,250,0.70)_84%,rgba(251,251,250,0.94)_100%)]" />
+
+            {/* Key change: make the bottom "paper" slightly less white so text is always readable */}
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.00)_34%,rgba(255,255,255,0.62)_78%,rgba(255,255,255,0.90)_100%)]" />
           </div>
 
-          {/* Premium refractor sweep on hover */}
+          {/* Premium sweep */}
           <div className="pointer-events-none absolute inset-0 opacity-0 transition duration-700 group-hover:opacity-100">
             <div className="absolute -left-[40%] top-[-30%] h-[180%] w-[55%] rotate-[18deg] bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.18),transparent)] blur-xl" />
           </div>
 
-          {/* Top-left micro badge (only when featured) */}
+          {/* Top-left badge */}
           {isFeatured ? (
             <div className="absolute left-4 top-4">
               <div
                 className={cx(
-                  // no rounded corners
                   'inline-flex items-center gap-2 px-3 py-1.5 text-[11px] tracking-[0.22em] uppercase',
-                  'bg-white/82 backdrop-blur-2xl',
+                  'bg-white/90 backdrop-blur-2xl',
                   RING,
-                  'text-[color:var(--ink-3)]',
+                  'text-slate-600',
                 )}
               >
                 <span className={cx('font-semibold', goldText())}>Featured market</span>
@@ -184,12 +183,11 @@ export default function CityCard({
           <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
             <div className="flex items-end justify-between gap-4">
               <div className="min-w-0">
-                <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-slate-950">
                   {city.name}
                 </div>
-                <div className="mt-1 truncate text-[12px] text-[color:var(--ink-2)]">{regionLine(city)}</div>
+                <div className="mt-1 truncate text-[12px] text-slate-600">{regionLine(city)}</div>
 
-                {/* Signal row (sexier, tighter) */}
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {showVerified ? (
                     <SignalChip label="Verified" value={`${verified}`} tone="gold" />
@@ -201,12 +199,12 @@ export default function CityCard({
                 </div>
               </div>
 
-              {/* CTA chip (no rounded) */}
+              {/* CTA chip */}
               <span
                 className={cx(
                   'inline-flex shrink-0 items-center gap-2 px-4 py-2.5 text-[12px] font-semibold',
-                  'bg-white/86 backdrop-blur-2xl',
-                  'text-[color:var(--ink)]',
+                  'bg-white/92 backdrop-blur-2xl',
+                  'text-slate-900',
                   RING,
                   'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
                   'transition group-hover:bg-white',
@@ -214,30 +212,30 @@ export default function CityCard({
               >
                 <span className={cx('tracking-[-0.01em]', goldText())}>Enter</span>
                 <span className="h-4 w-px bg-black/10" />
-                <span className="text-[color:var(--ink-2)]">dossier</span>
+                <span className="text-slate-600">dossier</span>
               </span>
             </div>
           </div>
         </div>
 
-        {/* Editorial footer (paper) */}
+        {/* Editorial footer */}
         <div className="px-5 pb-5 pt-4">
           {city.blurb?.trim() ? (
-            <p className="text-[13px] leading-relaxed text-[color:var(--ink-2)] line-clamp-2">{city.blurb.trim()}</p>
+            <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">{city.blurb.trim()}</p>
           ) : (
-            <p className="text-[13px] leading-relaxed text-[color:var(--ink-2)] line-clamp-2">
+            <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">
               Private market coverage with proof-first signals, not portal theatre.
             </p>
           )}
 
           <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="text-[11px] tracking-[0.20em] uppercase text-[color:var(--ink-3)]">Open dossier</div>
-            <div className="h-px flex-1 bg-[rgba(11,12,16,0.10)]" />
-            <div className="text-[11px] text-[color:var(--ink-3)]">Updated weekly</div>
+            <div className="text-[11px] tracking-[0.20em] uppercase text-slate-500">Open dossier</div>
+            <div className="h-px flex-1 bg-black/10" />
+            <div className="text-[11px] text-slate-500">Updated weekly</div>
           </div>
         </div>
 
-        {/* hover ring (no rounded) */}
+        {/* hover ring */}
         <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
           <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(231,201,130,0.26)]" />
         </div>
