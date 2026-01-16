@@ -182,7 +182,7 @@ export default function Footer() {
 
           {/* Bottom row */}
           <div className="mt-5 flex flex-col gap-2 text-[12px] text-[color:var(--ink-3)] sm:flex-row sm:items-center sm:justify-between">
-            <span>© {year} Vantera</span>
+            <span>© {year} Vantera, Inc.</span>
             <span>All listings subject to verification and availability.</span>
           </div>
         </div>
