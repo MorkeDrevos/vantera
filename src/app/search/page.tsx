@@ -1,102 +1,161 @@
 // src/app/search/page.tsx
-import SearchResultsPageClient, { type SearchParams } from '@/components/search/SearchResultsPageClient';
+import SearchResultsPageClient, {
+  type SearchParams,
+  type SearchResultListing,
+} from '@/components/search/SearchResultsPageClient';
+
 import { prisma } from '@/lib/prisma';
 
-function firstParam(v: string | string[] | undefined) {
+function firstString(v: string | string[] | undefined) {
   if (Array.isArray(v)) return v[0];
   return v;
 }
 
-function parseIntParam(v: string | string[] | undefined) {
-  const s = firstParam(v);
-  if (!s) return undefined;
-  const n = Number(s);
-  if (!Number.isFinite(n)) return undefined;
-  return Math.round(n);
+function parseIntSafe(v: string | undefined) {
+  if (!v) return undefined;
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) ? n : undefined;
 }
 
-function parseNeeds(v: string | string[] | undefined) {
-  const s = firstParam(v);
-  if (!s) return [];
-  return s
+function parseNeeds(v: string | undefined) {
+  if (!v) return [];
+  return v
     .split(',')
     .map((x) => x.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function normalizeText(s: string) {
+  return s.trim();
+}
+
+function orTextFields(term: string) {
+  const t = normalizeText(term);
+  if (!t) return [];
+  return [
+    { title: { contains: t, mode: 'insensitive' as const } },
+    { headline: { contains: t, mode: 'insensitive' as const } },
+    { description: { contains: t, mode: 'insensitive' as const } },
+    { neighborhood: { contains: t, mode: 'insensitive' as const } },
+  ];
 }
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  // Next 15: can be async, but works fine as plain object on server in practice
+  searchParams?: SearchParams;
 }) {
-  const sp = (searchParams ?? {}) as SearchParams;
+  const sp = searchParams ?? {};
 
-  const q = (firstParam(sp.q) ?? '').trim();
-  const place = (firstParam(sp.place) ?? '').trim();
-  const kw = (firstParam(sp.kw) ?? '').trim();
-  const type = (firstParam(sp.type) ?? 'any').trim();
-  const max = parseIntParam(sp.max);
-  const beds = parseIntParam(sp.beds);
-  const needs = parseNeeds(sp.needs);
+  const q = normalizeText(firstString(sp.q) ?? '');
+  const place = normalizeText(firstString(sp.place) ?? '');
+  const kw = normalizeText(firstString(sp.kw) ?? '');
 
-  // Production baseline: strict LIVE + PUBLIC
-  // We apply pragmatic text matching until you add structured tags/features.
-  const and: any[] = [
+  // mode exists in UI but not in schema yet - we keep it for UX, but it does not affect DB query
+  const mode = normalizeText(firstString(sp.mode) ?? '');
+
+  const max = parseIntSafe(firstString(sp.max));
+  const beds = parseIntSafe(firstString(sp.beds));
+  const type = normalizeText(firstString(sp.type) ?? 'any');
+  const needs = parseNeeds(firstString(sp.needs));
+
+  const pageSize = 24;
+  const page = Math.max(1, parseIntSafe(firstString(sp.p)) ?? 1);
+  const skip = (page - 1) * pageSize;
+
+  const textTerms: string[] = [];
+  if (q) textTerms.push(q);
+  if (kw) textTerms.push(kw);
+  for (const n of needs) textTerms.push(n.replace(/_/g, ' '));
+
+  const andClauses: any[] = [
     { status: 'LIVE' },
     { visibility: 'PUBLIC' },
   ];
 
-  if (max) and.push({ price: { lte: max } });
-  if (beds) and.push({ bedrooms: { gte: beds } });
-
-  if (type && type !== 'any') {
-    and.push({
-      OR: [
-        { propertyType: { contains: type, mode: 'insensitive' } },
-        { title: { contains: type, mode: 'insensitive' } },
-        { headline: { contains: type, mode: 'insensitive' } },
-      ],
-    });
-  }
-
+  // City/place filter (matches city name OR slug)
   if (place) {
-    and.push({
+    andClauses.push({
       OR: [
-        { neighborhood: { contains: place, mode: 'insensitive' } },
         { city: { name: { contains: place, mode: 'insensitive' } } },
-        { city: { slug: { contains: place.toLowerCase(), mode: 'insensitive' } } },
-        { city: { country: { contains: place, mode: 'insensitive' } } },
-        { address: { contains: place, mode: 'insensitive' } },
+        { city: { slug: { contains: place, mode: 'insensitive' } } },
       ],
     });
   }
 
-  const textNeedles = [q, kw, ...needs].map((s) => s.trim()).filter(Boolean);
-
-  if (textNeedles.length) {
-    and.push({
-      AND: textNeedles.map((needle) => ({
-        OR: [
-          { title: { contains: needle, mode: 'insensitive' } },
-          { headline: { contains: needle, mode: 'insensitive' } },
-          { description: { contains: needle, mode: 'insensitive' } },
-          { neighborhood: { contains: needle, mode: 'insensitive' } },
-          { propertyType: { contains: needle, mode: 'insensitive' } },
-          { city: { name: { contains: needle, mode: 'insensitive' } } },
-        ],
-      })),
+  // Type filter -> Listing.propertyType (freeform)
+  if (type && type !== 'any') {
+    andClauses.push({
+      propertyType: { contains: type, mode: 'insensitive' },
     });
   }
 
-  const listings = await prisma.listing.findMany({
-    where: { AND: and },
-    include: {
-      city: true,
-      coverMedia: true,
-    },
-    orderBy: [{ updatedAt: 'desc' }],
-    take: 60,
-  });
+  // Beds
+  if (typeof beds === 'number' && Number.isFinite(beds)) {
+    andClauses.push({ bedrooms: { gte: beds } });
+  }
 
-  return <SearchResultsPageClient searchParams={sp} listings={listings} />;
+  // Max price (currency assumed EUR today; we filter by price numeric)
+  if (typeof max === 'number' && Number.isFinite(max)) {
+    andClauses.push({ price: { lte: max } });
+  }
+
+  // Text terms (q, kw, needs) -> OR over key text fields
+  if (textTerms.length) {
+    andClauses.push({
+      AND: textTerms.map((t) => ({ OR: orTextFields(t) })),
+    });
+  }
+
+  const where = { AND: andClauses };
+
+  const [total, rows] = await Promise.all([
+    prisma.listing.count({ where }),
+    prisma.listing.findMany({
+      where,
+      include: {
+        city: true,
+        coverMedia: true,
+      },
+      orderBy: [
+        { price: 'desc' },
+        { updatedAt: 'desc' },
+      ],
+      take: pageSize,
+      skip,
+    }),
+  ]);
+
+  const listings: SearchResultListing[] = rows.map((l) => ({
+    id: l.id,
+    slug: l.slug,
+    title: l.title,
+    locationLine: `${l.city.name}${l.neighborhood ? ` · ${l.neighborhood}` : ''}`,
+    citySlug: l.city.slug,
+    cityName: l.city.name,
+    country: l.city.country,
+    price: l.price ?? null,
+    currency: l.currency ?? 'EUR',
+    bedrooms: l.bedrooms ?? null,
+    bathrooms: l.bathrooms ?? null,
+    builtM2: l.builtM2 ?? null,
+    propertyType: l.propertyType ?? null,
+    coverUrl: l.coverMedia?.url ?? null,
+    coverAlt: l.coverMedia?.alt ?? null,
+  }));
+
+  return (
+    <SearchResultsPageClient
+      searchParams={sp}
+      listings={listings}
+      total={total}
+      page={page}
+      pageSize={pageSize}
+      // mode is UI-only until you add a schema field. We pass it through anyway so it stays in the URL.
+      modeHint={mode}
+      basePath="/search"
+    />
+  );
 }
