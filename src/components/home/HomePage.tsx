@@ -51,7 +51,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* =========================================================
-   Royal layout primitives
+   Layout primitives
    ========================================================= */
 
 const HERO_INNER = 'mx-auto w-full max-w-[1680px] px-5 sm:px-8 lg:px-12 2xl:px-16';
@@ -66,25 +66,14 @@ const CARD =
   RING +
   ' shadow-[0_26px_80px_rgba(10,12,16,0.10)]';
 
-const DARK_PLATE =
-  'bg-[rgba(9,11,15,0.70)] backdrop-blur-[18px] ' +
-  'ring-1 ring-inset ring-white/[0.14] ' +
-  'shadow-[0_40px_130px_rgba(0,0,0,0.58)]';
-
-function GoldWord({ children }: { children: ReactNode }) {
-  return (
-    <span className="bg-clip-text text-transparent bg-[linear-gradient(180deg,#fff3da_0%,#ead08f_42%,#b98533_100%)]">
-      {children}
-    </span>
-  );
-}
+// White-only glass (no brown accents)
+const GLASS_DARK =
+  'bg-[rgba(10,12,16,0.62)] backdrop-blur-[18px] ' +
+  'ring-1 ring-inset ring-white/[0.12] ' +
+  'shadow-[0_40px_130px_rgba(0,0,0,0.56)]';
 
 function Kicker({ children }: { children: ReactNode }) {
-  return (
-    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)] uppercase">
-      {children}
-    </div>
-  );
+  return <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)] uppercase">{children}</div>;
 }
 
 function SectionHeader({
@@ -105,9 +94,7 @@ function SectionHeader({
         <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[28px]">
           {title}
         </div>
-        {subtitle ? (
-          <div className="mt-1 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">{subtitle}</div>
-        ) : null}
+        {subtitle ? <div className="mt-1 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">{subtitle}</div> : null}
       </div>
 
       <div className="flex items-center gap-3">
@@ -118,15 +105,18 @@ function SectionHeader({
   );
 }
 
+/* =========================================================
+   HERO building blocks (white-only, calm)
+   ========================================================= */
+
 type SignalItem = { k: string; v: ReactNode; hint?: string };
 
 function SignalStripDark({ items }: { items: SignalItem[] }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[26px] p-3 sm:p-4', DARK_PLATE)}>
+    <div className={cx('relative overflow-hidden rounded-2xl p-3 sm:p-4', GLASS_DARK)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]" />
+        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
       <div className="relative grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-5">
@@ -134,9 +124,9 @@ function SignalStripDark({ items }: { items: SignalItem[] }) {
           <div
             key={it.k}
             className={cx(
-              'group relative overflow-hidden rounded-2xl px-3.5 py-3',
+              'group relative overflow-hidden rounded-xl px-3.5 py-3',
               'bg-white/[0.06] hover:bg-white/[0.10] transition',
-              'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.30)]',
+              'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
             )}
             title={it.hint ?? undefined}
           >
@@ -159,23 +149,25 @@ function SignalStripDark({ items }: { items: SignalItem[] }) {
   );
 }
 
-function HeroQuickLinks({ cities }: { cities: RuntimeCity[] }) {
+function HeroHotLocations({ cities }: { cities: RuntimeCity[] }) {
   const top = [...cities]
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-    .slice(0, 8)
-    .map((c) => ({ slug: c.slug, name: c.name }));
+    .slice(0, 10)
+    .map((c) => ({ slug: c.slug, name: c.name, country: c.country }));
 
   return (
-    <div className={cx('relative overflow-hidden rounded-[28px] p-4 sm:p-5', DARK_PLATE)}>
+    <div className={cx('relative overflow-hidden rounded-2xl p-4 sm:p-5', GLASS_DARK)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-60" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-70" />
       </div>
 
       <div className="relative">
         <div className="flex items-center justify-between gap-3">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/60">Start here</div>
-          <div className="text-[11px] text-white/55">hand-picked index entries</div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/60">Hot locations</div>
+          <a href="#explore-index" className="text-[11px] text-white/55 hover:text-white/80 transition">
+            Explore index
+          </a>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -186,15 +178,17 @@ function HeroQuickLinks({ cities }: { cities: RuntimeCity[] }) {
               className={cx(
                 'group inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] font-medium',
                 'bg-white/[0.06] hover:bg-white/[0.10] transition',
-                'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.28)]',
-                'text-white/85',
+                'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.20]',
+                'text-white/88',
                 'backdrop-blur-[18px]',
               )}
+              title={c.country}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.72)] opacity-80" />
+              <span className="h-1.5 w-1.5 rounded-full bg-white/70 opacity-80" />
               <span className="truncate max-w-[18ch]">{c.name}</span>
             </a>
           ))}
+
           <a
             href="#explore-index"
             className={cx(
@@ -213,7 +207,12 @@ function HeroQuickLinks({ cities }: { cities: RuntimeCity[] }) {
 }
 
 /* =========================================================
-   HERO (full-screen, cinematic, “James-edition killer”)
+   HERO (full-screen, calm, white-only accents)
+   - Removes the two sections shown in your screenshot:
+     1) House rules
+     2) Start here
+   - Replaces with: Hot locations
+   - Uses HERO.JPG
    ========================================================= */
 
 function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
@@ -224,25 +223,20 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
     <section className="relative w-full min-h-[92vh] overflow-hidden">
       {/* FULL-SCREEN MEDIA */}
       <div className="pointer-events-none absolute inset-0">
-        <Image src="/hero.jpg" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
+        <Image src="/HERO.JPG" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
 
-        {/* Deep cinematic base */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,9,0.74)_0%,rgba(7,9,12,0.62)_28%,rgba(9,11,15,0.42)_56%,rgba(251,251,250,0.92)_100%)]" />
+        {/* Neutral cinematic base (no brown) */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,9,0.72)_0%,rgba(7,9,12,0.58)_28%,rgba(9,11,15,0.42)_56%,rgba(251,251,250,0.92)_100%)]" />
 
-        {/* Soft vignette + authority edges */}
-        <div className="absolute inset-0 bg-[radial-gradient(1400px_760px_at_50%_18%,rgba(0,0,0,0.15),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-70" />
+        {/* Soft vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(1400px_760px_at_50%_18%,rgba(0,0,0,0.14),transparent_62%)]" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.14)] to-transparent" />
       </div>
 
-      {/* Royal accents */}
+      {/* Subtle structure (white-only) */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-[560px] left-1/2 h-[1040px] w-[1800px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.22),transparent_66%)] blur-3xl" />
-        <div className="absolute -top-[600px] right-[-560px] h-[1040px] w-[1040px] rounded-full bg-[radial-gradient(circle_at_center,rgba(78,99,155,0.12),transparent_68%)] blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.26),transparent_18%,transparent_82%,rgba(0,0,0,0.26))]" />
-
-        {/* subtle animated “breathing” glow */}
+        <div className="absolute inset-0 opacity-[0.028] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.22),transparent_18%,transparent_82%,rgba(0,0,0,0.22))]" />
         <div className="absolute inset-0 opacity-60 animate-[vanteraGlow_7.5s_ease-in-out_infinite]" />
       </div>
 
@@ -258,19 +252,19 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
             {/* LEFT: statement + search */}
             <div className="lg:col-span-7">
               <h1 className="text-balance text-[32px] font-medium tracking-[-0.018em] text-white/92 sm:text-[40px] lg:text-[54px] lg:leading-[1.04]">
-                The quiet edge in <GoldWord>luxury real estate</GoldWord>
+                The quiet edge in luxury real estate
               </h1>
 
               <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-white/76 sm:text-lg">
                 Vantera turns location noise into decision signal.
-                <span className="text-white/55"> Value, liquidity and risk - clear, comparable, and verifiable.</span>
+                <span className="text-white/55"> Value, liquidity and risk - clear, comparable and verifiable.</span>
               </p>
 
               <div className="mt-7">
-                <div className={cx('relative overflow-hidden rounded-[30px] p-3.5 sm:p-4', DARK_PLATE)}>
+                <div className={cx('relative overflow-hidden rounded-2xl p-3.5 sm:p-4', GLASS_DARK)}>
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-70" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.12),transparent_62%)]" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-70" />
                   </div>
                   <div className="relative">
                     <VanteraOmniSearch cities={cities as any} clusters={clusters as any} autoFocus={false} />
@@ -310,45 +304,13 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
               </div>
             </div>
 
-            {/* RIGHT: “authority” stack */}
+            {/* RIGHT: Hot locations only (replaces House rules + Start here) */}
             <div className="lg:col-span-5">
               <div className="grid gap-4 sm:gap-5">
-                <div className={cx('relative overflow-hidden rounded-[28px] p-5 sm:p-6', DARK_PLATE)}>
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_74%_12%,rgba(231,201,130,0.12),transparent_64%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-50" />
-                  </div>
+                <HeroHotLocations cities={cities} />
 
-                  <div className="relative">
-                    <div className="text-[11px] tracking-[0.26em] text-white/60">House rules</div>
-                    <div className="mt-2 text-[15px] leading-relaxed text-white/78">
-                      Signal beats story.
-                      <span className="text-white/55"> If it cannot be verified, it cannot lead.</span>
-                    </div>
-                    <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-                    <div className="mt-4 grid grid-cols-2 gap-2 text-[12px]">
-                      {[
-                        { k: 'Clarity', v: 'Plain language' },
-                        { k: 'Proof', v: 'Docs + registry' },
-                        { k: 'Scope', v: 'City-to-region' },
-                        { k: 'Use', v: 'Buyer-to-advisor' },
-                      ].map((x) => (
-                        <div
-                          key={x.k}
-                          className="rounded-2xl bg-white/[0.06] px-3 py-2 ring-1 ring-inset ring-white/[0.12]"
-                        >
-                          <div className="text-[10px] font-semibold tracking-[0.22em] text-white/55">{x.k}</div>
-                          <div className="mt-0.5 font-medium text-white/85">{x.v}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <HeroQuickLinks cities={cities} />
-
-                {/* Trust tape stays in hero (premium + safe) */}
-                <div className="rounded-[28px] bg-white/[0.06] ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
+                {/* Keep trust in hero if you want - styled white-only */}
+                <div className="rounded-2xl bg-white/[0.06] ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
                   <TrustMarquee
                     className="!mt-0"
                     brands={[
@@ -380,7 +342,7 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
           }
           @keyframes vanteraGlow {
             0% { filter: saturate(1) brightness(1); }
-            50% { filter: saturate(1.05) brightness(1.06); }
+            50% { filter: saturate(1.03) brightness(1.05); }
             100% { filter: saturate(1) brightness(1); }
           }
         `}</style>
@@ -393,8 +355,9 @@ function CTA() {
   return (
     <div className={cx('relative overflow-hidden rounded-[32px] p-7 sm:p-11', CARD)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(38,44,63,0.08),transparent_62%)]" />
+        {/* neutral only */}
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(10,12,16,0.06),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(10,12,16,0.06),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.12)] to-transparent" />
       </div>
 
@@ -442,13 +405,13 @@ function CTA() {
 }
 
 /* =========================================================
-   HOME PAGE (re-ordered for flow + conversion)
+   HOME PAGE
    ========================================================= */
 
 export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
   return (
     <PageShell fullBleedHero={<HeroBand cities={cities} clusters={clusters} />} bodyMaxWidthClassName="max-w-[1840px]">
-      {/* Discovery (first thing after hero - keep momentum) */}
+      {/* Discovery */}
       <section className="mt-10 sm:mt-14">
         <div className={MID}>
           <SectionHeader
@@ -501,7 +464,7 @@ export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; 
           />
           <div className={cx('relative overflow-hidden rounded-[34px] p-5 sm:p-8', CARD)}>
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(10,12,16,0.06),transparent_62%)]" />
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.10)] to-transparent" />
             </div>
 
