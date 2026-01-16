@@ -5,10 +5,10 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 
   // Pooled (runtime, edge/serverless friendly)
-  url       = env("DATABASE_URL")
+  url = env("DATABASE_URL")
 
   // Non-pooled (required for prisma migrate deploy)
   directUrl = env("DIRECT_DATABASE_URL")
@@ -159,17 +159,17 @@ model CityMetric {
   asOf      DateTime
 
   // Core signals (nullable until you have source)
-  medianPricePerSqm  Int?
-  primePricePerSqm   Int?
-  medianRentPerSqm   Int?
-  yoyPriceChangePct  Float?
-  yoyRentChangePct   Float?
-  daysOnMarketMedian Int?
-  activeListingCount Int?
+  medianPricePerSqm     Int?
+  primePricePerSqm      Int?
+  medianRentPerSqm      Int?
+  yoyPriceChangePct     Float?
+  yoyRentChangePct      Float?
+  daysOnMarketMedian    Int?
+  activeListingCount    Int?
 
   // Confidence and provenance
-  confidenceScore Int?    // 0-100
-  sourceNote      String? // "manual", "licensed feed", etc.
+  confidenceScore       Int?    // 0-100
+  sourceNote            String? // "manual", "licensed feed", etc.
 
   @@unique([cityId, asOf])
   @@index([cityId, asOf])
@@ -220,7 +220,11 @@ model ImportRun {
 
 /**
  * Listing
- * Luxury-first listing model.
+ * Luxury-first listing model. Works for:
+ * - Verified inventory
+ * - Private sellers (one-off)
+ * - Off-market (visibility PRIVATE)
+ * - Agents (later)
  */
 model Listing {
   id        String   @id @default(cuid())
@@ -229,10 +233,9 @@ model Listing {
 
   slug      String   @unique
 
-  // Provider identity (critical for ingestion + dedupe)
-  source          String   @default("manual")
-  sourceId        String?
-  sourceUrl       String?
+  source      String   @default("manual")
+  sourceId    String?
+  sourceUrl   String?
   sourceUpdatedAt DateTime?
 
   cityId    String
@@ -242,12 +245,10 @@ model Listing {
   visibility   ListingVisibility @default(PUBLIC)
   verification VerificationLevel @default(SELF_REPORTED)
 
-  // Display
   title        String
   headline     String?
   description  String?
 
-  // Location
   neighborhood  String?
   address       String?
   addressHidden Boolean @default(false)
@@ -255,7 +256,6 @@ model Listing {
   lat           Float?
   lng           Float?
 
-  // Core specs
   propertyType String?
   bedrooms     Int?
   bathrooms    Int?
@@ -268,36 +268,27 @@ model Listing {
   builtSqft    Int?
   plotSqft     Int?
 
-  // Pricing
   price        Int?
   currency     String  @default("EUR")
 
   // Confidence flags (0-100)
-  priceConfidence  Int?
-  dataCompleteness Int?
+  priceConfidence   Int?
+  dataCompleteness  Int?
 
-  // Running costs
   communityFeesMonthly Int?
   ibiYearly            Int?
   garbageTaxYearly     Int?
 
-  // Truth fields (expand later)
   yearBuilt      Int?
   renovationYear Int?
   energyRating   String?
 
-  // Media
   media        ListingMedia[] @relation("ListingMedia")
 
-  // Cover media (optional 1:1)
   coverMediaId  String? @unique
   coverMedia    ListingMedia? @relation("ListingCover", fields: [coverMediaId], references: [id], onDelete: SetNull)
 
-  // ✅ IMPORTANT FIX:
-  // Postgres UNIQUE treats NULLs as distinct, but Prisma will still enforce the constraint.
-  // This keeps ATTOM dedupe strong when sourceId exists, while allowing manual listings with null sourceId.
   @@unique([source, sourceId])
-
   @@index([cityId, status])
   @@index([status, visibility])
   @@index([cityId, price])
@@ -334,7 +325,4 @@ model ListingMedia {
   coverOf   Listing? @relation("ListingCover")
 
   @@index([listingId, sortOrder])
-
-  // (Optional) If you want hard dedupe for the same image URL per listing, uncomment:
-  // @@unique([listingId, url])
 }
