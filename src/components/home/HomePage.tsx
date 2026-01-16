@@ -134,7 +134,7 @@ function SectionHeader({
 
       <div className="flex items-center gap-3">
         {right}
-        <div className="hidden sm:block h-px w-44 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+        <div className="hidden sm:block h-px w-44 bg-gradient-to-r from-transparent via-white/12 to-transparent" />
       </div>
     </div>
   );
@@ -169,10 +169,10 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
 
             <div className="relative flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                <div className="text-[10px] font-semibold tracking-[0.26em] text-white/55">
                   {it.k}
                 </div>
-                <div className="mt-1 truncate text-sm font-medium text-[color:var(--ink)]">
+                <div className="mt-1 truncate text-sm font-medium text-white/90">
                   {it.v}
                 </div>
               </div>
@@ -220,24 +220,24 @@ function PortalVsTruth() {
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
             Luxury portals
           </div>
-          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
             Beautiful inventory
           </div>
           <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
             Great for browsing, but vulnerable to persuasion, missing facts and theatre.
           </div>
 
-          <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
+          <ul className="mt-5 space-y-2 text-sm text-white/70">
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/25" />
               Asking price leads the story
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/25" />
               Verification happens elsewhere
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-white/25" />
               Risk hides late in the process
             </li>
           </ul>
@@ -247,14 +247,14 @@ function PortalVsTruth() {
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
             Vantera
           </div>
-          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
             Quiet intelligence
           </div>
           <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
             Built for signal: value, liquidity and risk, with verification-first outputs.
           </div>
 
-          <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
+          <ul className="mt-5 space-y-2 text-sm text-white/70">
             <li className="flex gap-2">
               <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
               Fair value model, not theatre
@@ -293,7 +293,7 @@ function FeatureCard({
       </div>
 
       <div className="relative">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
           {eyebrow}
         </div>
         <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
@@ -301,7 +301,7 @@ function FeatureCard({
         </div>
         <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
-        <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
+        <ul className="mt-5 space-y-2 text-sm text-white/70">
           {bullets.map((b) => (
             <li key={b} className="flex gap-2">
               <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
@@ -355,9 +355,9 @@ function CTA() {
             href="/coming-soon?flow=agents"
             className={cx(
               'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-[color:var(--paper-2)] hover:bg-white',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
-              'text-[color:var(--ink)]',
+              'bg-white/[0.05] hover:bg-white/[0.09]',
+              'ring-1 ring-inset ring-white/12',
+              'text-white/90',
             )}
           >
             Agent access
@@ -453,7 +453,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
                         { k: 'REGIONS', v: <span>{regionCount}</span> },
                         { k: 'TIMEZONES', v: <span>{timezoneCount}</span> },
-                        { k: 'UPDATES', v: <span>Live</span>, hint: 'Private index' },
+                        { k: 'UPDATES', v: <span>Weekly</span>, hint: 'Index refresh cadence' },
                         { k: 'PROOF', v: <span>Registry + docs</span> },
                       ]}
                     />
@@ -478,10 +478,10 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                     <div className="relative">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
-                          <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)] uppercase">
+                          <div className="text-[11px] font-semibold tracking-[0.28em] text-white/55 uppercase">
                             Featured markets
                           </div>
-                          <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                          <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-white/92">
                             Private intelligence, city-first
                           </div>
                           <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
@@ -505,7 +505,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                           House rule
                         </div>
-                        <div className="mt-1 text-sm text-[color:var(--ink-2)]">
+                        <div className="mt-1 text-sm text-white/70">
                           Signal beats story. If it cannot be verified, it cannot lead.
                         </div>
                       </div>
@@ -621,11 +621,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
