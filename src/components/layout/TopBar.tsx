@@ -68,7 +68,6 @@ function useHotkeys(pathname: string | null, router: ReturnType<typeof useRouter
 
       if (wantsSearch) {
         e.preventDefault();
-
         if (pathname !== '/search') {
           router.push('/search');
           return;
@@ -295,6 +294,7 @@ export default function TopBar() {
   // layout
   const BAR_INNER =
     'mx-auto flex w-full max-w-[1760px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
+  const STRIP_INNER = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-12 2xl:px-16';
 
   const goldText =
     'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_48%,#8a5b12_100%)]';
@@ -333,6 +333,16 @@ export default function TopBar() {
   const isIntelligence = pathname?.startsWith('/intelligence') || intelligenceHref.includes('intelligence');
   const isJournal = pathname?.startsWith('/journal') || journalHref.includes('journal');
 
+  // Second-row country strip (quiet)
+  const stripItem =
+    'relative inline-flex h-8 items-center px-2 text-[12px] text-[color:var(--ink-2)] transition ' +
+    'hover:text-[color:var(--ink)]';
+  const stripActive =
+    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px ' +
+    'after:bg-[linear-gradient(90deg,transparent,rgba(185,133,51,0.55),transparent)]';
+
+  const activeCountry = (searchParams?.get('country') ?? '').trim();
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
@@ -344,6 +354,7 @@ export default function TopBar() {
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,12,16,0.010),transparent_46%,rgba(11,12,16,0.022))]" />
         </div>
 
+        {/* Row 1 */}
         <div className={cx('relative', BAR_INNER)}>
           {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
@@ -386,7 +397,7 @@ export default function TopBar() {
                   />
                 </button>
 
-                {/* Mega panel (keep your premium build) */}
+                {/* Mega panel */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -563,7 +574,6 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Clean links */}
               <Link href={intelligenceHref} prefetch className={cx(navLink, isIntelligence && navActive)}>
                 Intelligence
               </Link>
@@ -611,9 +621,39 @@ export default function TopBar() {
             </button>
           </div>
         </div>
+
+        {/* Row 2: desktop-only countries strip (thin, quiet) */}
+        <div className="relative hidden lg:block">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[rgba(11,12,16,0.10)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[rgba(11,12,16,0.08)]" />
+
+          <div className={cx('relative flex h-9 items-center', STRIP_INNER)}>
+            <div className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {countries.map((c) => {
+                const active = activeCountry && c.toLowerCase() === activeCountry.toLowerCase();
+                return (
+                  <Link
+                    key={c}
+                    href={countryHref(c)}
+                    prefetch
+                    className={cx(stripItem, active && stripActive)}
+                    aria-current={active ? 'page' : undefined}
+                  >
+                    {c}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+              <span className="h-1.5 w-1.5 bg-[rgba(185,133,51,0.55)]" />
+              INDEX COUNTRIES
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile sheet (keep your existing design) */}
+      {/* Mobile sheet (unchanged) */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[70] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
