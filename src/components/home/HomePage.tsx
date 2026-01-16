@@ -1,9 +1,11 @@
 // src/components/home/HomePage.tsx
 import Image from 'next/image';
+import Link from 'next/link';
 import { Suspense, type ReactNode } from 'react';
 
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
+import TrustMarquee from '@/components/trust/TrustMarquee';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -76,7 +78,19 @@ function Shell({ children }: { children: ReactNode }) {
    Micro components
    ========================================================= */
 
-function Kicker({
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
+      {children}
+    </div>
+  );
+}
+
+function Hairline() {
+  return <div className="h-px w-full bg-[color:var(--hairline)]" />;
+}
+
+function SectionHeader({
   eyebrow,
   title,
   subtitle,
@@ -90,14 +104,12 @@ function Kicker({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-          {eyebrow}
-        </div>
+        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
         <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
           {title}
         </div>
         {subtitle ? (
-          <div className="mt-2 max-w-[75ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
+          <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
             {subtitle}
           </div>
         ) : null}
@@ -108,34 +120,23 @@ function Kicker({
   );
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
-      {children}
-    </div>
-  );
-}
-
-function Hairline() {
-  return <div className="h-px w-full bg-[color:var(--hairline)]" />;
-}
-
 type ListingTease = {
   title: string;
   place: string;
   price: string;
   imageSrc?: string;
   imageAlt?: string;
+  href?: string;
 };
 
 function ListingCardTease({ item }: { item: ListingTease }) {
+  const href = item.href ?? '/marketplace';
   return (
-    <a
-      href="/marketplace"
+    <Link
+      href={href}
       className={cx(
         'group block overflow-hidden border border-[color:var(--hairline)] bg-white',
-        'transition',
-        'hover:border-[rgba(10,10,12,0.22)]',
+        'transition hover:border-[rgba(10,10,12,0.22)]',
       )}
       aria-label={`${item.title} - ${item.place} - ${item.price}`}
     >
@@ -158,44 +159,63 @@ function ListingCardTease({ item }: { item: ListingTease }) {
       </div>
 
       <div className="p-5">
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-          {item.place}
-        </div>
-        <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-          {item.title}
-        </div>
+        <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">{item.place}</div>
+        <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{item.title}</div>
         <div className="mt-2 text-sm text-[color:var(--ink-2)]">{item.price}</div>
 
         <div className="mt-5 flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-            VIEW
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">VIEW</div>
           <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
         </div>
       </div>
-    </a>
+    </Link>
+  );
+}
+
+function QuickLink({
+  href,
+  label,
+  hint,
+}: {
+  href: string;
+  label: string;
+  hint?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cx(
+        'group flex items-center justify-between gap-4 px-4 py-3',
+        'border border-[color:var(--hairline)] bg-white',
+        'transition hover:border-[rgba(10,10,12,0.22)]',
+      )}
+    >
+      <div className="min-w-0">
+        <div className="text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{label}</div>
+        {hint ? <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">{hint}</div> : null}
+      </div>
+      <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
+    </Link>
   );
 }
 
 /* =========================================================
-   HERO (full-bleed, sexy marketplace statement)
+   HERO (full-bleed, marketplace statement + search atelier)
    ========================================================= */
 
-function FullBleedHero() {
+function FullBleedHero({
+  cities,
+  topCountries,
+}: {
+  cities: Array<{ name: string; slug: string; country: string }>;
+  topCountries: string[];
+}) {
   return (
-    <section
-      className={cx(
-        'relative overflow-hidden',
-        'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
-      )}
-    >
+    <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
       <div className="relative">
-        {/* Top hairline */}
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        {/* Visual stage */}
-        <div className="relative h-[78vh] min-h-[620px] w-full bg-[color:var(--paper-2)]">
-          {/* Background image (replace /brand/hero.jpg with your best global hero) */}
+        <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
           <Image
             src="/brand/hero.jpg"
             alt="Vantera - World’s Largest Luxury Marketplace"
@@ -205,30 +225,31 @@ function FullBleedHero() {
             sizes="100vw"
           />
 
-          {/* White editorial wash (keeps it premium, not dark) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.90),rgba(255,255,255,0.55),rgba(255,255,255,0.25))]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.42),rgba(255,255,255,0.28),rgba(255,255,255,0.88))]" />
+          {/* White editorial wash (premium, not dark) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.62),rgba(255,255,255,0.28))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.44),rgba(255,255,255,0.30),rgba(255,255,255,0.92))]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
 
-          {/* Copy */}
-          <div className={cx('relative z-10 h-full', WIDE)}>
-            <div className="flex h-full items-end pb-10 sm:pb-14 lg:pb-16">
-              <div className="max-w-[980px]">
-                <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className={cx('relative z-10', WIDE)}>
+            <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
+              {/* Left: statement */}
+              <div className="lg:col-span-7">
+                <div className="flex flex-wrap items-center gap-2">
                   <Chip>€2M+ ONLY</Chip>
                   <Chip>GLOBAL CURATION</Chip>
-                  <Chip>EDITORIAL PRESENTATION</Chip>
+                  <Chip>CATALOGUE PRESENTATION</Chip>
                 </div>
 
-                <h1 className="text-balance text-[42px] font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
+                <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
                   World’s Largest Luxury Marketplace
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  A single destination for €2M+ properties, presented like a catalogue - not a portal.
+                  Search fast, browse beautifully, and land on properties that feel like a catalogue, not a portal.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <a
+                  <Link
                     href="/marketplace"
                     className={cx(
                       'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
@@ -236,34 +257,165 @@ function FullBleedHero() {
                       'hover:bg-[rgba(10,10,12,1.0)] transition',
                     )}
                   >
-                    Enter marketplace
-                  </a>
+                    Browse marketplace
+                  </Link>
 
-                  <a
-                    href="/listings"
+                  <Link
+                    href="/coming-soon?flow=sell"
                     className={cx(
                       'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
                       'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
                       'hover:border-[rgba(10,10,12,0.22)] transition',
                     )}
                   >
-                    View listings
-                  </a>
+                    List privately
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right: Search atelier (server-safe form, feels like a product) */}
+              <div className="lg:col-span-5">
+                <div
+                  className={cx(
+                    'relative overflow-hidden',
+                    'border border-[color:var(--hairline)] bg-white/82 backdrop-blur-[18px]',
+                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
+                  )}
+                >
+                  <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,10,12,0.14)] to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+                  </div>
+
+                  <div className="relative p-5 sm:p-6">
+                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                      SEARCH ATELIER
+                    </div>
+                    <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                      The fastest way to a €2M+ property
+                    </div>
+                    <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                      Use keywords, a country, or jump straight into a destination.
+                    </div>
+
+                    <form action="/search" method="get" className="mt-5 space-y-3">
+                      {/* Keyword */}
+                      <div className="border border-[color:var(--hairline)] bg-white">
+                        <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          KEYWORDS
+                        </label>
+                        <input
+                          name="q"
+                          placeholder="Waterfront, penthouse, gated, golf, privacy..."
+                          className={cx(
+                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
+                            'placeholder:text-[color:var(--ink-3)]',
+                          )}
+                        />
+                      </div>
+
+                      {/* Country */}
+                      <div className="border border-[color:var(--hairline)] bg-white">
+                        <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          COUNTRY
+                        </label>
+                        <select
+                          name="country"
+                          className={cx(
+                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
+                          )}
+                          defaultValue=""
+                        >
+                          <option value="">Any</option>
+                          {topCountries.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* CTA row */}
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          type="submit"
+                          className={cx(
+                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
+                            'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                          )}
+                        >
+                          Search
+                        </button>
+
+                        <Link
+                          href="/marketplace"
+                          className={cx(
+                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
+                            'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                          )}
+                        >
+                          Browse
+                        </Link>
+                      </div>
+
+                      <div className="pt-2">
+                        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          QUICK DESTINATIONS
+                        </div>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          {cities.slice(0, 6).map((c) => (
+                            <QuickLink
+                              key={c.slug}
+                              href={`/city/${c.slug}`}
+                              label={c.name}
+                              hint={c.country}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 text-[12px] text-[color:var(--ink-3)]">
+                        Tip: press <span className="font-mono">/</span> to jump into search from anywhere.
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Bottom hairline */}
-          <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-[color:var(--hairline)]" />
+            {/* Trust row (quiet, still powerful) */}
+            <div className="pb-10 sm:pb-12">
+              <TrustMarquee
+                eyebrow="Institutional benchmark"
+                title="Measured against the world’s most established luxury real-estate standards"
+                subtitle="Presentation, disclosure, and credibility are not optional at €2M+."
+                brands={[
+                  { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+                  { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+                  { name: 'Knight Frank', domain: 'knightfrank.com' },
+                  { name: 'Savills', domain: 'savills.com' },
+                  { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+                  { name: 'BARNES', domain: 'barnes-international.com' },
+                  { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+                  { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
+                  { name: 'Compass', domain: 'compass.com', invert: false },
+                  { name: 'CBRE', domain: 'cbre.com', invert: false },
+                  { name: 'JLL', domain: 'jll.com', invert: false },
+                ]}
+              />
+            </div>
+          </div>
         </div>
+
+        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-[color:var(--hairline)]" />
       </div>
     </section>
   );
 }
 
 /* =========================================================
-   HOME PAGE (marketplace-first, zero intelligence talk)
+   HOME PAGE (marketplace-first, wow-factor search + browse)
    ========================================================= */
 
 export default function HomePage({
@@ -273,66 +425,122 @@ export default function HomePage({
   cities: RuntimeCity[];
   clusters?: RuntimeRegionCluster[];
 }) {
-  // Note: clusters intentionally unused for this phase (marketplace visuals first)
   void clusters;
 
-  // Use city hero images if available (so the page instantly looks real).
-  const cityImages = cities
-    .map((c) => ({
-      src: c.heroImageSrc ?? c.image?.src ?? '',
-      alt: c.heroImageAlt ?? c.image?.alt ?? c.name,
-      place: `${c.name}, ${c.country}`,
-    }))
-    .filter((x) => Boolean(x.src))
-    .slice(0, 3);
+  const safeCities = Array.isArray(cities) ? cities : [];
 
+  // Prioritise cities that have hero imagery so the page looks real instantly
+  const imageCities = safeCities
+    .map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      country: c.country,
+      img: c.heroImageSrc ?? c.image?.src ?? '',
+      alt: c.heroImageAlt ?? c.image?.alt ?? c.name,
+      priority: c.priority ?? 0,
+    }))
+    .filter((x) => Boolean(x.slug) && Boolean(x.name) && Boolean(x.country))
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+  const topForHero = imageCities.slice(0, 6);
+
+  const countryCounts = new Map<string, number>();
+  for (const c of imageCities) {
+    const k = String(c.country || '').trim();
+    if (!k) continue;
+    countryCounts.set(k, (countryCounts.get(k) ?? 0) + 1);
+  }
+  const topCountries = Array.from(countryCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([k]) => k)
+    .slice(0, 12);
+
+  // Featured teaser (editorial)
   const tease: ListingTease[] = [
     {
-      place: cityImages[0]?.place ?? 'Cap Ferrat, France',
+      place: topForHero[0] ? `${topForHero[0].name}, ${topForHero[0].country}` : 'Cap Ferrat, France',
       title: 'Waterfront Villa',
       price: 'From €18,500,000',
-      imageSrc: cityImages[0]?.src,
-      imageAlt: cityImages[0]?.alt,
+      imageSrc: topForHero[0]?.img || undefined,
+      imageAlt: topForHero[0]?.alt,
+      href: topForHero[0]?.slug ? `/city/${topForHero[0].slug}` : '/marketplace',
     },
     {
-      place: cityImages[1]?.place ?? 'Marbella, Spain',
+      place: topForHero[1] ? `${topForHero[1].name}, ${topForHero[1].country}` : 'Marbella, Spain',
       title: 'Modern Estate',
       price: 'From €7,900,000',
-      imageSrc: cityImages[1]?.src,
-      imageAlt: cityImages[1]?.alt,
+      imageSrc: topForHero[1]?.img || undefined,
+      imageAlt: topForHero[1]?.alt,
+      href: topForHero[1]?.slug ? `/city/${topForHero[1].slug}` : '/marketplace',
     },
     {
-      place: cityImages[2]?.place ?? 'Dubai, UAE',
+      place: topForHero[2] ? `${topForHero[2].name}, ${topForHero[2].country}` : 'Dubai, UAE',
       title: 'Penthouse Residence',
       price: 'From €12,200,000',
-      imageSrc: cityImages[2]?.src,
-      imageAlt: cityImages[2]?.alt,
+      imageSrc: topForHero[2]?.img || undefined,
+      imageAlt: topForHero[2]?.alt,
+      href: topForHero[2]?.slug ? `/city/${topForHero[2].slug}` : '/marketplace',
+    },
+    {
+      place: topForHero[3] ? `${topForHero[3].name}, ${topForHero[3].country}` : 'Miami, USA',
+      title: 'Beachfront Compound',
+      price: 'From €9,400,000',
+      imageSrc: topForHero[3]?.img || undefined,
+      imageAlt: topForHero[3]?.alt,
+      href: topForHero[3]?.slug ? `/city/${topForHero[3].slug}` : '/marketplace',
+    },
+    {
+      place: topForHero[4] ? `${topForHero[4].name}, ${topForHero[4].country}` : 'London, UK',
+      title: 'Townhouse Residence',
+      price: 'From €6,200,000',
+      imageSrc: topForHero[4]?.img || undefined,
+      imageAlt: topForHero[4]?.alt,
+      href: topForHero[4]?.slug ? `/city/${topForHero[4].slug}` : '/marketplace',
+    },
+    {
+      place: topForHero[5] ? `${topForHero[5].name}, ${topForHero[5].country}` : 'Monaco',
+      title: 'Skyline Apartment',
+      price: 'From €11,700,000',
+      imageSrc: topForHero[5]?.img || undefined,
+      imageAlt: topForHero[5]?.alt,
+      href: topForHero[5]?.slug ? `/city/${topForHero[5].slug}` : '/marketplace',
     },
   ];
 
   return (
     <Shell>
-      <FullBleedHero />
+      <FullBleedHero
+        cities={topForHero.map((c) => ({ name: c.name, slug: c.slug, country: c.country }))}
+        topCountries={topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']}
+      />
 
       {/* Editorial intro */}
       <section className="py-12 sm:py-16">
         <div className={NARROW}>
-          <Kicker
+          <SectionHeader
             eyebrow="VANTERA"
-            title="Luxury, stripped of noise"
-            subtitle="No clutter, no duplicated feeds, no portal look. Just the best €2M+ properties, presented with restraint and taste."
+            title="Search and browse, the way luxury should feel"
+            subtitle="No clutter, no duplicated feeds, and no portal look. Just €2M+ property discovery with editorial restraint and serious speed."
             right={
               <div className="hidden sm:flex items-center gap-3">
-                <a
-                  href="/marketplace"
+                <Link
+                  href="/search"
                   className={cx(
-                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold',
-                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
-                    'hover:border-[rgba(10,10,12,0.22)] transition',
+                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
                   )}
                 >
-                  Explore
-                </a>
+                  Open search
+                </Link>
+                <Link
+                  href="/marketplace"
+                  className={cx(
+                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                  )}
+                >
+                  Browse
+                </Link>
               </div>
             }
           />
@@ -343,90 +551,87 @@ export default function HomePage({
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="border border-[color:var(--hairline)] bg-white p-5">
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-                THRESHOLD
-              </div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                €2M+ only
-              </div>
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">THRESHOLD</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">€2M+ only</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
                 The line is enforced. This is a luxury marketplace, not a mixed portal.
               </div>
             </div>
 
             <div className="border border-[color:var(--hairline)] bg-white p-5">
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-                CURATION
-              </div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                Fewer, better
-              </div>
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                We prioritise presentation, photography, and clarity - the opposite of volume.
+                Keywords first, destinations second, and results that feel curated.
               </div>
             </div>
 
             <div className="border border-[color:var(--hairline)] bg-white p-5">
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-                EDITORIAL
-              </div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                Catalogue grade
-              </div>
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Layouts designed to sell desire - not checkboxes.
+                Layouts designed to sell desire, not checkboxes.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured (teaser) - designed to feel like a printed catalogue */}
+      {/* Featured (wow browse) */}
       <section className="pb-16 sm:pb-20">
         <div className={WIDE}>
           <div className="flex items-end justify-between gap-6">
             <div>
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                FEATURED
-              </div>
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED</div>
               <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-                A taste of the marketplace
+                The browse of your lifetime
+              </div>
+              <div className="mt-2 max-w-[80ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+                Big imagery, quiet typography, and a layout that feels like a high-end print spread.
               </div>
             </div>
 
-            <a
+            <Link
               href="/marketplace"
               className={cx(
-                'hidden sm:inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold',
-                'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
-                'hover:border-[rgba(10,10,12,0.22)] transition',
+                'hidden sm:inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
               )}
             >
               View all
-            </a>
+            </Link>
           </div>
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {tease.map((t) => (
               <ListingCardTease key={`${t.place}-${t.title}`} item={t} />
             ))}
           </div>
 
-          <div className="mt-10 flex items-center justify-between">
-            <div className="text-sm text-[color:var(--ink-2)]">
-              Curated €2M+ listings. Global coverage. Zero portal feel.
-            </div>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[color:var(--ink-2)]">Curated €2M+ listings. Global coverage. Zero portal feel.</div>
 
-            <a
-              href="/marketplace"
-              className={cx(
-                'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
-                'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white',
-                'hover:bg-[rgba(10,10,12,1.0)] transition',
-              )}
-            >
-              Enter marketplace
-            </a>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Link
+                href="/search"
+                className={cx(
+                  'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+                  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                )}
+              >
+                Search
+              </Link>
+
+              <Link
+                href="/marketplace"
+                className={cx(
+                  'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+                  'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                )}
+              >
+                Browse marketplace
+              </Link>
+            </div>
           </div>
         </div>
       </section>
