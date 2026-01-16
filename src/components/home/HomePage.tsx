@@ -338,64 +338,6 @@ function FeatureCard({
   );
 }
 
-/* ---------- CTA ---------- */
-
-function CTA() {
-  return (
-    <div className={cx('relative overflow-hidden p-6 sm:p-10', GLASS)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
-      </div>
-
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-            PRIVATE ACCESS
-          </div>
-
-          <div className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
-            Bring a serious asset or a serious buyer
-          </div>
-
-          <div className="mt-2 max-w-[70ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Vantera is built for private sellers, advisors, and agents who want verification, clarity, and speed.
-            <span className="text-[color:var(--ink-3)]"> Signal only.</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href="/coming-soon?flow=sell"
-            className={cx(
-              'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-              'bg-white/78 hover:bg-white',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
-              'text-[color:var(--ink)]',
-              'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
-            )}
-          >
-            Submit a private seller
-          </a>
-
-          <a
-            href="/coming-soon?flow=agents"
-            className={cx(
-              'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-              'bg-[color:var(--paper-2)] hover:bg-white',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
-              'text-[color:var(--ink)]',
-            )}
-          >
-            Agent access
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* =========================================================
    HOME PAGE
    ========================================================= */
