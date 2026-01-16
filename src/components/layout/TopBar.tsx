@@ -465,11 +465,11 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'absolute left-1/2 z-[80] mt-4 w-[1320px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'fixed left-1/2 top-[78px] z-[80] mt-0 w-[1320px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'rounded-[34px] overflow-hidden',
-                    'bg-[rgba(255,255,255,0.94)] backdrop-blur-[18px]',
-                    'shadow-[0_44px_140px_rgba(0,0,0,0.18)]',
-                    'ring-1 ring-inset ring-black/[0.10]',
+'bg-[rgba(255,255,255,0.92)] backdrop-blur-[22px]',
+'shadow-[0_60px_180px_rgba(0,0,0,0.22)]',
+'ring-1 ring-inset ring-[rgba(185,133,51,0.18)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
@@ -479,11 +479,23 @@ export default function TopBar() {
                   aria-label="Places menu"
                 >
                   {/* Crown rail inside panel */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-90" />
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),transparent_45%,rgba(0,0,0,0.05))]" />
-                  </div>
+<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.62)] to-transparent opacity-95" />
+
+{/* Rich aura + glass depth */}
+<div className="pointer-events-none absolute inset-0">
+  {/* warm crown halo */}
+  <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(1100px_360px_at_50%_0%,rgba(185,133,51,0.14),transparent_62%)]" />
+
+  {/* side auras (adds richness without going dark) */}
+  <div className="absolute -left-28 top-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.10)] blur-3xl" />
+  <div className="absolute -right-28 bottom-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.08)] blur-3xl" />
+
+  {/* subtle vignette for depth */}
+  <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_20%,transparent_52%,rgba(0,0,0,0.06)_100%)]" />
+
+  {/* micro-glass shading */}
+  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.015),transparent_38%,rgba(0,0,0,0.05))]" />
+</div>
 
                   {/* Header */}
                   <div className={cx('relative flex items-center justify-between gap-4 px-7 py-6 border-b', borderSoft)}>
