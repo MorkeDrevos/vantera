@@ -1,99 +1,120 @@
 // src/app/api/attom/ingest/cities/route.ts
 import { NextResponse } from 'next/server';
+
 import { prisma } from '@/lib/prisma';
+import { CITIES, WATCHLIST_CITIES } from '@/components/home/cities';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const CITY_PRESETS = {
-  miami: {
-    name: 'Miami',
-    slug: 'miami',
-    country: 'United States',
-    region: 'Florida',
-    tz: 'America/New_York',
-    lat: 25.7617,
-    lng: -80.1918,
-  },
-} as const;
+function uniqBySlug<T extends { slug: string }>(items: T[]) {
+  const map = new Map<string, T>();
+  for (const it of items) map.set(it.slug, it);
+  return Array.from(map.values());
+}
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const dryRun = url.searchParams.get('dryRun') === '1';
 
-  const params = {
-    dryRun,
-    presets: Object.keys(CITY_PRESETS),
-  };
+  // Canonical city source of truth is cities.ts
+  // IMPORTANT: collapse Costa del Sol into Marbella
+  const all = uniqBySlug([...CITIES, ...WATCHLIST_CITIES]);
+
+  const cities = all.filter((c) => {
+    // Collapse Costa del Sol cities under Marbella
+    if (c.slug === 'benahavis') return false;
+    if (c.slug === 'estepona') return false;
+    // If you ever add more CDS slugs, exclude them here too.
+    return true;
+  });
 
   const run = await prisma.importRun.create({
     data: {
-      source: 'attom',
+      source: 'vantera',
       scope: 'cities',
-      region: 'US-FL',
-      market: 'Miami',
-      params,
+      region: 'GLOBAL',
+      market: 'Cities',
+      params: { dryRun, count: cities.length, source: 'cities.ts', collapseCostaDelSolTo: 'marbella' },
       status: 'RUNNING',
-      startedAt: new Date(),
-      message: 'Starting city upsert',
+      message: 'Starting city ingest',
     },
     select: { id: true },
   });
 
+  let scanned = cities.length;
   let created = 0;
+  let skipped = 0;
   let errors = 0;
   const errorSamples: Array<{ step: string; message: string }> = [];
 
   try {
-    for (const key of Object.keys(CITY_PRESETS) as Array<keyof typeof CITY_PRESETS>) {
-      const preset = CITY_PRESETS[key];
-
-      if (dryRun) {
-        created += 1;
-        continue;
+    if (!dryRun) {
+      for (const c of cities) {
+        try {
+          await prisma.city.upsert({
+            where: { slug: c.slug },
+            update: {
+              name: c.name,
+              country: c.country,
+              region: c.region ?? null,
+              tz: c.tz,
+              tier: (c.tier as any) ?? undefined,
+              status: (c.status as any) ?? undefined,
+              priority: c.priority ?? undefined,
+              blurb: c.blurb ?? null,
+              heroImageSrc: c.image?.src ?? null,
+              heroImageAlt: c.image?.alt ?? null,
+            },
+            create: {
+              name: c.name,
+              slug: c.slug,
+              country: c.country,
+              region: c.region ?? null,
+              tz: c.tz,
+              tier: (c.tier as any) ?? undefined,
+              status: (c.status as any) ?? undefined,
+              priority: c.priority ?? undefined,
+              blurb: c.blurb ?? null,
+              heroImageSrc: c.image?.src ?? null,
+              heroImageAlt: c.image?.alt ?? null,
+            },
+          });
+          created += 1;
+        } catch (e: any) {
+          errors += 1;
+          if (errorSamples.length < 8) errorSamples.push({ step: 'upsert:city', message: e?.message || String(e) });
+        }
       }
-
-      await prisma.city.upsert({
-        where: { slug: preset.slug },
-        update: {
-          name: preset.name,
-          country: preset.country,
-          region: preset.region,
-          tz: preset.tz,
-          lat: preset.lat,
-          lng: preset.lng,
-        },
-        create: {
-          name: preset.name,
-          slug: preset.slug,
-          country: preset.country,
-          region: preset.region,
-          tz: preset.tz,
-          lat: preset.lat,
-          lng: preset.lng,
-        },
-      });
-
-      created += 1;
+    } else {
+      created = cities.length;
     }
 
     await prisma.importRun.update({
       where: { id: run.id },
       data: {
-        status: 'SUCCEEDED',
+        status: errors > 0 ? 'FAILED' : 'SUCCEEDED',
         finishedAt: new Date(),
-        scanned: created,
+        scanned,
         created,
-        skipped: 0,
+        skipped,
         errors,
         errorSamples,
-        message: 'City ingest complete',
+        message: errors > 0 ? 'City ingest finished with errors' : 'City ingest complete',
       },
     });
 
-    return NextResponse.json({ ok: true, runId: run.id, created, dryRun });
+    return NextResponse.json({
+      ok: errors === 0,
+      runId: run.id,
+      scanned,
+      created,
+      skipped,
+      errors,
+      errorSamples,
+      preview: cities.map((c) => ({ slug: c.slug, name: c.name, country: c.country })),
+    });
   } catch (e: any) {
-    errors += 1;
     errorSamples.push({ step: 'route', message: e?.message || String(e) });
 
     await prisma.importRun.update({
@@ -101,17 +122,17 @@ export async function GET(req: Request) {
       data: {
         status: 'FAILED',
         finishedAt: new Date(),
-        scanned: created,
+        scanned,
         created,
-        skipped: 0,
-        errors,
+        skipped,
+        errors: errors + 1,
         errorSamples,
-        message: 'City ingest failed',
+        message: 'Route failed',
       },
     });
 
     return NextResponse.json(
-      { ok: false, runId: run.id, errors, errorSamples },
+      { ok: false, runId: run.id, message: e?.message || String(e), errorSamples },
       { status: 500 },
     );
   }
