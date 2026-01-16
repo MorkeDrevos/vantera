@@ -80,12 +80,16 @@ export default async function Page() {
 
   if (comingSoon) return <ComingSoon />;
 
+  // HomePage now requires clusters too (keep it simple while wiring data)
+  const clusters: any[] = [];
+  const emptyCities: RuntimeCity[] = [];
+
   // Build/preview safety: don’t crash if env isn’t set
   if (!process.env.DATABASE_URL) {
     return (
       <>
         {jsonLd(pageJsonLd)}
-        <HomePage cities={[]} />
+        <HomePage cities={emptyCities} clusters={clusters} />
       </>
     );
   }
@@ -94,12 +98,12 @@ export default async function Page() {
     orderBy: [{ priority: 'desc' }, { name: 'asc' }],
   });
 
-  const cities = rows.map(toRuntimeCity);
+  const cities: RuntimeCity[] = rows.map(toRuntimeCity);
 
   return (
     <>
       {jsonLd(pageJsonLd)}
-      <HomePage cities={cities} />
+      <HomePage cities={cities} clusters={clusters} />
     </>
   );
 }
