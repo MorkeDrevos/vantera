@@ -9,12 +9,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
 
   title: {
-    default: 'Vantera - Private Intelligence for the World’s Most Valuable Assets',
+    default: 'Vantera · World’s Largest Luxury Marketplace',
     template: '%s · Vantera',
   },
 
   description:
-    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
+    'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.',
 
   applicationName: 'Vantera',
 
@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ...websiteJsonLd(),
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${SEO_CONFIG.domain}/listings?q={search_term_string}`,
+      target: `${SEO_CONFIG.domain}/marketplace?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
@@ -54,11 +54,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const org = organizationJsonLd();
 
   return (
-    <html lang="en" className="bg-white">
-      <body className="min-h-[100dvh] bg-white text-slate-900">
+    <html
+      lang="en"
+      className="h-full bg-white antialiased scroll-smooth"
+      suppressHydrationWarning
+    >
+      <body className="min-h-[100dvh] bg-white text-slate-950 selection:bg-black/10 selection:text-slate-950">
         {jsonLd(site)}
         {jsonLd(org)}
-        {children}
+
+        {/* App root */}
+        <div id="__vantera" className="min-h-[100dvh] bg-white">
+          {children}
+        </div>
       </body>
     </html>
   );
