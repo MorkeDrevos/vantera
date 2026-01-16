@@ -36,7 +36,6 @@ function hasVerified(stats?: CityListingsStats) {
 const RING = 'ring-1 ring-inset ring-black/[0.08]';
 
 function goldText() {
-  // keep your gold tokens, just ensure it is not relying on ink vars
   return 'bg-clip-text text-transparent bg-[linear-gradient(180deg,var(--gold-1)_0%,var(--gold-2)_45%,var(--gold-3)_100%)]';
 }
 
@@ -58,7 +57,7 @@ function SignalChip({
 }: {
   label: string;
   value?: string;
-  tone?: 'neutral' | 'gold' | 'violet' | 'emerald';
+  tone?: 'neutral' | 'gold' | 'emerald' | 'violet';
 }) {
   const ringCls =
     tone === 'gold'
@@ -69,11 +68,22 @@ function SignalChip({
           ? 'ring-[rgba(139,92,246,0.18)]'
           : 'ring-black/[0.08]';
 
+  const tint =
+    tone === 'gold'
+      ? 'bg-[rgba(231,201,130,0.10)]'
+      : tone === 'emerald'
+        ? 'bg-[rgba(16,185,129,0.08)]'
+        : tone === 'violet'
+          ? 'bg-[rgba(139,92,246,0.07)]'
+          : 'bg-white/90';
+
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-2 px-3 py-1.5 text-[11px]',
-        'bg-white/90 backdrop-blur-2xl',
+        'inline-flex items-center gap-2 whitespace-nowrap',
+        'rounded-full px-3 py-1.5 text-[11px]',
+        tint,
+        'backdrop-blur-2xl',
         'ring-1 ring-inset',
         ringCls,
         'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
@@ -114,12 +124,13 @@ export default function CityCard({
     city.slug === 'marbella';
 
   return (
-    <div className="group relative min-w-0">
+    <div className="group relative min-w-0 h-full">
       <Link
         href={`/city/${city.slug}`}
         prefetch
         className={cx(
-          'relative block overflow-hidden',
+          'relative block h-full overflow-hidden',
+          'flex flex-col',
           'bg-white/78 backdrop-blur-[14px]',
           RING,
           'shadow-[0_26px_90px_rgba(11,12,16,0.10)]',
@@ -128,8 +139,8 @@ export default function CityCard({
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Media */}
-        <div className={cx('relative w-full', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
+        {/* Media (fixed height ensures consistent cards) */}
+        <div className={cx('relative w-full shrink-0', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
           {src ? (
             <SafeImage
               src={src}
@@ -153,8 +164,6 @@ export default function CityCard({
             <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
             <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,rgba(0,0,0,0.16)_1px,transparent_0)] [background-size:34px_34px]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
-
-            {/* Key change: make the bottom "paper" slightly less white so text is always readable */}
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.00)_34%,rgba(255,255,255,0.62)_78%,rgba(255,255,255,0.90)_100%)]" />
           </div>
 
@@ -183,19 +192,17 @@ export default function CityCard({
           <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
             <div className="flex items-end justify-between gap-4">
               <div className="min-w-0">
-                <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-slate-950">
-                  {city.name}
-                </div>
+                <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-slate-950">{city.name}</div>
                 <div className="mt-1 truncate text-[12px] text-slate-600">{regionLine(city)}</div>
 
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                {/* Less busy + fixed height behaviour (single line chips, no wrap) */}
+                <div className="mt-3 flex items-center gap-2 overflow-hidden">
                   {showVerified ? (
                     <SignalChip label="Verified" value={`${verified}`} tone="gold" />
                   ) : (
                     <SignalChip label="Coverage" value="City dossier" tone="neutral" />
                   )}
                   <SignalChip label="Liquidity" value="Weekly" tone="emerald" />
-                  <SignalChip label="Risk" value="Tracked" tone="violet" />
                 </div>
               </div>
 
@@ -218,8 +225,8 @@ export default function CityCard({
           </div>
         </div>
 
-        {/* Editorial footer */}
-        <div className="px-5 pb-5 pt-4">
+        {/* Editorial footer (mt-auto keeps all cards equal height) */}
+        <div className="mt-auto px-5 pb-5 pt-4">
           {city.blurb?.trim() ? (
             <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">{city.blurb.trim()}</p>
           ) : (
