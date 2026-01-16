@@ -1,4 +1,3 @@
-
 // src/components/trust/TrustMarquee.tsx
 import Image from 'next/image';
 
@@ -12,7 +11,7 @@ type Brand = {
 const CLIENT_ID = process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID || '';
 
 function brandfetchLogoUrl(domain: string) {
-  // NOTE: this matches your current Brandfetch usage pattern
+  // matches your current Brandfetch usage pattern
   return `https://cdn.brandfetch.io/${domain}/${CLIENT_ID}?type=logo&format=svg`;
 }
 
@@ -24,6 +23,12 @@ function splitIntoChunks<T>(items: T[], size: number) {
   const out: T[][] = [];
   for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
   return out;
+}
+
+function titleCase(s: string) {
+  const t = (s ?? '').trim();
+  if (!t) return '';
+  return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
 export default function TrustMarquee({
@@ -52,24 +57,22 @@ export default function TrustMarquee({
       }, {})
     : null;
 
-  // Ungrouped: stable, premium grid (no scattered collage).
-  // 12 items per "band" keeps it balanced across screen sizes.
+  // Ungrouped: stable, premium grid (no collage).
   const chunks = splitIntoChunks(brands, 12);
+
+  const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
 
   return (
     <section className={cx('w-full', className)}>
       <div className="relative overflow-hidden border-y border-[color:var(--hairline)] bg-[color:var(--paper)]">
-        {/* premium ambient (light editorial) */}
+        {/* paper-first ambient */}
         <div className="pointer-events-none absolute inset-0">
-          {/* museum light */}
-          <div className="absolute -top-52 left-1/2 h-[620px] w-[1040px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(11,12,16,0.08),transparent_72%)] blur-2xl" />
-          {/* violet discipline */}
-          <div className="absolute -top-56 right-[-320px] h-[720px] w-[980px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.10),transparent_74%)] blur-2xl" />
-          {/* gold warmth */}
-          <div className="absolute -top-72 left-[-260px] h-[720px] w-[720px] rounded-full bg-[radial-gradient(closest-side,rgba(231,201,130,0.12),transparent_72%)] blur-2xl" />
-          {/* vignette */}
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_720px_at_50%_0%,transparent_42%,rgba(11,12,16,0.06)_88%)]" />
-
+          {/* warm crown halo */}
+          <div className="absolute -top-56 left-1/2 h-[680px] w-[1120px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(231,201,130,0.16),transparent_70%)] blur-3xl" />
+          {/* cool discipline */}
+          <div className="absolute -top-64 right-[-320px] h-[720px] w-[980px] rounded-full bg-[radial-gradient(closest-side,rgba(139,92,246,0.08),transparent_74%)] blur-3xl" />
+          {/* subtle paper grain */}
+          <div className="absolute inset-0 opacity-[0.028] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
           {/* hairlines */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.08)] to-transparent" />
@@ -81,8 +84,8 @@ export default function TrustMarquee({
             <div className="lg:col-span-5">
               <div className="inline-flex items-center gap-3">
                 <div className="h-px w-10 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.16)] to-transparent" />
-                <div className="text-[11px] font-semibold tracking-[0.34em] text-[color:var(--ink-3)]">
-                  {eyebrow.toUpperCase()}
+                <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
+                  {eyebrow}
                 </div>
               </div>
 
@@ -96,19 +99,19 @@ export default function TrustMarquee({
 
               <div className="mt-7 space-y-3.5">
                 <div className="flex items-start gap-3">
-                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.32)]" />
                   <p className="text-sm leading-relaxed text-[color:var(--ink-2)]">
                     Comparable disclosure depth across pricing signals, provenance and data confidence
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.32)]" />
                   <p className="text-sm leading-relaxed text-[color:var(--ink-2)]">
                     Comparable presentation rigor for clients who expect institutional clarity
                   </p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+                  <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.32)]" />
                   <p className="text-sm leading-relaxed text-[color:var(--ink-2)]">
                     A reference framework that stays disciplined as coverage expands
                   </p>
@@ -121,53 +124,42 @@ export default function TrustMarquee({
               </div>
             </div>
 
-            {/* right premium reference plate */}
+            {/* right reference plate */}
             <div className="lg:col-span-7">
               <div
                 className={cx(
                   'relative overflow-hidden rounded-[30px]',
-                  'bg-[color:var(--surface-2)] backdrop-blur-[12px]',
-                  'ring-1 ring-inset ring-[color:var(--hairline)]',
-                  'shadow-[0_36px_140px_rgba(11,12,16,0.14)]'
+                  'bg-white/70 backdrop-blur-[14px]',
+                  RING,
+                  'shadow-[0_36px_140px_rgba(11,12,16,0.12)]',
                 )}
               >
-                {/* plate lighting + grid */}
+                {/* plate lighting */}
                 <div className="pointer-events-none absolute inset-0">
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_22%_0%,rgba(11,12,16,0.07),transparent_64%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_82%_10%,rgba(139,92,246,0.10),transparent_66%)]" />
-
-                  {/* ultra-subtle grid */}
-                  <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(11,12,16,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(11,12,16,0.08)_1px,transparent_1px)] [background-size:52px_52px]" />
-
-                  {/* vignette edges */}
-                  <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_42%,transparent_36%,rgba(11,12,16,0.08)_88%)]" />
-
-                  {/* top sheen */}
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_10%,rgba(139,92,246,0.08),transparent_66%)]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.015),transparent_44%,rgba(0,0,0,0.04))]" />
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
                 </div>
 
                 <div className="relative p-6 sm:p-8">
                   <div className="flex items-center justify-between gap-4">
-                    <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-                      REFERENCE PLATE
+                    <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">
+                      Reference plate
                     </div>
                     <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent sm:block" />
-                    <div className="rounded-full bg-white/70 px-3 py-1 text-[11px] text-[color:var(--ink-3)] ring-1 ring-inset ring-[color:var(--hairline)]">
+                    <div className={cx('rounded-full bg-white/80 px-3 py-1 text-[11px] text-[color:var(--ink-3)]', RING)}>
                       Benchmark only
                     </div>
                   </div>
 
-                  {/* content */}
                   <div className="mt-7 space-y-7">
                     {grouped ? (
                       Object.entries(grouped).map(([groupName, groupBrands]) => (
-                        <div
-                          key={groupName}
-                          className="rounded-2xl bg-white/65 px-5 py-5 ring-1 ring-inset ring-[color:var(--hairline)]"
-                        >
+                        <div key={groupName} className={cx('rounded-2xl bg-white/78 px-5 py-5', RING)}>
                           <div className="flex items-center gap-4">
-                            <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
-                              {groupName.toUpperCase()}
+                            <div className="text-[11px] font-semibold tracking-[0.16em] text-[color:var(--ink-3)]">
+                              {titleCase(groupName)}
                             </div>
                             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
                           </div>
@@ -175,19 +167,33 @@ export default function TrustMarquee({
                           <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                             {groupBrands.map((b) => (
                               <div key={`${groupName}:${b.domain}`} className="group flex items-center justify-center">
-                                <Image
-                                  src={brandfetchLogoUrl(b.domain)}
-                                  alt={`${b.name} logo`}
-                                  width={340}
-                                  height={100}
-                                  unoptimized
+                                <div
                                   className={cx(
-                                    'h-7 w-auto max-w-[200px] object-contain opacity-80 grayscale-[0.55] transition',
-                                    'group-hover:opacity-100 group-hover:grayscale-0',
-                                    // Light mode: default to NOT invert (logos are usually dark)
-                                    (b.invert ?? false) && 'invert'
+                                    'flex items-center justify-center',
+                                    'h-10 w-full',
+                                    'rounded-2xl bg-white/65',
+                                    'px-4',
+                                    RING,
+                                    'transition',
+                                    'group-hover:bg-white/85',
                                   )}
-                                />
+                                >
+                                  <Image
+                                    src={brandfetchLogoUrl(b.domain)}
+                                    alt={`${b.name} logo`}
+                                    width={320}
+                                    height={96}
+                                    unoptimized
+                                    loading="lazy"
+                                    decoding="async"
+                                    className={cx(
+                                      'h-6 w-auto max-w-[210px] object-contain',
+                                      'opacity-80 grayscale-[0.55] transition',
+                                      'group-hover:opacity-100 group-hover:grayscale-0',
+                                      (b.invert ?? false) && 'invert',
+                                    )}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -195,13 +201,10 @@ export default function TrustMarquee({
                       ))
                     ) : (
                       chunks.map((chunk, idx) => (
-                        <div
-                          key={idx}
-                          className="rounded-2xl bg-white/65 px-5 py-5 ring-1 ring-inset ring-[color:var(--hairline)]"
-                        >
+                        <div key={idx} className={cx('rounded-2xl bg-white/78 px-5 py-5', RING)}>
                           <div className="flex items-center gap-4">
-                            <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
-                              GLOBAL REFERENCE SET
+                            <div className="text-[11px] font-semibold tracking-[0.16em] text-[color:var(--ink-3)]">
+                              Global reference set
                             </div>
                             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
                           </div>
@@ -209,18 +212,33 @@ export default function TrustMarquee({
                           <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                             {chunk.map((b) => (
                               <div key={b.domain} className="group flex items-center justify-center">
-                                <Image
-                                  src={brandfetchLogoUrl(b.domain)}
-                                  alt={`${b.name} logo`}
-                                  width={340}
-                                  height={100}
-                                  unoptimized
+                                <div
                                   className={cx(
-                                    'h-7 w-auto max-w-[210px] object-contain opacity-80 grayscale-[0.55] transition',
-                                    'group-hover:opacity-100 group-hover:grayscale-0',
-                                    (b.invert ?? false) && 'invert'
+                                    'flex items-center justify-center',
+                                    'h-10 w-full',
+                                    'rounded-2xl bg-white/65',
+                                    'px-4',
+                                    RING,
+                                    'transition',
+                                    'group-hover:bg-white/85',
                                   )}
-                                />
+                                >
+                                  <Image
+                                    src={brandfetchLogoUrl(b.domain)}
+                                    alt={`${b.name} logo`}
+                                    width={320}
+                                    height={96}
+                                    unoptimized
+                                    loading="lazy"
+                                    decoding="async"
+                                    className={cx(
+                                      'h-6 w-auto max-w-[210px] object-contain',
+                                      'opacity-80 grayscale-[0.55] transition',
+                                      'group-hover:opacity-100 group-hover:grayscale-0',
+                                      (b.invert ?? false) && 'invert',
+                                    )}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -229,18 +247,15 @@ export default function TrustMarquee({
                     )}
                   </div>
 
-                  {/* bottom stamp */}
                   <div className="mt-8 flex items-center justify-between gap-4">
-                    <div className="text-xs text-[color:var(--ink-3)]">
-                      Disclosure depth • Data discipline • Presentation rigor
-                    </div>
+                    <div className="text-xs text-[color:var(--ink-3)]">Disclosure depth • Data discipline • Presentation rigor</div>
                     <div className="hidden h-px flex-1 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent sm:block" />
                     <div className="text-xs text-[color:var(--ink-3)]">Monochrome display for impartiality</div>
                   </div>
                 </div>
               </div>
 
-              {/* No extra outside caption */}
+              {/* no outside caption */}
             </div>
           </div>
         </div>
