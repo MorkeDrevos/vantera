@@ -26,11 +26,6 @@ function isEditableTarget(el: Element | null) {
  * - OmniSearch / CitySearch can listen to "vantera:focus-search".
  * - Keep legacy bridge event in one place so removal is trivial later.
  */
-function dispatchFocusSearch() {
-  window.dispatchEvent(new CustomEvent('vantera:focus-search'));
-  window.dispatchEvent(new CustomEvent('locus:focus-search'));
-}
-
 function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('vantera:tab', { detail: { tab } }));
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
@@ -78,9 +73,6 @@ function useHotkeys(pathname: string | null, router: ReturnType<typeof useRouter
           router.push('/search');
           return;
         }
-
-        // If you ever want to focus an inline search (home hero etc), swap:
-        // dispatchFocusSearch();
       }
     };
 
@@ -292,7 +284,6 @@ export default function TopBar() {
       router.push('/search');
       return;
     }
-    // dispatchFocusSearch();
   }
 
   // routes
@@ -301,30 +292,28 @@ export default function TopBar() {
   const intelligenceHref = '/coming-soon?section=intelligence';
   const journalHref = '/coming-soon?section=journal';
 
-  // Layout
+  // layout
   const BAR_INNER =
     'mx-auto flex w-full max-w-[1760px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
-
-  // Royal, hairline, no rounded corners
-  const barShell = cx(
-    'relative w-full',
-    'backdrop-blur-[18px]',
-    'ring-1 ring-inset ring-[color:var(--hairline)]',
-    scrolled ? 'bg-[rgba(255,255,255,0.94)]' : 'bg-[rgba(255,255,255,0.86)]',
-    scrolled ? 'shadow-[0_18px_70px_rgba(11,12,16,0.10)]' : 'shadow-[0_10px_50px_rgba(11,12,16,0.06)]',
-  );
 
   const goldText =
     'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_48%,#8a5b12_100%)]';
 
-  const navItemBase =
-    'inline-flex h-10 items-center gap-2 px-4 text-[13px] font-medium transition select-none ' +
-    'ring-1 ring-inset ring-[color:var(--hairline)] bg-transparent hover:bg-black/[0.035] ' +
-    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]';
+  const barShell = cx(
+    'relative w-full',
+    'backdrop-blur-[18px]',
+    'bg-[rgba(255,255,255,0.86)]',
+    scrolled && 'bg-[rgba(255,255,255,0.94)]',
+  );
 
-  const navItemActive =
-    'inline-flex h-10 items-center gap-2 px-4 text-[13px] font-medium transition select-none ' +
-    'ring-1 ring-inset ring-[rgba(11,12,16,0.18)] bg-black/[0.03] text-[color:var(--ink)]';
+  // Clean nav (no boxes)
+  const navLink =
+    'relative inline-flex h-10 items-center px-2 text-[13px] font-medium text-[color:var(--ink-2)] transition ' +
+    'hover:text-[color:var(--ink)]';
+
+  const navActive =
+    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px ' +
+    'after:bg-[linear-gradient(90deg,transparent,rgba(185,133,51,0.65),transparent)]';
 
   const signatureSearch =
     'inline-flex h-10 items-center gap-2 px-4 transition ' +
@@ -341,15 +330,18 @@ export default function TopBar() {
 
   const iconMuted = 'text-[color:var(--ink-3)]';
 
+  const isIntelligence = pathname?.startsWith('/intelligence') || intelligenceHref.includes('intelligence');
+  const isJournal = pathname?.startsWith('/journal') || journalHref.includes('journal');
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
-        {/* Royal hairlines + warm crown wash */}
+        {/* Rich but quiet: hairlines + warm wash */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
-          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1200px_240px_at_50%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,12,16,0.012),transparent_42%,rgba(11,12,16,0.030))]" />
+          <div className="absolute inset-x-0 top-0 h-14 bg-[radial-gradient(1200px_220px_at_50%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,12,16,0.010),transparent_46%,rgba(11,12,16,0.022))]" />
         </div>
 
         <div className={cx('relative', BAR_INNER)}>
@@ -365,25 +357,36 @@ export default function TopBar() {
             />
           </Link>
 
-          {/* Desktop center nav */}
+          {/* Desktop nav (clean text, rich spacing) */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
-            <div className="flex items-center gap-2">
-              {/* Gateway mega */}
+            <div className="flex items-center gap-6">
+              {/* Gateway mega (text trigger) */}
               <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
                   onClick={toggleMega}
                   onFocus={() => setMegaOpen(true)}
-                  className={cx(megaOpen ? navItemActive : navItemBase)}
+                  className={cx(
+                    'relative inline-flex h-10 items-center gap-2 px-2 text-[13px] font-medium transition select-none',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                    megaOpen && 'text-[color:var(--ink)]',
+                  )}
                   aria-expanded={megaOpen}
                   aria-haspopup="menu"
                 >
                   <Globe className={cx('h-4 w-4', iconMuted)} />
                   <span>Gateway</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
+                  <span
+                    className={cx(
+                      'absolute left-2 right-2 bottom-1 h-px opacity-0 transition-opacity',
+                      'bg-[linear-gradient(90deg,transparent,rgba(185,133,51,0.55),transparent)]',
+                      megaOpen && 'opacity-100',
+                    )}
+                  />
                 </button>
 
-                {/* Mega panel - editorial, no rounding, hairlines */}
+                {/* Mega panel (keep your premium build) */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -560,11 +563,11 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Minimal nav links (no caps) */}
-              <Link href={intelligenceHref} prefetch className={navItemBase}>
+              {/* Clean links */}
+              <Link href={intelligenceHref} prefetch className={cx(navLink, isIntelligence && navActive)}>
                 Intelligence
               </Link>
-              <Link href={journalHref} prefetch className={navItemBase}>
+              <Link href={journalHref} prefetch className={cx(navLink, isJournal && navActive)}>
                 Journal
               </Link>
             </div>
@@ -610,7 +613,7 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile sheet - editorial, no rounding */}
+      {/* Mobile sheet (keep your existing design) */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[70] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
