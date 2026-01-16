@@ -244,13 +244,13 @@ function FullBleedHero({
               {/* Left: statement */}
               <div className="lg:col-span-7">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Chip>€2M+ ONLY</Chip>
-                  <Chip>GLOBAL CURATION</Chip>
-                  <Chip>TRUTH LAYER</Chip>
+                  <Chip>Curated</Chip>
+<Chip>Verified</Chip>
+<Chip>Global</Chip>
                 </div>
 
                 <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
-                  A global €2M+ luxury marketplace, powered by intelligence
+                  A global catalogue of exceptional homes, powered by intelligence
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
@@ -302,10 +302,10 @@ function FullBleedHero({
                       SEARCH ATELIER
                     </div>
                     <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                      The fastest way to a €2M+ property
+                      The fastest path through verified markets
                     </div>
                     <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                      Use keywords, a country, or jump straight into a destination.
+                      Use keywords, a country, or step directly into a city.
                     </div>
 
                     <form action="/search" method="get" className="mt-5 space-y-3">
@@ -404,25 +404,28 @@ function FullBleedHero({
                 <div className="p-5 sm:p-7">
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     <DnaPillar
-                      eyebrow="TRUTH LAYER"
-                      title="Verify and explain"
-                      body="Structured facts and consistency checks. Reduce ambiguity, surface gaps, and show what is known vs assumed."
-                    />
-                    <DnaPillar
-                      eyebrow="MARKET INTELLIGENCE"
-                      title="Price, liquidity, risk"
-                      body="City-level signals that turn browsing into decision-making. Not volume - insight. Built city by city."
-                    />
-                    <DnaPillar
-                      eyebrow="SIGNAL OVER NOISE"
-                      title="Curate, don’t flood"
-                      body="€2M+ threshold with editorial restraint. No duplicated feeds, no portal chaos, no endless clutter."
-                    />
-                    <DnaPillar
-                      eyebrow="PRIVATE NETWORK"
-                      title="Discreet by default"
-                      body="Private submissions and verified sellers. Designed for serious buyers and advisors, not mass traffic."
-                    />
+  eyebrow="TRUTH LAYER"
+  title="What’s verified, and what isn’t"
+  body="Structured facts, cross-checks, and consistency rules. Clear separation between verified data, inferred signals, and unknowns — so you always know what you’re looking at."
+/>
+
+<DnaPillar
+  eyebrow="MARKET INTELLIGENCE"
+  title="Understand price, liquidity, and risk"
+  body="City-level signals that explain how markets behave, not just what’s listed. Built market by market, designed to support real decisions."
+/>
+
+<DnaPillar
+  eyebrow="SIGNAL OVER NOISE"
+  title="Curated, not flooded"
+  body="A controlled catalogue with editorial restraint. No duplicated feeds, no algorithmic clutter, no endless scroll — only listings that meet integrity thresholds."
+/>
+
+<DnaPillar
+  eyebrow="PRIVATE NETWORK"
+  title="Discreet by default"
+  body="Verified sellers, private submissions, and controlled visibility. Built for serious buyers, advisors, and long-term decision-makers — not mass traffic."
+/>
                   </div>
 
                   <div className="mt-6">
