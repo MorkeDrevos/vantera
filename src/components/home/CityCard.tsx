@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { City } from './cities';
 import SafeImage from '@/components/home/SafeImage';
@@ -50,40 +51,44 @@ function premiumFallback() {
   );
 }
 
-function SignalChip({
+function Chip({
   label,
   tone = 'neutral',
-  value = '—',
 }: {
   label: string;
-  value?: string;
-  tone?: 'neutral' | 'gold' | 'violet' | 'emerald';
+  tone?: 'neutral' | 'gold';
 }) {
-  const ringCls =
-    tone === 'gold'
-      ? 'ring-[rgba(231,201,130,0.38)]'
-      : tone === 'emerald'
-        ? 'ring-[rgba(16,185,129,0.22)]'
-        : tone === 'violet'
-          ? 'ring-[rgba(139,92,246,0.18)]'
-          : 'ring-black/[0.08]';
+  const ringCls = tone === 'gold' ? 'ring-[rgba(231,201,130,0.28)]' : 'ring-black/[0.08]';
+  const bgCls = tone === 'gold' ? 'bg-[rgba(231,201,130,0.10)]' : 'bg-white/90';
 
   return (
     <span
       className={cx(
         'inline-flex items-center gap-2 px-3 py-1.5 text-[11px]',
-        'bg-white/90 backdrop-blur-2xl',
+        bgCls,
+        'backdrop-blur-2xl',
         'ring-1 ring-inset',
         ringCls,
         'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
         'text-slate-900',
       )}
     >
-      <span className="tracking-[0.18em] uppercase text-[10px] text-slate-500">{label}</span>
-      <span className="h-3 w-px bg-black/10" />
-      <span className="font-semibold tracking-[-0.01em] text-slate-900">{value}</span>
+      {label}
     </span>
   );
+}
+
+function formatLocalTime(tz?: string, nowMs?: number) {
+  if (!tz) return null;
+  try {
+    return new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: tz,
+    }).format(new Date(nowMs ?? Date.now()));
+  } catch {
+    return null;
+  }
 }
 
 export default function CityCard({
@@ -110,7 +115,16 @@ export default function CityCard({
     city.slug === 'new-york' ||
     city.slug === 'monaco' ||
     city.slug === 'dubai' ||
-    city.slug === 'marbella';
+    city.slug === 'marbella' ||
+    city.slug === 'london';
+
+  // Local time (real signal)
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(t);
+  }, []);
+  const localTime = useMemo(() => formatLocalTime((city as any)?.tz, nowMs), [city, nowMs]);
 
   return (
     <div className="group relative min-w-0 h-full">
@@ -124,12 +138,11 @@ export default function CityCard({
           'shadow-[0_26px_90px_rgba(11,12,16,0.10)]',
           'transition duration-500 hover:-translate-y-[2px] hover:shadow-[0_34px_120px_rgba(11,12,16,0.14)]',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
-          // IMPORTANT: make every card equal-height in grid
           'h-full flex flex-col',
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Media (fixed height, never affects overall card height variability) */}
+        {/* Media */}
         <div className={cx('relative w-full shrink-0', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
           {src ? (
             <SafeImage
@@ -178,25 +191,21 @@ export default function CityCard({
             </div>
           ) : null}
 
+          {/* Real signals row (only real data) */}
+          <div className="absolute left-4 right-4 top-4 mt-9 flex flex-wrap items-center gap-2">
+            {localTime ? <Chip label={`Local time ${localTime}`} /> : null}
+            {showVerified ? <Chip label={`Verified ${verified}`} tone="gold" /> : null}
+          </div>
+
           {/* Bottom overlay content */}
           <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
             <div className="flex items-end justify-between gap-4">
               <div className="min-w-0">
                 <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-slate-950">{city.name}</div>
                 <div className="mt-1 truncate text-[12px] text-slate-600">{regionLine(city)}</div>
-
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {showVerified ? (
-                    <SignalChip label="Verified" value={`${verified}`} tone="gold" />
-                  ) : (
-                    <SignalChip label="Coverage" value="City dossier" tone="neutral" />
-                  )}
-                  <SignalChip label="Liquidity" value="Weekly" tone="emerald" />
-                  <SignalChip label="Risk" value="Tracked" tone="violet" />
-                </div>
               </div>
 
-              {/* CTA chip */}
+              {/* CTA chip (no fake words) */}
               <span
                 className={cx(
                   'inline-flex shrink-0 items-center gap-2 px-4 py-2.5 text-[12px] font-semibold',
@@ -209,22 +218,24 @@ export default function CityCard({
               >
                 <span className={cx('tracking-[-0.01em]', goldText())}>Enter</span>
                 <span className="h-4 w-px bg-black/10" />
-                <span className="text-slate-600">dossier</span>
+                <span className="text-slate-600">market</span>
               </span>
             </div>
           </div>
         </div>
 
-        {/* Editorial footer (flex-1 makes all cards equal height) */}
+        {/* Editorial footer (no fake “Updated weekly”) */}
         <div className="px-5 pb-5 pt-4 flex-1 flex flex-col">
           <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">
-            {(city.blurb?.trim() ? city.blurb.trim() : 'Private market coverage with proof-first signals, not portal theatre.')}
+            {city.blurb?.trim()
+              ? city.blurb.trim()
+              : 'Private market coverage with proof-first signals, presented like a catalogue.'}
           </p>
 
           <div className="mt-auto pt-4 flex items-center justify-between gap-3">
-            <div className="text-[11px] tracking-[0.20em] uppercase text-slate-500">Open dossier</div>
+            <div className="text-[11px] tracking-[0.20em] uppercase text-slate-500">Open market</div>
             <div className="h-px flex-1 bg-black/10" />
-            <div className="text-[11px] text-slate-500">Updated weekly</div>
+            <div className="text-[11px] text-slate-500">{showVerified ? 'Verified' : 'Coverage'}</div>
           </div>
         </div>
 
