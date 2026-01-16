@@ -21,6 +21,8 @@ const CITY_PRESETS = {
   },
 } as const;
 
+const DEFAULT_MIN_VALUE = 2_000_000;
+
 function pickString(v: any): string | null {
   return typeof v === 'string' && v.trim() ? v.trim() : null;
 }
@@ -166,6 +168,66 @@ function computeDataCompleteness(input: {
   return clampInt(score, 0, 100);
 }
 
+function isResidentialPropertyType(propertyType: string | null, propClass: string | null) {
+  const cls = (propClass || '').trim().toUpperCase();
+  // Many ATTOM datasets use propclass like "R" / "RES" variants for residential
+  if (cls === 'R' || cls.startsWith('RES')) return true;
+
+  const t = (propertyType || '').trim().toUpperCase();
+  if (!t) return false;
+
+  // Explicit excludes first (we want luxury residential only)
+  const EXCLUDE = [
+    'COMMERCIAL',
+    'OFFICE',
+    'RETAIL',
+    'INDUSTRIAL',
+    'WAREHOUSE',
+    'HOTEL',
+    'MOTEL',
+    'HOSPITAL',
+    'HOSPITALITY',
+    'MIXED USE',
+    'MIXED-USE',
+    'LAND',
+    'LOT',
+    'VACANT',
+    'FARM',
+    'AGRIC',
+    'AGRICULT',
+    'PARKING',
+    'GARAGE',
+    'MARINA',
+    'MOBILE HOME',
+    'TRAILER',
+    'TIMESHARE',
+  ];
+  if (EXCLUDE.some((k) => t.includes(k))) return false;
+
+  // Positive signals for residential
+  const INCLUDE = [
+    'SINGLE',
+    'SFR',
+    'RESIDENTIAL',
+    'CONDO',
+    'CONDOMINIUM',
+    'APARTMENT',
+    'TOWNHOUSE',
+    'TOWN HOME',
+    'ROW',
+    'DUPLEX',
+    'TRIPLEX',
+    'FOURPLEX',
+    'QUAD',
+    'MULTI',
+    'MULTIFAMILY',
+    'VILLA',
+    'HOME',
+  ];
+
+  return INCLUDE.some((k) => t.includes(k));
+}
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
 
@@ -177,6 +239,9 @@ export async function GET(req: Request) {
   const minBeds = url.searchParams.get('minBeds') ? Number(url.searchParams.get('minBeds')) : null;
   const minAvm = url.searchParams.get('minAvm') ? Number(url.searchParams.get('minAvm')) : null;
   const typeWhitelist = parseCsvUpper(url.searchParams.get('types'));
+
+  // Hard gate: luxury only (>= 2m). Allow override, but default is 2m.
+  const minValue = url.searchParams.get('minValue') ? Number(url.searchParams.get('minValue')) : DEFAULT_MIN_VALUE;
 
   if (!process.env.ATTOM_API_KEY) {
     return NextResponse.json(
@@ -200,7 +265,10 @@ export async function GET(req: Request) {
     dryRun,
     minBeds,
     minAvm,
+    minValue,
     types: typeWhitelist,
+    // Force: residential-only (hard gate)
+    residentialOnly: true,
   };
 
   const run = await prisma.importRun.create({
@@ -222,6 +290,17 @@ export async function GET(req: Request) {
   let created = 0;
   let skipped = 0;
   let errors = 0;
+
+  // Skip breakdown (for Ops visibility)
+  let skippedMissingAddress = 0;
+  let skippedMinBeds = 0;
+  let skippedTypeWhitelist = 0;
+  let skippedExisting = 0;
+  let skippedDetailError = 0;
+  let skippedMinAvm = 0;
+  let skippedNotResidential = 0;
+  let skippedMissingValue = 0;
+  let skippedBelowMinValue = 0;
 
   try {
     const city = await prisma.city.upsert({
@@ -292,6 +371,7 @@ export async function GET(req: Request) {
         const address = safeJoin([address1, address2], ', ');
         if (!address) {
           skipped += 1;
+          skippedMissingAddress += 1;
           continue;
         }
 
@@ -301,18 +381,20 @@ export async function GET(req: Request) {
         const builtSqftSnap = readSqftFromSnapshot(p);
         const typeSnap = readTypeFromSnapshot(p);
 
-        // Filter: min beds
+        // Filter: min beds (optional)
         if (minBeds != null && (bedsSnap == null || bedsSnap < minBeds)) {
           skipped += 1;
+          skippedMinBeds += 1;
           continue;
         }
 
-        // Filter: type whitelist (uppercase contains match)
+        // Filter: type whitelist (optional, uppercase contains match)
         if (typeWhitelist && typeWhitelist.length) {
           const t = (typeSnap || '').toUpperCase();
           const ok = typeWhitelist.some((allowed) => t.includes(allowed));
           if (!ok) {
             skipped += 1;
+            skippedTypeWhitelist += 1;
             continue;
           }
         }
@@ -329,6 +411,7 @@ export async function GET(req: Request) {
 
         if (existing) {
           skipped += 1;
+          skippedExisting += 1;
           continue;
         }
 
@@ -343,12 +426,17 @@ export async function GET(req: Request) {
             detail = detailRes?.property?.[0] || null;
           } catch (e: any) {
             errors += 1;
+            skipped += 1;
+            skippedDetailError += 1;
             if (errorSamples.length < 5) {
               errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
             }
             continue;
           }
         }
+
+        const propClassRaw =
+          pickString(detail?.summary?.propclass) || pickString(p?.summary?.propclass) || null;
 
         const propertyType =
           pickString(detail?.summary?.proptype) ||
@@ -397,10 +485,11 @@ export async function GET(req: Request) {
           }
         }
 
-        // min AVM filter (requires AVM)
+        // min AVM filter (optional, requires AVM)
         if (minAvm != null) {
           if (avmValue == null || avmValue < minAvm) {
             skipped += 1;
+            skippedMinAvm += 1;
             continue;
           }
         }
@@ -414,6 +503,25 @@ export async function GET(req: Request) {
 
           avmValue = fallback;
           if (avmValue != null) priceConfidence = 55;
+        }
+
+        // HARD GATE 1: Residential only
+        if (!isResidentialPropertyType(propertyType, propClassRaw)) {
+          skipped += 1;
+          skippedNotResidential += 1;
+          continue;
+        }
+
+        // HARD GATE 2: Minimum value (>= 2m). If missing value, skip.
+        if (avmValue == null || !Number.isFinite(avmValue)) {
+          skipped += 1;
+          skippedMissingValue += 1;
+          continue;
+        }
+        if (avmValue < minValue) {
+          skipped += 1;
+          skippedBelowMinValue += 1;
+          continue;
         }
 
         const builtM2 = sqftToM2Int(builtSqft);
@@ -439,47 +547,47 @@ export async function GET(req: Request) {
         }
 
         const listing = await prisma.listing.create({
-  data: {
-    slug,
-    source: 'attom',
-    sourceId: bestSourceId,
-    city: { connect: { id: city.id } },
+          data: {
+            slug,
+            source: 'attom',
+            sourceId: bestSourceId,
+            city: { connect: { id: city.id } },
 
-    status: 'LIVE',
-    visibility: 'PUBLIC',
-    verification: 'SELF_REPORTED',
+            status: 'LIVE',
+            visibility: 'PUBLIC',
+            verification: 'SELF_REPORTED',
 
-    title,
-    headline: 'Imported from ATTOM - verification and media layers come next.',
-    description: ['ATTOM import (trial)', bestSourceId ? `ATTOM ID: ${bestSourceId}` : null, address]
-      .filter(Boolean)
-      .join('\n'),
+            title,
+            headline: 'Imported from ATTOM - verification and media layers come next.',
+            description: ['ATTOM import (trial)', bestSourceId ? `ATTOM ID: ${bestSourceId}` : null, address]
+              .filter(Boolean)
+              .join('\n'),
 
-    address,
-    addressHidden: true,
+            address,
+            addressHidden: true,
 
-    lat: lat ?? undefined,
-    lng: lng ?? undefined,
+            lat: lat ?? undefined,
+            lng: lng ?? undefined,
 
-    propertyType: propertyType ?? undefined,
-    bedrooms: beds ?? undefined,
-    bathrooms: baths ?? undefined,
+            propertyType: propertyType ?? undefined,
+            bedrooms: beds ?? undefined,
+            bathrooms: baths ?? undefined,
 
-    builtSqft: builtSqft ?? undefined,
-    plotSqft: lotSqft ?? undefined,
+            builtSqft: builtSqft ?? undefined,
+            plotSqft: lotSqft ?? undefined,
 
-    builtM2: builtM2 ?? undefined,
-    plotM2: plotM2 ?? undefined,
+            builtM2: builtM2 ?? undefined,
+            plotM2: plotM2 ?? undefined,
 
-    price: avmValue ?? undefined,
-    currency: 'USD',
+            price: avmValue ?? undefined,
+            currency: 'USD',
 
-    priceConfidence: priceConfidence ?? undefined,
-    dataCompleteness: dataCompleteness ?? undefined,
-  },
-});
+            priceConfidence: priceConfidence ?? undefined,
+            dataCompleteness: dataCompleteness ?? undefined,
+          },
+        });
 
-await ingestAttomMediaForListing(listing.id, bestSourceId);
+        await ingestAttomMediaForListing(listing.id, bestSourceId);
 
         created += 1;
       } catch (e: any) {
@@ -487,6 +595,18 @@ await ingestAttomMediaForListing(listing.id, bestSourceId);
         if (errorSamples.length < 5) errorSamples.push({ step: 'loop', message: e?.message || String(e) });
       }
     }
+
+    const breakdown = {
+      skippedMissingAddress,
+      skippedMinBeds,
+      skippedTypeWhitelist,
+      skippedExisting,
+      skippedDetailError,
+      skippedMinAvm,
+      skippedNotResidential,
+      skippedMissingValue,
+      skippedBelowMinValue,
+    };
 
     await prisma.importRun.update({
       where: { id: run.id },
@@ -498,7 +618,19 @@ await ingestAttomMediaForListing(listing.id, bestSourceId);
         skipped,
         errors,
         errorSamples,
-        message: 'Property ingest complete',
+        message:
+          `Property ingest complete (residential-only, minValue=${minValue}). ` +
+          `Created=${created}, Skipped=${skipped}, Errors=${errors}. ` +
+          `SkipBreakdown: ` +
+          `missingAddress=${skippedMissingAddress}, ` +
+          `minBeds=${skippedMinBeds}, ` +
+          `typeWhitelist=${skippedTypeWhitelist}, ` +
+          `existing=${skippedExisting}, ` +
+          `detailError=${skippedDetailError}, ` +
+          `minAvm=${skippedMinAvm}, ` +
+          `notResidential=${skippedNotResidential}, ` +
+          `missingValue=${skippedMissingValue}, ` +
+          `belowMinValue=${skippedBelowMinValue}`,
       },
     });
 
@@ -512,6 +644,7 @@ await ingestAttomMediaForListing(listing.id, bestSourceId);
       skipped,
       errors,
       errorSamples,
+      breakdown,
     });
   } catch (e: any) {
     errorSamples.push({ step: 'route', message: e?.message || String(e) });
