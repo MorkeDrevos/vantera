@@ -49,10 +49,10 @@ const AUTO_FIT_2COL_MAX = 'grid-cols-[repeat(auto-fit,minmax(min(520px,100%),1fr
 
 export default function CityCardsClient({
   cities,
-  columns = AUTO_FIT_2COL_MAX,
+  columns = '[grid-template-columns:repeat(auto-fit,minmax(min(640px,100%),1fr))]',
   className,
   variant = 'default',
-  showLocalTime = false, // JamesEdition-style: off by default
+  showLocalTime = false,
 }: {
   cities: RuntimeCity[];
   columns?: string;
@@ -60,6 +60,7 @@ export default function CityCardsClient({
   variant?: 'default' | 'wall';
   showLocalTime?: boolean;
 }) {
+  
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
