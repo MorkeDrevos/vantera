@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck, Globe, TrendingUp } from 'lucide-react';
 
 type RuntimeCityLite = {
   slug: string;
@@ -56,8 +56,6 @@ function computeBaseScore(c: RuntimeCityLite) {
   const status = c.status ?? '';
   const tw = TIER_WEIGHT[tier] ?? 1.0;
   const sw = STATUS_WEIGHT[status] ?? 1.0;
-
-  // Base: priority drives relevance, tier/status refine confidence
   return p * tw * sw;
 }
 
@@ -66,8 +64,6 @@ function intentBonus(id: IntentId, c: RuntimeCityLite) {
   const country = normalize(c.country);
   const region = normalize(c.region ?? '');
 
-  // IMPORTANT: v1 is heuristics based on your current schema (tier/status/priority/region)
-  // Later, we swap these bonuses for real signal metrics.
   if (id === 'quiet-accumulation') {
     let b = 0;
     if (slug === 'monaco') b += 18;
@@ -134,20 +130,37 @@ function pickDistinctTimezones(input: RuntimeCityLite[], max: number) {
   return out;
 }
 
-function ScoreBar({ score01 }: { score01: number }) {
-  const w = clamp(score01, 0, 1) * 100;
-  return (
-    <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/[0.06]">
-      <div
-        className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,rgba(231,201,130,0.85),rgba(255,255,255,0.55),rgba(120,76,255,0.70))]"
-        style={{ width: `${w}%` }}
-      />
-      <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
-    </div>
-  );
+function formatTier(tier?: string | null) {
+  if (!tier) return 'TIER';
+  return tier.replace('TIER_', 'T');
 }
 
-function IntentChip({
+function formatStatus(status?: string | null) {
+  if (!status) return 'TRACKING';
+  return status;
+}
+
+function Badge({
+  children,
+  tone = 'neutral',
+}: {
+  children: React.ReactNode;
+  tone?: 'neutral' | 'gold' | 'violet';
+}) {
+  const base =
+    'inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] leading-none backdrop-blur-2xl';
+
+  const cls =
+    tone === 'gold'
+      ? 'border-[#E7C982]/25 bg-[#E7C982]/[0.08] text-[#F3E3B8]'
+      : tone === 'violet'
+        ? 'border-[rgba(120,76,255,0.22)] bg-[rgba(120,76,255,0.10)] text-[rgba(230,220,255,0.92)]'
+        : 'border-white/10 bg-white/[0.04] text-zinc-200/90';
+
+  return <span className={cx(base, cls)}>{children}</span>;
+}
+
+function IntentPill({
   label,
   sub,
   active,
@@ -155,7 +168,7 @@ function IntentChip({
 }: {
   label: string;
   sub: string;
-  active?: boolean;
+  active: boolean;
   onClick: () => void;
 }) {
   return (
@@ -163,35 +176,111 @@ function IntentChip({
       type="button"
       onClick={onClick}
       className={cx(
-        'group relative overflow-hidden rounded-2xl px-4 py-2.5 text-left transition',
-        'border backdrop-blur-xl',
+        'group relative w-full overflow-hidden rounded-3xl border px-4 py-3 text-left transition',
+        'backdrop-blur-2xl',
         active
-          ? 'border-white/18 bg-white/[0.06] text-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-          : 'border-white/10 bg-white/[0.03] text-white/80 hover:border-white/16 hover:bg-white/[0.05]',
+          ? 'border-white/16 bg-white/[0.07] shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]'
+          : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/14',
       )}
     >
       <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
-        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_86%_10%,rgba(120,76,255,0.12),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_180px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_180px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
       </div>
 
       <div className="relative">
-        <div className="text-[12px] leading-none text-zinc-100/95">{label}</div>
-        <div className="mt-1 text-[11px] leading-none text-zinc-400">{sub}</div>
+        <div className="flex items-center justify-between gap-3">
+          <div className={cx('text-[13px] font-semibold', active ? 'text-zinc-100' : 'text-zinc-100/90')}>
+            {label}
+          </div>
+          <span
+            className={cx(
+              'inline-flex h-7 w-7 items-center justify-center rounded-2xl border transition',
+              active ? 'border-white/16 bg-white/[0.06]' : 'border-white/10 bg-black/20',
+            )}
+          >
+            <ArrowRight className={cx('h-4 w-4 transition', active ? 'opacity-85 translate-x-0.5' : 'opacity-55')} />
+          </span>
+        </div>
+        <div className="mt-1 text-[12px] leading-snug text-zinc-400">{sub}</div>
       </div>
     </button>
   );
 }
 
-function Token({
-  children,
+function CityRow({
+  city,
+  score01,
+  rank,
 }: {
-  children: React.ReactNode;
+  city: RuntimeCityLite;
+  score01: number;
+  rank: number;
 }) {
+  const glow = clamp(score01, 0, 1);
+
   return (
-    <span className="inline-flex items-center rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] text-zinc-200/90">
-      {children}
-    </span>
+    <div
+      className={cx(
+        'group relative overflow-hidden rounded-3xl border border-white/10 bg-black/25 p-4',
+        'shadow-[0_26px_100px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.05)]',
+        'transition hover:bg-white/[0.04] hover:border-white/14',
+      )}
+    >
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
+        <div className="absolute inset-0 bg-[radial-gradient(520px_200px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_200px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
+      </div>
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-[12px] font-semibold text-zinc-100/90">
+              {rank}
+            </span>
+            <div className="min-w-0">
+              <div className="truncate text-[13px] font-semibold text-zinc-100">{city.name}</div>
+              <div className="truncate text-[11px] text-zinc-500">
+                {city.country}
+                {city.region ? ` · ${city.region}` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Badge tone="gold">{formatTier(city.tier)}</Badge>
+            <Badge tone="neutral">{formatStatus(city.status)}</Badge>
+            <Badge tone="violet">{city.tz}</Badge>
+          </div>
+
+          <div className="mt-3 text-[12px] leading-relaxed text-zinc-300/90">
+            {city.blurb ? city.blurb : 'Private index coverage with truth-first emphasis.'}
+          </div>
+        </div>
+
+        <Link
+          href={`/city/${city.slug}`}
+          prefetch
+          className={cx(
+            'shrink-0 inline-flex items-center gap-2 rounded-2xl border px-3.5 py-2 text-[11px] transition',
+            'border-white/10 bg-white/[0.03] text-zinc-200 hover:bg-white/[0.07] hover:border-white/16',
+          )}
+        >
+          Open <ArrowRight className="h-4 w-4 opacity-75" />
+        </Link>
+      </div>
+
+      {/* confidence line (quiet, not flashy) */}
+      <div className="relative mt-4">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+          <div
+            className="h-full rounded-full bg-[linear-gradient(90deg,rgba(231,201,130,0.72),rgba(255,255,255,0.42),rgba(120,76,255,0.64))]"
+            style={{ width: `${Math.round(glow * 100)}%` }}
+          />
+        </div>
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-full" />
+      </div>
+    </div>
   );
 }
 
@@ -204,41 +293,46 @@ export default function IntentHero({
   defaultTop?: number;
   onKeepScanningId?: string;
 }) {
-  const [active, setActive] = useState<IntentId | null>(null);
+  const [active, setActive] = useState<IntentId>('quiet-accumulation');
 
   const intents = useMemo(
     () => [
       {
         id: 'quiet-accumulation' as const,
         label: 'Quiet accumulation',
-        sub: 'low noise, high signal',
+        sub: 'Low noise. Deep capital. Long horizon.',
+        icon: ShieldCheck,
       },
       {
         id: 'low-noise-prime' as const,
         label: 'Low-noise prime',
-        sub: 'clean demand structure',
+        sub: 'Clean demand. Structural scarcity.',
+        icon: Sparkles,
       },
       {
         id: 'ahead-of-cycle' as const,
         label: 'Ahead of cycle',
-        sub: 'early momentum, disciplined',
+        sub: 'Early momentum with discipline.',
+        icon: TrendingUp,
       },
       {
         id: 'verification-strong' as const,
         label: 'Verification strong',
-        sub: 'truth-first coverage',
+        sub: 'Truth-first coverage and evidence.',
+        icon: ShieldCheck,
       },
       {
         id: 'liquidity-building' as const,
         label: 'Liquidity building',
-        sub: 'velocity-led signals',
+        sub: 'Velocity-led signals and flow.',
+        icon: Globe,
       },
     ],
     [],
   );
 
   const ranked = useMemo(() => {
-    const id = active ?? 'quiet-accumulation';
+    const id = active;
     const scored = (cities ?? [])
       .map((c) => {
         const base = computeBaseScore(c);
@@ -250,7 +344,7 @@ export default function IntentHero({
     const top = pickDistinctTimezones(scored.map((x) => x.c), defaultTop);
 
     const maxScore = scored.length ? scored[0].score : 1;
-    const minScore = scored.length ? scored[Math.min(scored.length - 1, 8)].score : 0;
+    const minScore = scored.length ? scored[Math.min(scored.length - 1, 10)].score : 0;
 
     const to01 = (s: number) => {
       const den = Math.max(1, maxScore - minScore);
@@ -262,187 +356,143 @@ export default function IntentHero({
       return { city, score: row?.score ?? 0, score01: to01(row?.score ?? 0) };
     });
 
-    return { id, topWithScore };
-  }, [cities, active, defaultTop]);
+    const activeMeta = intents.find((x) => x.id === id);
+    return { id, topWithScore, activeMeta };
+  }, [cities, active, defaultTop, intents]);
 
-  const mode: 'idle' | 'response' = active ? 'response' : 'idle';
+  const ActiveIcon = ranked.activeMeta?.icon ?? Sparkles;
 
   return (
-    <div className="relative">
-      {/* Crown line */}
-      <div aria-hidden className="pointer-events-none absolute -top-4 inset-x-0">
-        <div className="mx-auto h-px w-[86%] bg-gradient-to-r from-transparent via-[#E7C982]/26 to-transparent" />
-        <div className="mx-auto mt-2 h-px w-[72%] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <section className="relative">
+      {/* Quiet crown lines */}
+      <div aria-hidden className="pointer-events-none absolute -top-5 inset-x-0">
+        <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/28 to-transparent" />
+        <div className="mx-auto mt-2 h-px w-[78%] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       </div>
 
-      {/* Intelligence slab */}
       <div
         className={cx(
-          'relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03]',
-          'shadow-[0_42px_150px_rgba(0,0,0,0.70),inset_0_1px_0_rgba(255,255,255,0.06)]',
+          'relative overflow-hidden rounded-[36px] border border-white/10 bg-white/[0.03]',
+          'shadow-[0_52px_190px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(255,255,255,0.06)]',
         )}
       >
         {/* Ambient */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_360px_at_18%_-10%,rgba(255,255,255,0.07),transparent_62%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_360px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_12%_-12%,rgba(255,255,255,0.08),transparent_64%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_86%_6%,rgba(120,76,255,0.16),transparent_64%)]" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-black/45" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/8 via-black/22 to-black/46" />
           <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.7)_1px,transparent_0)] [background-size:26px_26px]" />
         </div>
 
-        <div className="relative p-5 sm:p-6 lg:p-8">
+        <div className="relative p-5 sm:p-7 lg:p-10">
           {/* Header */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 max-w-2xl">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 opacity-80" />
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-black/25">
+                  <ActiveIcon className="h-4 w-4 text-zinc-100/90" />
+                </span>
                 <div className="text-[11px] font-semibold tracking-[0.30em] text-zinc-200/70">
-                  INTENT
+                  INTENT-LED DISCOVERY
                 </div>
               </div>
 
-              {/* colder copy */}
-              <div className="mt-2 text-[14px] leading-relaxed text-zinc-300/90">
-                Select a mandate. Vantera re-weights markets and surfaces the next
-                highest-probability path.
+              <h1 className="mt-3 text-[28px] font-semibold tracking-[-0.02em] text-zinc-100 sm:text-[34px]">
+                Search is the interface.
+                <span className="text-zinc-300/90"> Intent is the engine.</span>
+              </h1>
+
+              <p className="mt-3 text-[14px] leading-relaxed text-zinc-300/90">
+                Pick a mandate and Vantera surfaces the most probable markets to start from - quiet, verified, and
+                signal-first. This is not a portal. It is a decision surface.
+              </p>
+
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <Badge tone="gold">Royal minimal</Badge>
+                <Badge tone="neutral">Readable by default</Badge>
+                <Badge tone="violet">Proof expands weekly</Badge>
               </div>
             </div>
 
-            <div className="hidden items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-4 py-2 text-[11px] text-zinc-300 sm:inline-flex">
-              Press <span className="font-mono text-zinc-100">/</span> for city search
+            <div className="hidden lg:flex items-center gap-2 rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-[12px] text-zinc-300/85">
+              Tip: press <span className="font-mono text-zinc-100">/</span> for city search
             </div>
           </div>
 
-          {/* Intent chips - more “console” */}
-          <div className="mt-5 flex flex-wrap gap-2.5">
-            {intents.map((i) => (
-              <IntentChip
-                key={i.id}
-                label={i.label}
-                sub={i.sub}
-                active={active === i.id}
-                onClick={() => setActive(i.id)}
-              />
-            ))}
-          </div>
-
-          {/* System line */}
-          <div
-            className={cx(
-              'mt-5 rounded-3xl border border-white/10 bg-black/30 px-5 py-4 text-[12px] text-zinc-300/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition',
-              mode === 'response' ? 'opacity-100' : 'opacity-0 pointer-events-none',
-            )}
-            aria-hidden={mode !== 'response'}
-          >
-            Re-weighting coverage against selected mandate. Output is signal-first and evidence-scored.
-          </div>
-
-          {/* Results tiles */}
-          <div
-            className={cx(
-              'mt-5 grid gap-3 transition',
-              mode === 'response'
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 -translate-y-1 pointer-events-none',
-              'sm:grid-cols-2',
-            )}
-            aria-hidden={mode !== 'response'}
-          >
-            {ranked.topWithScore.map(({ city, score01 }) => (
-              <div
-                key={city.slug}
-                className={cx(
-                  'group relative overflow-hidden rounded-3xl border border-white/10 bg-black/30 p-5',
-                  'shadow-[0_28px_110px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)]',
-                  'transition hover:bg-white/[0.04] hover:border-white/16',
-                )}
-              >
-                <div className="pointer-events-none absolute inset-0 opacity-0 transition group-hover:opacity-100">
-                  <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_86%_10%,rgba(120,76,255,0.14),transparent_62%)]" />
+          {/* Body */}
+          <div className="mt-7 grid gap-5 lg:grid-cols-12 lg:gap-6">
+            {/* Left: intents */}
+            <div className="lg:col-span-4">
+              <div className="rounded-[28px] border border-white/10 bg-black/25 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                <div className="mb-3 text-[11px] font-semibold tracking-[0.28em] text-zinc-200/70">
+                  SELECT A MANDATE
                 </div>
 
-                <div className="relative flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="truncate text-[13px] font-semibold text-zinc-100">
-                      {city.name}
-                    </div>
-                    <div className="truncate text-[11px] text-zinc-500">
-                      {city.country}
-                      {city.region ? ` · ${city.region}` : ''}
-                    </div>
-                  </div>
+                <div className="grid gap-2.5">
+                  {intents.map((i) => (
+                    <IntentPill
+                      key={i.id}
+                      label={i.label}
+                      sub={i.sub}
+                      active={active === i.id}
+                      onClick={() => setActive(i.id)}
+                    />
+                  ))}
+                </div>
 
-                  <Link
-                    href={`/city/${city.slug}`}
-                    prefetch
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-[12px] text-zinc-300/90">
+                  Vantera re-weights markets using coverage tier, status, and priority.
+                  <span className="text-zinc-500"> Signals replace heuristics as metrics land.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: results */}
+            <div className="lg:col-span-8">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-[11px] font-semibold tracking-[0.28em] text-zinc-200/70">
+                  TOP MARKETS RIGHT NOW
+                </div>
+
+                <div className="hidden sm:flex items-center gap-2">
+                  <a
+                    href={`#${onKeepScanningId}`}
                     className={cx(
-                      'inline-flex items-center gap-2 rounded-2xl px-3.5 py-2 text-[11px]',
-                      'border border-white/10 bg-white/[0.03] text-zinc-200',
-                      'transition hover:bg-white/[0.07] hover:border-white/16',
+                      'inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] transition',
+                      'border-white/10 bg-white/[0.03] text-zinc-200 hover:bg-white/[0.07] hover:border-white/16',
                     )}
                   >
-                    Open <ArrowRight className="h-3.5 w-3.5 opacity-80" />
-                  </Link>
-                </div>
-
-                <div className="relative mt-4">
-                  <ScoreBar score01={score01} />
-                </div>
-
-                <div className="relative mt-3 text-[12px] leading-relaxed text-zinc-300/90">
-                  {city.blurb ? city.blurb : 'Private index coverage with truth-first emphasis.'}
-                </div>
-
-                <div className="relative mt-4 flex flex-wrap gap-2">
-                  <Token>{city.tier ?? 'TIER'}</Token>
-                  <Token>{city.status ?? 'STATUS'}</Token>
-                  <Token>{city.tz}</Token>
+                    Keep scanning <ArrowRight className="h-4 w-4 opacity-75" />
+                  </a>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* Actions */}
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {mode === 'response' ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setActive(null)}
-                  className={cx(
-                    'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-[12px]',
-                    'border border-white/10 bg-white/[0.03] text-zinc-200',
-                    'transition hover:bg-white/[0.07] hover:border-white/16',
-                  )}
-                >
-                  Reset
-                </button>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {ranked.topWithScore.map(({ city, score01 }, idx) => (
+                  <CityRow key={city.slug} city={city} score01={score01} rank={idx + 1} />
+                ))}
+              </div>
 
+              <div className="mt-4 flex flex-wrap items-center gap-2 sm:hidden">
                 <a
                   href={`#${onKeepScanningId}`}
                   className={cx(
-                    'inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-[12px]',
-                    'border border-white/10 bg-black/30 text-zinc-200',
-                    'transition hover:bg-white/[0.07] hover:border-white/16',
+                    'inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-[12px] transition',
+                    'border-white/10 bg-white/[0.03] text-zinc-200 hover:bg-white/[0.07] hover:border-white/16',
                   )}
                 >
-                  Keep scanning <ArrowRight className="h-4 w-4 opacity-80" />
+                  Keep scanning <ArrowRight className="h-4 w-4 opacity-75" />
                 </a>
-
-                <div className="ml-auto hidden lg:flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-[12px] text-zinc-300/80">
-                  Output is indicative. Proof expands with coverage.
-                </div>
-              </>
-            ) : (
-              <div className="text-[12px] text-zinc-500">
-                Default mode is intent-first discovery. Direct city search is available.
               </div>
-            )}
+
+              <div className="mt-4 text-[12px] text-zinc-500">
+                Output is indicative. The evidence layer (comparables, liquidity, risk) expands with each city release.
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
