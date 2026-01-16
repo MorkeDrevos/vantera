@@ -210,7 +210,7 @@ function HeroHotLocations({ cities }: { cities: RuntimeCity[] }) {
 
 /* =========================================================
    HERO
-   - Uses HERO.JPG
+   - Uses /brand/hero.jpg
    - Removes House rules and Start here
    - Adds Hot locations
    - Removes all brown/gold accents
@@ -224,7 +224,7 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
     <section className="relative w-full min-h-[92vh] overflow-hidden">
       {/* FULL-SCREEN MEDIA */}
       <div className="pointer-events-none absolute inset-0">
-        <Image src="/HERO.JPG" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
+        <Image src="/brand/hero.jpg" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
 
         {/* neutral cinematic base */}
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,9,0.72)_0%,rgba(7,9,12,0.58)_28%,rgba(9,11,15,0.42)_56%,rgba(251,251,250,0.92)_100%)]" />
