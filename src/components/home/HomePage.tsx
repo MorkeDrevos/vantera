@@ -374,9 +374,22 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
     <Shell>
       {/* FULL-BLEED HERO */}
       <section className="relative w-full overflow-hidden pt-10 sm:pt-12">
-        {/* Hero background is full-bleed (NO rounded container) */}
+        {/* HERO MEDIA (image background) */}
+        <div className="pointer-events-none absolute inset-0 -z-[1]">
+          <Image
+            src="/hero.jpg"
+            alt="Vantera hero skyline at night"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+          {/* Editorial wash for readability (tuned, not fully opaque) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.86),rgba(251,251,250,0.76))]" />
+        </div>
+
+        {/* Hero background accents (kept subtle) */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.96),rgba(251,251,250,0.92),rgba(251,251,250,0.86))]" />
           <div className="absolute inset-0 bg-[radial-gradient(1400px_620px_at_30%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(1100px_560px_at_86%_0%,rgba(139,92,246,0.06),transparent_62%)]" />
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
