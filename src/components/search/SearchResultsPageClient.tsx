@@ -20,6 +20,8 @@ import {
   X,
 } from 'lucide-react';
 
+export type SearchParams = Record<string, string | string[] | undefined>;
+
 type Mode = 'buy' | 'rent' | 'sell';
 
 type Initial = {
@@ -33,308 +35,77 @@ type Initial = {
   needs: string[];
 };
 
-type Listing = {
-  id: string;
-  title: string;
-  locationLine: string;
-  priceEUR: number;
-  beds: number;
-  baths: number;
-  sqm: number;
-  type: 'villa' | 'apartment' | 'penthouse' | 'house' | 'plot';
-  tags: string[];
-  imageSeed: string;
-  href: string;
+type Props = {
+  // NEW: server passes URL params here
+  searchParams?: SearchParams;
+
+  // OLD: keep support if something still uses it
+  initial?: Initial;
 };
 
-function cx(...parts: Array<string | false | null | undefined>) {
-  return parts.filter(Boolean).join(' ');
-}
-
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
-
-function normalize(s: string) {
-  return s.trim().toLowerCase();
-}
-
-function shortMoneyEUR(n: number) {
-  if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}m`;
-  if (n >= 1_000) return `€${Math.round(n / 1_000)}k`;
-  return `€${n}`;
-}
-
-function buildUrl(next: {
-  q?: string;
-  place?: string;
-  kw?: string;
-  mode?: Mode;
-  max?: number | undefined;
-  beds?: number | undefined;
-  type?: string;
-  needs?: string[];
-}) {
-  const params = new URLSearchParams();
-
-  if (next.q?.trim()) params.set('q', next.q.trim());
-  if (next.place?.trim()) params.set('place', next.place.trim());
-  if (next.kw?.trim()) params.set('kw', next.kw.trim());
-  if (next.mode && next.mode !== 'buy') params.set('mode', next.mode);
-
-  if (typeof next.max === 'number' && Number.isFinite(next.max)) params.set('max', String(Math.round(next.max)));
-  if (typeof next.beds === 'number' && Number.isFinite(next.beds)) params.set('beds', String(Math.round(next.beds)));
-
-  const t = (next.type ?? '').trim();
-  if (t && t !== 'any') params.set('type', t);
-
-  const needs = next.needs ?? [];
-  if (needs.length) params.set('needs', needs.join(','));
-
-  const qs = params.toString();
-  return qs ? `/search?${qs}` : '/search';
-}
-
-function makeMockListings(seed: string, place: string): Listing[] {
-  const base = normalize(place || seed || 'global');
-  const pool: Listing[] = [];
-
-  const types: Listing['type'][] = ['villa', 'apartment', 'penthouse', 'house', 'plot'];
-  const areas = [
-    'golden mile',
-    'sierra blanca',
-    'nagueles',
-    'puerto banus',
-    'la zagaleta',
-    'cascada de camojan',
-    'el madronal',
-    'los monteros',
-    'nova santa ponsa',
-    'cap ferrat',
-  ];
-
-  let h = 2166136261;
-  for (let i = 0; i < base.length; i++) h = (h ^ base.charCodeAt(i)) * 16777619;
-
-  const rand = () => {
-    h += h << 13;
-    h ^= h >> 7;
-    h += h << 3;
-    h ^= h >> 17;
-    h += h << 5;
-    return (h >>> 0) / 4294967295;
+// helper: always produce a full Initial object (so the rest of your code stays unchanged)
+function initialFromSearchParams(sp?: SearchParams): Initial {
+  const get = (k: string) => {
+    const v = sp?.[k];
+    if (Array.isArray(v)) return v[0] ?? '';
+    return typeof v === 'string' ? v : '';
   };
 
-  for (let i = 0; i < 18; i++) {
-    const t = types[Math.floor(rand() * types.length)]!;
-    const beds = t === 'plot' ? 0 : clamp(Math.floor(rand() * 6) + 2, 1, 8);
-    const baths = t === 'plot' ? 0 : clamp(Math.floor(rand() * 5) + 2, 1, 8);
-    const sqm =
-      t === 'plot'
-        ? clamp(Math.floor(rand() * 3500) + 900, 600, 6000)
-        : clamp(Math.floor(rand() * 650) + 140, 80, 1400);
+  const q = get('q');
+  const place = get('place');
+  const kw = get('kw');
 
-    const priceEUR =
-      t === 'plot'
-        ? clamp(Math.floor(rand() * 8_500_000) + 850_000, 350_000, 12_500_000)
-        : clamp(Math.floor(rand() * 15_000_000) + 900_000, 350_000, 25_000_000);
+  const modeRaw = get('mode');
+  const mode: Mode = modeRaw === 'rent' || modeRaw === 'sell' ? modeRaw : 'buy';
 
-    const area = areas[Math.floor(rand() * areas.length)]!;
-    const city = place?.trim() ? place.trim() : 'world';
+  const maxRaw = get('max');
+  const maxNum = maxRaw ? Number(maxRaw) : undefined;
+  const max = Number.isFinite(maxNum as number) ? (maxNum as number) : undefined;
 
-    const title =
-      t === 'villa'
-        ? 'private villa with calm light'
-        : t === 'penthouse'
-          ? 'penthouse with terrace and horizon'
-          : t === 'apartment'
-            ? 'apartment with clean lines'
-            : t === 'house'
-              ? 'house in a quiet enclave'
-              : 'prime plot with position';
+  const bedsRaw = get('beds');
+  const bedsNum = bedsRaw ? Number(bedsRaw) : undefined;
+  const beds = Number.isFinite(bedsNum as number) ? (bedsNum as number) : undefined;
 
-    const tags = [
-      beds >= 5 ? 'family-scale' : 'tight footprint',
-      priceEUR >= 5_000_000 ? 'ultra prime' : 'prime',
-      rand() > 0.6 ? 'sea view' : 'quiet',
-      rand() > 0.7 ? 'gated' : 'privacy',
-    ];
+  const type = get('type') || 'any';
 
-    pool.push({
-      id: `${base}-${i}`,
-      title,
-      locationLine: `${city}${area ? ` · ${area}` : ''}`,
-      priceEUR,
-      beds,
-      baths,
-      sqm,
-      type: t,
-      tags: Array.from(new Set(tags)).slice(0, 3),
-      imageSeed: `${base}-${i}`,
-      href: `/property/${base}-${i}`,
-    });
-  }
+  const needsRaw = get('needs');
+  const needs = needsRaw
+    ? needsRaw
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean)
+    : [];
 
-  pool.sort((a, b) => b.priceEUR - a.priceEUR);
-  return pool;
+  return {
+    q,
+    place,
+    kw,
+    mode,
+    max,
+    beds,
+    type,
+    needs,
+  };
 }
 
-function matchesFilters(l: Listing, f: Initial) {
-  const q = normalize(f.q);
-  const place = normalize(f.place);
-  const kw = normalize(f.kw);
-  const type = normalize(f.type);
-
-  const hay = normalize(`${l.title} ${l.locationLine} ${l.type} ${l.tags.join(' ')}`);
-
-  if (place && !hay.includes(place)) return false;
-  if (type && type !== 'any' && normalize(l.type) !== type) return false;
-
-  if (typeof f.max === 'number' && Number.isFinite(f.max) && l.priceEUR > f.max) return false;
-  if (typeof f.beds === 'number' && Number.isFinite(f.beds) && l.beds < f.beds) return false;
-
-  const needs = (f.needs ?? []).map(normalize).filter(Boolean);
-  if (needs.length) {
-    const tagHay = normalize(l.tags.join(' '));
-    const ok = needs.every((n) => tagHay.includes(n.replace('_', ' ')) || hay.includes(n.replace('_', ' ')));
-    if (!ok) return false;
-  }
-
-  if (kw && !hay.includes(kw)) return false;
-  if (q && !hay.includes(q) && !hay.includes(q.replace(/\s+/g, ' '))) return false;
-
-  return true;
-}
-
-function sortListings(list: Listing[], sort: string) {
-  const out = [...list];
-  if (sort === 'price_low') out.sort((a, b) => a.priceEUR - b.priceEUR);
-  else if (sort === 'beds') out.sort((a, b) => b.beds - a.beds);
-  else if (sort === 'sqm') out.sort((a, b) => b.sqm - a.sqm);
-  else out.sort((a, b) => b.priceEUR - a.priceEUR);
-  return out;
-}
-
-function TagPill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-      {children}
-    </span>
-  );
-}
-
-function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-      <span className="text-zinc-500">{icon}</span>
-      <span>{label}</span>
-    </span>
-  );
-}
-
-function GoldHairline() {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0">
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-70" />
-    </div>
-  );
-}
-
-function CardImage({ seed }: { seed: string }) {
-  const n = Math.abs(Array.from(seed).reduce((a, c) => a + c.charCodeAt(0), 0));
-  const a = (n % 25) + 5;
-  const b = ((n >> 3) % 25) + 5;
-
-  return (
-    <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-zinc-200">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            `radial-gradient(600px 240px at 20% 0%, rgba(231,201,130,0.${a}), transparent 60%), ` +
-            `radial-gradient(640px 240px at 90% 10%, rgba(120,76,255,0.${b}), transparent 62%), ` +
-            `linear-gradient(180deg, rgba(250,250,250,1), rgba(244,244,245,1))`,
-        }}
-      />
-      <div className="absolute inset-x-0 top-0">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
-      </div>
-      <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200 backdrop-blur">
-        <Sparkles className="h-4 w-4 text-zinc-500" />
-        <span>vantera preview</span>
-      </div>
-    </div>
-  );
-}
-
-function NeedChip({
-  active,
-  label,
-  icon,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cx(
-        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] transition',
-        'ring-1 ring-inset',
-        active ? 'bg-white ring-zinc-300 text-zinc-900' : 'bg-white ring-zinc-200 text-zinc-700 hover:ring-zinc-300',
-      )}
-    >
-      <span className="text-zinc-500">{icon}</span>
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function useClickOutside(
-  refs: Array<React.RefObject<HTMLElement>>,
-  onOutside: () => void,
-  when = true,
-) {
-  useEffect(() => {
-    if (!when) return;
-
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      const t = e.target as Node | null;
-      if (!t) return;
-
-      for (const r of refs) {
-        const el = r.current;
-        if (el && el.contains(t)) return;
-      }
-
-      onOutside();
-    };
-
-    window.addEventListener('mousedown', onDown, { passive: true });
-    window.addEventListener('touchstart', onDown, { passive: true });
-
-    return () => {
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('touchstart', onDown);
-    };
-  }, [refs, onOutside, when]);
-}
-
-export default function SearchResultsPageClient({ initial }: { initial: Initial }) {
+export default function SearchResultsPageClient({ searchParams, initial }: Props) {
   const router = useRouter();
 
-  const [mode, setMode] = useState<Mode>(initial.mode ?? 'buy');
-  const [q, setQ] = useState(initial.q ?? '');
-  const [place, setPlace] = useState(initial.place ?? '');
-  const [kw, setKw] = useState(initial.kw ?? '');
-  const [max, setMax] = useState<number | undefined>(initial.max);
-  const [beds, setBeds] = useState<number | undefined>(initial.beds);
-  const [type, setType] = useState<string>(initial.type || 'any');
-  const [needs, setNeeds] = useState<string[]>(initial.needs ?? []);
+  // ✅ unify: prefer searchParams (URL truth), fall back to initial
+  const boot: Initial = useMemo(() => {
+    if (searchParams && Object.keys(searchParams).length) return initialFromSearchParams(searchParams);
+    if (initial) return initial;
+    return initialFromSearchParams(undefined);
+  }, [searchParams, initial]);
+
+  const [mode, setMode] = useState<Mode>(boot.mode ?? 'buy');
+  const [q, setQ] = useState(boot.q ?? '');
+  const [place, setPlace] = useState(boot.place ?? '');
+  const [kw, setKw] = useState(boot.kw ?? '');
+  const [max, setMax] = useState<number | undefined>(boot.max);
+  const [beds, setBeds] = useState<number | undefined>(boot.beds);
+  const [type, setType] = useState<string>(boot.type || 'any');
+  const [needs, setNeeds] = useState<string[]>(boot.needs ?? []);
 
   const [sort, setSort] = useState<'price_high' | 'price_low' | 'beds' | 'sqm'>('price_high');
 
