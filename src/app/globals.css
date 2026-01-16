@@ -11,6 +11,28 @@ body {
 
 :root {
   color-scheme: light; /* important: stop dark UA defaults */
+
+  /* Paper system */
+  --paper: #ffffff;
+  --paper-2: #fbfbfa;
+
+  /* Surfaces (glass cards etc) */
+  --surface-1: rgba(255, 255, 255, 0.88);
+  --surface-2: rgba(255, 255, 255, 0.72);
+
+  /* Ink (text) - tuned for pure white UI */
+  --ink: rgba(11, 12, 16, 0.94);
+  --ink-2: rgba(11, 12, 16, 0.74);
+  --ink-3: rgba(11, 12, 16, 0.52);
+
+  /* Hairlines (borders, dividers) */
+  --hairline: rgba(15, 23, 42, 0.10);
+  --hairline-2: rgba(15, 23, 42, 0.16);
+
+  /* Royal gold gradient */
+  --gold-1: #f5e6bf;
+  --gold-2: #e7c982;
+  --gold-3: #b98533;
 }
 
 body {
