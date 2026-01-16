@@ -10,15 +10,20 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+function isEditableTarget(el: Element | null) {
+  if (!el) return false;
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+  if ((el as HTMLElement).isContentEditable) return true;
+  return false;
+}
+
 const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
 
 const CARD =
   'bg-[color:var(--surface-2)] backdrop-blur-[14px] ' +
   RING +
   ' shadow-[0_30px_90px_rgba(11,12,16,0.10)]';
-
-const GOLD_TEXT =
-  'bg-clip-text text-transparent bg-[linear-gradient(180deg,#f7edcf_0%,#e6c980_45%,#b7863a_100%)]';
 
 function Badge({
   children,
@@ -46,14 +51,6 @@ function Badge({
       {children}
     </span>
   );
-}
-
-function toneBeam(tone: 'gold' | 'emerald' | 'violet') {
-  if (tone === 'gold')
-    return 'bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.80)] to-transparent';
-  if (tone === 'emerald')
-    return 'bg-gradient-to-r from-transparent via-[rgba(16,185,129,0.70)] to-transparent';
-  return 'bg-gradient-to-r from-transparent via-[rgba(139,92,246,0.70)] to-transparent';
 }
 
 function PortalTab({
@@ -94,32 +91,10 @@ function PortalTab({
       className={cx(
         'group relative w-full overflow-hidden rounded-2xl px-4 py-3 text-left transition',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
-        active
-          ? cx('bg-white/85', activeRing)
-          : cx('bg-white/62', RING, 'hover:bg-white/78'),
+        active ? cx('bg-white/85', activeRing) : cx('bg-white/62', RING, 'hover:bg-white/78'),
       )}
       aria-pressed={active}
     >
-      {/* ACTIVE “PORTAL BEAM” */}
-      <div
-        className={cx(
-          'pointer-events-none absolute inset-x-6 top-0 h-px opacity-0 transition',
-          active ? 'opacity-100' : 'group-hover:opacity-70',
-          toneBeam(tone),
-        )}
-      />
-      <div
-        className={cx(
-          'pointer-events-none absolute left-3 top-1/2 h-10 w-px -translate-y-1/2 opacity-0 transition',
-          active ? 'opacity-100' : 'group-hover:opacity-50',
-          tone === 'gold'
-            ? 'bg-[rgba(231,201,130,0.55)]'
-            : tone === 'emerald'
-              ? 'bg-[rgba(16,185,129,0.45)]'
-              : 'bg-[rgba(139,92,246,0.45)]',
-        )}
-      />
-
       <div
         className={cx(
           'pointer-events-none absolute inset-0 opacity-0 transition',
@@ -213,31 +188,6 @@ function Bullet({ children }: { children: string }) {
   );
 }
 
-function DossierStrip() {
-  return (
-    <div className={cx('relative mb-4 overflow-hidden rounded-2xl', 'bg-white/70', RING)}>
-      {/* “listing carousel” band */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_240px_at_15%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.00)_0%,rgba(255,255,255,0.45)_48%,rgba(255,255,255,0.00)_100%)] opacity-60" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-        <div className="absolute inset-0 opacity-[0.04] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.20)_1px,transparent_0)] [background-size:22px_22px]" />
-      </div>
-
-      <div className="relative grid h-[82px] grid-cols-3 gap-2 p-2">
-        <div className="rounded-xl bg-white/70 ring-1 ring-inset ring-[rgba(11,12,16,0.10)]" />
-        <div className="rounded-xl bg-white/70 ring-1 ring-inset ring-[rgba(11,12,16,0.10)]" />
-        <div className="rounded-xl bg-white/70 ring-1 ring-inset ring-[rgba(11,12,16,0.10)]" />
-      </div>
-
-      <div className="relative flex items-center justify-between border-t border-[rgba(11,12,16,0.10)] px-4 py-3">
-        <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">DOSSIER PREVIEW</div>
-        <div className="text-[10px] text-[color:var(--ink-3)]">sample</div>
-      </div>
-    </div>
-  );
-}
-
 function PortalCard({
   eyebrow,
   title,
@@ -274,11 +224,6 @@ function PortalCard({
         {chip}
       </div>
 
-      {/* NEW: “dossier strip” makes it portal / listing-native */}
-      <div className="relative mt-4">
-        <DossierStrip />
-      </div>
-
       <div className="relative mt-4 grid gap-2">
         {items.map((it) => (
           <div key={it.k} className={cx('rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
@@ -299,17 +244,17 @@ export default function FeaturedIntelligencePanel() {
   const [tab, setTab] = useState<TabKey>('value');
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  // Fast portal switching with 1/2/3 (works anywhere)
+  // ✅ Hotkeys: 1/2/3 switch modes (ignored while typing)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      const t = (e.target as HTMLElement | null)?.tagName?.toLowerCase() || '';
-      if (t === 'input' || t === 'textarea' || t === 'select') return;
-      if ((e.target as HTMLElement | null)?.isContentEditable) return;
+      if (isEditableTarget(e.target as Element | null)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       if (e.key === '1') setTab('value');
       if (e.key === '2') setTab('liquidity');
       if (e.key === '3') setTab('risk');
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
@@ -323,6 +268,7 @@ export default function FeaturedIntelligencePanel() {
         lead: 'A clean answer to a dirty question: is the asking price earned or invented?',
         sub: 'Plain language, backed by a proof trail.',
         badgeA: 'Portal lens',
+        badgeB: 'Valuation',
         heroIcon: Sparkles,
         stats: [
           { label: 'FAIR BAND', value: 'Narrow', note: 'Confidence concentrated in a tight pocket' },
@@ -349,7 +295,7 @@ export default function FeaturedIntelligencePanel() {
           'Supply stayed tight across 14 days (clean inventory)',
           'Buyer attention rose in best streets (not the whole area)',
         ],
-        ctaLabel: 'Enter dossier',
+        ctaLabel: 'Open sample dossier',
       };
     }
 
@@ -361,6 +307,7 @@ export default function FeaturedIntelligencePanel() {
         lead: 'Speed is the truth in luxury. See how fast clean homes actually move - without the marketing fog.',
         sub: 'Timing, velocity and buyer depth in one view.',
         badgeA: 'Portal lens',
+        badgeB: 'Liquidity',
         heroIcon: TrendingUp,
         stats: [
           { label: 'TIME TO SELL', value: 'Short', note: 'Velocity is strong on clean inventory' },
@@ -387,7 +334,7 @@ export default function FeaturedIntelligencePanel() {
           'Lower quality stock is sitting longer (drag detected)',
           'Best homes are moving quietly (off-market activity)',
         ],
-        ctaLabel: 'Enter dossier',
+        ctaLabel: 'View liquidity dossier',
       };
     }
 
@@ -398,6 +345,7 @@ export default function FeaturedIntelligencePanel() {
       lead: 'Luxury hides risk behind beauty. Vantera surfaces it early, clearly, and with receipts.',
       sub: 'Clean facts, clean history, clean signals.',
       badgeA: 'Portal lens',
+      badgeB: 'Integrity',
       heroIcon: ShieldCheck,
       stats: [
         { label: 'RISK FLAGS', value: 'Low', note: 'No obvious red flags detected' },
@@ -424,7 +372,7 @@ export default function FeaturedIntelligencePanel() {
         'One source disagreed - flagged for review',
         'Confidence increased as proof landed (status updated)',
       ],
-      ctaLabel: 'Enter dossier',
+      ctaLabel: 'Open integrity log',
     };
   }, [tab]);
 
@@ -448,7 +396,13 @@ export default function FeaturedIntelligencePanel() {
   const toneBadge = content.tone === 'gold' ? 'gold' : content.tone === 'emerald' ? 'emerald' : 'violet';
 
   return (
-    <section ref={(n) => (sectionRef.current = n)} className="relative">
+    <section
+      // ✅ Important: callback ref must return void (not the element)
+      ref={(n) => {
+        sectionRef.current = n;
+      }}
+      className="relative"
+    >
       {/* Crown lines */}
       <div aria-hidden className="pointer-events-none absolute -top-4 inset-x-0">
         <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.28)] to-transparent" />
@@ -472,7 +426,7 @@ export default function FeaturedIntelligencePanel() {
                 <Badge tone="neutral">
                   <span className="font-semibold tracking-[0.22em]">{content.eyebrow.toUpperCase()}</span>
                 </Badge>
-                <Badge tone={toneBadge}>Portal lens</Badge>
+                <Badge tone={toneBadge}>{content.badgeA}</Badge>
                 <Badge tone="neutral">Sample dossier</Badge>
               </div>
 
@@ -506,9 +460,7 @@ export default function FeaturedIntelligencePanel() {
             <div className="w-full lg:w-[460px]">
               <div className={cx('rounded-[30px] p-3', 'bg-white/72', RING, 'shadow-[0_22px_70px_rgba(11,12,16,0.08)]')}>
                 <div className="flex items-center justify-between gap-3 px-1">
-                  <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                    PORTAL MODES
-                  </div>
+                  <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PORTAL MODES</div>
                   <div className="text-[10px] text-[color:var(--ink-3)]">Choose your entrance</div>
                 </div>
 
@@ -580,7 +532,9 @@ export default function FeaturedIntelligencePanel() {
 
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PORTAL SIGNALS</div>
+                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                      PORTAL SIGNALS
+                    </div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
                       {content.signalsTitle}
                     </div>
@@ -614,7 +568,6 @@ export default function FeaturedIntelligencePanel() {
                   ))}
                 </div>
 
-                {/* CTA: “portal action” */}
                 <div className={cx('relative mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
                   <div className="text-[12px] text-[color:var(--ink-2)]">
                     Want this on a real listing?
@@ -623,15 +576,14 @@ export default function FeaturedIntelligencePanel() {
                   <button
                     type="button"
                     className={cx(
-                      'inline-flex items-center gap-2 rounded-full px-4 py-2 text-[12px] font-semibold transition',
-                      'bg-white/84 hover:bg-white/96',
+                      'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
+                      'bg-white/78 hover:bg-white/92',
                       RING,
-                      'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
+                      'text-[color:var(--ink)]',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
                     )}
                   >
-                    <span className={GOLD_TEXT}>{content.ctaLabel}</span>
-                    <ArrowRight className="h-4 w-4 opacity-75 text-black" />
+                    {content.ctaLabel} <ArrowRight className="h-4 w-4 opacity-75" />
                   </button>
                 </div>
               </div>
