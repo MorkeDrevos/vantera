@@ -1,4 +1,5 @@
 // src/app/listing/[slug]/page.tsx
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -46,7 +47,7 @@ function clamp(n: number, a: number, b: number) {
 
 function estimateRange(price: number, confidence?: number | null) {
   const c = confidence == null ? 50 : clamp(confidence, 0, 100);
-  const pct = clamp(0.24 - (c / 100) * 0.20, 0.06, 0.24);
+  const pct = clamp(0.24 - (c / 100) * 0.2, 0.06, 0.24);
   const lo = Math.round(price * (1 - pct));
   const hi = Math.round(price * (1 + pct));
   return { lo, hi, pct };
@@ -54,18 +55,30 @@ function estimateRange(price: number, confidence?: number | null) {
 
 /**
  * IMPORTANT:
- * Your current Prisma Listing model does NOT include:
- * - slug
- * - source
- *
- * So this route treats [slug] as "id" (back-compat with your earlier /listing/<id> links).
- * When you add a real `slug` column later, we can switch to slug-first resolution.
+ * Your Prisma Listing model DOES include `slug` now.
+ * So this route resolves by slug first, and falls back to id (for older links).
  */
-async function getListing(id: string) {
-  if (!id) return null;
+async function getListing(slugOrId: string) {
+  if (!slugOrId) return null;
 
+  // 1) slug-first (new canonical)
+  const bySlug = await prisma.listing.findUnique({
+    where: { slug: slugOrId },
+    include: {
+      city: { select: { id: true, name: true, slug: true, country: true, region: true } },
+      coverMedia: { select: { url: true, alt: true, width: true, height: true, kind: true } },
+      media: {
+        orderBy: { sortOrder: 'asc' },
+        select: { id: true, url: true, alt: true, sortOrder: true, kind: true },
+      },
+    },
+  });
+
+  if (bySlug) return bySlug;
+
+  // 2) id fallback (back-compat)
   return prisma.listing.findUnique({
-    where: { id },
+    where: { id: slugOrId },
     include: {
       city: { select: { id: true, name: true, slug: true, country: true, region: true } },
       coverMedia: { select: { url: true, alt: true, width: true, height: true, kind: true } },
@@ -88,8 +101,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const priceLabel =
     typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
 
-  // Until Listing has a real slug, use id for canonical stability
-  const canonicalSlug = listing.id;
+  // Canonical is now the real listing.slug
+  const canonicalSlug = listing.slug;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
@@ -134,7 +147,7 @@ export default async function ListingPage({ params }: Props) {
   const priceLabel =
     typeof listing.price === 'number' ? formatMoney(listing.price, listing.currency || 'EUR') : null;
 
-  const canonicalSlug = listing.id;
+  const canonicalSlug = listing.slug;
 
   const doc = SEO_INTENT.listing({
     id: listing.id,
@@ -184,6 +197,12 @@ export default async function ListingPage({ params }: Props) {
   const currency = (listing.currency || 'EUR').toUpperCase();
   const price = typeof listing.price === 'number' ? listing.price : null;
   const range = price ? estimateRange(price, listing.priceConfidence) : null;
+
+  // Marketing-friendly reference number (stable, non-guessable, short)
+  // Example: VNTR-MIA-4F2A9C
+  const refCity = (listing.city.slug || 'city').slice(0, 3).toUpperCase();
+  const refShort = listing.id.replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
+  const ref = `VNTR-${refCity}-${refShort}`;
 
   return (
     <main className="min-h-screen bg-[#06060a] text-zinc-100">
@@ -245,7 +264,7 @@ export default async function ListingPage({ params }: Props) {
                     {priceLabel ?? 'Price on request'}
                   </div>
                   <div className="mt-2 text-xs text-white/60">
-                    {listing.priceConfidence ? `Confidence ${listing.priceConfidence}/100` : 'Confidence pending'}
+                    {listing.priceConfidence != null ? `Confidence ${listing.priceConfidence}/100` : 'Confidence pending'}
                   </div>
                 </div>
               </div>
@@ -256,7 +275,7 @@ export default async function ListingPage({ params }: Props) {
         {/* Content grid */}
         <section className="mt-10 grid grid-cols-12 gap-8">
           {/* Left */}
-          <div className="col-span-8">
+          <div className="col-span-12 lg:col-span-8">
             {/* Badge row */}
             <div className="flex flex-wrap items-center gap-2">
               <Pill tone="gold">Vantera Intelligence</Pill>
@@ -271,14 +290,14 @@ export default async function ListingPage({ params }: Props) {
             </div>
 
             {/* Core card */}
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-8">
-              <div className="grid grid-cols-6 gap-3">
+            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 <Fact k="Bedrooms" v={listing.bedrooms != null ? String(listing.bedrooms) : null} />
                 <Fact k="Bathrooms" v={listing.bathrooms != null ? String(listing.bathrooms) : null} />
                 <Fact k="Interior" v={builtM2 != null ? `${builtM2.toLocaleString('en-US')} m²` : null} />
                 <Fact k="Plot" v={plotM2 != null ? `${plotM2.toLocaleString('en-US')} m²` : null} />
                 <Fact k="City" v={listing.city.name} />
-                <Fact k="Dataset" v={sourceLabel} />
+                <Fact k="Reference" v={ref} />
               </div>
 
               <div className="mt-8">
@@ -313,7 +332,7 @@ export default async function ListingPage({ params }: Props) {
             </div>
 
             {/* Truth-first signals */}
-            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-8">
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
               <h2 className="text-lg font-semibold tracking-tight text-white">Truth-first signals</h2>
               <p className="mt-2 text-sm leading-relaxed text-zinc-300">
                 This is the listing surface. Once ingestion is live, this area shows pricing context, comparable tension, and
@@ -358,7 +377,7 @@ export default async function ListingPage({ params }: Props) {
           </div>
 
           {/* Right - ALWAYS visible */}
-          <aside className="col-span-4">
+          <aside className="col-span-12 lg:col-span-4">
             <div className="sticky top-6 space-y-8">
               {/* Intelligence panel (always visible) */}
               <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
@@ -389,13 +408,20 @@ export default async function ListingPage({ params }: Props) {
                   </div>
 
                   <div className="mt-3 text-sm leading-6 text-white/70">
-                    Calm, private estimate derived from available signals. This tightens as verification, media, and market depth improve.
+                    Calm, private estimate derived from available signals. This tightens as verification, media, and market depth
+                    improve.
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-3">
-                  <Metric label="Price confidence" value={listing.priceConfidence != null ? `${listing.priceConfidence}/100` : 'Pending'} />
-                  <Metric label="Data completeness" value={listing.dataCompleteness != null ? `${listing.dataCompleteness}/100` : 'Pending'} />
+                  <Metric
+                    label="Price confidence"
+                    value={listing.priceConfidence != null ? `${listing.priceConfidence}/100` : 'Pending'}
+                  />
+                  <Metric
+                    label="Data completeness"
+                    value={listing.dataCompleteness != null ? `${listing.dataCompleteness}/100` : 'Pending'}
+                  />
                 </div>
               </section>
 
@@ -418,7 +444,7 @@ export default async function ListingPage({ params }: Props) {
                     Request intelligence report
                   </button>
 
-                  <div className="pt-2 text-xs leading-5 text-white/55">Listing: {listing.id}</div>
+                  <div className="pt-2 text-xs leading-5 text-white/55">Reference: {ref}</div>
                 </div>
               </section>
             </div>
@@ -432,6 +458,7 @@ export default async function ListingPage({ params }: Props) {
 function Pill({ children, tone = 'neutral' }: { children: React.ReactNode; tone?: 'neutral' | 'gold' | 'violet' }) {
   const base =
     'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] uppercase tracking-[0.16em]';
+
   const cls =
     tone === 'gold'
       ? 'border-[#d7b86a]/30 bg-[#d7b86a]/10 text-[#f4e1a6]'
@@ -447,7 +474,7 @@ function Fact({ k, v }: { k: string; v: string | null }) {
     return (
       <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
         <div className="text-[11px] uppercase tracking-[0.16em] text-white/55">{k}</div>
-        <div className="mt-1 text-[15px] font-medium text-white/35">—</div>
+        <div className="mt-1 text-[15px] font-medium text-white/35">-</div>
       </div>
     );
   }
