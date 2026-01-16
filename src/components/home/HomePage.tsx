@@ -431,10 +431,8 @@ export default function HomePage({
   return (
     <Shell>
       {/* =====================================================
-          HERO - edge-to-edge background image (/brand/hero.jpg)
-          - Omni only (no other hero search concepts)
-          - H1 smaller
-          - Right-side panel gets more width / collapses earlier
+          HERO - ONLY the hero content has the background image
+          Fix: moved "Why this exists" OUTSIDE this section
          ===================================================== */}
       <section className="relative w-full pb-12 pt-10 sm:pb-16 sm:pt-12">
         {/* Full-bleed hero image (edge-to-edge) */}
@@ -556,11 +554,6 @@ export default function HomePage({
                   </IntelligencePlate>
                 </div>
               </div>
-
-              <div className="mt-10">
-                <SectionKicker title="Why this exists" subtitle="This is why we sit above luxury portals" />
-                <PortalVsTruth />
-              </div>
             </div>
 
             {/* Bottom fade (kept light) */}
@@ -569,10 +562,29 @@ export default function HomePage({
         </div>
       </section>
 
+      {/* WHY THIS EXISTS - now on clean paper (no hero image behind it) */}
+      <section className="mt-10 sm:mt-12">
+        <div className={WIDE}>
+          <div className={cx('relative overflow-hidden p-6 sm:p-8', GLASS)}>
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+            </div>
+
+            <div className="relative">
+              <SectionKicker title="Why this exists" subtitle="This is why we sit above luxury portals" />
+              <PortalVsTruth />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* TRUST - keep but make it feel like an institutional tape */}
-      <div className={cx('relative', NARROW)}>
+      <div className={cx('relative mt-10 sm:mt-12', NARROW)}>
         <TrustMarquee
-          className="-mt-6"
+          className=""
           brands={[
             { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
             { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
