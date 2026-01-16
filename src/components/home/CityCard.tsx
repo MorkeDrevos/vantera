@@ -20,11 +20,6 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
-function hasVerified(stats?: CityListingsStats) {
-  const n = stats?.verifiedCount ?? 0;
-  return n > 0;
-}
-
 function regionLine(city: City) {
   const a: string[] = [];
   if (city.country) a.push(city.country);
@@ -32,12 +27,23 @@ function regionLine(city: City) {
   return a.join(' · ');
 }
 
+function hasVerified(stats?: CityListingsStats) {
+  const n = stats?.verifiedCount ?? 0;
+  return n > 0;
+}
+
+const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+
+function goldText() {
+  return 'bg-clip-text text-transparent bg-[linear-gradient(180deg,var(--gold-1)_0%,var(--gold-2)_45%,var(--gold-3)_100%)]';
+}
+
 function premiumFallback() {
   return (
     <div className="absolute inset-0">
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(255,255,255,0.06),transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_90%_10%,rgba(120,76,255,0.10),transparent_62%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(0,0,0,0.06),rgba(0,0,0,0.02),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_90%_10%,rgba(11,12,16,0.06),transparent_62%)]" />
     </div>
   );
 }
@@ -74,27 +80,29 @@ export default function CityCard({
         href={`/city/${city.slug}`}
         prefetch
         className={cx(
-          'relative block overflow-hidden rounded-[26px] border border-white/10 bg-white/[0.02]',
-          'shadow-[0_18px_70px_rgba(0,0,0,0.45)]',
-          'transition duration-500 hover:-translate-y-[2px] hover:border-white/16 hover:shadow-[0_26px_92px_rgba(0,0,0,0.55)]',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+          'relative block overflow-hidden rounded-[28px]',
+          // white editorial card shell
+          'bg-white/70 backdrop-blur-[12px]',
+          RING,
+          'shadow-[0_26px_90px_rgba(11,12,16,0.10)]',
+          'transition duration-500 hover:-translate-y-[2px] hover:shadow-[0_34px_120px_rgba(11,12,16,0.14)]',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.18)]',
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Image */}
-        <div className={cx('relative w-full', isWall ? 'h-[320px]' : 'h-[290px] sm:h-[330px]')}>
+        {/* Media */}
+        <div className={cx('relative w-full', isWall ? 'h-[340px]' : 'h-[300px] sm:h-[340px]')}>
           {src ? (
             <SafeImage
               src={src}
               alt={safeAlt(city)}
               fill
-              // ✅ Updated for 2-column desktop layouts:
-              // mobile: 100vw, tablet: 50vw, desktop: ~50vw (2 columns), huge screens: ~520px
-              sizes={isWall ? '(max-width: 1024px) 100vw, 520px' : '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 520px'}
+              sizes={isWall ? '(max-width: 1024px) 100vw, 720px' : '(max-width: 768px) 100vw, 50vw'}
               className={cx(
                 'object-cover transition duration-700',
-                'group-hover:scale-[1.03]',
-                '[filter:contrast(1.03)_saturate(1.03)]',
+                'group-hover:scale-[1.02]',
+                // cleaner look for white UI
+                '[filter:contrast(1.02)_saturate(1.03)]',
               )}
               priority={isFeatured}
               fallback={premiumFallback()}
@@ -103,51 +111,104 @@ export default function CityCard({
             premiumFallback()
           )}
 
-          {/* Editorial scrim */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/80 via-black/35 to-transparent" />
+          {/* Light editorial veil (NOT black scrim) */}
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(251,251,250,0.00)_40%,rgba(251,251,250,0.72)_88%,rgba(251,251,250,0.90)_100%)]" />
 
-          {/* Bottom content */}
-          <div className="absolute inset-x-0 bottom-0 px-5 pb-5 pt-10">
+          {/* Top-left micro badge */}
+          <div className="absolute left-4 top-4">
+            <div
+              className={cx(
+                'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] tracking-[0.22em] uppercase',
+                'bg-white/80 backdrop-blur-2xl',
+                RING,
+                'text-[color:var(--ink-3)]',
+              )}
+            >
+              <span className={cx('font-semibold', goldText())}>Featured market</span>
+            </div>
+          </div>
+
+          {/* Bottom overlay content */}
+          <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
             <div className="flex items-end justify-between gap-4">
               <div className="min-w-0">
-                <div className="truncate text-[20px] font-semibold tracking-tight text-zinc-50">
+                <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
                   {city.name}
                 </div>
-                <div className="mt-1 truncate text-[12px] text-zinc-200/85">{regionLine(city)}</div>
+                <div className="mt-1 truncate text-[12px] text-[color:var(--ink-2)]">
+                  {regionLine(city)}
+                </div>
 
                 {showVerified ? (
-                  <div className="mt-3 inline-flex items-center rounded-full border border-white/14 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
+                  <div
+                    className={cx(
+                      'mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-[11px]',
+                      'bg-white/80 backdrop-blur-2xl',
+                      RING,
+                      'text-[color:var(--ink-2)]',
+                    )}
+                  >
                     Verified homes
-                    <span className="text-zinc-500"> · </span>
-                    <span className="font-medium text-zinc-100">{verified}</span>
+                    <span className="text-black/20"> · </span>
+                    <span className="font-semibold text-[color:var(--ink)]">{verified}</span>
                   </div>
-                ) : null}
+                ) : (
+                  <div
+                    className={cx(
+                      'mt-3 inline-flex items-center rounded-full px-3 py-1.5 text-[11px]',
+                      'bg-white/76 backdrop-blur-2xl',
+                      RING,
+                      'text-[color:var(--ink-3)]',
+                    )}
+                  >
+                    City-first intelligence
+                  </div>
+                )}
               </div>
 
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-white/14 bg-white/[0.06] px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl transition group-hover:border-white/22 group-hover:bg-white/[0.08]">
-                <span className="opacity-90">View</span>
-                <span className="translate-x-0 opacity-70 transition group-hover:translate-x-[2px] group-hover:opacity-100">
-                  →
-                </span>
+              {/* CTA pill (light, premium, not “dark view button”) */}
+              <span
+                className={cx(
+                  'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[12px] font-semibold',
+                  'bg-white/82 backdrop-blur-2xl',
+                  'text-[color:var(--ink)]',
+                  RING,
+                  'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
+                  'transition group-hover:bg-white/92',
+                )}
+              >
+                <span className={goldText()}>Enter</span>
+                <span className="text-black/30">→</span>
               </span>
             </div>
           </div>
         </div>
 
-        {/* Optional description */}
-        {city.blurb?.trim() ? (
-          <div className="px-5 pb-5 pt-4">
-            <p className="text-[13px] leading-relaxed text-zinc-300 line-clamp-2">{city.blurb.trim()}</p>
-          </div>
-        ) : (
-          <div className="px-5 pb-5 pt-4">
-            <p className="text-[13px] leading-relaxed text-zinc-400 line-clamp-2">
-              Private market coverage, presented with a truth-first lens.
+        {/* Editorial footer (paper) */}
+        <div className="px-5 pb-5 pt-4">
+          {city.blurb?.trim() ? (
+            <p className="text-[13px] leading-relaxed text-[color:var(--ink-2)] line-clamp-2">
+              {city.blurb.trim()}
             </p>
-          </div>
-        )}
+          ) : (
+            <p className="text-[13px] leading-relaxed text-[color:var(--ink-2)] line-clamp-2">
+              Private market coverage with proof-first signals, not portal theatre.
+            </p>
+          )}
 
-        <div className="pointer-events-none absolute inset-0 rounded-[26px] ring-0 ring-white/10 transition group-hover:ring-1" />
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div className="text-[11px] tracking-[0.20em] uppercase text-[color:var(--ink-3)]">
+              Open dossier
+            </div>
+            <div className="h-px flex-1 bg-[rgba(11,12,16,0.10)]" />
+            <div className="text-[11px] text-[color:var(--ink-3)]">Updated weekly</div>
+          </div>
+        </div>
+
+        {/* hover ring */}
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] opacity-0 transition group-hover:opacity-100">
+          <div className="absolute inset-0 rounded-[28px] ring-1 ring-inset ring-[rgba(231,201,130,0.28)]" />
+        </div>
       </Link>
     </div>
   );
