@@ -6,9 +6,6 @@ import { Suspense, type ReactNode } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
-import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
-import type { City as HomeCity } from './cities';
-
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
 export type RuntimeCity = {
@@ -340,7 +337,7 @@ function FullBleedHero({
                     Meet the intelligence behind the marketplace
                   </div>
                   <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    Listings are the surface. Vantera is the system underneath - verification, scoring, and clarity that removes noise.
+                    Listings are one layer. Vantera adds verification, scoring, and clarity that removes noise.
                   </div>
                 </div>
 
@@ -353,13 +350,13 @@ function FullBleedHero({
                     />
                     <DnaPillar
                       eyebrow="MARKET INTELLIGENCE"
-                      title="Markets, not listings"
+                      title="Markets, with clarity"
                       body="Signals that explain pricing dynamics, liquidity and risk at a city level, built progressively as coverage expands."
                     />
                     <DnaPillar
                       eyebrow="SIGNAL OVER NOISE"
-                      title="Designed to reduce noise"
-                      body="Editorial control replaces volume. Fewer listings, higher signal density, and a calmer path to a decision."
+                      title="Designed for signal"
+                      body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
                     />
                     <DnaPillar
                       eyebrow="PRIVATE NETWORK"
@@ -425,39 +422,22 @@ export default function HomePage({
 
   const safeCities = Array.isArray(cities) ? cities : [];
 
-  // Adapter: RuntimeCity -> HomeCity (CityCard expects this shape)
-  const cityCards: HomeCity[] = safeCities
-    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
-    .map((c) => ({
-      slug: c.slug,
-      name: c.name,
-      country: c.country,
-      region: c.region ?? null,
-      tz: c.tz,
-      tier: c.tier,
-      status: c.status,
-      priority: c.priority ?? 0,
-      blurb: c.blurb ?? null,
-      image: c.image
-        ? {
-            src: c.image.src,
-            alt: c.image.alt ?? null,
-          }
-        : null,
-      heroImageSrc: c.heroImageSrc ?? null,
-      heroImageAlt: c.heroImageAlt ?? null,
-    }));
+  // Build hero destinations:
+  // - sorted by priority
+  // - explicitly exclude Estepona/Benahavis from the hero quick destinations
+  const EXCLUDE_HERO_SLUGS = new Set(['estepona', 'benahavis']);
 
-  // Hero needs small list + countries
-  const topForHero = cityCards
+  const heroCandidates = safeCities
+    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
     .slice()
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-    .slice(0, 6)
-    .map((c) => ({ name: c.name, slug: c.slug, country: c.country }));
+    .filter((c) => !EXCLUDE_HERO_SLUGS.has(String(c.slug).toLowerCase()));
+
+  const topForHero = heroCandidates.slice(0, 6).map((c) => ({ name: c.name, slug: c.slug, country: c.country }));
 
   const countryCounts = new Map<string, number>();
-  for (const c of cityCards) {
-    const k = String(c.country || '').trim();
+  for (const c of safeCities) {
+    const k = String(c?.country || '').trim();
     if (!k) continue;
     countryCounts.set(k, (countryCounts.get(k) ?? 0) + 1);
   }
@@ -470,7 +450,11 @@ export default function HomePage({
     <Shell>
       <FullBleedHero
         cities={topForHero}
-        topCountries={topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']}
+        topCountries={
+          topCountries.length
+            ? topCountries
+            : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+        }
       />
 
       {/* Editorial intro */}
@@ -536,19 +520,7 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Marketplace grid (replaces “The browse of your lifetime”) */}
-      <section className="pb-16 sm:pb-20">
-        <div className={WIDE}>
-          <CityCardsVirtualizedClient
-            cities={cityCards}
-            mode="full"
-            showFeatured
-            initial={18}
-            step={18}
-            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          />
-        </div>
-      </section>
+      {/* Removed per request: the large marketplace city-card section (img 4). */}
     </Shell>
   );
 }
