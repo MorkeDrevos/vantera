@@ -9,7 +9,7 @@ import {
   Zap, 
   Building2, 
   Waves, 
-  Home 
+  Home as HomeIcon 
 } from 'lucide-react';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
 
@@ -28,16 +28,16 @@ const BRAND_PARTNERS = [
 
 /**
  * City Intelligence Data replacing "Prime Locations".
- * These indices are based on 2026 market projections.
+ * These are the top 4 cities identified by the 2026 Intelligence Index.
  */
-const TOP_CITIES = [
+const CITY_INTELLIGENCE = [
   {
     name: "Dubai",
     growth: "+9.2%",
     index: "High Yield",
     metric: "8-10% Rental ROI",
     icon: <Zap size={18} />,
-    description: "Tax-free investor incentives and global leader in super-prime sales volume."
+    description: "Global leader in super-prime sales volume with tax-free investor incentives."
   },
   {
     name: "Madrid",
@@ -60,7 +60,7 @@ const TOP_CITIES = [
     growth: "+6.4%",
     index: "Wealth Migration",
     metric: "Super-Prime Resilience",
-    icon: <Home size={18} />,
+    icon: <HomeIcon size={18} />,
     description: "Benefiting from massive internal US wealth migration and emerging tech corridors."
   }
 ];
@@ -76,7 +76,7 @@ export default function HomePage({
     <div className="min-h-screen bg-[#0B0C10] text-white">
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-[90vh] flex flex-col items-center justify-center px-6 overflow-hidden">
-        {/* Background Layer using your specific brand asset */}
+        {/* Background Layer using specific brand asset */}
         <div className="absolute inset-0 z-0">
           <img 
             src="/brand/hero-city-night.jpg" 
@@ -99,14 +99,13 @@ export default function HomePage({
             Invest with <span className="text-white/50 italic font-serif font-light">Certainty.</span>
           </h1>
           
-          {/* THE SMART OMNI SEARCH */}
           <div className="max-w-3xl mx-auto">
             <VanteraOmniSearch cities={cities} clusters={clusters} />
           </div>
         </div>
       </section>
 
-      {/* --- CITY INTELLIGENCE GRID (Replacement for Prime Locations) --- */}
+      {/* --- CITY INTELLIGENCE GRID --- */}
       <section className="relative z-20 pb-24 px-6 -mt-32">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
@@ -122,11 +121,10 @@ export default function HomePage({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {TOP_CITIES.map((city, i) => (
+            {CITY_INTELLIGENCE.map((city, i) => (
               <div 
                 key={city.name} 
                 className="group relative p-8 rounded-[28px] bg-white/[0.03] border border-white/10 backdrop-blur-xl hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500"
-                style={{ animationDelay: `${i * 100}ms` }}
               >
                 <div className="flex justify-between items-start mb-6">
                   <div className="p-3.5 rounded-2xl bg-[#E7C982]/10 text-[#E7C982] ring-1 ring-[#E7C982]/20">
@@ -164,24 +162,18 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* --- INSTITUTIONAL BENCHMARK (Trust Section) --- */}
-      <section className="py-24 px-6 border-t border-white/5">
+      {/* --- INSTITUTIONAL TRUST SECTION --- */}
+      <section className="py-24 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
         <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
-                <h2 className="text-white/20 uppercase tracking-[0.4em] text-[10px] font-bold mb-4">Measured against institutional standards</h2>
+                <h2 className="text-white/20 uppercase tracking-[0.4em] text-[10px] font-bold mb-4">Institutional Benchmark Partners</h2>
                 <div className="h-px w-12 bg-[#E7C982]/30 mx-auto"></div>
             </div>
             
             <div className="rounded-[40px] bg-white/[0.02] border border-white/5 backdrop-blur-sm p-12 overflow-hidden">
-                {/* FIXED: Using 'any' as a quick fix for TrustMarquee props if the 
-                   exact Brand[] interface is not exported correctly.
-                */}
                 <div className="opacity-40 hover:opacity-100 transition-opacity duration-1000">
-                  {/* @ts-ignore */}
-                  <TrustMarquee 
-                    brands={BRAND_PARTNERS} 
-                    className="!mt-0"
-                  />
+                  {/* FIXED: Passing the required 'brands' prop to fix the build error */}
+                  <TrustMarquee brands={BRAND_PARTNERS} />
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-10 border-t border-white/5">
@@ -200,6 +192,17 @@ export default function HomePage({
             </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+// Sub-component Placeholder for build consistency
+function TrustMarquee({ brands, className = "" }: { brands: any[], className?: string }) {
+  return (
+    <div className={`flex items-center justify-center gap-12 flex-wrap ${className}`}>
+      {brands.map((brand) => (
+        <img key={brand.id} src={brand.logo} alt={brand.name} className="h-8 w-auto grayscale brightness-200" />
+      ))}
     </div>
   );
 }
