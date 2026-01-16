@@ -572,6 +572,39 @@ function pushRecent(q: string) {
   writeRecents(next);
 }
 
+const DEFAULT_CITY_SLUGS: string[] = [
+  // Keep this aligned with the "Countries" strip / site navigation priorities
+  'marbella',
+  'miami',
+  'new-york',
+  'dubai',
+  'london',
+  'monaco',
+];
+
+function pickCuratedCities(cities: OmniCity[], limit = 6): OmniCity[] {
+  const bySlug = new Map(cities.map((c) => [c.slug, c] as const));
+  const picked: OmniCity[] = [];
+
+  for (const slug of DEFAULT_CITY_SLUGS) {
+    const c = bySlug.get(slug);
+    if (c) picked.push(c);
+    if (picked.length >= limit) return picked;
+  }
+
+  // fallback: highest priority
+  const remaining = [...cities]
+    .filter((c) => !picked.some((p) => p.slug === c.slug))
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+
+  for (const c of remaining) {
+    if (picked.length >= limit) break;
+    picked.push(c);
+  }
+
+  return picked.slice(0, limit);
+}
+
 export default function VanteraOmniSearch({
   cities,
   clusters,
@@ -729,7 +762,7 @@ export default function VanteraOmniSearch({
     };
 
     if (!raw) {
-      const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
+      const topCities = pickCuratedCities(cities, 6);
       const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
 
       const recentHits: PlaceHit[] = recents.map((rq, i) => ({
@@ -844,7 +877,7 @@ export default function VanteraOmniSearch({
       );
       if (next === 'rent') filtered.unshift('rent');
       if (next === 'sell') filtered.unshift('sell');
-            return filtered.join(' ').trim();
+      return filtered.join(' ').trim();
     });
     setOpen(true);
     window.setTimeout(() => inputRef.current?.focus(), 0);
