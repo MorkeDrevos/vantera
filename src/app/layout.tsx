@@ -31,13 +31,12 @@ export const metadata: Metadata = {
 
   manifest: '/brand/site.webmanifest',
 
-  // White theme polish (matches your new royal paper)
-  themeColor: '#FBFBFA',
+  // Pure white UI
+  themeColor: '#FFFFFF',
 
   appleWebApp: {
     title: 'Vantera',
     capable: true,
-    // "default" plays nicer for white UIs than black-translucent
     statusBarStyle: 'default',
   },
 };
@@ -55,8 +54,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const org = organizationJsonLd();
 
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" className="bg-white">
+      <body className="min-h-[100dvh] bg-white text-slate-900">
         {jsonLd(site)}
         {jsonLd(org)}
         {children}
