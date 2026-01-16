@@ -82,13 +82,15 @@ export default function CityCard({
         aria-label={`Open ${city.name}`}
       >
         {/* Image */}
-        <div className={cx('relative w-full', isWall ? 'h-[320px]' : 'h-[290px] sm:h-[320px]')}>
+        <div className={cx('relative w-full', isWall ? 'h-[320px]' : 'h-[290px] sm:h-[330px]')}>
           {src ? (
             <SafeImage
               src={src}
               alt={safeAlt(city)}
               fill
-              sizes={isWall ? '(max-width: 1024px) 100vw, 520px' : '(max-width: 768px) 100vw, 33vw'}
+              // ✅ Updated for 2-column desktop layouts:
+              // mobile: 100vw, tablet: 50vw, desktop: ~50vw (2 columns), huge screens: ~520px
+              sizes={isWall ? '(max-width: 1024px) 100vw, 520px' : '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 520px'}
               className={cx(
                 'object-cover transition duration-700',
                 'group-hover:scale-[1.03]',
@@ -111,9 +113,7 @@ export default function CityCard({
                 <div className="truncate text-[20px] font-semibold tracking-tight text-zinc-50">
                   {city.name}
                 </div>
-                <div className="mt-1 truncate text-[12px] text-zinc-200/85">
-                  {regionLine(city)}
-                </div>
+                <div className="mt-1 truncate text-[12px] text-zinc-200/85">{regionLine(city)}</div>
 
                 {showVerified ? (
                   <div className="mt-3 inline-flex items-center rounded-full border border-white/14 bg-white/[0.06] px-2.5 py-1 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
