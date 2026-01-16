@@ -43,6 +43,15 @@ export type RuntimeCity = {
   heroImageAlt?: string | null;
 };
 
+export type RuntimeRegionCluster = {
+  slug: string;
+  name: string;
+  country?: string;
+  region?: string;
+  priority?: number;
+  citySlugs: string[];
+};
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
@@ -196,13 +205,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   );
 }
 
-function Pillar({
-  title,
-  body,
-}: {
-  title: string;
-  body: string;
-}) {
+function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div
       className={cx(
@@ -219,9 +222,7 @@ function Pillar({
 
       <div className="relative">
         <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
       </div>
     </div>
   );
@@ -340,9 +341,7 @@ function FeatureCard({
           {title}
         </div>
 
-        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-          {body}
-        </div>
+        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
         <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
           {bullets.map((b) => (
@@ -419,9 +418,17 @@ function CTA() {
    HOME PAGE
    ========================================================= */
 
-export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
+export default function HomePage({
+  cities,
+  clusters,
+}: {
+  cities: RuntimeCity[];
+  clusters?: RuntimeRegionCluster[];
+}) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
+
+  const resolvedClusters = (clusters ?? (REGION_CLUSTERS as any)) as any;
 
   return (
     <Shell>
@@ -475,7 +482,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   <div className="mt-7 max-w-[1200px]">
                     <VanteraOmniSearch
                       cities={cities as any}
-                      clusters={REGION_CLUSTERS as any}
+                      clusters={resolvedClusters}
                       autoFocus={false}
                     />
                   </div>
@@ -554,10 +561,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
 
               <div className="mt-10">
-                <SectionKicker
-                  title="Why this exists"
-                  subtitle="This is why we sit above luxury portals"
-                />
+                <SectionKicker title="Why this exists" subtitle="This is why we sit above luxury portals" />
                 <PortalVsTruth />
               </div>
             </div>
@@ -628,31 +632,19 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Truth-first"
               title="Pricing without illusions"
               body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={[
-                'Tracks velocity and reductions',
-                'Separates value from persuasion',
-                'Protects buyers from regret',
-              ]}
+              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
             />
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership, and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent, and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls, and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </div>
@@ -694,9 +686,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
 
               <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                  ENTRY POINTS
-                </div>
+                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">ENTRY POINTS</div>
               </div>
             </div>
 
