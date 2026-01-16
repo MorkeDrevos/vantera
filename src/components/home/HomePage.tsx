@@ -6,6 +6,9 @@ import { Suspense, type ReactNode } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
+import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
+import type { City as HomeCity } from './cities';
+
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
 export type RuntimeCity = {
@@ -119,58 +122,6 @@ function SectionHeader({
   );
 }
 
-type ListingTease = {
-  title: string;
-  place: string;
-  price: string;
-  imageSrc?: string;
-  imageAlt?: string;
-  href?: string;
-};
-
-function ListingCardTease({ item }: { item: ListingTease }) {
-  const href = item.href ?? '/marketplace';
-  return (
-    <Link
-      href={href}
-      className={cx(
-        'group block overflow-hidden border border-[color:var(--hairline)] bg-white',
-        'transition hover:border-[rgba(10,10,12,0.22)]',
-      )}
-      aria-label={`${item.title} - ${item.place} - ${item.price}`}
-    >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[color:var(--paper-2)]">
-        {item.imageSrc ? (
-          <Image
-            src={item.imageSrc}
-            alt={item.imageAlt ?? item.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-            sizes="(max-width: 1024px) 100vw, 33vw"
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(800px_420px_at_50%_0%,rgba(0,0,0,0.06),transparent_62%)]" />
-        )}
-
-        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.00),rgba(0,0,0,0.08))]" />
-        </div>
-      </div>
-
-      <div className="p-5">
-        <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">{item.place}</div>
-        <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{item.title}</div>
-        <div className="mt-2 text-sm text-[color:var(--ink-2)]">{item.price}</div>
-
-        <div className="mt-5 flex items-center justify-between">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">VIEW</div>
-          <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 function QuickLink({ href, label, hint }: { href: string; label: string; hint?: string }) {
   return (
     <Link
@@ -225,14 +176,7 @@ function FullBleedHero({
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
         <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
-          <Image
-            src="/brand/hero.jpg"
-            alt="Vantera - Global €2M+ marketplace"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+          <Image src="/brand/hero.jpg" alt="Vantera - Global luxury marketplace" fill priority className="object-cover" sizes="100vw" />
 
           {/* White editorial wash (premium, not dark) */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.62),rgba(255,255,255,0.28))]" />
@@ -245,8 +189,8 @@ function FullBleedHero({
               <div className="lg:col-span-7">
                 <div className="flex flex-wrap items-center gap-2">
                   <Chip>Curated</Chip>
-<Chip>Verified</Chip>
-<Chip>Global</Chip>
+                  <Chip>Verified</Chip>
+                  <Chip>Global</Chip>
                 </div>
 
                 <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
@@ -254,7 +198,8 @@ function FullBleedHero({
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  Vantera is built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market.
+                  Built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market so you can
+                  move with clarity - not noise.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -386,46 +331,41 @@ function FullBleedHero({
               </div>
             </div>
 
-            {/* Vantera DNA (replaces Institutional benchmark) */}
+            {/* Vantera DNA */}
             <div className="pb-10 sm:pb-12">
               <div className="border border-[color:var(--hairline)] bg-white/84 backdrop-blur-[14px] shadow-[0_40px_140px_rgba(10,10,12,0.10)]">
                 <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                    VANTERA DNA
-                  </div>
+                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
                   <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
-                    Meet the Truth Layer behind the marketplace
+                    Meet the intelligence behind the marketplace
                   </div>
                   <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    Listings are the surface. Vantera is the intelligence underneath - verification, scoring, and clarity that removes noise.
+                    Listings are the surface. Vantera is the system underneath - verification, scoring, and clarity that removes noise.
                   </div>
                 </div>
 
                 <div className="p-5 sm:p-7">
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     <DnaPillar
-  eyebrow="TRUTH LAYER"
-  title="Verified versus assumed"
-body="Clear attribution of what is verified, inferred, or unknown - with structured checks to remove ambiguity."
-/>
-
-<DnaPillar
-  eyebrow="MARKET INTELLIGENCE"
-  title="Markets, not listings"
-body="Signals that explain pricing dynamics, liquidity and risk at a city level."
-/>
-
-<DnaPillar
-  eyebrow="SIGNAL OVER NOISE"
-  title="Designed to reduce noise"
-body="Editorial control replaces volume. Fewer listings, higher signal density."
-/>
-
-<DnaPillar
-  eyebrow="PRIVATE NETWORK"
-  title="Private by architecture"
-body="Controlled access, verified submissions and discretion as a system default."
-/>
+                      eyebrow="TRUTH LAYER"
+                      title="Verified versus assumed"
+                      body="Clear attribution of what is verified, inferred or unknown - with structured checks designed to remove ambiguity."
+                    />
+                    <DnaPillar
+                      eyebrow="MARKET INTELLIGENCE"
+                      title="Markets, not listings"
+                      body="Signals that explain pricing dynamics, liquidity and risk at a city level, built progressively as coverage expands."
+                    />
+                    <DnaPillar
+                      eyebrow="SIGNAL OVER NOISE"
+                      title="Designed to reduce noise"
+                      body="Editorial control replaces volume. Fewer listings, higher signal density, and a calmer path to a decision."
+                    />
+                    <DnaPillar
+                      eyebrow="PRIVATE NETWORK"
+                      title="Private by architecture"
+                      body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
+                    />
                   </div>
 
                   <div className="mt-6">
@@ -434,7 +374,7 @@ body="Controlled access, verified submissions and discretion as a system default
 
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="text-sm text-[color:var(--ink-2)]">
-                      This is the foundation of Vantera. The marketplace is how you enter.
+                      The marketplace is how you enter. The intelligence is why you stay.
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <Link
@@ -471,7 +411,7 @@ body="Controlled access, verified submissions and discretion as a system default
 }
 
 /* =========================================================
-   HOME PAGE (marketplace-first, wow-factor search + browse)
+   HOME PAGE (marketplace-first)
    ========================================================= */
 
 export default function HomePage({
@@ -485,23 +425,38 @@ export default function HomePage({
 
   const safeCities = Array.isArray(cities) ? cities : [];
 
-  // Prioritise cities that have hero imagery so the page looks real instantly
-  const imageCities = safeCities
+  // Adapter: RuntimeCity -> HomeCity (CityCard expects this shape)
+  const cityCards: HomeCity[] = safeCities
+    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
     .map((c) => ({
       slug: c.slug,
       name: c.name,
       country: c.country,
-      img: c.heroImageSrc ?? c.image?.src ?? '',
-      alt: c.heroImageAlt ?? c.image?.alt ?? c.name,
+      region: c.region ?? null,
+      tz: c.tz,
+      tier: c.tier,
+      status: c.status,
       priority: c.priority ?? 0,
-    }))
-    .filter((x) => Boolean(x.slug) && Boolean(x.name) && Boolean(x.country))
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+      blurb: c.blurb ?? null,
+      image: c.image
+        ? {
+            src: c.image.src,
+            alt: c.image.alt ?? null,
+          }
+        : null,
+      heroImageSrc: c.heroImageSrc ?? null,
+      heroImageAlt: c.heroImageAlt ?? null,
+    }));
 
-  const topForHero = imageCities.slice(0, 6);
+  // Hero needs small list + countries
+  const topForHero = cityCards
+    .slice()
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+    .slice(0, 6)
+    .map((c) => ({ name: c.name, slug: c.slug, country: c.country }));
 
   const countryCounts = new Map<string, number>();
-  for (const c of imageCities) {
+  for (const c of cityCards) {
     const k = String(c.country || '').trim();
     if (!k) continue;
     countryCounts.set(k, (countryCounts.get(k) ?? 0) + 1);
@@ -511,65 +466,11 @@ export default function HomePage({
     .map(([k]) => k)
     .slice(0, 12);
 
-  // Featured teaser (editorial)
-  const tease: ListingTease[] = [
-    {
-      place: topForHero[0] ? `${topForHero[0].name}, ${topForHero[0].country}` : 'Cap Ferrat, France',
-      title: 'Waterfront Villa',
-      price: 'From €18,500,000',
-      imageSrc: topForHero[0]?.img || undefined,
-      imageAlt: topForHero[0]?.alt,
-      href: topForHero[0]?.slug ? `/city/${topForHero[0].slug}` : '/marketplace',
-    },
-    {
-      place: topForHero[1] ? `${topForHero[1].name}, ${topForHero[1].country}` : 'Marbella, Spain',
-      title: 'Modern Estate',
-      price: 'From €7,900,000',
-      imageSrc: topForHero[1]?.img || undefined,
-      imageAlt: topForHero[1]?.alt,
-      href: topForHero[1]?.slug ? `/city/${topForHero[1].slug}` : '/marketplace',
-    },
-    {
-      place: topForHero[2] ? `${topForHero[2].name}, ${topForHero[2].country}` : 'Dubai, UAE',
-      title: 'Penthouse Residence',
-      price: 'From €12,200,000',
-      imageSrc: topForHero[2]?.img || undefined,
-      imageAlt: topForHero[2]?.alt,
-      href: topForHero[2]?.slug ? `/city/${topForHero[2].slug}` : '/marketplace',
-    },
-    {
-      place: topForHero[3] ? `${topForHero[3].name}, ${topForHero[3].country}` : 'Miami, USA',
-      title: 'Beachfront Compound',
-      price: 'From €9,400,000',
-      imageSrc: topForHero[3]?.img || undefined,
-      imageAlt: topForHero[3]?.alt,
-      href: topForHero[3]?.slug ? `/city/${topForHero[3].slug}` : '/marketplace',
-    },
-    {
-      place: topForHero[4] ? `${topForHero[4].name}, ${topForHero[4].country}` : 'London, UK',
-      title: 'Townhouse Residence',
-      price: 'From €6,200,000',
-      imageSrc: topForHero[4]?.img || undefined,
-      imageAlt: topForHero[4]?.alt,
-      href: topForHero[4]?.slug ? `/city/${topForHero[4].slug}` : '/marketplace',
-    },
-    {
-      place: topForHero[5] ? `${topForHero[5].name}, ${topForHero[5].country}` : 'Monaco',
-      title: 'Skyline Apartment',
-      price: 'From €11,700,000',
-      imageSrc: topForHero[5]?.img || undefined,
-      imageAlt: topForHero[5]?.alt,
-      href: topForHero[5]?.slug ? `/city/${topForHero[5].slug}` : '/marketplace',
-    },
-  ];
-
   return (
     <Shell>
       <FullBleedHero
-        cities={topForHero.map((c) => ({ name: c.name, slug: c.slug, country: c.country }))}
-        topCountries={
-          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
-        }
+        cities={topForHero}
+        topCountries={topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']}
       />
 
       {/* Editorial intro */}
@@ -578,7 +479,7 @@ export default function HomePage({
           <SectionHeader
             eyebrow="VANTERA"
             title="Search and browse, the way luxury should feel"
-            subtitle="No clutter, no duplicated feeds, and no portal look. Just €2M+ property discovery with editorial restraint and serious speed."
+            subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
             right={
               <div className="hidden sm:flex items-center gap-3">
                 <Link
@@ -609,10 +510,10 @@ export default function HomePage({
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="border border-[color:var(--hairline)] bg-white p-5">
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">THRESHOLD</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">€2M+ only</div>
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                The line is enforced. This is a luxury marketplace, not a mixed portal.
+                Verification, structured facts and clear attribution of what is known versus assumed.
               </div>
             </div>
 
@@ -620,79 +521,32 @@ export default function HomePage({
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
               <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Keywords first, destinations second, and results that feel curated.
+                Keywords first, destinations second, and results designed to feel editorial, not noisy.
               </div>
             </div>
 
             <div className="border border-[color:var(--hairline)] bg-white p-5">
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                Catalogue grade
-              </div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Layouts designed to sell desire, not checkboxes.
+                Big imagery, quiet typography and layouts that sell desire with restraint.
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured (wow browse) */}
+      {/* Marketplace grid (replaces “The browse of your lifetime”) */}
       <section className="pb-16 sm:pb-20">
         <div className={WIDE}>
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED</div>
-              <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-                The browse of your lifetime
-              </div>
-              <div className="mt-2 max-w-[80ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Big imagery, quiet typography, and a layout that feels like a high-end print spread.
-              </div>
-            </div>
-
-            <Link
-              href="/marketplace"
-              className={cx(
-                'hidden sm:inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-                'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-              )}
-            >
-              View all
-            </Link>
-          </div>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {tease.map((t) => (
-              <ListingCardTease key={`${t.place}-${t.title}`} item={t} />
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-[color:var(--ink-2)]">Curated €2M+ listings. Global coverage. Zero portal feel.</div>
-
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Link
-                href="/search"
-                className={cx(
-                  'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-                  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-                )}
-              >
-                Search
-              </Link>
-
-              <Link
-                href="/marketplace"
-                className={cx(
-                  'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-                  'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-                )}
-              >
-                Browse marketplace
-              </Link>
-            </div>
-          </div>
+          <CityCardsVirtualizedClient
+            cities={cityCards}
+            mode="full"
+            showFeatured
+            initial={18}
+            step={18}
+            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          />
         </div>
       </section>
     </Shell>
