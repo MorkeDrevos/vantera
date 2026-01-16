@@ -19,11 +19,10 @@ export type CityListingsStats = {
 // This avoids relying on whatever is in cities.ts and guarantees premium visuals.
 // Non-destructive: only used in this component.
 const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
-  // Fix Monaco "for good" by using a local image (no Unsplash 403/optimizer issues)
   monaco: {
-  src: 'https://images.unsplash.com/photo-1595138320174-a64d168e9970?q=80&w=3520&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  alt: 'Monaco harbour at night with yachts and city lights',
-},
+    src: 'https://images.unsplash.com/photo-1595138320174-a64d168e9970?q=80&w=3520&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+    alt: 'Monaco harbour at night with yachts and city lights',
+  },
   miami: {
     src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2800&q=85',
     alt: 'Miami skyline across the water',
@@ -41,10 +40,96 @@ const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
 function withFeaturedOverrides(city: City): City {
   const o = FEATURED_IMAGE_OVERRIDES[city.slug];
   if (!o) return city;
-  return {
-    ...city,
-    image: { src: o.src, alt: o.alt },
-  };
+  return { ...city, image: { src: o.src, alt: o.alt } };
+}
+
+const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+
+function goldText() {
+  return 'bg-clip-text text-transparent bg-[linear-gradient(180deg,var(--gold-1)_0%,var(--gold-2)_45%,var(--gold-3)_100%)]';
+}
+
+function Pill({
+  children,
+  tone = 'neutral',
+}: {
+  children: React.ReactNode;
+  tone?: 'neutral' | 'gold';
+}) {
+  const ring = tone === 'gold' ? 'ring-[rgba(231,201,130,0.28)]' : 'ring-[color:var(--hairline)]';
+  const bg = tone === 'gold' ? 'bg-[rgba(231,201,130,0.10)]' : 'bg-white/80';
+  return (
+    <span
+      className={cx(
+        'inline-flex items-center rounded-full px-3 py-1.5 text-[11px]',
+        'backdrop-blur-2xl',
+        bg,
+        'ring-1 ring-inset',
+        ring,
+        'text-[color:var(--ink-2)]',
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function FeaturedHeader() {
+  return (
+    <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">Featured markets</div>
+
+        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[26px]">
+          Private intelligence, city by city
+        </div>
+
+        <div className="mt-2 max-w-2xl text-sm leading-relaxed text-[color:var(--ink-2)]">
+          Monaco joins the flagship set. Explore like a luxury portal, but with signal you can trust.
+        </div>
+
+        <div className="mt-3 text-[12px] text-[color:var(--ink-3)]">
+          Tap a market to open its intelligence - pricing reality, liquidity read and risk flags.
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <Pill tone="gold">
+          <span className={cx('font-semibold', goldText())}>Top 4</span>
+        </Pill>
+        <Pill>Updated weekly</Pill>
+      </div>
+    </div>
+  );
+}
+
+function FeaturedPlate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={cx(
+        'relative overflow-hidden rounded-[34px]',
+        'bg-white/70 backdrop-blur-[14px]',
+        RING,
+        'shadow-[0_44px_160px_rgba(11,12,16,0.12)]',
+        'p-5 sm:p-6',
+      )}
+    >
+      {/* premium paper aura (no dark) */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-40 -top-40 h-[420px] w-[420px] rounded-full bg-[rgba(231,201,130,0.14)] blur-3xl" />
+        <div className="absolute -right-40 -top-44 h-[440px] w-[440px] rounded-full bg-[rgba(139,92,246,0.06)] blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-70" />
+        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+      </div>
+
+      <div className="relative">{children}</div>
+    </div>
+  );
 }
 
 export default function CityCardsVirtualizedClient({
@@ -54,11 +139,9 @@ export default function CityCardsVirtualizedClient({
   initial = 18,
   step = 18,
 
-  // NEW
   mode = 'full',
   showFeatured = true,
 
-  // Optional: plug this in once you have real DB/API
   statsByCity,
 }: {
   cities: City[];
@@ -67,7 +150,6 @@ export default function CityCardsVirtualizedClient({
   initial?: number;
   step?: number;
 
-  // NEW
   mode?: 'full' | 'featured';
   showFeatured?: boolean;
 
@@ -78,9 +160,6 @@ export default function CityCardsVirtualizedClient({
     return [...cities];
   }, [cities]);
 
-  // Featured top 4:
-  // - Monaco must be in top 4 (replace Marbella).
-  // - We keep it deterministic by selecting from a preferred slug list first.
   const featured = useMemo(() => {
     if (!showFeatured && mode !== 'featured') return [] as City[];
 
@@ -93,7 +172,6 @@ export default function CityCardsVirtualizedClient({
       if (c) picked.push(withFeaturedOverrides(c));
     }
 
-    // Fallback: if any are missing, fill from highest priority remaining
     if (picked.length < 4) {
       const remaining = sorted
         .filter((c) => !picked.some((p) => p.slug === c.slug))
@@ -111,72 +189,28 @@ export default function CityCardsVirtualizedClient({
   const featuredSlugs = useMemo(() => new Set(featured.map((c) => c.slug)), [featured]);
 
   const rest = useMemo(() => {
-    // If featured is visible in this render, keep the full list below clean by excluding it.
-    // If featured is hidden, show everything in the grid.
     if (featured.length === 0) return sorted;
     return sorted.filter((c) => !featuredSlugs.has(c.slug));
   }, [sorted, featuredSlugs, featured.length]);
-
-  function FeaturedHeader() {
-    return (
-      <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <div className="text-[11px] font-semibold tracking-[0.22em] text-zinc-400">FEATURED MARKETS</div>
-
-          <div className="mt-2 text-[22px] font-semibold tracking-tight text-zinc-50 sm:text-[26px]">
-            Private intelligence, city by city
-          </div>
-
-          <div className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-300">
-            Monaco now joins the flagship set. Explore like a luxury portal, but with signal you can trust.
-          </div>
-
-          <div className="mt-3 text-[12px] text-zinc-400">
-            Tap a market to open its intelligence - pricing reality, liquidity read and risk flags.
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-[11px] text-zinc-200/90 backdrop-blur-2xl">
-            Top 4
-          </span>
-          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[11px] text-zinc-400 backdrop-blur-2xl">
-            Updated weekly
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   // Featured-only mode: no virtualization, no "showing X of Y"
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
-        <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_48px_150px_rgba(0,0,0,0.62)] sm:p-6">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[rgba(120,76,255,0.16)] blur-3xl" />
-            <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[rgba(231,201,130,0.12)] blur-3xl" />
-            <div className="absolute inset-0 opacity-[0.35] [background:radial-gradient(900px_260px_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]" />
+        <FeaturedPlate>
+          <FeaturedHeader />
+          {/* 1-per-row through lg, 2 cols at xl+ */}
+          <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+            {featured.map((city) => {
+              const stats = statsByCity?.[city.slug];
+              return (
+                <div key={city.slug} className="xl:[&>div]:h-full">
+                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                </div>
+              );
+            })}
           </div>
-
-          <div className="relative">
-            <FeaturedHeader />
-
-            {/* Go 1-per-row much earlier:
-               - 1 column through lg
-               - 2 columns only at xl and above */}
-            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
-              {featured.map((city) => {
-                const stats = statsByCity?.[city.slug];
-                return (
-                  <div key={city.slug} className="xl:[&>div]:h-full">
-                    <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        </FeaturedPlate>
       </section>
     );
   }
@@ -198,10 +232,7 @@ export default function CityCardsVirtualizedClient({
         const hit = entries.some((e) => e.isIntersecting);
         if (!hit) return;
 
-        setCount((c) => {
-          const next = Math.min(c + step, rest.length);
-          return next;
-        });
+        setCount((c) => Math.min(c + step, rest.length));
       },
       { root: null, rootMargin: '900px 0px', threshold: 0.01 },
     );
@@ -217,31 +248,19 @@ export default function CityCardsVirtualizedClient({
     <section className={cx('w-full', className)}>
       {/* Featured Markets - editorial / premium (optional in full mode) */}
       {showFeatured && featured.length > 0 ? (
-        <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-white/[0.02] p-5 shadow-[0_48px_150px_rgba(0,0,0,0.62)] sm:p-6">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-28 -top-28 h-80 w-80 rounded-full bg-[rgba(120,76,255,0.16)] blur-3xl" />
-            <div className="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[rgba(231,201,130,0.12)] blur-3xl" />
-            <div className="absolute inset-0 opacity-[0.35] [background:radial-gradient(900px_260px_at_50%_0%,rgba(255,255,255,0.10),transparent_60%)]" />
+        <FeaturedPlate>
+          <FeaturedHeader />
+          <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+            {featured.map((city) => {
+              const stats = statsByCity?.[city.slug];
+              return (
+                <div key={city.slug} className="xl:[&>div]:h-full">
+                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                </div>
+              );
+            })}
           </div>
-
-          <div className="relative">
-            <FeaturedHeader />
-
-            {/* Go 1-per-row much earlier:
-               - 1 column through lg
-               - 2 columns only at xl and above */}
-            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
-              {featured.map((city) => {
-                const stats = statsByCity?.[city.slug];
-                return (
-                  <div key={city.slug} className="xl:[&>div]:h-full">
-                    <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        </FeaturedPlate>
       ) : null}
 
       {/* Everything else */}
@@ -253,25 +272,40 @@ export default function CityCardsVirtualizedClient({
           })}
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <div className="text-xs text-zinc-500">
-            Showing <span className="text-zinc-200">{visible.length}</span> of{' '}
-            <span className="text-zinc-200">{rest.length}</span>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xs text-[color:var(--ink-3)]">
+            Showing <span className="font-semibold text-[color:var(--ink)]">{visible.length}</span> of{' '}
+            <span className="font-semibold text-[color:var(--ink)]">{rest.length}</span>
           </div>
 
-          {!done ? (
-            <button
-              type="button"
-              onClick={() => setCount((c) => Math.min(c + step, rest.length))}
-              className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-xs text-zinc-200 transition hover:bg-white/[0.06]"
-            >
-              Load more
-            </button>
-          ) : (
-            <div className="rounded-full border border-white/10 bg-white/[0.02] px-4 py-2 text-xs text-zinc-400">
-              All cities loaded
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {!done ? (
+              <button
+                type="button"
+                onClick={() => setCount((c) => Math.min(c + step, rest.length))}
+                className={cx(
+                  'inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition',
+                  'bg-white/80 backdrop-blur-2xl',
+                  'text-[color:var(--ink)]',
+                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                  'shadow-[0_18px_60px_rgba(11,12,16,0.10)]',
+                )}
+              >
+                Load more
+              </button>
+            ) : (
+              <div
+                className={cx(
+                  'inline-flex items-center rounded-full px-4 py-2 text-xs',
+                  'bg-white/70 backdrop-blur-2xl',
+                  'text-[color:var(--ink-3)]',
+                  'ring-1 ring-inset ring-[color:var(--hairline)]',
+                )}
+              >
+                All cities loaded
+              </div>
+            )}
+          </div>
         </div>
 
         <div ref={sentinelRef} className="h-px w-full" />
