@@ -8,7 +8,7 @@ type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
   alt: string;
   fallback?: React.ReactNode;
 
-  // Backwards-compatible hooks (optional)
+  // allow callers to attach handlers again
   onLoad?: ImageProps['onLoad'];
   onError?: ImageProps['onError'];
 };
@@ -20,7 +20,6 @@ type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
  * - Smooth fade-in on load (no harsh pop).
  * - Resets correctly when src changes.
  * - Retries once on transient CDN failures.
- * - Allows callers to attach onLoad/onError without breaking types.
  */
 export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: Props) {
   const srcKey = typeof props.src === 'string' ? props.src : (props.src as any)?.src ?? String(props.src);
@@ -28,7 +27,7 @@ export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: 
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // One gentle retry per src (some CDNs 403/timeout transiently)
+  // One gentle retry per src
   const retriedRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -66,7 +65,7 @@ export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: 
     );
   }, [fallback]);
 
-  // If image has failed (after retry), show fallback only.
+  // If image failed (after retry), show fallback only.
   if (failed) return <>{safeFallback}</>;
 
   return (
@@ -82,14 +81,12 @@ export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: 
           onLoad?.(e);
         }}
         onError={(e) => {
-          // let caller know immediately
           onError?.(e);
 
           const already = retriedRef.current[srcKey] === true;
           if (!already) {
             retriedRef.current[srcKey] = true;
-
-            // Keep shimmer and allow Next to retry naturally (some CDN glitches are transient)
+            // keep shimmer and let Next try again (CDN transient)
             setLoaded(false);
             return;
           }
