@@ -21,18 +21,11 @@ export type RuntimeCity = {
   country: string;
   region?: string | null;
   tz: string;
-
   tier?: CoverageTier;
   status?: CoverageStatus;
   priority?: number;
-
   blurb?: string | null;
-
-  image?: {
-    src: string;
-    alt?: string | null;
-  } | null;
-
+  image?: { src: string; alt?: string | null; } | null;
   heroImageSrc?: string | null;
   heroImageAlt?: string | null;
 };
@@ -51,97 +44,70 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* =========================================================
-   Layout primitives
+    ULTRA-PREMIUM PRIMITIVES
    ========================================================= */
 
-const HERO_INNER = 'mx-auto w-full max-w-[1680px] px-5 sm:px-8 lg:px-12 2xl:px-16';
-const WIDE = 'mx-auto w-full max-w-[1840px] px-5 sm:px-8 lg:px-12 2xl:px-16';
-const MID = 'mx-auto w-full max-w-[1480px] px-5 sm:px-8';
-const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
+const HERO_INNER = 'mx-auto w-full max-w-[1720px] px-6 sm:px-10 lg:px-16 2xl:px-24';
+const WIDE = 'mx-auto w-full max-w-[1920px] px-6 sm:px-10 lg:px-16 2xl:px-24';
+const MID = 'mx-auto w-full max-w-[1540px] px-6 sm:px-10';
+const NARROW = 'mx-auto w-full max-w-5xl px-6 sm:px-10';
 
-const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+// Royal "Champagne" Hairline
+const RING = 'ring-[1px] ring-inset ring-white/[0.08] dark:ring-white/[0.12]';
 
-const CARD =
-  'bg-[color:var(--surface-2)] backdrop-blur-[12px] ' +
-  RING +
-  ' shadow-[0_26px_80px_rgba(10,12,16,0.10)]';
+// Elevated Card: Multi-stage shadow + Silk blur
+const CARD = 
+  'bg-white/[0.03] backdrop-blur-[32px] ' + 
+  RING + 
+  ' shadow-[0_32px_120px_-20px_rgba(0,0,0,0.3)] hover:shadow-[0_40px_140px_-15px_rgba(0,0,0,0.4)] transition-all duration-700';
 
-// White-only glass (no brown accents)
-const GLASS_DARK =
-  'bg-[rgba(10,12,16,0.62)] backdrop-blur-[18px] ' +
-  'ring-1 ring-inset ring-white/[0.12] ' +
-  'shadow-[0_40px_130px_rgba(0,0,0,0.56)]';
+// Signature Glass: High-refraction, subtle tint
+const GLASS_ROYAL = 
+  'bg-[rgba(15,17,23,0.72)] backdrop-blur-[24px] ' +
+  'ring-[1px] ring-inset ring-white/[0.14] ' +
+  'shadow-[0_40px_130px_rgba(0,0,0,0.6)]';
 
 function Kicker({ children }: { children: ReactNode }) {
-  return <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)] uppercase">{children}</div>;
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-[1px] w-6 bg-gradient-to-r from-[color:var(--ink-3)] to-transparent opacity-40" />
+      <div className="text-[10px] font-bold tracking-[0.4em] text-[color:var(--ink-3)] uppercase">
+        {children}
+      </div>
+    </div>
+  );
 }
 
-function SectionHeader({
-  kicker,
-  title,
-  subtitle,
-  right,
-}: {
-  kicker: string;
-  title: string;
-  subtitle?: string;
-  right?: ReactNode;
-}) {
+function SectionHeader({ kicker, title, subtitle, right }: { kicker: string; title: string; subtitle?: string; right?: ReactNode; }) {
   return (
-    <div className="mb-5 flex flex-col gap-3 sm:mb-7 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-10 flex flex-col gap-6 sm:mb-14 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         <Kicker>{kicker}</Kicker>
-        <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[28px]">
+        <h2 className="mt-4 text-balance text-[32px] font-light leading-tight tracking-[-0.03em] text-[color:var(--ink)] sm:text-[42px] lg:text-[48px]">
           {title}
-        </div>
-        {subtitle ? <div className="mt-1 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">{subtitle}</div> : null}
+        </h2>
+        {subtitle && <p className="mt-4 max-w-[70ch] text-[16px] font-medium leading-relaxed text-[color:var(--ink-2)] opacity-80">{subtitle}</p>}
       </div>
-
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-6">
         {right}
-        <div className="hidden sm:block h-px w-44 bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.12)] to-transparent" />
+        <div className="hidden lg:block h-[1px] w-32 bg-gradient-to-r from-[rgba(10,12,16,0.15)] to-transparent" />
       </div>
     </div>
   );
 }
 
 /* =========================================================
-   HERO building blocks (white-only, calm)
+    REFINED COMPONENTS
    ========================================================= */
 
-type SignalItem = { k: string; v: ReactNode; hint?: string };
-
-function SignalStripDark({ items }: { items: SignalItem[] }) {
+function SignalStripDark({ items }: { items: { k: string; v: ReactNode; hint?: string }[] }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-2xl p-3 sm:p-4', GLASS_DARK)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]" />
-        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] [background-size:28px_28px]" />
-      </div>
-
-      <div className="relative grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-5">
+    <div className={cx('relative overflow-hidden rounded-[24px] p-1', GLASS_ROYAL)}>
+      <div className="relative grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-5">
         {items.map((it) => (
-          <div
-            key={it.k}
-            className={cx(
-              'group relative overflow-hidden rounded-xl px-3.5 py-3',
-              'bg-white/[0.06] hover:bg-white/[0.10] transition',
-              'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-            )}
-            title={it.hint ?? undefined}
-          >
-            <div className="relative flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-[10px] font-semibold tracking-[0.28em] text-white/55">{it.k}</div>
-                <div className="mt-1 truncate text-sm font-medium text-white/90">{it.v}</div>
-              </div>
-
-              {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full bg-white/[0.06] px-2 py-1 text-[10px] tracking-[0.18em] text-white/55 ring-1 ring-inset ring-white/[0.12] sm:block">
-                  INFO
-                </div>
-              ) : null}
-            </div>
+          <div key={it.k} className="group relative overflow-hidden rounded-[20px] px-5 py-4 hover:bg-white/[0.04] transition-all duration-500">
+            <div className="text-[9px] font-black tracking-[0.3em] text-white/40 uppercase mb-2">{it.k}</div>
+            <div className="text-sm font-medium text-white/90 group-hover:text-white transition-colors">{it.v}</div>
           </div>
         ))}
       </div>
@@ -150,253 +116,121 @@ function SignalStripDark({ items }: { items: SignalItem[] }) {
 }
 
 function HeroHotLocations({ cities }: { cities: RuntimeCity[] }) {
-  const top = [...cities]
-    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-    .slice(0, 10)
-    .map((c) => ({ slug: c.slug, name: c.name, country: c.country }));
+  const top = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 10);
 
   return (
-    <div className={cx('relative overflow-hidden rounded-2xl p-4 sm:p-5', GLASS_DARK)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-70" />
+    <div className={cx('relative overflow-hidden rounded-[32px] p-6 sm:p-8', GLASS_ROYAL)}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="text-[10px] font-bold tracking-[0.35em] text-white/50 uppercase">Prime Locations</div>
+        <div className="h-[1px] flex-grow mx-6 bg-white/10" />
       </div>
-
-      <div className="relative">
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/60">Hot locations</div>
-          <a href="#explore-index" className="text-[11px] text-white/55 hover:text-white/80 transition">
-            Explore index
+      <div className="flex flex-wrap gap-2.5">
+        {top.map((c) => (
+          <a key={c.slug} href={`/city/${c.slug}`} className="group flex items-center gap-3 rounded-full bg-white/[0.04] hover:bg-white/[0.12] border border-white/10 px-4 py-2.5 transition-all duration-300">
+            <span className="h-1 w-1 rounded-full bg-white/40 group-hover:scale-150 group-hover:bg-white transition-all" />
+            <span className="text-[13px] font-medium text-white/80">{c.name}</span>
           </a>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {top.map((c) => (
-            <a
-              key={c.slug}
-              href={`/city/${c.slug}`}
-              className={cx(
-                'group inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] font-medium',
-                'bg-white/[0.06] hover:bg-white/[0.10] transition',
-                'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.20]',
-                'text-white/88',
-                'backdrop-blur-[18px]',
-              )}
-              title={c.country}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-white/70 opacity-80" />
-              <span className="truncate max-w-[18ch]">{c.name}</span>
-            </a>
-          ))}
-
-          <a
-            href="#explore-index"
-            className={cx(
-              'inline-flex items-center justify-center rounded-full px-3 py-2 text-[12px] font-semibold',
-              'bg-white/90 hover:bg-white transition text-[rgba(10,12,16,0.92)]',
-              'ring-1 ring-inset ring-white/30',
-              'shadow-[0_18px_50px_rgba(0,0,0,0.26)]',
-            )}
-          >
-            Explore the full index
-          </a>
-        </div>
+        ))}
       </div>
     </div>
   );
 }
 
-/* =========================================================
-   HERO (full-screen, calm, white-only accents)
-   - Removes the two sections shown in your screenshot:
-     1) House rules
-     2) Start here
-   - Replaces with: Hot locations
-   - Uses HERO.JPG
-   ========================================================= */
-
 function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
-  const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
-  const timezoneCount = new Set(cities.map((c) => c.tz)).size;
-
   return (
-    <section className="relative w-full min-h-[92vh] overflow-hidden">
-      {/* FULL-SCREEN MEDIA */}
-      <div className="pointer-events-none absolute inset-0">
-        <Image src="/HERO.JPG" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
-
-        {/* Neutral cinematic base (no brown) */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,9,0.72)_0%,rgba(7,9,12,0.58)_28%,rgba(9,11,15,0.42)_56%,rgba(251,251,250,0.92)_100%)]" />
-
-        {/* Soft vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(1400px_760px_at_50%_18%,rgba(0,0,0,0.14),transparent_62%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.14)] to-transparent" />
+    <section className="relative w-full min-h-[96vh] flex flex-col justify-center overflow-hidden">
+      {/* CINEMATIC BACKGROUND */}
+      <div className="absolute inset-0 z-0">
+        <Image src="/HERO.JPG" alt="Vantera Global" fill priority className="object-cover scale-105 animate-[vanteraPan_40s_linear_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050609]/80 via-[#07090C]/40 to-[#FBFBFA]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_0%,rgba(5,6,9,0.4)_100%)]" />
       </div>
 
-      {/* Subtle structure (white-only) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 opacity-[0.028] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.22),transparent_18%,transparent_82%,rgba(0,0,0,0.22))]" />
-        <div className="absolute inset-0 opacity-60 animate-[vanteraGlow_7.5s_ease-in-out_infinite]" />
-      </div>
+      <div className={cx(HERO_INNER, 'relative z-10 pt-20 pb-16')}>
+        <div className="grid gap-16 lg:grid-cols-12 lg:items-center">
+          
+          {/* LEFT COLUMN: THE EDGE */}
+          <div className="lg:col-span-7">
+            <div className="inline-block animate-fade-in-up">
+              <PremiumBadgeRow />
+            </div>
+            
+            <h1 className="mt-8 text-balance text-[48px] font-light tracking-[-0.04em] leading-[1.05] text-white sm:text-[64px] lg:text-[84px]">
+              The Quiet Edge in <br/>
+              <span className="font-serif italic opacity-90">Luxury Real Estate</span>
+            </h1>
 
-      {/* CONTENT */}
-      <div className={cx(HERO_INNER, 'relative pt-12 sm:pt-16')}>
-        <div className="pb-10 sm:pb-12 lg:pb-[8vh]">
-          {/* Top badge */}
-          <div className="inline-flex max-w-full rounded-full bg-white/[0.06] px-3 py-2 ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
-            <PremiumBadgeRow />
-          </div>
+            <p className="mt-8 max-w-[60ch] text-lg font-medium leading-relaxed text-white/70">
+              Vantera distillates market noise into pure decision signal. 
+              <span className="block mt-2 text-white/40 font-normal">Liquidity, risk, and verified yield—refined for the uncompromising.</span>
+            </p>
 
-          <div className="mt-6 grid gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* LEFT: statement + search */}
-            <div className="lg:col-span-7">
-              <h1 className="text-balance text-[32px] font-medium tracking-[-0.018em] text-white/92 sm:text-[40px] lg:text-[54px] lg:leading-[1.04]">
-                The quiet edge in luxury real estate
-              </h1>
-
-              <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-white/76 sm:text-lg">
-                Vantera turns location noise into decision signal.
-                <span className="text-white/55"> Value, liquidity and risk - clear, comparable and verifiable.</span>
-              </p>
-
-              <div className="mt-7">
-                <div className={cx('relative overflow-hidden rounded-2xl p-3.5 sm:p-4', GLASS_DARK)}>
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(255,255,255,0.12),transparent_62%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-70" />
-                  </div>
-                  <div className="relative">
-                    <VanteraOmniSearch cities={cities as any} clusters={clusters as any} autoFocus={false} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-white/60">
-                {['City-first', 'Keywords included', 'Typos ok', 'Verification-first'].map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full bg-white/[0.06] px-3 py-1.5 ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-
-              <div className="mt-6">
-                <SignalStripDark
-                  items={[
-                    { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
-                    { k: 'REGIONS', v: <span>{regionCount}</span> },
-                    { k: 'TIMEZONES', v: <span>{timezoneCount}</span> },
-                    { k: 'UPDATES', v: <span>Weekly</span>, hint: 'Index refresh cadence' },
-                    { k: 'PROOF', v: <span>Registry + docs</span> },
-                  ]}
-                />
-              </div>
-
-              {/* subtle scroll cue */}
-              <div className="mt-7 hidden sm:flex items-center gap-3 text-[12px] text-white/55">
-                <span className="inline-flex h-8 w-5 items-start justify-center rounded-full ring-1 ring-inset ring-white/15 bg-white/[0.06]">
-                  <span className="mt-1.5 h-2 w-1 rounded-full bg-white/55 animate-[vanteraScroll_1.6s_ease-in-out_infinite]" />
-                </span>
-                <span>Scroll for featured markets, intelligence and the full index</span>
-              </div>
+            <div className="mt-12 max-w-2xl">
+               <div className={cx('p-2 rounded-[28px]', GLASS_ROYAL)}>
+                  <VanteraOmniSearch cities={cities as any} clusters={clusters as any} autoFocus={false} />
+               </div>
             </div>
 
-            {/* RIGHT: Hot locations only (replaces House rules + Start here) */}
-            <div className="lg:col-span-5">
-              <div className="grid gap-4 sm:gap-5">
-                <HeroHotLocations cities={cities} />
-
-                {/* Keep trust in hero if you want - styled white-only */}
-                <div className="rounded-2xl bg-white/[0.06] ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
-                  <TrustMarquee
-                    className="!mt-0"
-                    brands={[
-                      { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-                      { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-                      { name: 'Knight Frank', domain: 'knightfrank.com' },
-                      { name: 'Savills', domain: 'savills.com' },
-                      { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-                      { name: 'BARNES', domain: 'barnes-international.com' },
-                      { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-                      { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-                      { name: 'Compass', domain: 'compass.com', invert: false },
-                      { name: 'CBRE', domain: 'cbre.com', invert: false },
-                      { name: 'JLL', domain: 'jll.com', invert: false },
-                    ]}
-                  />
-                </div>
-              </div>
+            <div className="mt-10">
+              <SignalStripDark items={[
+                { k: 'Portfolio', v: `${cities.length} Global Hubs` },
+                { k: 'Intelligence', v: 'Weekly Audit' },
+                { k: 'Verification', v: 'Full Registry' },
+                { k: 'Standard', v: 'Ultra Prime' },
+                { k: 'Status', v: 'Private Access' }
+              ]} />
             </div>
           </div>
+
+          {/* RIGHT COLUMN: HOT MARKETS & TRUST */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            <HeroHotLocations cities={cities} />
+            <div className="rounded-[32px] bg-white/[0.03] border border-white/10 backdrop-blur-md p-2">
+              <TrustMarquee className="!mt-0 opacity-60 hover:opacity-100 transition-opacity duration-700" />
+            </div>
+          </div>
+
         </div>
-
-        {/* local-only keyframes (kept here so you don’t need to touch globals) */}
-        <style>{`
-          @keyframes vanteraScroll {
-            0% { transform: translateY(0); opacity: .35; }
-            50% { transform: translateY(10px); opacity: .85; }
-            100% { transform: translateY(0); opacity: .35; }
-          }
-          @keyframes vanteraGlow {
-            0% { filter: saturate(1) brightness(1); }
-            50% { filter: saturate(1.03) brightness(1.05); }
-            100% { filter: saturate(1) brightness(1); }
-          }
-        `}</style>
       </div>
+
+      <style>{`
+        @keyframes vanteraPan {
+          0% { transform: scale(1.05) translateX(0); }
+          50% { transform: scale(1.1) translateX(-2%); }
+          100% { transform: scale(1.05) translateX(0); }
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </section>
   );
 }
 
 function CTA() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[32px] p-7 sm:p-11', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        {/* neutral only */}
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(10,12,16,0.06),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(10,12,16,0.06),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.12)] to-transparent" />
-      </div>
-
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <Kicker>Private access</Kicker>
-          <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[34px]">
-            Bring a serious asset or a serious buyer
-          </div>
-          <div className="mt-2 max-w-[78ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Vantera is built for private sellers, advisors and agents who want verification, clarity and speed.
-            <span className="text-[color:var(--ink-3)]"> Signal only.</span>
-          </div>
+    <div className={cx('relative overflow-hidden rounded-[48px] p-12 lg:p-20', CARD)}>
+      <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-2xl">
+          <Kicker>Membership</Kicker>
+          <h2 className="mt-6 text-[42px] font-light tracking-tight text-[color:var(--ink)] leading-tight">
+            Curated for the <br/><span className="italic font-serif">Significant Asset.</span>
+          </h2>
+          <p className="mt-6 text-lg text-[color:var(--ink-2)] opacity-80">
+            Vantera is a private environment for sellers and advisors who require surgical clarity.
+          </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href="/coming-soon?flow=sell"
-            className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white hover:bg-white',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(10,12,16,0.20)]',
-              'text-[color:var(--ink)]',
-              'shadow-[0_18px_50px_rgba(10,12,16,0.12)]',
-            )}
-          >
-            Submit a private seller
+        <div className="flex flex-col sm:flex-row gap-4">
+          <a href="/join?flow=sell" className="px-10 py-5 rounded-full bg-[color:var(--ink)] text-white text-sm font-bold tracking-widest uppercase hover:scale-105 transition-transform shadow-2xl">
+            Submit Private Asset
           </a>
-
-          <a
-            href="/coming-soon?flow=agents"
-            className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white/62 hover:bg-white/78',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(10,12,16,0.18)]',
-              'text-[color:var(--ink)]',
-            )}
-          >
-            Agent access
+          <a href="/join?flow=agent" className="px-10 py-5 rounded-full border border-[color:var(--ink)]/20 text-[color:var(--ink)] text-sm font-bold tracking-widest uppercase hover:bg-[color:var(--ink)]/5 transition-colors">
+            Advisor Portal
           </a>
         </div>
       </div>
@@ -404,83 +238,51 @@ function CTA() {
   );
 }
 
-/* =========================================================
-   HOME PAGE
-   ========================================================= */
-
 export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
   return (
-    <PageShell fullBleedHero={<HeroBand cities={cities} clusters={clusters} />} bodyMaxWidthClassName="max-w-[1840px]">
-      {/* Discovery */}
-      <section className="mt-10 sm:mt-14">
+    <PageShell fullBleedHero={<HeroBand cities={cities} clusters={clusters} />} bodyMaxWidthClassName="max-w-none">
+      
+      <section className="mt-24">
         <div className={MID}>
-          <SectionHeader
-            kicker="Discovery"
-            title="One box that does magic"
-            subtitle="Start broad, then refine. Cities, lifestyle and keywords without brittle searching."
-          />
+          <SectionHeader kicker="Discovery" title="Intuitive Intelligence" subtitle="A unified search architecture designed for lifestyle, asset class, and tax-liquidity vectors." />
           <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
         </div>
       </section>
 
-      {/* Featured markets */}
-      <section className="mt-12 sm:mt-16">
+      <section className="mt-32">
         <div className={WIDE}>
-          <SectionHeader
-            kicker="Featured markets"
-            title="The flagship set"
-            subtitle="Clean, calm and high-signal - built for fast scanning and confident next clicks."
-          />
+          <SectionHeader kicker="The Collection" title="Flagship Markets" subtitle="Global tier-one coverage. Evaluated on 140+ proprietary risk and opportunity metrics." />
           <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
         </div>
       </section>
 
-      {/* Featured intelligence */}
-      <section className="mt-12 sm:mt-16">
+      <section className="mt-32">
         <div className={WIDE}>
-          <SectionHeader
-            kicker="Featured intelligence"
-            title="Decision-grade, not portal theatre"
-            subtitle="A product layer built for serious decisions, not screenshots."
-          />
           <FeaturedIntelligencePanel />
         </div>
       </section>
 
-      {/* Market briefing */}
-      <section className="mt-12 sm:mt-16">
+      <section className="mt-32">
         <div className={WIDE}>
           <MarketBriefing cities={cities as any} />
         </div>
       </section>
 
-      {/* Explore index */}
-      <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-18">
+      <section id="explore-index" className="mt-32 scroll-mt-32">
         <div className={WIDE}>
-          <SectionHeader
-            kicker="Explore the index"
-            title="Coverage that feels alive"
-            subtitle="Scan for where value is forming, where risk is hiding and where liquidity is strongest."
-          />
-          <div className={cx('relative overflow-hidden rounded-[34px] p-5 sm:p-8', CARD)}>
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(10,12,16,0.06),transparent_62%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.10)] to-transparent" />
-            </div>
-
-            <div className="relative mt-1">
-              <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
-            </div>
+          <SectionHeader kicker="Full Index" title="Global Coverage" subtitle="The definitive registry of luxury liquidity. Updated in real-time." />
+          <div className={cx('rounded-[40px] p-8 lg:p-12', CARD)}>
+             <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mt-14 sm:mt-18 pb-16 sm:pb-20">
+      <section className="mt-32 pb-32">
         <div className={NARROW}>
           <CTA />
         </div>
       </section>
+
     </PageShell>
   );
 }
