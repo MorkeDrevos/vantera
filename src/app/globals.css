@@ -14,14 +14,9 @@ body {
 }
 
 html {
-  /* Prevent iOS font scaling surprises */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-
-  /* Smooth scrolling unless reduced motion */
   scroll-behavior: smooth;
-
-  /* Better scroll feel on modern browsers */
   overscroll-behavior-y: none;
 }
 
@@ -33,9 +28,11 @@ body {
   background: var(--paper);
   color: var(--ink);
 
-  /* Strong default typography rhythm (components can override) */
   font-feature-settings: 'ss01' 1, 'ss02' 1, 'cv01' 1, 'cv02' 1;
   letter-spacing: -0.01em;
+
+  /* Prevent random horizontal scroll on full-bleed sections */
+  overflow-x: hidden;
 }
 
 /* Prevent iOS tap flash */
@@ -105,25 +102,27 @@ select {
   color-scheme: light;
 
   /* Paper system */
-  --paper: #fbfbfa; /* warm white */
-  --paper-2: #f6f6f4; /* subtle section alt */
-  --paper-3: #f0f0ee; /* deeper alt */
-  --ink: #0b0c10; /* near-black */
-  --ink-2: rgba(11, 12, 16, 0.78); /* body */
-  --ink-3: rgba(11, 12, 16, 0.58); /* muted */
+  --paper: #fbfbfa;
+  --paper-2: #f6f6f4;
+  --paper-3: #f0f0ee;
+
+  --ink: #0b0c10;
+  --ink-2: rgba(11, 12, 16, 0.78);
+  --ink-3: rgba(11, 12, 16, 0.58);
 
   /* Surfaces and borders */
   --surface: rgba(255, 255, 255, 0.72);
   --surface-2: rgba(255, 255, 255, 0.86);
+
   --hairline: rgba(11, 12, 16, 0.10);
   --hairline-2: rgba(11, 12, 16, 0.14);
 
-  /* Shadows (quiet luxury, not "startup glow") */
+  /* Shadows */
   --shadow-sm: 0 10px 26px rgba(11, 12, 16, 0.08);
   --shadow: 0 24px 70px rgba(11, 12, 16, 0.10);
   --shadow-lg: 0 40px 120px rgba(11, 12, 16, 0.14);
 
-  /* Brand accents (used sparingly on white) */
+  /* Brand accents */
   --gold: rgba(231, 201, 130, 0.9);
   --gold-2: rgba(231, 201, 130, 0.35);
   --violet: rgba(139, 92, 246, 0.85);
@@ -162,7 +161,6 @@ select {
   background: var(--paper);
   color: var(--ink);
 }
-
 .v-paper-2 {
   background: var(--paper-2);
 }
@@ -172,7 +170,6 @@ select {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
-
 .v-surface-2 {
   background: var(--surface-2);
   backdrop-filter: blur(18px);
@@ -182,7 +179,6 @@ select {
 .v-ink-2 {
   color: var(--ink-2);
 }
-
 .v-ink-3 {
   color: var(--ink-3);
 }
@@ -194,18 +190,16 @@ select {
 .v-shadow-sm {
   box-shadow: var(--shadow-sm);
 }
-
 .v-shadow {
   box-shadow: var(--shadow);
 }
-
 .v-shadow-lg {
   box-shadow: var(--shadow-lg);
 }
 
 /* =========================
    VANTERA - Royal Portal FX
-   Single canonical animation set
+   (kept as-is, works on white)
    ========================= */
 
 @keyframes vanteraPulse {
@@ -334,7 +328,6 @@ select {
   }
 }
 
-/* Utility classes used by HomePage.tsx */
 .vantera-float-a {
   animation: vanteraFloatA 22s ease-in-out infinite;
   will-change: transform, opacity;
@@ -362,14 +355,11 @@ select {
   animation: vanteraArc 20s ease-in-out infinite;
   will-change: transform, opacity;
 }
-
-/* Optional pulse helper */
 .vantera-pulse {
   animation: vanteraPulse 6s ease-in-out infinite;
   will-change: transform, opacity;
 }
 
-/* On white, premium "ring + lift" */
 .vantera-royal-ring {
   box-shadow:
     0 0 0 1px rgba(11, 12, 16, 0.08),
