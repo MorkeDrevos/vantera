@@ -9,7 +9,15 @@ import { ingestAttomMediaForListing } from '@/lib/ingest/attomPersistMedia';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const CITY_ALIASES: Record<string, string> = {
+  // Costa del Sol lock: all resolve to Marbella
+  benahavis: 'marbella',
+  estepona: 'marbella',
+  'costa-del-sol': 'marbella',
+};
+
 const CITY_PRESETS = {
+  // US demo
   miami: {
     name: 'Miami',
     slug: 'miami',
@@ -19,9 +27,23 @@ const CITY_PRESETS = {
     lat: 25.7617,
     lng: -80.1918,
   },
+
+  // Costa del Sol canonical (even if ATTOM won't return data here today, the lock is correct and future-proof)
+  marbella: {
+    name: 'Marbella (Costa del Sol)',
+    slug: 'marbella',
+    country: 'Spain',
+    region: 'Andalucia',
+    tz: 'Europe/Madrid',
+    lat: 36.5101,
+    lng: -4.8824,
+  },
 } as const;
 
-const DEFAULT_MIN_VALUE = 2_000_000;
+function canonicalCityKey(input: string) {
+  const k = (input || '').toLowerCase().trim();
+  return CITY_ALIASES[k] ?? k;
+}
 
 function pickString(v: any): string | null {
   return typeof v === 'string' && v.trim() ? v.trim() : null;
@@ -104,7 +126,6 @@ function readAddressFromSnapshot(p: any) {
   const address1 =
     pickString(p?.address?.line1) || pickString(p?.address?.oneLine) || pickString(p?.address1) || null;
 
-  // Often "CITY, ST ZIP"
   const address2 = pickString(p?.address?.line2) || pickString(p?.address2) || null;
 
   const latRaw = p?.location?.latitude ?? null;
@@ -122,16 +143,12 @@ function readAddressFromSnapshot(p: any) {
 }
 
 function normalizeLotSqft(raw: any): number | null {
-  // ATTOM can vary; best-effort:
-  // - lotsize2 is usually sqft in many packages
-  // - lotsize1 can be acres in some cases (especially if small decimal)
   const lotsize2 = raw?.lot?.lotsize2;
   if (typeof lotsize2 === 'number' && Number.isFinite(lotsize2) && lotsize2 > 0) return Math.round(lotsize2);
 
   const lotsize1 = raw?.lot?.lotsize1;
   if (typeof lotsize1 !== 'number' || !Number.isFinite(lotsize1) || lotsize1 <= 0) return null;
 
-  // Heuristic: if it's a small number (< 200), treat as acres, else assume sqft
   if (lotsize1 < 200) return Math.round(lotsize1 * 43560);
   return Math.round(lotsize1);
 }
@@ -168,70 +185,12 @@ function computeDataCompleteness(input: {
   return clampInt(score, 0, 100);
 }
 
-function isResidentialPropertyType(propertyType: string | null, propClass: string | null) {
-  const cls = (propClass || '').trim().toUpperCase();
-  // Many ATTOM datasets use propclass like "R" / "RES" variants for residential
-  if (cls === 'R' || cls.startsWith('RES')) return true;
-
-  const t = (propertyType || '').trim().toUpperCase();
-  if (!t) return false;
-
-  // Explicit excludes first (we want luxury residential only)
-  const EXCLUDE = [
-    'COMMERCIAL',
-    'OFFICE',
-    'RETAIL',
-    'INDUSTRIAL',
-    'WAREHOUSE',
-    'HOTEL',
-    'MOTEL',
-    'HOSPITAL',
-    'HOSPITALITY',
-    'MIXED USE',
-    'MIXED-USE',
-    'LAND',
-    'LOT',
-    'VACANT',
-    'FARM',
-    'AGRIC',
-    'AGRICULT',
-    'PARKING',
-    'GARAGE',
-    'MARINA',
-    'MOBILE HOME',
-    'TRAILER',
-    'TIMESHARE',
-  ];
-  if (EXCLUDE.some((k) => t.includes(k))) return false;
-
-  // Positive signals for residential
-  const INCLUDE = [
-    'SINGLE',
-    'SFR',
-    'RESIDENTIAL',
-    'CONDO',
-    'CONDOMINIUM',
-    'APARTMENT',
-    'TOWNHOUSE',
-    'TOWN HOME',
-    'ROW',
-    'DUPLEX',
-    'TRIPLEX',
-    'FOURPLEX',
-    'QUAD',
-    'MULTI',
-    'MULTIFAMILY',
-    'VILLA',
-    'HOME',
-  ];
-
-  return INCLUDE.some((k) => t.includes(k));
-}
-
 export async function GET(req: Request) {
   const url = new URL(req.url);
 
-  const cityKey = (url.searchParams.get('city') || 'miami').toLowerCase();
+  const rawCityKey = url.searchParams.get('city') || 'miami';
+  const cityKey = canonicalCityKey(rawCityKey);
+
   const radius = Number(url.searchParams.get('radius') || '0.5'); // miles
   const limit = Math.min(Number(url.searchParams.get('limit') || '25'), 100);
   const dryRun = url.searchParams.get('dryRun') === '1';
@@ -239,9 +198,6 @@ export async function GET(req: Request) {
   const minBeds = url.searchParams.get('minBeds') ? Number(url.searchParams.get('minBeds')) : null;
   const minAvm = url.searchParams.get('minAvm') ? Number(url.searchParams.get('minAvm')) : null;
   const typeWhitelist = parseCsvUpper(url.searchParams.get('types'));
-
-  // Hard gate: luxury only (>= 2m). Allow override, but default is 2m.
-  const minValue = url.searchParams.get('minValue') ? Number(url.searchParams.get('minValue')) : DEFAULT_MIN_VALUE;
 
   if (!process.env.ATTOM_API_KEY) {
     return NextResponse.json(
@@ -253,7 +209,7 @@ export async function GET(req: Request) {
   const preset = CITY_PRESETS[cityKey as keyof typeof CITY_PRESETS];
   if (!preset) {
     return NextResponse.json(
-      { ok: false, error: `Unknown city preset "${cityKey}". Try: miami.` },
+      { ok: false, error: `Unknown city preset "${cityKey}". Try: miami (or marbella).` },
       { status: 400 },
     );
   }
@@ -265,17 +221,16 @@ export async function GET(req: Request) {
     dryRun,
     minBeds,
     minAvm,
-    minValue,
     types: typeWhitelist,
-    // Force: residential-only (hard gate)
-    residentialOnly: true,
+    inputCity: rawCityKey,
+    canonicalCity: cityKey,
   };
 
   const run = await prisma.importRun.create({
     data: {
       source: 'attom',
       scope: 'properties',
-      region: 'US-FL',
+      region: preset.country === 'Spain' ? 'ES-AN' : 'US-FL',
       market: preset.name,
       params,
       status: 'RUNNING',
@@ -290,17 +245,6 @@ export async function GET(req: Request) {
   let created = 0;
   let skipped = 0;
   let errors = 0;
-
-  // Skip breakdown (for Ops visibility)
-  let skippedMissingAddress = 0;
-  let skippedMinBeds = 0;
-  let skippedTypeWhitelist = 0;
-  let skippedExisting = 0;
-  let skippedDetailError = 0;
-  let skippedMinAvm = 0;
-  let skippedNotResidential = 0;
-  let skippedMissingValue = 0;
-  let skippedBelowMinValue = 0;
 
   try {
     const city = await prisma.city.upsert({
@@ -371,7 +315,6 @@ export async function GET(req: Request) {
         const address = safeJoin([address1, address2], ', ');
         if (!address) {
           skipped += 1;
-          skippedMissingAddress += 1;
           continue;
         }
 
@@ -381,25 +324,20 @@ export async function GET(req: Request) {
         const builtSqftSnap = readSqftFromSnapshot(p);
         const typeSnap = readTypeFromSnapshot(p);
 
-        // Filter: min beds (optional)
         if (minBeds != null && (bedsSnap == null || bedsSnap < minBeds)) {
           skipped += 1;
-          skippedMinBeds += 1;
           continue;
         }
 
-        // Filter: type whitelist (optional, uppercase contains match)
         if (typeWhitelist && typeWhitelist.length) {
           const t = (typeSnap || '').toUpperCase();
           const ok = typeWhitelist.some((allowed) => t.includes(allowed));
           if (!ok) {
             skipped += 1;
-            skippedTypeWhitelist += 1;
             continue;
           }
         }
 
-        // Dedupe: prefer stable provider ID
         const bestSourceId = obPropId || attomId || null;
 
         const existing = await prisma.listing.findFirst({
@@ -411,11 +349,10 @@ export async function GET(req: Request) {
 
         if (existing) {
           skipped += 1;
-          skippedExisting += 1;
           continue;
         }
 
-        // STEP 2: Detail by ID (best when obPropId exists)
+        // STEP 2: Detail by ID
         let detail: any = null;
         if (obPropId) {
           try {
@@ -426,17 +363,12 @@ export async function GET(req: Request) {
             detail = detailRes?.property?.[0] || null;
           } catch (e: any) {
             errors += 1;
-            skipped += 1;
-            skippedDetailError += 1;
             if (errorSamples.length < 5) {
               errorSamples.push({ step: 'attom:/property/detail', message: summarizeAttomError(e).message });
             }
             continue;
           }
         }
-
-        const propClassRaw =
-          pickString(detail?.summary?.propclass) || pickString(p?.summary?.propclass) || null;
 
         const propertyType =
           pickString(detail?.summary?.proptype) ||
@@ -445,8 +377,7 @@ export async function GET(req: Request) {
           typeSnap ||
           null;
 
-        const beds =
-          typeof detail?.building?.rooms?.beds === 'number' ? detail.building.rooms.beds : bedsSnap;
+        const beds = typeof detail?.building?.rooms?.beds === 'number' ? detail.building.rooms.beds : bedsSnap;
 
         const baths =
           typeof detail?.building?.rooms?.bathstotal === 'number'
@@ -460,7 +391,7 @@ export async function GET(req: Request) {
 
         const lotSqft = detail ? normalizeLotSqft(detail) : null;
 
-        // STEP 3: AVM (optional, but needed for minAvm and for priceConfidence)
+        // STEP 3: AVM
         let avmValue: number | null = null;
         let priceConfidence: number | null = null;
 
@@ -485,16 +416,13 @@ export async function GET(req: Request) {
           }
         }
 
-        // min AVM filter (optional, requires AVM)
         if (minAvm != null) {
           if (avmValue == null || avmValue < minAvm) {
             skipped += 1;
-            skippedMinAvm += 1;
             continue;
           }
         }
 
-        // Fallback price from assessment market if present
         if (avmValue == null) {
           const fallback =
             typeof detail?.assessment?.market?.mktTtlValue === 'number'
@@ -503,25 +431,6 @@ export async function GET(req: Request) {
 
           avmValue = fallback;
           if (avmValue != null) priceConfidence = 55;
-        }
-
-        // HARD GATE 1: Residential only
-        if (!isResidentialPropertyType(propertyType, propClassRaw)) {
-          skipped += 1;
-          skippedNotResidential += 1;
-          continue;
-        }
-
-        // HARD GATE 2: Minimum value (>= 2m). If missing value, skip.
-        if (avmValue == null || !Number.isFinite(avmValue)) {
-          skipped += 1;
-          skippedMissingValue += 1;
-          continue;
-        }
-        if (avmValue < minValue) {
-          skipped += 1;
-          skippedBelowMinValue += 1;
-          continue;
         }
 
         const builtM2 = sqftToM2Int(builtSqft);
@@ -596,18 +505,6 @@ export async function GET(req: Request) {
       }
     }
 
-    const breakdown = {
-      skippedMissingAddress,
-      skippedMinBeds,
-      skippedTypeWhitelist,
-      skippedExisting,
-      skippedDetailError,
-      skippedMinAvm,
-      skippedNotResidential,
-      skippedMissingValue,
-      skippedBelowMinValue,
-    };
-
     await prisma.importRun.update({
       where: { id: run.id },
       data: {
@@ -618,19 +515,7 @@ export async function GET(req: Request) {
         skipped,
         errors,
         errorSamples,
-        message:
-          `Property ingest complete (residential-only, minValue=${minValue}). ` +
-          `Created=${created}, Skipped=${skipped}, Errors=${errors}. ` +
-          `SkipBreakdown: ` +
-          `missingAddress=${skippedMissingAddress}, ` +
-          `minBeds=${skippedMinBeds}, ` +
-          `typeWhitelist=${skippedTypeWhitelist}, ` +
-          `existing=${skippedExisting}, ` +
-          `detailError=${skippedDetailError}, ` +
-          `minAvm=${skippedMinAvm}, ` +
-          `notResidential=${skippedNotResidential}, ` +
-          `missingValue=${skippedMissingValue}, ` +
-          `belowMinValue=${skippedBelowMinValue}`,
+        message: 'Property ingest complete',
       },
     });
 
@@ -644,7 +529,6 @@ export async function GET(req: Request) {
       skipped,
       errors,
       errorSamples,
-      breakdown,
     });
   } catch (e: any) {
     errorSamples.push({ step: 'route', message: e?.message || String(e) });
