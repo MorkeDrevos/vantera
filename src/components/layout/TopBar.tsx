@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, ChevronDown, Command, Globe, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, Command, Globe, Search, X } from 'lucide-react';
 
 import { CITIES } from '@/components/home/cities';
 
@@ -87,6 +87,13 @@ function buildSearchHref(params: Record<string, string | number | boolean | unde
   return qs ? `/search?${qs}` : '/search';
 }
 
+function pickGroupTitle(country: string) {
+  const s = country.toLowerCase();
+  if (s.includes('united')) return 'United';
+  if (s.includes('arab')) return 'Middle East';
+  return 'Countries';
+}
+
 export default function TopBar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -100,7 +107,6 @@ export default function TopBar() {
 
   const wrapRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-
   const openT = useRef<number | null>(null);
   const closeT = useRef<number | null>(null);
 
@@ -113,7 +119,7 @@ export default function TopBar() {
   }, [searchParams]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -221,6 +227,7 @@ export default function TopBar() {
       'United Arab Emirates',
       'United States',
       'United Kingdom',
+      'Monaco',
       'Portugal',
       'Italy',
       'Switzerland',
@@ -245,7 +252,7 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  const topCities = useMemo(() => cityList.slice(0, 10), [cityList]);
+  const topCities = useMemo(() => cityList.slice(0, 12), [cityList]);
 
   function countryHref(country: string) {
     return buildSearchHref({ country });
@@ -265,7 +272,7 @@ export default function TopBar() {
 
   function closeMegaSoon() {
     cancelTimers();
-    closeT.current = window.setTimeout(() => setMegaOpen(false), 160);
+    closeT.current = window.setTimeout(() => setMegaOpen(false), 140);
   }
 
   function toggleMega() {
@@ -285,34 +292,34 @@ export default function TopBar() {
   const listingsHref = '/listings';
 
   // layout
-  const BAR_INNER = 'mx-auto flex w-full max-w-[1760px] items-center px-5 py-3 sm:px-8 lg:px-14 2xl:px-20';
+  const BAR_INNER = 'mx-auto flex w-full max-w-[1760px] items-center px-5 sm:px-8 lg:px-14 2xl:px-20';
   const STRIP_INNER = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 
   const barShell = cx(
     'relative w-full',
-    'bg-white/92 backdrop-blur-[18px]',
-    scrolled && 'bg-white/96',
+    'bg-white/88 backdrop-blur-[18px]',
+    scrolled && 'bg-white/94',
   );
 
-  // Editorial nav (no uppercase, no gold gradients, no boxes)
+  // editorial nav
   const navLink =
     'relative inline-flex h-10 items-center px-1 text-[13px] font-medium text-[color:var(--ink-2)] transition ' +
     'hover:text-[color:var(--ink)]';
-
   const navActive =
     'text-[color:var(--ink)] after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.55]';
 
+  const iconMuted = 'text-[color:var(--ink-3)]';
+
+  // right side actions
   const signatureSearch =
-    'inline-flex h-10 items-center gap-2 px-4 transition ' +
+    'group inline-flex h-10 items-center gap-2 px-4 transition ' +
     'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]';
 
   const primaryCta =
-    'inline-flex h-10 items-center gap-2 px-5 text-sm font-semibold transition ' +
+    'inline-flex h-10 items-center justify-between gap-3 px-5 text-sm font-semibold transition ' +
     'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]';
 
-  const iconMuted = 'text-[color:var(--ink-3)]';
-
-  // Second-row country strip (quiet)
+  // country strip
   const stripItem =
     'relative inline-flex h-8 items-center px-2 text-[12px] text-[color:var(--ink-2)] transition ' +
     'hover:text-[color:var(--ink)]';
@@ -324,14 +331,15 @@ export default function TopBar() {
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
-        {/* Hairlines only - super clean */}
+        {/* Hairlines + crown accent (subtle) */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.35),transparent)] opacity-55" />
         </div>
 
         {/* Row 1 */}
-        <div className={cx('relative', BAR_INNER)}>
+        <div className={cx('relative', BAR_INNER, 'py-3')}>
           {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <Image
@@ -347,7 +355,7 @@ export default function TopBar() {
           {/* Desktop nav */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-7">
-              {/* Gateway mega (text trigger) */}
+              {/* Places (mega) */}
               <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
@@ -364,10 +372,39 @@ export default function TopBar() {
                   <Globe className={cx('h-4 w-4', iconMuted)} />
                   <span>Places</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
-                  <span className={cx('absolute left-1 right-1 bottom-1 h-px bg-[color:var(--ink)] opacity-0', megaOpen && 'opacity-[0.35]')} />
+                  <span
+                    className={cx(
+                      'absolute left-1 right-1 bottom-1 h-px bg-[color:var(--ink)] opacity-0',
+                      megaOpen && 'opacity-[0.35]',
+                    )}
+                  />
                 </button>
 
-                {/* Mega panel */}
+                {/* Mega backdrop (full width, like your reference) */}
+                <div
+                  className={cx(
+                    'fixed inset-0 z-[70]',
+                    megaOpen ? 'pointer-events-auto' : 'pointer-events-none',
+                  )}
+                  aria-hidden={!megaOpen}
+                >
+                  <div
+                    className={cx(
+                      'absolute inset-0 transition-opacity duration-200',
+                      megaOpen ? 'opacity-100' : 'opacity-0',
+                      'bg-[rgba(10,10,12,0.18)]',
+                    )}
+                  />
+                  <div
+                    className={cx(
+                      'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200',
+                      megaOpen && 'opacity-100',
+                      '[background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.10)_1px,transparent_0)] [background-size:28px_28px]',
+                    )}
+                  />
+                </div>
+
+                {/* Mega panel (centered catalogue overlay) */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -376,13 +413,13 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'fixed left-1/2 top-[72px] z-[80] w-[1160px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'fixed left-1/2 top-[72px] z-[80] w-[1220px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'overflow-hidden border border-[color:var(--hairline)] bg-white/96 backdrop-blur-[22px]',
-                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
+                    'shadow-[0_50px_180px_rgba(10,10,12,0.18)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
-                      : 'pointer-events-none -translate-y-1 scale-[0.99] opacity-0',
+                      : 'pointer-events-none -translate-y-2 scale-[0.99] opacity-0',
                   )}
                   role="menu"
                   aria-label="Places menu"
@@ -390,20 +427,24 @@ export default function TopBar() {
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
                     <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(10,10,12,0.05),transparent_62%)]" />
                   </div>
 
                   {/* Header */}
-                  <div className="relative flex items-start justify-between gap-6 px-7 py-6">
+                  <div className="relative flex items-start justify-between gap-6 px-8 py-7">
                     <div className="min-w-0">
                       <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
                         PLACES
                       </div>
-                      <div className="mt-2 max-w-[72ch] text-[13px] leading-relaxed text-[color:var(--ink-2)]">
+                      <div className="mt-3 max-w-[74ch] text-[28px] leading-[1.05] font-semibold text-[color:var(--ink)]">
+                        A global luxury marketplace built city by city.
+                      </div>
+                      <div className="mt-2 max-w-[74ch] text-[13px] leading-relaxed text-[color:var(--ink-2)]">
                         Countries and flagship cities. Clean entry points.
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2">
+                      {/* quick country tabs */}
+                      <div className="mt-5 flex flex-wrap gap-2">
                         {countries.map((c) => (
                           <Link
                             key={c}
@@ -411,7 +452,7 @@ export default function TopBar() {
                             prefetch
                             onClick={() => setMegaOpen(false)}
                             className={cx(
-                              'px-3.5 py-1.5 text-[12px] transition',
+                              'px-3.5 py-2 text-[12px] transition',
                               'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                               'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                             )}
@@ -454,10 +495,16 @@ export default function TopBar() {
                   </div>
 
                   {/* Body */}
-                  <div className="relative grid grid-cols-12 gap-6 px-7 pb-7">
+                  <div className="relative grid grid-cols-12 gap-7 px-8 pb-8">
+                    {/* Left: flagship cities (two columns) */}
                     <div className="col-span-8">
-                      <div className="mb-3 text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                        FLAGSHIP CITIES
+                      <div className="mb-3 flex items-center justify-between">
+                        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                          FLAGSHIP CITIES
+                        </div>
+                        <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+                          {pickGroupTitle(activeCountry || 'Countries')}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
@@ -488,7 +535,7 @@ export default function TopBar() {
                         ))}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between border border-[color:var(--hairline)] bg-[rgba(0,0,0,0.02)] px-4 py-3">
+                      <div className="mt-4 flex items-center justify-between border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] px-4 py-3">
                         <div className="text-xs text-[color:var(--ink-2)]">Fast entry. Clean navigation.</div>
                         <Link
                           href="/search"
@@ -496,28 +543,57 @@ export default function TopBar() {
                           onClick={() => setMegaOpen(false)}
                           className="inline-flex items-center gap-2 text-xs text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition"
                         >
-                          Search <ArrowRight className="h-4 w-4 opacity-70" />
+                          Browse all <ArrowRight className="h-4 w-4 opacity-70" />
                         </Link>
                       </div>
                     </div>
 
-                    <div className="col-span-4">
+                    {/* Right: Search Atelier + submissions */}
+                    <div className="col-span-4 space-y-3">
+                      <div className="border border-[color:var(--hairline)] bg-white p-4">
+                        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                          SEARCH ATELIER
+                        </div>
+                        <div className="mt-2 text-xs text-[color:var(--ink-2)]">
+                          The fastest way to a €2M+ property.
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMegaOpen(false);
+                            router.push('/search');
+                          }}
+                          className={cx(
+                            'mt-4 inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
+                            'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
+                            'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                          )}
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
+                            Search
+                            <span className="ml-1 font-mono text-xs text-[color:var(--ink-3)]">/</span>
+                          </span>
+                          <ArrowRight className="h-4 w-4 opacity-70" />
+                        </button>
+
+                        <div className="mt-3 text-[11px] text-[color:var(--ink-3)]">
+                          Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere.
+                        </div>
+                      </div>
+
                       <div className="border border-[color:var(--hairline)] bg-white p-4">
                         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
                           SUBMISSIONS
                         </div>
-                        <div className="mt-1 text-xs text-[color:var(--ink-2)]">
-                          Private by default. €2M+ only.
-                        </div>
+                        <div className="mt-1 text-xs text-[color:var(--ink-2)]">Private by default. €2M+ only.</div>
 
                         <Link
                           href={sellHref}
                           prefetch
                           onClick={() => setMegaOpen(false)}
-                          className={cx(
-                            'mt-4 inline-flex w-full items-center justify-between px-4 py-3 text-sm font-semibold transition',
-                            'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-                          )}
+                          className={cx('mt-4 inline-flex w-full', primaryCta)}
                         >
                           <span>{sellLabel}</span>
                           <ArrowRight className="h-4 w-4 opacity-85" />
@@ -540,9 +616,16 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
-                <Command className="h-4 w-4 text-[color:var(--ink-3)]" />
-                <span className="text-[13px] text-[color:var(--ink-2)]">Search</span>
+              <button
+                type="button"
+                onClick={openSearchResultsFromAnywhere}
+                className={signatureSearch}
+                aria-label="Search"
+              >
+                <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
+                <span className="text-[13px] text-[color:var(--ink-2)] group-hover:text-[color:var(--ink)] transition">
+                  Search
+                </span>
                 <span className="text-[color:var(--ink-3)]/40">·</span>
                 <span className="font-mono text-xs text-[color:var(--ink-3)]">/</span>
               </button>
@@ -595,7 +678,7 @@ export default function TopBar() {
 
             <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
               <span className="h-1.5 w-1.5 bg-[rgba(10,10,12,0.30)]" />
-              COUNTRIES
+              Countries
             </div>
           </div>
         </div>
@@ -604,7 +687,7 @@ export default function TopBar() {
       {/* Mobile sheet */}
       <div
         id="vantera-mobile-menu"
-        className={cx('fixed inset-0 z-[70] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
+        className={cx('fixed inset-0 z-[90] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
@@ -627,11 +710,11 @@ export default function TopBar() {
           )}
         >
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(0,0,0,0.05),transparent_62%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(10,10,12,0.05),transparent_62%)]" />
           </div>
 
           <div className="relative flex items-center justify-between px-5 py-5">
-            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MENU</div>
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -647,9 +730,9 @@ export default function TopBar() {
           </div>
 
           <div className="relative space-y-4 px-5 pb-6">
-            {/* Quick actions */}
-            <div className="border border-[color:var(--hairline)] bg-[rgba(0,0,0,0.02)] p-4">
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">ACTIONS</div>
+            {/* Actions */}
+            <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Actions</div>
               <div className="mt-1 text-xs text-[color:var(--ink-2)]">Search and submissions.</div>
 
               <div className="mt-3 grid gap-2">
@@ -666,7 +749,7 @@ export default function TopBar() {
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Command className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
                     Search <span className="ml-1 font-mono text-xs text-[color:var(--ink-3)]">/</span>
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-70" />
@@ -688,8 +771,8 @@ export default function TopBar() {
             </div>
 
             {/* Navigation */}
-            <div className="border border-[color:var(--hairline)] bg-[rgba(0,0,0,0.02)] p-4">
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">NAVIGATION</div>
+            <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Navigation</div>
 
               <div className="mt-3 grid gap-2">
                 <Link
@@ -719,28 +802,12 @@ export default function TopBar() {
                   <span>Listings</span>
                   <ArrowRight className="h-4 w-4 opacity-70" />
                 </Link>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    router.push('/search');
-                    setMobileOpen(false);
-                  }}
-                  className={cx(
-                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
-                    'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
-                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
-                  )}
-                >
-                  <span>Search</span>
-                  <ArrowRight className="h-4 w-4 opacity-70" />
-                </button>
               </div>
             </div>
 
             {/* Places */}
-            <div className="border border-[color:var(--hairline)] bg-[rgba(0,0,0,0.02)] p-4">
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">PLACES</div>
+            <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Places</div>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {countries.map((c) => (
@@ -788,8 +855,8 @@ export default function TopBar() {
 
             {/* City page switch (kept) */}
             {onCityPage ? (
-              <div className="border border-[color:var(--hairline)] bg-[rgba(0,0,0,0.02)] p-4">
-                <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">CITY VIEW</div>
+              <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
+                <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">City view</div>
                 <div className="mt-1 text-xs text-[color:var(--ink-2)]">Switch: facts (T) or live market (L).</div>
 
                 <div className="mt-3 flex items-center gap-2">
@@ -836,7 +903,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-1 text-[11px] text-[color:var(--ink-3)]">Vantera is white, editorial, and quiet.</div>
+            <div className="pt-1 text-[11px] text-[color:var(--ink-3)]">White, editorial, quiet. Black accents.</div>
           </div>
         </div>
       </div>
