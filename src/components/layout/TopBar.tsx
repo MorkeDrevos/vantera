@@ -243,14 +243,12 @@ export default function TopBar() {
       'Netherlands',
     ];
 
+    // FIX: cityList is an array (CityLite[]). The stray ".Ultra" was a typo that broke the build.
     const present = uniqBy(
       cityList
-        .Ultra
-        ? []
-        : cityList
-            .map((c) => c.country)
-            .filter(Boolean)
-            .map((c) => String(c)),
+        .map((c) => c.country)
+        .filter(Boolean)
+        .map((c) => String(c)),
       (x) => x.toLowerCase(),
     );
 
@@ -426,12 +424,7 @@ export default function TopBar() {
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-2">
               {/* Places mega */}
-              <div
-                ref={wrapRef}
-                className="relative"
-                onPointerEnter={openMegaSoon}
-                onPointerLeave={closeMegaSoon}
-              >
+              <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
                   onClick={toggleMega}
@@ -643,9 +636,7 @@ export default function TopBar() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/[0.10] px-4 py-3">
-                        <div className="text-xs text-white/60">
-                          Entry points only. Intelligence expands weekly.
-                        </div>
+                        <div className="text-xs text-white/60">Entry points only. Intelligence expands weekly.</div>
                         <button
                           type="button"
                           onClick={() => {
@@ -804,12 +795,7 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button
-                type="button"
-                onClick={openSearchFromAnywhere}
-                className={signatureSearch}
-                aria-label="Search"
-              >
+              <button type="button" onClick={openSearchFromAnywhere} className={signatureSearch} aria-label="Search">
                 <Command className="h-4 w-4 text-white/80" />
                 <span className="text-[12px] tracking-[0.12em] uppercase text-white/85">Search</span>
                 <span className="text-white/30">·</span>
@@ -993,7 +979,9 @@ export default function TopBar() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
                           <div className="truncate text-sm font-semibold text-white/90">{c.name}</div>
-                          <div className="truncate text-[11px] tracking-[0.16em] uppercase text-white/55">{c.country}</div>
+                          <div className="truncate text-[11px] tracking-[0.16em] uppercase text-white/55">
+                            {c.country}
+                          </div>
                         </div>
                         <ArrowRight className="h-4 w-4 opacity-70 text-white" />
                       </div>
@@ -1070,7 +1058,9 @@ export default function TopBar() {
             {onCityPage ? (
               <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
                 <div className="border-b border-white/[0.10] px-4 py-3">
-                  <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>City view</div>
+                  <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
+                    City view
+                  </div>
                   <div className="mt-1 text-xs text-white/60">Switch: facts (T) or live market (L).</div>
                 </div>
                 <div className="flex items-center gap-2 p-4">
