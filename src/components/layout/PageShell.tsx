@@ -5,38 +5,39 @@ import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 
 import TopBar from './TopBar';
-import ProtocolStrip from './ProtocolStrip';
 import Footer from './Footer';
 
 type PageShellProps = {
   children?: ReactNode;
 
-  // Full-bleed hero band rendered under TopBar + ProtocolStrip
+  // Full-bleed hero band rendered under TopBar
   fullBleedHero?: ReactNode;
 
-  // If true, we skip the constrained <main> spacing
+  // If true, we skip constrained <main> spacing
   heroOnly?: boolean;
 
   // Optional body width override
   bodyMaxWidthClassName?: string;
 };
 
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
 export default function PageShell({
   children,
   fullBleedHero,
   heroOnly = false,
-  bodyMaxWidthClassName = 'max-w-6xl',
+  bodyMaxWidthClassName = 'max-w-[1200px]',
 }: PageShellProps) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      {/* Ambient background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-56 left-1/2 h-[600px] w-[1100px] -translate-x-1/2 rounded-full bg-white/10 blur-[160px]" />
-        <div className="absolute bottom-[-260px] left-1/2 h-[680px] w-[1200px] -translate-x-1/2 rounded-full bg-white/5 blur-[180px]" />
-        <div className="absolute top-28 left-10 h-[520px] w-[520px] rounded-full bg-amber-400/10 blur-[150px]" />
-        <div className="absolute -top-10 right-[-120px] h-[520px] w-[520px] rounded-full bg-amber-300/8 blur-[170px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(1000px_500px_at_18%_6%,rgba(251,191,36,0.10),transparent_60%),radial-gradient(900px_540px_at_82%_18%,rgba(255,255,255,0.06),transparent_62%),radial-gradient(900px_520px_at_50%_92%,rgba(251,191,36,0.07),transparent_65%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/10 to-black/35" />
+    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
+      {/* Global paper stage (match HomePage) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(252,251,249,1)_55%,rgba(249,248,246,1)_100%)]" />
+        <div className="absolute -top-[520px] left-1/2 h-[980px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.20),transparent_66%)] blur-3xl" />
+        <div className="absolute -top-[560px] right-[-520px] h-[980px] w-[980px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06),transparent_68%)] blur-3xl" />
+        <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
       <div className="relative">
@@ -44,17 +45,10 @@ export default function PageShell({
           <TopBar />
         </Suspense>
 
-        <ProtocolStrip />
-
-        {fullBleedHero ? (
-          <div className="relative">
-            <div className="h-5 sm:h-7" />
-            {fullBleedHero}
-          </div>
-        ) : null}
+        {fullBleedHero ? <div className="relative">{fullBleedHero}</div> : null}
 
         {!heroOnly ? (
-          <main className={`relative mx-auto w-full ${bodyMaxWidthClassName} px-5 pb-16 sm:px-8`}>
+          <main className={cx('relative mx-auto w-full px-5 pb-16 sm:px-8', bodyMaxWidthClassName)}>
             {children}
           </main>
         ) : children ? (
