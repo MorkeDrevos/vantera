@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, TrendingUp, Lock, ScanEye, Waves } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Sparkles, TrendingUp, Lock, ScanEye, Waves, Clock4 } from 'lucide-react';
 
 type TabKey = 'value' | 'liquidity' | 'risk';
 
@@ -16,6 +16,43 @@ function isEditableTarget(el: Element | null) {
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
   if ((el as HTMLElement).isContentEditable) return true;
   return false;
+}
+
+function formatLocalTime(d: Date) {
+  try {
+    // 24h, minute precision
+    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+  } catch {
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
+}
+
+function useLocalTimeMinute() {
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    let t1: number | undefined;
+    let t2: number | undefined;
+
+    const tick = () => setNow(new Date());
+
+    // align to next minute boundary so it changes exactly when minutes change
+    const msToNextMinute = 60_000 - (Date.now() % 60_000);
+
+    t1 = window.setTimeout(() => {
+      tick();
+      t2 = window.setInterval(tick, 60_000);
+    }, msToNextMinute);
+
+    return () => {
+      if (t1) window.clearTimeout(t1);
+      if (t2) window.clearInterval(t2);
+    };
+  }, []);
+
+  return now;
 }
 
 const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
@@ -244,7 +281,10 @@ export default function FeaturedIntelligencePanel() {
   const [tab, setTab] = useState<TabKey>('value');
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  // ✅ Hotkeys: 1/2/3 switch modes (ignored while typing)
+  const now = useLocalTimeMinute();
+  const localTime = formatLocalTime(now);
+
+  // Hotkeys: 1/2/3 switch modes (ignored while typing)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target as Element | null)) return;
@@ -276,7 +316,7 @@ export default function FeaturedIntelligencePanel() {
           { label: 'EDGE', value: 'Opportunity', note: 'Signals point to best streets' },
         ],
         bullets: [
-          'Cuts through “luxury narrative” pricing in seconds',
+          'Cuts through "luxury narrative" pricing in seconds',
           'Shows what matters before you fly in',
           'Ends with a next move you can act on',
         ],
@@ -315,7 +355,7 @@ export default function FeaturedIntelligencePanel() {
           { label: 'CUT RISK', value: 'Low', note: 'Comparables and pricing are clean' },
         ],
         bullets: [
-          'Stops you overpaying for illiquid “prime” pockets',
+          'Stops you overpaying for illiquid "prime" pockets',
           'Helps you time offers instead of chasing',
           'Shows where deals happen quietly off-market',
         ],
@@ -379,9 +419,30 @@ export default function FeaturedIntelligencePanel() {
   const tabs = useMemo(
     () =>
       [
-        { k: 'value' as const, title: 'Valuation', subtitle: 'Is the price earned?', kbd: '1', Icon: Sparkles, tone: 'gold' as const },
-        { k: 'liquidity' as const, title: 'Liquidity', subtitle: 'How fast does it move?', kbd: '2', Icon: TrendingUp, tone: 'emerald' as const },
-        { k: 'risk' as const, title: 'Integrity', subtitle: 'Any hidden risk?', kbd: '3', Icon: ShieldCheck, tone: 'violet' as const },
+        {
+          k: 'value' as const,
+          title: 'Valuation',
+          subtitle: 'Is the price earned?',
+          kbd: '1',
+          Icon: Sparkles,
+          tone: 'gold' as const,
+        },
+        {
+          k: 'liquidity' as const,
+          title: 'Liquidity',
+          subtitle: 'How fast does it move?',
+          kbd: '2',
+          Icon: TrendingUp,
+          tone: 'emerald' as const,
+        },
+        {
+          k: 'risk' as const,
+          title: 'Integrity',
+          subtitle: 'Any hidden risk?',
+          kbd: '3',
+          Icon: ShieldCheck,
+          tone: 'violet' as const,
+        },
       ] as const,
     [],
   );
@@ -397,7 +458,6 @@ export default function FeaturedIntelligencePanel() {
 
   return (
     <section
-      // ✅ Important: callback ref must return void (not the element)
       ref={(n) => {
         sectionRef.current = n;
       }}
@@ -422,11 +482,27 @@ export default function FeaturedIntelligencePanel() {
           {/* Header */}
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 max-w-2xl">
+              {/* Bring back the full pill row (incl Local time + Updated weekly) */}
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="neutral">
                   <span className="font-semibold tracking-[0.22em]">{content.eyebrow.toUpperCase()}</span>
                 </Badge>
+
                 <Badge tone={toneBadge}>{content.badgeA}</Badge>
+
+                <Badge tone="neutral">
+                  <Clock4 className="h-3.5 w-3.5 opacity-70" />
+                  <span className="tracking-[0.22em] uppercase">Local time</span>
+                  <span className="font-mono text-[10px] text-[color:var(--ink-2)]">{localTime}</span>
+                </Badge>
+
+                <Badge tone="neutral">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500/70" />
+                    <span className="tracking-[0.22em] uppercase">Updated weekly</span>
+                  </span>
+                </Badge>
+
                 <Badge tone="neutral">Sample dossier</Badge>
               </div>
 
@@ -532,9 +608,7 @@ export default function FeaturedIntelligencePanel() {
 
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                      PORTAL SIGNALS
-                    </div>
+                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PORTAL SIGNALS</div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
                       {content.signalsTitle}
                     </div>
