@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { City } from './cities';
 import CityCard from './CityCard';
-import FeaturedMarketCard from './FeaturedMarketCard';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -17,6 +16,11 @@ export type CityListingsStats = {
 };
 
 // Curated “hero-grade” images for the Featured Markets (top 6)
+//
+// IMPORTANT (design contract):
+// - Featured markets MUST use image IDs pinned to a known-good source (no “random photo” surprises).
+// - Use source.unsplash.com/<PHOTO_ID>/... so the asset is stable and correct for the city.
+// - Any change here must keep city truth (London must be London, Marbella must be Marbella/Puerto Banus).
 const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
   monaco: {
     src: 'https://images.unsplash.com/photo-1595138320174-a64d168e9970?q=80&w=3520&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
@@ -34,13 +38,17 @@ const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
     src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2800&q=85',
     alt: 'Dubai skyline at dusk',
   },
+
+  // FIX: Marbella must be Marbella / Puerto Banus (yachts/marina), not a generic coast
   marbella: {
-    src: 'https://images.unsplash.com/photo-1526481280695-3c687fd643ed?auto=format&fit=crop&w=2800&q=85',
-    alt: 'Marbella coastline and marina',
+    src: 'https://source.unsplash.com/oum0nJ4fbDo/2800x1800',
+    alt: 'Puerto Banús marina, Marbella (Costa del Sol), Spain',
   },
+
+  // FIX: London must be London (Thames / cityscape), not a mountain landscape
   london: {
-    src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2800&q=85',
-    alt: 'London skyline at dusk',
+    src: 'https://source.unsplash.com/z889mSCfCDw/2800x1800',
+    alt: 'London cityscape and the River Thames',
   },
 };
 
@@ -48,20 +56,6 @@ function withFeaturedOverrides(city: City): City {
   const o = FEATURED_IMAGE_OVERRIDES[city.slug];
   if (!o) return city;
   return { ...city, image: { src: o.src, alt: o.alt } };
-}
-
-function featuredHref(city: City) {
-  // Adjust in one place if your route differs.
-  // Common patterns: `/market/${slug}` or `/markets/${slug}`.
-  return `/market/${city.slug}`;
-}
-
-function featuredDescription(city: City) {
-  // Keep 1-2 sentences max (FeaturedMarketCard clamps to 2 lines).
-  if (city.blurb && city.blurb.trim()) return city.blurb.trim();
-
-  // Premium fallback if blurb missing (avoid empty cards).
-  return 'Private, pocket-level intelligence across prime inventory, pricing discipline, and verified demand.';
 }
 
 export default function CityCardsVirtualizedClient({
@@ -116,38 +110,13 @@ export default function CityCardsVirtualizedClient({
   }, [sorted]);
 
   // Featured-only mode: render only the six, nothing else
-  // Contract-locked Featured Market UI (no per-city drift).
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
         <div className={columns}>
           {six.map((city) => {
-            const img = city.image?.src ? city.image : null;
-
-            // If a city somehow has no image even after overrides,
-            // do not render as Featured Market (fallback to CityCard).
-            if (!img?.src) {
-              const stats = statsByCity?.[city.slug];
-              return <CityCard key={city.slug} city={city} stats={stats} />;
-            }
-
-            return (
-              <FeaturedMarketCard
-                key={city.slug}
-                slug={city.slug}
-                name={city.name}
-                country={city.country}
-                region={city.region ?? null}
-                tz={city.tz}
-                heroImageSrc={img.src}
-                heroImageAlt={img.alt ?? null}
-                description={featuredDescription(city)}
-                href={featuredHref(city)}
-                modeLabel="OPEN MARKET"
-                coverageLabel="Coverage"
-                eyebrow="FEATURED MARKET"
-              />
-            );
+            const stats = statsByCity?.[city.slug];
+            return <CityCard key={city.slug} city={city} stats={stats} />;
           })}
         </div>
       </section>
