@@ -40,22 +40,17 @@ export default function PageShell({
         <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
 
-      <div className="relative">
+      {/* isolate prevents weird blend/stacking issues when hero uses heavy overlays */}
+      <div className="relative isolation-isolate">
         <Suspense fallback={null}>
           <TopBar />
         </Suspense>
 
-        {/* TRUE FULL-BLEED HERO WRAPPER (100vw, centered) */}
-        {fullBleedHero ? (
-          <div className="relative w-screen left-1/2 -translate-x-1/2">
-            {fullBleedHero}
-          </div>
-        ) : null}
+        {/* TRUE FULL-BLEED HERO WRAPPER (more robust than w-screen + transform) */}
+        {fullBleedHero ? <div className="relative w-full">{fullBleedHero}</div> : null}
 
         {!heroOnly ? (
-          <main className={cx('relative mx-auto w-full px-5 pb-16 sm:px-8', bodyMaxWidthClassName)}>
-            {children}
-          </main>
+          <main className={cx('relative mx-auto w-full px-5 pb-16 sm:px-8', bodyMaxWidthClassName)}>{children}</main>
         ) : children ? (
           <div className="relative">{children}</div>
         ) : null}
