@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
@@ -43,7 +43,7 @@ type Listing = {
   sqm: number;
   type: 'villa' | 'apartment' | 'penthouse' | 'house' | 'plot';
   tags: string[];
-  imageSeed: string; // used for consistent gradient
+  imageSeed: string;
   href: string;
 };
 
@@ -57,18 +57,6 @@ function clamp(n: number, a: number, b: number) {
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
-}
-
-function moneyEUR(n: number) {
-  try {
-    return new Intl.NumberFormat('en-IE', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(n);
-  } catch {
-    return `€${Math.round(n).toLocaleString()}`;
-  }
 }
 
 function shortMoneyEUR(n: number) {
@@ -125,9 +113,9 @@ function makeMockListings(seed: string, place: string): Listing[] {
     'cap ferrat',
   ];
 
-  // deterministic-ish number generator from string
   let h = 2166136261;
   for (let i = 0; i < base.length; i++) h = (h ^ base.charCodeAt(i)) * 16777619;
+
   const rand = () => {
     h += h << 13;
     h ^= h >> 7;
@@ -141,7 +129,11 @@ function makeMockListings(seed: string, place: string): Listing[] {
     const t = types[Math.floor(rand() * types.length)]!;
     const beds = t === 'plot' ? 0 : clamp(Math.floor(rand() * 6) + 2, 1, 8);
     const baths = t === 'plot' ? 0 : clamp(Math.floor(rand() * 5) + 2, 1, 8);
-    const sqm = t === 'plot' ? clamp(Math.floor(rand() * 3500) + 900, 600, 6000) : clamp(Math.floor(rand() * 650) + 140, 80, 1400);
+    const sqm =
+      t === 'plot'
+        ? clamp(Math.floor(rand() * 3500) + 900, 600, 6000)
+        : clamp(Math.floor(rand() * 650) + 140, 80, 1400);
+
     const priceEUR =
       t === 'plot'
         ? clamp(Math.floor(rand() * 8_500_000) + 850_000, 350_000, 12_500_000)
@@ -149,6 +141,7 @@ function makeMockListings(seed: string, place: string): Listing[] {
 
     const area = areas[Math.floor(rand() * areas.length)]!;
     const city = place?.trim() ? place.trim() : 'world';
+
     const title =
       t === 'villa'
         ? 'private villa with calm light'
@@ -182,7 +175,6 @@ function makeMockListings(seed: string, place: string): Listing[] {
     });
   }
 
-  // highest first by default
   pool.sort((a, b) => b.priceEUR - a.priceEUR);
   return pool;
 }
@@ -204,7 +196,6 @@ function matchesFilters(l: Listing, f: Initial) {
   const needs = (f.needs ?? []).map(normalize).filter(Boolean);
   if (needs.length) {
     const tagHay = normalize(l.tags.join(' '));
-    // light mapping
     const ok = needs.every((n) => tagHay.includes(n.replace('_', ' ')) || hay.includes(n.replace('_', ' ')));
     if (!ok) return false;
   }
@@ -232,13 +223,7 @@ function TagPill({ children }: { children: React.ReactNode }) {
   );
 }
 
-function IconPill({
-  icon,
-  label,
-}: {
-  icon: React.ReactNode;
-  label: string;
-}) {
+function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <span className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
       <span className="text-zinc-500">{icon}</span>
@@ -256,8 +241,6 @@ function GoldHairline() {
 }
 
 function CardImage({ seed }: { seed: string }) {
-  // pure white page, so we use a very light gradient "photo placeholder"
-  // replace this later with real Image src
   const n = Math.abs(Array.from(seed).reduce((a, c) => a + c.charCodeAt(0), 0));
   const a = (n % 25) + 5;
   const b = ((n >> 3) % 25) + 5;
@@ -311,6 +294,36 @@ function NeedChip({
   );
 }
 
+function useClickOutside(
+  refs: Array<React.RefObject<HTMLElement>>,
+  onOutside: () => void,
+  when = true,
+) {
+  useEffect(() => {
+    if (!when) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      for (const r of refs) {
+        const el = r.current;
+        if (el && el.contains(t)) return;
+      }
+
+      onOutside();
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [refs, onOutside, when]);
+}
+
 export default function SearchResultsPageClient({ initial }: { initial: Initial }) {
   const router = useRouter();
 
@@ -324,7 +337,14 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
   const [needs, setNeeds] = useState<string[]>(initial.needs ?? []);
 
   const [sort, setSort] = useState<'price_high' | 'price_low' | 'beds' | 'sqm'>('price_high');
+
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortBtnRef = useRef<HTMLButtonElement | null>(null);
+  const sortMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useClickOutside([sortBtnRef, sortMenuRef], () => setSortOpen(false), sortOpen);
 
   const baseListings = useMemo(() => makeMockListings(q || kw || place || 'global', place || ''), [q, kw, place]);
 
@@ -351,9 +371,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
     setNeeds((prev) => {
       const nn = normalize(n);
       const set = new Set(prev.map(normalize));
-      if (set.has(nn)) {
-        return prev.filter((x) => normalize(x) !== nn);
-      }
+      if (set.has(nn)) return prev.filter((x) => normalize(x) !== nn);
       return [...prev, n];
     });
   }
@@ -383,6 +401,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
     setType('any');
     setNeeds([]);
     setSort('price_high');
+    setSortOpen(false);
     router.push('/search');
   }
 
@@ -397,6 +416,9 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
     if (q.trim() && q.trim() !== kw.trim()) bits.push(`q: ${q.trim()}`);
     return bits;
   }, [place, type, beds, max, needs, kw, q]);
+
+  const sortLabel =
+    sort === 'price_low' ? 'price: low to high' : sort === 'beds' ? 'beds: most first' : sort === 'sqm' ? 'size: largest first' : 'price: high to low';
 
   return (
     <div className="relative">
@@ -433,34 +455,46 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
 
                 <div className="relative">
                   <button
+                    ref={sortBtnRef}
                     type="button"
+                    onClick={() => setSortOpen((v) => !v)}
                     className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                   >
                     <SlidersHorizontal className="h-4 w-4 text-zinc-500" />
                     <span>sort</span>
-                    <ChevronDown className="h-4 w-4 text-zinc-500" />
+                    <ChevronDown className={cx('h-4 w-4 text-zinc-500 transition', sortOpen && 'rotate-180')} />
                   </button>
 
-                  <div className="absolute right-0 mt-2 w-48 overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.10)] ring-1 ring-inset ring-zinc-200">
-                    {[
-                      { k: 'price_high', label: 'price: high to low' },
-                      { k: 'price_low', label: 'price: low to high' },
-                      { k: 'beds', label: 'beds: most first' },
-                      { k: 'sqm', label: 'size: largest first' },
-                    ].map((x) => (
-                      <button
-                        key={x.k}
-                        type="button"
-                        onClick={() => setSort(x.k as any)}
-                        className={cx(
-                          'w-full px-4 py-3 text-left text-[12px] transition',
-                          sort === x.k ? 'bg-zinc-50 text-zinc-900' : 'bg-white text-zinc-700 hover:bg-zinc-50',
-                        )}
-                      >
-                        {x.label}
-                      </button>
-                    ))}
-                  </div>
+                  {sortOpen ? (
+                    <div
+                      ref={sortMenuRef}
+                      className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.10)] ring-1 ring-inset ring-zinc-200"
+                    >
+                      <div className="px-4 py-3 text-[11px] text-zinc-500">current: {sortLabel}</div>
+
+                      {[
+                        { k: 'price_high', label: 'price: high to low' },
+                        { k: 'price_low', label: 'price: low to high' },
+                        { k: 'beds', label: 'beds: most first' },
+                        { k: 'sqm', label: 'size: largest first' },
+                      ].map((x) => (
+                        <button
+                          key={x.k}
+                          type="button"
+                          onClick={() => {
+                            setSort(x.k as any);
+                            setSortOpen(false);
+                          }}
+                          className={cx(
+                            'w-full px-4 py-3 text-left text-[12px] transition',
+                            sort === x.k ? 'bg-zinc-50 text-zinc-900' : 'bg-white text-zinc-700 hover:bg-zinc-50',
+                          )}
+                        >
+                          {x.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <button
@@ -489,7 +523,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
 
       {/* content */}
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-6">
-        {/* lightweight “query bar” */}
+        {/* query bar */}
         <div className="rounded-[24px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
           <div className="grid gap-3 md:grid-cols-12">
             <div className="md:col-span-5">
@@ -541,9 +575,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
                   onClick={() => setMode(m)}
                   className={cx(
                     'rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                    mode === m
-                      ? 'bg-white text-zinc-900 ring-zinc-300'
-                      : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                    mode === m ? 'bg-white text-zinc-900 ring-zinc-300' : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
                   )}
                 >
                   {m}
@@ -578,9 +610,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
             <div className="md:col-span-2 lg:col-span-3">
               <div className="rounded-[24px] bg-white p-8 ring-1 ring-inset ring-zinc-200">
                 <div className="text-[18px] font-semibold text-zinc-900">no matches</div>
-                <div className="mt-2 text-[13px] text-zinc-600">
-                  loosen one filter. try removing max price or needs.
-                </div>
+                <div className="mt-2 text-[13px] text-zinc-600">loosen one filter. try removing max price or needs.</div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -630,11 +660,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
 
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     <TagPill>{shortMoneyEUR(l.priceEUR)}</TagPill>
-                    {l.beds ? (
-                      <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.beds} beds`} />
-                    ) : (
-                      <IconPill icon={<Home className="h-4 w-4" />} label="plot" />
-                    )}
+                    {l.beds ? <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.beds} beds`} /> : <IconPill icon={<Home className="h-4 w-4" />} label="plot" />}
                     <TagPill>{l.sqm} sqm</TagPill>
                     <TagPill>{l.type}</TagPill>
                   </div>
@@ -666,10 +692,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
       {/* filters drawer */}
       {filtersOpen ? (
         <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-[rgba(0,0,0,0.18)]"
-            onClick={() => setFiltersOpen(false)}
-          />
+          <div className="absolute inset-0 bg-[rgba(0,0,0,0.18)]" onClick={() => setFiltersOpen(false)} />
 
           <div className="absolute right-0 top-0 h-full w-full max-w-[520px] bg-white shadow-[0_40px_140px_rgba(0,0,0,0.18)]">
             <div className="relative border-b border-zinc-200 px-5 py-4">
@@ -680,12 +703,12 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
                   <div className="mt-1 text-[12px] text-zinc-600">tight, clean, forgiving</div>
                 </div>
 
-                <button
+                < <button
                   type="button"
                   onClick={() => setFiltersOpen(false)}
                   className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                 >
-                  <X className="h-4 w-4 text-zinc-500800 />
+                  <X className="h-4 w-4 text-zinc-500" />
                   <span>close</span>
                 </button>
               </div>
@@ -703,9 +726,7 @@ export default function SearchResultsPageClient({ initial }: { initial: Initial 
                         onClick={() => setType(t)}
                         className={cx(
                           'rounded-2xl px-3 py-3 text-left text-[12px] ring-1 ring-inset transition',
-                          normalize(type) === normalize(t)
-                            ? 'bg-white text-zinc-900 ring-zinc-300'
-                            : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                          normalize(type) === normalize(t) ? 'bg-white text-zinc-900 ring-zinc-300' : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
                         )}
                       >
                         {t}
