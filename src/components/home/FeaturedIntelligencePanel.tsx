@@ -2,7 +2,19 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, TrendingUp, Lock, ScanEye, Waves } from 'lucide-react';
+import {
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Lock,
+  ScanEye,
+  Waves,
+  ChevronDown,
+  MapPin,
+} from 'lucide-react';
+
+import { CITIES, type City } from '@/components/home/cities';
 
 type TabKey = 'value' | 'liquidity' | 'risk';
 
@@ -42,7 +54,12 @@ function Badge({
           : 'bg-white/72 text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]';
 
   return (
-    <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] backdrop-blur-[14px]', toneCls)}>
+    <span
+      className={cx(
+        'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] backdrop-blur-[14px]',
+        toneCls,
+      )}
+    >
       {children}
     </span>
   );
@@ -86,22 +103,32 @@ function PortalTab({
       className={cx(
         'group relative w-full overflow-hidden rounded-2xl px-4 py-3 text-left transition',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
-        active ? cx('bg-white/85', activeRing) : cx('bg-white/62', RING, 'hover:bg-white/78'),
+        active ? cx('bg-white/86', activeRing) : cx('bg-white/66', RING, 'hover:bg-white/80'),
       )}
       aria-pressed={active}
     >
-      <div className={cx('pointer-events-none absolute inset-0 opacity-0 transition', active ? 'opacity-100' : 'group-hover:opacity-100')}>
+      <div
+        className={cx(
+          'pointer-events-none absolute inset-0 opacity-0 transition',
+          active ? 'opacity-100' : 'group-hover:opacity-100',
+        )}
+      >
         <div className={cx('absolute inset-0', glow)} />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative flex items-start gap-3">
-        <span className={cx('inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/82', RING)}>
+        <span className={cx('inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/86', RING)}>
           <Icon className={cx('h-[18px] w-[18px] transition', active ? 'opacity-90' : 'opacity-70')} />
         </span>
 
         <div className="min-w-0">
-          <div className={cx('text-[13px] font-semibold tracking-[-0.01em]', active ? 'text-[color:var(--ink)]' : 'text-[color:var(--ink-2)]')}>
+          <div
+            className={cx(
+              'text-[13px] font-semibold tracking-[-0.01em]',
+              active ? 'text-[color:var(--ink)]' : 'text-[color:var(--ink-2)]',
+            )}
+          >
             {title}
           </div>
           <div className="mt-1 text-[12px] leading-snug text-[color:var(--ink-3)]">{subtitle}</div>
@@ -111,7 +138,7 @@ function PortalTab({
           className={cx(
             'ml-auto inline-flex items-center gap-2 rounded-full px-2 py-1 text-[10px] tracking-[0.22em] uppercase',
             RING,
-            active ? 'bg-white/88 text-[color:var(--ink-2)]' : 'bg-white/62 text-[color:var(--ink-3)]',
+            active ? 'bg-white/90 text-[color:var(--ink-2)]' : 'bg-white/66 text-[color:var(--ink-3)]',
           )}
         >
           <span className="font-mono">{kbd}</span>
@@ -122,7 +149,17 @@ function PortalTab({
   );
 }
 
-function Stat({ label, value, note, tone }: { label: string; value: string; note?: string; tone: 'gold' | 'emerald' | 'violet' }) {
+function Stat({
+  label,
+  value,
+  note,
+  tone,
+}: {
+  label: string;
+  value: string;
+  note?: string;
+  tone: 'gold' | 'emerald' | 'violet';
+}) {
   const dot =
     tone === 'gold'
       ? 'bg-[rgba(231,201,130,0.95)] shadow-[0_0_0_4px_rgba(231,201,130,0.16)]'
@@ -132,7 +169,7 @@ function Stat({ label, value, note, tone }: { label: string; value: string; note
 
   return (
     <div className={cx('relative overflow-hidden rounded-2xl px-4 py-3', CARD)}>
-      <div className="pointer-events-none absolute inset-0 opacity-75">
+      <div className="pointer-events-none absolute inset-0 opacity-70">
         <div className="absolute inset-0 bg-[radial-gradient(560px_220px_at_18%_0%,rgba(11,12,16,0.04),transparent_64%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
       </div>
@@ -173,7 +210,7 @@ function PortalCard({
       <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className={cx('inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/82', RING)}>
+            <span className={cx('inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/86', RING)}>
               <Icon className="h-4 w-4 opacity-80" />
             </span>
             <div className="min-w-0">
@@ -187,7 +224,7 @@ function PortalCard({
 
       <div className="relative mt-4 grid gap-2">
         {items.map((it) => (
-          <div key={it.k} className={cx('rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
+          <div key={it.k} className={cx('rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
             <div className="flex items-center justify-between gap-3">
               <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">{it.k}</div>
               <div className="text-[10px] text-[color:var(--ink-3)]">log</div>
@@ -201,14 +238,131 @@ function PortalCard({
   );
 }
 
+function CityPicker({
+  value,
+  onChange,
+  options,
+}: {
+  value: City;
+  onChange: (slug: string) => void;
+  options: City[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest('[data-city-picker]')) return;
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  return (
+    <div className="relative" data-city-picker>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cx(
+          'group inline-flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left transition',
+          'bg-white/74 hover:bg-white/84',
+          RING,
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
+        )}
+        aria-expanded={open}
+      >
+        <span className="min-w-0">
+          <span className="flex items-center gap-2">
+            <span className={cx('inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/88', RING)}>
+              <MapPin className="h-4 w-4 opacity-80" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                CITY INTELLIGENCE
+              </span>
+              <span className="mt-1 block truncate text-[14px] font-semibold text-[color:var(--ink)]">{value.name}</span>
+            </span>
+          </span>
+        </span>
+
+        <ChevronDown className={cx('h-4 w-4 opacity-70 transition', open ? 'rotate-180' : '')} />
+      </button>
+
+      {open ? (
+        <div
+          className={cx(
+            'absolute right-0 z-20 mt-2 w-[min(520px,calc(100vw-32px))] overflow-hidden rounded-2xl',
+            'bg-[rgba(255,255,255,0.92)] backdrop-blur-[18px]',
+            'ring-1 ring-inset ring-[rgba(11,12,16,0.10)]',
+            'shadow-[0_40px_110px_rgba(11,12,16,0.18)]',
+          )}
+        >
+          <div className="px-4 py-3 text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+            SELECT CITY
+          </div>
+
+          <div className="max-h-[320px] overflow-auto p-2">
+            {options.map((c) => {
+              const active = c.slug === value.slug;
+              return (
+                <button
+                  key={c.slug}
+                  type="button"
+                  onClick={() => {
+                    onChange(c.slug);
+                    setOpen(false);
+                  }}
+                  className={cx(
+                    'w-full rounded-2xl px-3 py-2.5 text-left transition',
+                    active ? 'bg-white/92' : 'hover:bg-white/80',
+                    'ring-1 ring-inset ring-[rgba(11,12,16,0.08)]',
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">{c.name}</div>
+                      <div className="mt-1 truncate text-[12px] text-[color:var(--ink-3)]">
+                        {c.country}
+                        {c.region ? ` · ${c.region}` : ''}
+                      </div>
+                    </div>
+
+                    {active ? (
+                      <span className="rounded-full bg-[rgba(11,12,16,0.06)] px-2.5 py-1 text-[10px] tracking-[0.22em] uppercase text-[color:var(--ink-2)]">
+                        active
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-[rgba(11,12,16,0.04)] px-2.5 py-1 text-[10px] tracking-[0.22em] uppercase text-[color:var(--ink-3)]">
+                        open
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-[rgba(11,12,16,0.08)] px-4 py-3 text-[12px] text-[color:var(--ink-2)]">
+            Clean, city-by-city intelligence. Listings connect next.
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function FeaturedIntelligencePanel() {
   const [tab, setTab] = useState<TabKey>('value');
+  const [citySlug, setCitySlug] = useState<string>('marbella');
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target as Element | null)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+
       if (e.key === '1') setTab('value');
       if (e.key === '2') setTab('liquidity');
       if (e.key === '3') setTab('risk');
@@ -217,85 +371,120 @@ export default function FeaturedIntelligencePanel() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  const allCities = useMemo(() => {
+    // Keep it tight and premium: only cities with images first
+    const sorted = [...CITIES].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    return sorted;
+  }, []);
+
+  const city = useMemo(() => {
+    return allCities.find((c) => c.slug === citySlug) ?? allCities[0];
+  }, [allCities, citySlug]);
+
+  const toneBadge = useMemo(() => {
+    if (tab === 'value') return 'gold' as const;
+    if (tab === 'liquidity') return 'emerald' as const;
+    return 'violet' as const;
+  }, [tab]);
+
+  const accentGlow =
+    toneBadge === 'gold'
+      ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(231,201,130,0.24),transparent_62%)]'
+      : toneBadge === 'emerald'
+        ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(16,185,129,0.18),transparent_62%)]'
+        : 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(139,92,246,0.18),transparent_62%)]';
+
   const content = useMemo(() => {
+    const cityLine = `${city.name} · ${city.country}`;
+
+    // Premium-but-honest placeholders (until metrics are wired)
+    const tierLabel = (city.tier ?? 'TIER_3').replace('_', ' ');
+    const statusLabel = city.status ?? 'EXPANDING';
+
     if (tab === 'value') {
       return {
         tone: 'gold' as const,
-        eyebrow: 'Portal',
-        title: 'Valuation',
-        lead: 'Is the asking price earned or invented?',
+        eyebrow: 'Intelligence',
+        title: 'Valuation Dossier',
+        lead: `Price truth for ${cityLine}. Evidence-weighted comp logic, reductions, and pocket discipline.`,
         badgeA: 'Proof-first',
+        badgeB: tierLabel,
+        badgeC: statusLabel,
         heroIcon: Sparkles,
         stats: [
-          { label: 'FAIR BAND', value: 'Narrow', note: 'Confidence concentrated in a tight pocket' },
-          { label: 'ASKING', value: 'Within band', note: 'No fantasy premium detected' },
-          { label: 'EDGE', value: 'Opportunity', note: 'Signals point to best streets' },
+          { label: 'FAIR BAND', value: 'Calibrating', note: 'Wire comps + reductions per pocket' },
+          { label: 'ASKING', value: 'Under review', note: 'Flag fantasy premiums vs earned pricing' },
+          { label: 'EDGE', value: 'Street-level', note: 'Best streets emerge first, not broad averages' },
         ],
         proofEyebrow: 'CHECKS',
-        proofTitle: 'What gets verified before a claim',
+        proofTitle: `${city.name}: what gets verified before claims`,
         proofIcon: ScanEye,
         proofChip: <Badge tone="gold">Receipts</Badge>,
         proof: [
-          { k: 'Comps', v: 'Sold evidence and reductions (not list-only)', note: 'Weighting shifts by micro-area.' },
+          { k: 'Comps', v: 'Sold evidence and reductions (not list-only)', note: 'Weights shift by micro-area.' },
           { k: 'History', v: 'Relists, edits and timing patterns', note: 'Narrative changes are logged.' },
-          { k: 'Demand', v: 'Buyer depth by pocket and origin', note: 'Where real heat sits.' },
+          { k: 'Demand', v: 'Buyer depth by pocket and origin', note: 'Where heat sits.' },
         ],
-        signalsTitle: 'Signals (examples)',
+        signalsTitle: `${city.name} signals (examples)`,
         signals: [
           'A comparable cut 6% this week (same pocket, same finish)',
-          'Supply stayed tight across 14 days (clean inventory)',
+          'Clean inventory stayed tight across 14 days (supply discipline)',
           'Buyer attention rose in best streets (not the whole area)',
         ],
-        ctaLabel: 'Open sample dossier',
+        ctaLabel: `Open ${city.name} dossier`,
       };
     }
 
     if (tab === 'liquidity') {
       return {
         tone: 'emerald' as const,
-        eyebrow: 'Portal',
-        title: 'Liquidity',
-        lead: 'How fast do clean homes actually move - without marketing fog?',
+        eyebrow: 'Intelligence',
+        title: 'Liquidity Dossier',
+        lead: `How fast prime inventory actually moves in ${city.name}, without marketing fog.`,
         badgeA: 'Velocity',
+        badgeB: tierLabel,
+        badgeC: statusLabel,
         heroIcon: TrendingUp,
         stats: [
-          { label: 'TIME TO SELL', value: 'Short', note: 'Velocity is strong on clean inventory' },
-          { label: 'BUYER DEPTH', value: 'Deep', note: 'International demand confirmed' },
-          { label: 'CUT RISK', value: 'Low', note: 'Comparables and pricing are clean' },
+          { label: 'TIME TO SELL', value: 'Calibrating', note: 'Track by pocket and tier' },
+          { label: 'BUYER DEPTH', value: 'Mapping', note: 'Origin flows + verified intent' },
+          { label: 'CUT RISK', value: 'Early read', note: 'Reductions, relists, stagnation' },
         ],
-        proofEyebrow: 'CHECKS',
-        proofTitle: 'What gets measured (not guessed)',
+        proofEyebrow: 'MEASURED',
+        proofTitle: `${city.name}: what gets measured (not guessed)`,
         proofIcon: Waves,
         proofChip: <Badge tone="emerald">Signal</Badge>,
         proof: [
           { k: 'Turnover', v: 'Time-on-market by pocket and tier', note: 'Clean vs compromised inventory.' },
           { k: 'Buyers', v: 'Buyer inflow and direction changes', note: 'Where demand is building.' },
-          { k: 'Cuts', v: 'Reductions, relists and stagnation', note: 'Signals before headlines.' },
+          { k: 'Cuts', v: 'Reductions and stagnation detection', note: 'Signals before headlines.' },
         ],
-        signalsTitle: 'Signals (examples)',
+        signalsTitle: `${city.name} signals (examples)`,
         signals: [
           'Two new buyers entered this pocket (verified demand)',
           'Lower quality stock is sitting longer (drag detected)',
           'Best homes are moving quietly (off-market activity)',
         ],
-        ctaLabel: 'View liquidity dossier',
+        ctaLabel: `View ${city.name} liquidity`,
       };
     }
 
     return {
       tone: 'violet' as const,
-      eyebrow: 'Portal',
-      title: 'Integrity',
-      lead: 'Luxury hides risk behind beauty. Vantera surfaces it early and clearly.',
+      eyebrow: 'Intelligence',
+      title: 'Integrity Dossier',
+      lead: `Luxury hides risk behind beauty. Vantera surfaces it early for ${city.name}.`,
       badgeA: 'Integrity',
+      badgeB: tierLabel,
+      badgeC: statusLabel,
       heroIcon: ShieldCheck,
       stats: [
-        { label: 'RISK FLAGS', value: 'Low', note: 'No obvious red flags detected' },
-        { label: 'DATA QUALITY', value: 'Strong', note: 'Signals cross-checked' },
-        { label: 'PROOF LEVEL', value: 'Rising', note: 'Verification expands weekly' },
+        { label: 'RISK FLAGS', value: 'Scanning', note: 'Mismatch detection + anomaly guards' },
+        { label: 'DATA QUALITY', value: 'Improving', note: 'Cross-source verification expands' },
+        { label: 'PROOF LEVEL', value: 'Rising', note: 'Traceable logs per listing' },
       ],
-      proofEyebrow: 'CHECKS',
-      proofTitle: 'What gets locked before trust',
+      proofEyebrow: 'GUARDED',
+      proofTitle: `${city.name}: what gets locked before trust`,
       proofIcon: Lock,
       proofChip: <Badge tone="violet">Guarded</Badge>,
       proof: [
@@ -303,15 +492,15 @@ export default function FeaturedIntelligencePanel() {
         { k: 'Cross-source', v: 'Verification across independent sources', note: 'Disagreement is flagged.' },
         { k: 'Anomalies', v: 'Manipulation guards and anomaly detection', note: 'Noise is filtered.' },
       ],
-      signalsTitle: 'Signals (examples)',
+      signalsTitle: `${city.name} signals (examples)`,
       signals: [
         'A listing edit was detected and logged (trace preserved)',
         'One source disagreed - flagged for review',
         'Confidence increased as proof landed (status updated)',
       ],
-      ctaLabel: 'Open integrity log',
+      ctaLabel: `Open ${city.name} integrity`,
     };
-  }, [tab]);
+  }, [tab, city, toneBadge]);
 
   const tabs = useMemo(
     () =>
@@ -323,17 +512,13 @@ export default function FeaturedIntelligencePanel() {
     [],
   );
 
-  const accentGlow =
-    content.tone === 'gold'
-      ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(231,201,130,0.24),transparent_62%)]'
-      : content.tone === 'emerald'
-        ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(16,185,129,0.18),transparent_62%)]'
-        : 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(139,92,246,0.18),transparent_62%)]';
-
-  const toneBadge = content.tone === 'gold' ? 'gold' : content.tone === 'emerald' ? 'emerald' : 'violet';
-
   return (
-    <section ref={(n) => { sectionRef.current = n; }} className="relative">
+    <section
+      ref={(n) => {
+        sectionRef.current = n;
+      }}
+      className="relative"
+    >
       <div className={cx('relative overflow-hidden rounded-[40px]', CARD)}>
         <div className="pointer-events-none absolute inset-0">
           <div className={cx('absolute inset-0', accentGlow)} />
@@ -351,26 +536,40 @@ export default function FeaturedIntelligencePanel() {
                   <span className="font-semibold tracking-[0.22em] uppercase">{content.eyebrow}</span>
                 </Badge>
                 <Badge tone={toneBadge}>{content.badgeA}</Badge>
-                <Badge tone="neutral">Updated weekly</Badge>
+                <Badge tone="neutral">{content.badgeB}</Badge>
+                <Badge tone="neutral">{content.badgeC}</Badge>
               </div>
 
               <div className="mt-4 flex items-start gap-3">
-                <span className={cx('mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/82', RING)}>
+                <span className={cx('mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/86', RING)}>
                   <content.heroIcon className="h-5 w-5 opacity-85" />
                 </span>
 
                 <div className="min-w-0">
-                  <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[34px]">
+                  <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[32px]">
                     {content.title}
                   </h2>
                   <p className="mt-2 text-[14px] leading-relaxed text-[color:var(--ink-2)]">{content.lead}</p>
+
+                  {city.blurb ? (
+                    <div className="mt-3 text-[12px] leading-relaxed text-[color:var(--ink-3)]">{city.blurb}</div>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            {/* Selector (cleaner) */}
-            <div className="w-full lg:w-[460px]">
-              <div className={cx('rounded-[30px] p-3', 'bg-white/72', RING, 'shadow-[0_22px_70px_rgba(11,12,16,0.08)]')}>
+            {/* Selector block */}
+            <div className="w-full lg:w-[460px] space-y-3">
+              <CityPicker value={city} onChange={setCitySlug} options={allCities} />
+
+              <div
+                className={cx(
+                  'rounded-[30px] p-3',
+                  'bg-white/72',
+                  RING,
+                  'shadow-[0_22px_70px_rgba(11,12,16,0.08)]',
+                )}
+              >
                 <div className="flex items-center justify-between gap-3 px-1">
                   <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">MODES</div>
                   <div className="text-[10px] text-[color:var(--ink-3)]">1 / 2 / 3</div>
@@ -416,7 +615,7 @@ export default function FeaturedIntelligencePanel() {
             <div className="lg:col-span-5">
               <div className={cx('relative overflow-hidden rounded-[28px] p-5', CARD)}>
                 <div className="pointer-events-none absolute inset-0 opacity-70">
-                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_86%_-10%,rgba(139,92,246,0.12),transparent_62%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_86%_-10%,rgba(139,92,246,0.10),transparent_62%)]" />
                   <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_20%_-10%,rgba(11,12,16,0.05),transparent_62%)]" />
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
                 </div>
@@ -430,27 +629,27 @@ export default function FeaturedIntelligencePanel() {
                     <div className="mt-1 text-xs text-[color:var(--ink-3)]">Examples only. Wiring next.</div>
                   </div>
 
-                  <Badge tone={toneBadge}>Just in</Badge>
+                  <Badge tone={toneBadge}>City</Badge>
                 </div>
 
                 <div className="relative mt-4 grid gap-2">
                   {content.signals.map((a) => (
-                    <div key={a} className={cx('relative overflow-hidden rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
+                    <div key={a} className={cx('relative overflow-hidden rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
                       <div className="relative text-[13px] leading-relaxed text-[color:var(--ink-2)]">{a}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className={cx('relative mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
+                <div className={cx('relative mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
                   <div className="text-[12px] text-[color:var(--ink-2)]">
-                    Want this on real listings?
-                    <div className="text-[11px] text-[color:var(--ink-3)]">Next: connect verified inventory.</div>
+                    City-by-city dossiers.
+                    <div className="text-[11px] text-[color:var(--ink-3)]">Next: connect listings and verified metrics.</div>
                   </div>
                   <button
                     type="button"
                     className={cx(
                       'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                      'bg-white/78 hover:bg-white/92',
+                      'bg-white/82 hover:bg-white/92',
                       RING,
                       'text-[color:var(--ink)]',
                       'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
@@ -461,7 +660,7 @@ export default function FeaturedIntelligencePanel() {
                 </div>
               </div>
 
-              <div className={cx('mt-4 rounded-2xl px-4 py-3 text-[12px]', 'bg-white/72', RING, 'text-[color:var(--ink-2)]')}>
+              <div className={cx('mt-4 rounded-2xl px-4 py-3 text-[12px]', 'bg-white/74', RING, 'text-[color:var(--ink-2)]')}>
                 Proof first. Signal second. Decisions last.
               </div>
             </div>
