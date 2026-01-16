@@ -4,32 +4,145 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   Global baseline
+   ========================= */
+
 html,
 body {
   height: 100%;
 }
 
-:root {
-  color-scheme: dark;
+html {
+  /* Prevent iOS font scaling surprises */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  /* Smooth scrolling unless reduced motion */
+  scroll-behavior: smooth;
+
+  /* Better scroll feel on modern browsers */
+  overscroll-behavior-y: none;
 }
 
 body {
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  background: var(--paper);
+  color: var(--ink);
+
+  /* Strong default typography rhythm (components can override) */
+  font-feature-settings: 'ss01' 1, 'ss02' 1, 'cv01' 1, 'cv02' 1;
+  letter-spacing: -0.01em;
 }
 
+/* Prevent iOS tap flash */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-::selection {
-  background: rgba(255, 255, 255, 0.14);
+/* Make media behave predictably */
+img,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
-/* Respect reduced motion */
+/* Inputs inherit typography */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Better selection for light canvas */
+::selection {
+  background: rgba(231, 201, 130, 0.35);
+}
+
+/* Premium focus ring (keyboard only) */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid rgba(231, 201, 130, 0.65);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* Subtle scrollbar (keeps white editorial feel) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(11, 12, 16, 0.22) rgba(11, 12, 16, 0.06);
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-track {
+  background: rgba(11, 12, 16, 0.06);
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(11, 12, 16, 0.22);
+  border-radius: 999px;
+  border: 2px solid rgba(11, 12, 16, 0.06);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(11, 12, 16, 0.30);
+}
+
+/* =========================
+   White / editorial baseline
+   ========================= */
+
+:root {
+  color-scheme: light;
+
+  /* Paper system */
+  --paper: #fbfbfa; /* warm white */
+  --paper-2: #f6f6f4; /* subtle section alt */
+  --paper-3: #f0f0ee; /* deeper alt */
+  --ink: #0b0c10; /* near-black */
+  --ink-2: rgba(11, 12, 16, 0.78); /* body */
+  --ink-3: rgba(11, 12, 16, 0.58); /* muted */
+
+  /* Surfaces and borders */
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-2: rgba(255, 255, 255, 0.86);
+  --hairline: rgba(11, 12, 16, 0.10);
+  --hairline-2: rgba(11, 12, 16, 0.14);
+
+  /* Shadows (quiet luxury, not "startup glow") */
+  --shadow-sm: 0 10px 26px rgba(11, 12, 16, 0.08);
+  --shadow: 0 24px 70px rgba(11, 12, 16, 0.10);
+  --shadow-lg: 0 40px 120px rgba(11, 12, 16, 0.14);
+
+  /* Brand accents (used sparingly on white) */
+  --gold: rgba(231, 201, 130, 0.9);
+  --gold-2: rgba(231, 201, 130, 0.35);
+  --violet: rgba(139, 92, 246, 0.85);
+  --violet-2: rgba(139, 92, 246, 0.25);
+
+  /* Premium radii */
+  --r-lg: 22px;
+  --r-xl: 28px;
+}
+
+/* =========================
+   Reduced motion
+   ========================= */
+
 @media (prefers-reduced-motion: reduce) {
   html:focus-within {
+    scroll-behavior: auto;
+  }
+  html {
     scroll-behavior: auto;
   }
   *,
@@ -39,6 +152,55 @@ body {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* ==========================================
+   Tiny utilities for white luxury UI
+   ========================================== */
+
+.v-paper {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.v-paper-2 {
+  background: var(--paper-2);
+}
+
+.v-surface {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.v-surface-2 {
+  background: var(--surface-2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.v-ink-2 {
+  color: var(--ink-2);
+}
+
+.v-ink-3 {
+  color: var(--ink-3);
+}
+
+.v-hairline {
+  border-color: var(--hairline);
+}
+
+.v-shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.v-shadow {
+  box-shadow: var(--shadow);
+}
+
+.v-shadow-lg {
+  box-shadow: var(--shadow-lg);
 }
 
 /* =========================
@@ -103,7 +265,6 @@ body {
   }
 }
 
-/* One sweep only (you had two with same name) */
 @keyframes vanteraSweep {
   0% {
     transform: translateX(-22%);
@@ -124,7 +285,6 @@ body {
   }
 }
 
-/* Light star-drift / grain drift via background-position */
 @keyframes vanteraDrift {
   0% {
     background-position: 0 0;
@@ -177,34 +337,43 @@ body {
 /* Utility classes used by HomePage.tsx */
 .vantera-float-a {
   animation: vanteraFloatA 22s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .vantera-float-b {
   animation: vanteraFloatB 28s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .vantera-float-c {
   animation: vanteraFloatC 34s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .vantera-sweep {
   animation: vanteraSweep 16s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .vantera-drift {
   animation: vanteraDrift 26s linear infinite;
 }
 .vantera-beam {
   animation: vanteraBeam 14s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 .vantera-arc {
   animation: vanteraArc 20s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
-/* Optional pulse helper (if you ever use it) */
+/* Optional pulse helper */
 .vantera-pulse {
   animation: vanteraPulse 6s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
+/* On white, premium "ring + lift" */
 .vantera-royal-ring {
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 0 2px rgba(231, 201, 130, 0.08),
-    0 40px 140px rgba(0, 0, 0, 0.75);
+    0 0 0 1px rgba(11, 12, 16, 0.08),
+    0 0 0 2px rgba(231, 201, 130, 0.18),
+    0 26px 80px rgba(11, 12, 16, 0.18);
+  border-radius: var(--r-xl);
 }
