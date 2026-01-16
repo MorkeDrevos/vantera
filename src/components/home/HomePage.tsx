@@ -49,36 +49,35 @@ function cx(...parts: Array<string | false | null | undefined>) {
 
 /* =========================================================
    Royal layout primitives (wide, editorial, institutional)
+   Notes:
+   - No full-viewport blur fog overlays
+   - No undefined CSS vars (only uses globals.css vars you have)
    ========================================================= */
 
-const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+const WIDE = 'mx-auto w-full max-w-[1840px] px-5 sm:px-8 lg:px-12 2xl:px-16';
+const MID = 'mx-auto w-full max-w-[1400px] px-5 sm:px-8';
 const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 
-// New: dark "quiet luxury" surfaces (no white fog)
-const DARK_SHELL = 'bg-[#07080B] text-white';
-
-const DARK_GLASS =
-  'bg-[rgba(12,13,18,0.72)] backdrop-blur-[18px] ring-1 ring-inset ring-white/10 shadow-[0_40px_140px_rgba(0,0,0,0.55)]';
-
-const DARK_GLASS_SOFT =
-  'bg-[rgba(12,13,18,0.58)] backdrop-blur-[18px] ring-1 ring-inset ring-white/10 shadow-[0_30px_110px_rgba(0,0,0,0.45)]';
+const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+const SHADOW_HERO = 'shadow-[0_70px_170px_rgba(11,12,16,0.16)]';
+const SHADOW_CARD = 'shadow-[0_30px_90px_rgba(11,12,16,0.12)]';
+const GLASS =
+  'bg-white/78 backdrop-blur-[16px] ' +
+  RING +
+  ' ' +
+  SHADOW_CARD;
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className={cx('min-h-[100dvh]', DARK_SHELL)}>
-      {/* Global cinematic stage (dark, controlled, premium) */}
+    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
+      {/* Global paper stage - subtle only */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* Obsidian base wash */}
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_50%_-10%,rgba(255,255,255,0.06),transparent_58%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_20%_10%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_600px_at_85%_0%,rgba(139,92,246,0.10),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_700px_at_10%_90%,rgba(62,196,255,0.08),transparent_62%)]" />
-
-        {/* Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_900px_at_50%_55%,rgba(0,0,0,0.0),rgba(0,0,0,0.55))]" />
-
-        {/* Micro grain */}
-        <div className="absolute inset-0 opacity-[0.045] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] [background-size:26px_26px]" />
+        {/* restrained crown bloom */}
+        <div className="absolute -top-72 left-1/2 h-[820px] w-[1400px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.20),transparent_66%)] blur-3xl" />
+        {/* faint violet edge */}
+        <div className="absolute -top-72 right-[-420px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.10),transparent_66%)] blur-3xl" />
+        {/* micro grain only */}
+        <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
       </div>
 
       <div className="relative">
@@ -95,14 +94,24 @@ function Shell({ children }: { children: ReactNode }) {
 }
 
 /* =========================================================
-   Micro components (premium labels, plates, cards)
+   Micro components (premium plates, section headers)
    ========================================================= */
 
-function SectionKicker({
+function GoldWord({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="bg-clip-text text-transparent bg-[linear-gradient(180deg,#f7e7bf_0%,#e6c980_42%,#b7863a_100%)]">
+      {children}
+    </span>
+  );
+}
+
+function SectionHeader({
+  kicker,
   title,
   subtitle,
   right,
 }: {
+  kicker: string;
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
@@ -110,10 +119,17 @@ function SectionKicker({
   return (
     <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
+        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+          {kicker}
+        </div>
+        <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[26px]">
           {title}
         </div>
-        {subtitle ? <div className="mt-1 text-sm text-white/75">{subtitle}</div> : null}
+        {subtitle ? (
+          <div className="mt-1 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+            {subtitle}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-3">
@@ -124,35 +140,15 @@ function SectionKicker({
   );
 }
 
-function GoldWord({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]">
-      {children}
-    </span>
-  );
-}
-
-type SignalStripItem = {
-  k: string;
-  v: React.ReactNode;
-  hint?: string;
-};
+type SignalStripItem = { k: string; v: React.ReactNode; hint?: string };
 
 function SignalStrip({ items }: { items: SignalStripItem[] }) {
   return (
-    <div
-      className={cx(
-        'relative overflow-hidden rounded-[22px]',
-        'ring-1 ring-inset ring-white/10',
-        'bg-[rgba(12,13,18,0.55)] backdrop-blur-[18px]',
-        'shadow-[0_26px_90px_rgba(0,0,0,0.45)]',
-      )}
-    >
+    <div className={cx('relative overflow-hidden rounded-[22px]', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
       </div>
 
       <div className="relative grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
@@ -161,14 +157,14 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
             key={it.k}
             className={cx(
               'group relative overflow-hidden rounded-2xl',
-              'ring-1 ring-inset ring-white/10',
-              'bg-white/[0.04]',
+              RING,
+              'bg-white/80',
               'px-3 py-2.5 sm:px-3.5 sm:py-3',
             )}
             title={it.hint ?? undefined}
           >
             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.14),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
             </div>
 
             <div className="relative flex items-start justify-between gap-2">
@@ -182,7 +178,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
               </div>
 
               {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full ring-1 ring-inset ring-white/10 bg-white/[0.05] px-2 py-1 text-[10px] tracking-[0.18em] text-white/55 sm:block">
+                <div className="ml-2 hidden shrink-0 rounded-full bg-white/80 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] ring-1 ring-inset ring-[color:var(--hairline)] sm:block">
                   INFO
                 </div>
               ) : null}
@@ -196,62 +192,39 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
 
 function Pillar({ title, body }: { title: string; body: string }) {
   return (
-    <div
-      className={cx(
-        'relative overflow-hidden rounded-[22px] p-5',
-        'ring-1 ring-inset ring-white/10',
-        'bg-[rgba(12,13,18,0.52)] backdrop-blur-[18px]',
-        'shadow-[0_18px_60px_rgba(0,0,0,0.45)]',
-      )}
-    >
+    <div className={cx('relative overflow-hidden rounded-[22px] p-5', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_18%_0%,rgba(231,201,130,0.14),transparent_60%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative">
-        <div className="text-[13px] font-semibold text-white/92">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-white/70">{body}</div>
+        <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
+        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
       </div>
     </div>
   );
 }
-
-function IntelligencePlate({ children }: { children: React.ReactNode }) {
-  return (
-    <div className={cx('relative overflow-hidden rounded-[28px]', DARK_GLASS)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1000px_360px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_85%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
-      </div>
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
-
-/* ---------- Portal vs Truth ---------- */
 
 function PortalVsTruth() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[28px] p-5 sm:p-6', DARK_GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden rounded-[28px] p-5 sm:p-6', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[22px] ring-1 ring-inset ring-white/10 bg-white/[0.03] p-6">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55">
-            LUXURY PORTALS
+        <div className="rounded-[22px] bg-white/82 p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+            Luxury portals
           </div>
           <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
             Beautiful inventory
           </div>
-          <div className="mt-2 text-sm leading-relaxed text-white/70">
-            Great for browsing, but vulnerable to persuasion, missing facts, and theatre.
+          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+            Great for browsing, but vulnerable to persuasion, missing facts and theatre.
           </div>
 
           <ul className="mt-5 space-y-2 text-sm text-white/70">
@@ -270,15 +243,15 @@ function PortalVsTruth() {
           </ul>
         </div>
 
-        <div className="rounded-[22px] ring-1 ring-inset ring-white/10 bg-white/[0.02] p-6">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55">
-            VANTERA
+        <div className="rounded-[22px] bg-[color:var(--paper-2)] p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+            Vantera
           </div>
           <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
             Quiet intelligence
           </div>
-          <div className="mt-2 text-sm leading-relaxed text-white/70">
-            Built for signal: value, liquidity, and risk, with verification-first outputs.
+          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+            Built for signal: value, liquidity and risk, with verification-first outputs.
           </div>
 
           <ul className="mt-5 space-y-2 text-sm text-white/70">
@@ -301,8 +274,6 @@ function PortalVsTruth() {
   );
 }
 
-/* ---------- Feature card ---------- */
-
 function FeatureCard({
   eyebrow,
   title,
@@ -315,24 +286,20 @@ function FeatureCard({
   bullets: string[];
 }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[28px] p-6', DARK_GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden rounded-[28px] p-6', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative">
         <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
           {eyebrow}
         </div>
-
-        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
+        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
           {title}
         </div>
-
-        <div className="mt-2 text-sm leading-relaxed text-white/70">
-          {body}
-        </div>
+        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
         <ul className="mt-5 space-y-2 text-sm text-white/70">
           {bullets.map((b) => (
@@ -347,30 +314,26 @@ function FeatureCard({
   );
 }
 
-/* ---------- CTA ---------- */
-
 function CTA() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-6 sm:p-10', DARK_GLASS)}>
+    <div className={cx('relative overflow-hidden rounded-[30px] p-6 sm:p-10', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
       </div>
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
-            PRIVATE ACCESS
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+            Private access
           </div>
-
-          <div className="mt-2 text-[26px] font-semibold tracking-[-0.02em] text-white/92 sm:text-[30px]">
+          <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
             Bring a serious asset or a serious buyer
           </div>
-
-          <div className="mt-2 max-w-[70ch] text-sm leading-relaxed text-white/70">
-            Vantera is built for private sellers, advisors, and agents who want verification, clarity, and speed.
-            <span className="text-white/55"> Signal only.</span>
+          <div className="mt-2 max-w-[74ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+            Vantera is built for private sellers, advisors and agents who want verification, clarity and speed.
+            <span className="text-[color:var(--ink-3)]"> Signal only.</span>
           </div>
         </div>
 
@@ -379,9 +342,10 @@ function CTA() {
             href="/coming-soon?flow=sell"
             className={cx(
               'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white/90 hover:bg-white',
-              'text-black',
-              'shadow-[0_18px_50px_rgba(0,0,0,0.35)]',
+              'bg-white hover:bg-white',
+              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
+              'text-[color:var(--ink)]',
+              'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
             )}
           >
             Submit a private seller
@@ -405,7 +369,10 @@ function CTA() {
 }
 
 /* =========================================================
-   HOME PAGE
+   HOME PAGE (flagship rebuild)
+   - Ultra-wide hero (real estate editorial)
+   - No grey fog, no washed whites
+   - Clean hierarchy, more "institutional"
    ========================================================= */
 
 export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
@@ -414,48 +381,56 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
   return (
     <Shell>
-      {/* HERO - Dark, premium, search-first */}
-      <section className="relative w-full pb-10 pt-10 sm:pb-14 sm:pt-12">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-        <div className={cx('relative', WIDE)}>
-          <div className={cx('relative overflow-hidden rounded-[34px]', DARK_GLASS)}>
-            {/* Cinematic portal layers, but controlled (no white wash) */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-screen">
+      {/* HERO */}
+      <section className="relative w-full pt-10 sm:pt-12">
+        <div className={WIDE}>
+          <div
+            className={cx(
+              'relative overflow-hidden rounded-[34px] bg-white/82',
+              'ring-1 ring-inset ring-[color:var(--hairline)]',
+              SHADOW_HERO,
+            )}
+          >
+            {/* section-only premium aura */}
+            <div className="pointer-events-none absolute inset-0">
               <RoyalPortalBackdrop />
             </div>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-screen">
+            <div className="pointer-events-none absolute inset-0 opacity-[0.18]">
               <HeroGoldCrown />
             </div>
 
-            {/* Hero ambient */}
+            {/* crisp editorial wash (keeps whites white) */}
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_0%,rgba(231,201,130,0.14),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.12),transparent_62%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.0),rgba(0,0,0,0.35))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.14),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_86%_0%,rgba(139,92,246,0.08),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.92),rgba(255,255,255,0.86),rgba(255,255,255,0.78))]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
             </div>
 
-            <div className="relative px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14 2xl:px-20 2xl:py-16">
+            <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-12 lg:py-16 2xl:px-16 2xl:py-18">
               <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-                {/* LEFT: Narrative + Search */}
+                {/* LEFT */}
                 <div className="lg:col-span-7">
                   <PremiumBadgeRow />
 
-                  <h1 className="mt-7 text-balance text-[42px] font-semibold tracking-[-0.035em] text-white sm:text-6xl lg:text-[72px] lg:leading-[1.02] 2xl:text-[80px]">
+                  <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[78px] lg:leading-[1.01] 2xl:text-[86px]">
                     Private intelligence for the world&apos;s{' '}
                     <span className="inline">
                       <GoldWord>most valuable assets</GoldWord>
                     </span>
                   </h1>
 
-                  <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-white/75 sm:text-lg">
-                    Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value signal over noise.
-                    <span className="text-white/55"> Built to model value, liquidity, and risk without theatre.</span>
+                  <p className="mt-4 max-w-[84ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
+                    Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
+                    <span className="text-[color:var(--ink-3)]">
+                      {' '}
+                      Built to model value, liquidity and risk without theatre.
+                    </span>
                   </p>
 
-                  {/* Primary: OmniSearch (hero element) */}
-                  <div className="mt-7 max-w-[860px]">
+                  {/* Primary search */}
+                  <div className="mt-7 max-w-[1240px]">
                     <VanteraOmniSearch
                       cities={cities as any}
                       clusters={REGION_CLUSTERS as any}
@@ -463,7 +438,16 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                     />
                   </div>
 
-                  <div className="mt-6 max-w-[860px]">
+                  {/* Secondary: intent console */}
+                  <div className="mt-5 max-w-[1240px]">
+                    <IntentHero
+                      cities={cities as any}
+                      defaultTop={6}
+                      onKeepScanningId="explore-index"
+                    />
+                  </div>
+
+                  <div className="mt-6 max-w-[1240px]">
                     <SignalStrip
                       items={[
                         { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
@@ -475,19 +459,23 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                     />
                   </div>
 
-                  <div className="mt-6 grid max-w-[860px] gap-3 sm:grid-cols-3">
+                  <div className="mt-6 grid max-w-[1240px] gap-3 sm:grid-cols-3">
                     <Pillar title="Paperwork" body="See what is missing before you waste time." />
                     <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
                     <Pillar title="Risk radar" body="Catch resale killers early." />
                   </div>
-
-                  <div className="mt-10 hidden lg:block h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                 </div>
 
-                {/* RIGHT: Featured markets dossier */}
+                {/* RIGHT */}
                 <div className="lg:col-span-5">
-                  <IntelligencePlate>
-                    <div className="px-6 py-6 sm:px-7 sm:py-7">
+                  <div className={cx('relative overflow-hidden rounded-[28px] p-6 sm:p-7', GLASS)}>
+                    <div className="pointer-events-none absolute inset-0">
+                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+                      <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+                    </div>
+
+                    <div className="relative">
                       <div className="flex items-start justify-between gap-4">
                         <div className="min-w-0">
                           <div className="text-[11px] font-semibold tracking-[0.28em] text-white/55 uppercase">
@@ -496,14 +484,14 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                           <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-white/92">
                             Private intelligence, city-first
                           </div>
-                          <div className="mt-1 text-sm leading-relaxed text-white/70">
-                            Tap a market to open its intelligence - pricing reality, liquidity read, and risk flags.
+                          <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                            Tap a market to open its intelligence - pricing reality, liquidity read and risk flags.
                           </div>
                         </div>
 
-                        <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/12 px-3 py-1.5">
-                          <div className="h-2 w-2 rounded-full bg-emerald-400/80" />
-                          <div className="text-[11px] tracking-[0.22em] text-white/60">
+                        <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                          <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
+                          <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
                             UPDATED WEEKLY
                           </div>
                         </div>
@@ -513,8 +501,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
                       </div>
 
-                      <div className="mt-5 rounded-[20px] bg-white/[0.03] ring-1 ring-inset ring-white/10 px-5 py-4">
-                        <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
+                      <div className="mt-5 rounded-[20px] bg-white/85 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                           House rule
                         </div>
                         <div className="mt-1 text-sm text-white/70">
@@ -522,58 +510,78 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         </div>
                       </div>
                     </div>
-                  </IntelligencePlate>
+                  </div>
+
+                  <div className="mt-4 rounded-[26px] bg-white/70 p-6 ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_22px_70px_rgba(11,12,16,0.10)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
+                        Proof stack
+                      </div>
+                      <div className="text-[11px] text-[color:var(--ink-3)]">Preview</div>
+                    </div>
+
+                    <div className="mt-3 grid gap-2">
+                      <div className="rounded-2xl bg-white/85 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                        <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          SOURCE
+                        </div>
+                        <div className="mt-1 text-sm text-[color:var(--ink-2)]">
+                          Logged, cross-checked, traceable.
+                        </div>
+                      </div>
+                      <div className="rounded-2xl bg-white/85 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                        <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          SIGNAL
+                        </div>
+                        <div className="mt-1 text-sm text-[color:var(--ink-2)]">
+                          Price reality, liquidity read, risk flags.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 text-sm text-[color:var(--ink-3)]">
+                      Portals show inventory. Vantera shows what matters before you fly in.
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div className="mt-10">
-                <SectionKicker title="Why this exists" subtitle="This is why we sit above luxury portals" />
+                <SectionHeader
+                  kicker="Why this exists"
+                  title="Above the portal layer"
+                  subtitle="A discipline: verification-first, signal-first, engineered for high-value decisions."
+                />
                 <PortalVsTruth />
               </div>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Intent is now a separate premium section (not cluttering hero) */}
-      <section className="mt-8 sm:mt-10">
-        <div className={WIDE}>
-          <SectionKicker
-            title="Intent discovery"
-            subtitle="Pick a mandate, then let Vantera surface the best starting markets"
-            right={
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/12 px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-white/60">DISCOVERY</div>
-              </div>
-            }
+        {/* Trust tape - centered, clean */}
+        <div className={cx('mt-10 sm:mt-12', MID)}>
+          <TrustMarquee
+            className="!mt-0"
+            brands={[
+              { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+              { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+              { name: 'Knight Frank', domain: 'knightfrank.com' },
+              { name: 'Savills', domain: 'savills.com' },
+              { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+              { name: 'BARNES', domain: 'barnes-international.com' },
+              { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+              { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
+              { name: 'Compass', domain: 'compass.com', invert: false },
+              { name: 'CBRE', domain: 'cbre.com', invert: false },
+              { name: 'JLL', domain: 'jll.com', invert: false },
+              { name: 'RE/MAX', domain: 'remax.com' },
+              { name: 'BHHS', domain: 'bhhs.com' },
+              { name: 'Corcoran', domain: 'corcoran.com', invert: false },
+              { name: 'Century 21', domain: 'century21.com', invert: false },
+            ]}
           />
-          <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
         </div>
       </section>
-
-      {/* TRUST - keep for now, but it will be redesigned later for dark mode */}
-      <div className={cx('relative mt-10', NARROW)}>
-        <TrustMarquee
-          className="opacity-90"
-          brands={[
-            { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-            { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-            { name: 'Knight Frank', domain: 'knightfrank.com' },
-            { name: 'Savills', domain: 'savills.com' },
-            { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-            { name: 'BARNES', domain: 'barnes-international.com' },
-            { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-            { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-            { name: 'Compass', domain: 'compass.com', invert: false },
-            { name: 'CBRE', domain: 'cbre.com', invert: false },
-            { name: 'JLL', domain: 'jll.com' },
-            { name: 'RE/MAX', domain: 'remax.com' },
-            { name: 'BHHS', domain: 'bhhs.com' },
-            { name: 'Corcoran', domain: 'corcoran.com', invert: false },
-            { name: 'Century 21', domain: 'century21.com', invert: false },
-          ]}
-        />
-      </div>
 
       {/* BODY */}
       <section className="mt-12 sm:mt-14">
@@ -584,12 +592,15 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
       <section className="mt-12 sm:mt-16">
         <div className={WIDE}>
-          <SectionKicker
-            title="Featured intelligence"
-            subtitle="Believable, not fake listings"
+          <SectionHeader
+            kicker="Featured intelligence"
+            title="Believable, not fake listings"
+            subtitle="A product layer built for decisions, not screenshots."
             right={
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/12 px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-white/60">PROOF FIRST</div>
+              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/75 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+                  PROOF FIRST
+                </div>
               </div>
             }
           />
@@ -599,7 +610,12 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
       <section className="mt-14 sm:mt-18">
         <div className={NARROW}>
-          <SectionKicker title="Why Vantera wins" subtitle="Plain language, high precision" />
+          <SectionHeader
+            kicker="Why Vantera wins"
+            title="Plain language, high precision"
+            subtitle="The same standards clients expect from institutions, applied to real estate intelligence."
+          />
+
           <div className="grid gap-4 lg:grid-cols-3">
             <FeatureCard
               eyebrow="Truth-first"
@@ -610,14 +626,22 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             <FeatureCard
               eyebrow="Verification"
               title="Permits, ownership, and risk flags"
-              body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent, and what must be verified next."
-              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
+              body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
+              bullets={[
+                'Turns paperwork into plain language',
+                'Surfaces missing documents fast',
+                'Flags resale killers early',
+              ]}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
-              body="Vantera watches the market behaviour that matters: what sells, what stalls, and what the next buyer will pay for."
-              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
+              body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
+              bullets={[
+                'Demand signals over hype',
+                'Comparables that match reality',
+                'Designed for advisors and sellers',
+              ]}
             />
           </div>
         </div>
@@ -625,44 +649,32 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
       <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-18">
         <div className={WIDE}>
-          <SectionKicker
-            title="Explore the index"
-            subtitle="Coverage that feels alive"
+          <SectionHeader
+            kicker="Explore the index"
+            title="Coverage that feels alive"
+            subtitle="Fast scan for where value is forming, where risk is hiding and where liquidity is strongest."
             right={
               <div className="hidden sm:block">
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl ring-1 ring-inset ring-white/12 bg-white/[0.04]">
-                  <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
+                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white/85 ring-1 ring-inset ring-[color:var(--hairline)]">
+                  <Image
+                    src="/brand/vantera-mark.png"
+                    alt="Vantera"
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               </div>
             }
           />
 
-          <div className={cx('relative overflow-hidden rounded-[32px] p-5 sm:p-7', DARK_GLASS)}>
+          <div className={cx('relative overflow-hidden rounded-[32px] p-5 sm:p-7', GLASS)}>
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.10),transparent_62%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
             </div>
 
-            <div className="relative flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <div className="text-[11px] font-semibold tracking-[0.26em] text-white/55 uppercase">
-                  Cities
-                </div>
-                <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-white/92">
-                  Browse coverage with signal
-                </div>
-                <div className="mt-1 text-sm text-white/70">
-                  Fast scan for where value is forming, where risk is hiding, and where liquidity is strongest.
-                </div>
-              </div>
-
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/[0.05] ring-1 ring-inset ring-white/12 px-3 py-1.5">
-                <div className="text-[11px] tracking-[0.22em] text-white/60">ENTRY POINTS</div>
-              </div>
-            </div>
-
-            <div className="relative mt-6">
+            <div className="relative mt-1">
               <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
             </div>
           </div>
