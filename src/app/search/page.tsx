@@ -1,6 +1,17 @@
 // src/app/search/page.tsx
+import type { Metadata } from 'next';
+
 import SearchResultsPageClient from '@/components/search/SearchResultsPageClient';
 import { prisma } from '@/lib/prisma';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export const metadata: Metadata = {
+  title: 'Search · Vantera',
+  description: 'Search the €2M+ luxury marketplace.',
+};
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -199,7 +210,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         })
       : [];
 
-  const listings: ListingCard[] = rows.map((l) => ({
+  const listings = rows.map((l) => ({
     id: l.id,
     slug: l.slug,
     title: l.title,
