@@ -8,9 +8,9 @@ type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
   alt: string;
   fallback?: React.ReactNode;
 
-  // allow callers to attach handlers again
-  onLoad?: ImageProps['onLoad'];
-  onError?: ImageProps['onError'];
+  // Allow parent components to react (e.g. setOk(false))
+  onLoad?: () => void;
+  onError?: () => void;
 };
 
 /**
@@ -19,7 +19,7 @@ type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
  * - Shows a premium shimmer while loading.
  * - Smooth fade-in on load (no harsh pop).
  * - Resets correctly when src changes.
- * - Retries once on transient CDN failures.
+ * - Allows optional parent callbacks onLoad/onError (typed).
  */
 export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: Props) {
   const srcKey = typeof props.src === 'string' ? props.src : (props.src as any)?.src ?? String(props.src);
@@ -65,37 +65,37 @@ export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: 
     );
   }, [fallback]);
 
-  // If image failed (after retry), show fallback only.
   if (failed) return <>{safeFallback}</>;
 
   return (
     <div className="absolute inset-0">
-      {/* fallback stays under image until it fully loads */}
       {!loaded ? <>{safeFallback}</> : null}
 
       <Image
         {...props}
         alt={alt}
-        onLoad={(e) => {
+        onLoad={() => {
           setLoaded(true);
-          onLoad?.(e);
+          onLoad?.();
         }}
-        onError={(e) => {
-          onError?.(e);
+        onError={() => {
+          // Let parent react immediately (e.g. setOk(false))
+          onError?.();
 
           const already = retriedRef.current[srcKey] === true;
           if (!already) {
             retriedRef.current[srcKey] = true;
-            // keep shimmer and let Next try again (CDN transient)
             setLoaded(false);
+            // one retry: re-render is enough for Next/Image to retry fetch
             return;
           }
-
           setFailed(true);
         }}
-        className={[props.className ?? '', 'transition-opacity duration-500', loaded ? 'opacity-100' : 'opacity-0'].join(
-          ' ',
-        )}
+        className={[
+          props.className ?? '',
+          'transition-opacity duration-500',
+          loaded ? 'opacity-100' : 'opacity-0',
+        ].join(' ')}
       />
     </div>
   );
