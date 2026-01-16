@@ -40,13 +40,13 @@ function isEditableTarget(el: Element | null) {
  */
 function dispatchFocusSearch() {
   window.dispatchEvent(new CustomEvent('vantera:focus-search'));
-  // legacy bridge (remove later when all listeners are migrated)
+  // legacy bridge
   window.dispatchEvent(new CustomEvent('locus:focus-search'));
 }
 
 function dispatchTab(tab: 'truth' | 'supply') {
   window.dispatchEvent(new CustomEvent('vantera:tab', { detail: { tab } }));
-  // legacy bridge (remove later when all listeners are migrated)
+  // legacy bridge
   window.dispatchEvent(new CustomEvent('locus:tab', { detail: { tab } }));
 }
 
@@ -88,14 +88,13 @@ function useHotkeys(pathname: string | null, router: ReturnType<typeof useRouter
       if (wantsSearch) {
         e.preventDefault();
 
-        // Primary: go to results search page
         if (pathname !== '/search') {
           router.push('/search');
           return;
         }
 
-        // Optional: if you still want the homepage omni modal behavior later,
-        // swap to dispatchFocusSearch() here.
+        // If you ever want to focus an inline search (home hero etc), swap:
+        // dispatchFocusSearch();
       }
     };
 
@@ -304,12 +303,12 @@ export default function TopBar() {
 
   function openMegaSoon() {
     cancelTimers();
-    openT.current = window.setTimeout(() => setMegaOpen(true), 85);
+    openT.current = window.setTimeout(() => setMegaOpen(true), 70);
   }
 
   function closeMegaSoon() {
     cancelTimers();
-    closeT.current = window.setTimeout(() => setMegaOpen(false), 190);
+    closeT.current = window.setTimeout(() => setMegaOpen(false), 160);
   }
 
   function toggleMega() {
@@ -322,6 +321,8 @@ export default function TopBar() {
       router.push('/search');
       return;
     }
+    // If you want "focus on search" behavior later:
+    // dispatchFocusSearch();
   }
 
   // routes
@@ -348,39 +349,38 @@ export default function TopBar() {
     return buildSearchHref({ collection: key });
   }
 
-  // White royal visual system (pure white glass + gold accents)
+  // Visual system (pure white glass, hairlines, restrained gold)
   const goldText =
-    'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_45%,#8a5b12_100%)]';
+    'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_48%,#8a5b12_100%)]';
 
   const BAR_INNER =
-    'mx-auto flex w-full max-w-[1720px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
+    'mx-auto flex w-full max-w-[1760px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
 
   const barShell = cx(
     'relative w-full',
     'backdrop-blur-[18px]',
-    scrolled ? 'bg-[rgba(255,255,255,0.86)]' : 'bg-[rgba(255,255,255,0.78)]',
+    scrolled ? 'bg-[rgba(255,255,255,0.90)]' : 'bg-[rgba(255,255,255,0.80)]',
   );
 
-  // no uppercase for menu links
-  const pillBase = 'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] transition select-none';
+  const hairline = 'ring-1 ring-inset ring-black/[0.08]';
+  const hairlineHover = 'hover:ring-black/[0.12]';
+  const softShadow = scrolled ? 'shadow-[0_18px_70px_rgba(0,0,0,0.12)]' : 'shadow-[0_10px_50px_rgba(0,0,0,0.08)]';
 
-  const navPill = cx(
-    pillBase,
-    'text-slate-900/78 hover:text-slate-900',
-    'bg-black/[0.035] hover:bg-black/[0.055]',
-    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
-  );
+  const pillBase =
+    'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-medium transition select-none';
+
+  const navPill = cx(pillBase, 'text-slate-900/76 hover:text-slate-900', 'bg-black/[0.03] hover:bg-black/[0.05]', hairline, hairlineHover);
 
   const navPillActive = cx(
     pillBase,
     'text-slate-900',
-    'bg-black/[0.055]',
+    'bg-black/[0.05]',
     'ring-1 ring-inset ring-[rgba(185,133,51,0.22)]',
   );
 
   const signatureSearch =
     'inline-flex h-10 items-center gap-2 rounded-full px-4 transition ' +
-    'bg-[linear-gradient(180deg,rgba(0,0,0,0.040),rgba(0,0,0,0.028))] ' +
+    'bg-[linear-gradient(180deg,rgba(0,0,0,0.040),rgba(0,0,0,0.026))] ' +
     'ring-1 ring-inset ring-black/[0.10] hover:ring-[rgba(185,133,51,0.22)] ' +
     'shadow-[0_18px_52px_rgba(0,0,0,0.10)]';
 
@@ -391,22 +391,20 @@ export default function TopBar() {
     'shadow-[0_22px_64px_rgba(0,0,0,0.12)]';
 
   const subtleText = 'text-slate-700/80';
-  const strongText = 'text-slate-900';
   const borderSoft = 'border-black/[0.08]';
   const ringSoft = 'ring-black/[0.10]';
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      {/* Royal crown rail */}
+      {/* Crown rail */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[60] h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-90" />
 
-      {/* Full-bleed bar */}
-      <div className={barShell}>
-        {/* Ambient depth + crown glow */}
+      <div className={cx(barShell, softShadow)}>
+        {/* Ambient depth + bottom hairline */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1100px_220px_at_50%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
           <div className={cx('absolute inset-x-0 bottom-0 h-px', borderSoft)} />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),transparent_40%,rgba(0,0,0,0.05))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.015),transparent_40%,rgba(0,0,0,0.045))]" />
         </div>
 
         <div className={cx('relative', BAR_INNER)}>
@@ -415,7 +413,8 @@ export default function TopBar() {
             <div
               className={cx(
                 'relative flex items-center gap-3 rounded-full pl-3 pr-4 py-2',
-                'bg-black/[0.035] ring-1 ring-inset ring-black/[0.10]',
+                'bg-black/[0.03]',
+                'ring-1 ring-inset ring-black/[0.10]',
                 'shadow-[0_16px_48px_rgba(0,0,0,0.10)]',
               )}
             >
@@ -456,7 +455,7 @@ export default function TopBar() {
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
                 </button>
 
-                {/* Mega panel (white gateway, not directory) */}
+                {/* Mega panel */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -465,11 +464,11 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'fixed left-1/2 top-[78px] z-[80] mt-0 w-[1320px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'fixed left-1/2 top-[78px] z-[80] w-[1320px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'rounded-[34px] overflow-hidden',
-'bg-[rgba(255,255,255,0.92)] backdrop-blur-[22px]',
-'shadow-[0_60px_180px_rgba(0,0,0,0.22)]',
-'ring-1 ring-inset ring-[rgba(185,133,51,0.18)]',
+                    'bg-[rgba(255,255,255,0.92)] backdrop-blur-[22px]',
+                    'shadow-[0_60px_180px_rgba(0,0,0,0.22)]',
+                    'ring-1 ring-inset ring-[rgba(185,133,51,0.18)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
@@ -478,24 +477,17 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Places menu"
                 >
-                  {/* Crown rail inside panel */}
-<div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.62)] to-transparent opacity-95" />
+                  {/* Crown rail */}
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.62)] to-transparent opacity-95" />
 
-{/* Rich aura + glass depth */}
-<div className="pointer-events-none absolute inset-0">
-  {/* warm crown halo */}
-  <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(1100px_360px_at_50%_0%,rgba(185,133,51,0.14),transparent_62%)]" />
-
-  {/* side auras (adds richness without going dark) */}
-  <div className="absolute -left-28 top-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.10)] blur-3xl" />
-  <div className="absolute -right-28 bottom-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.08)] blur-3xl" />
-
-  {/* subtle vignette for depth */}
-  <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_20%,transparent_52%,rgba(0,0,0,0.06)_100%)]" />
-
-  {/* micro-glass shading */}
-  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.015),transparent_38%,rgba(0,0,0,0.05))]" />
-</div>
+                  {/* Aura */}
+                  <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-x-0 top-0 h-44 bg-[radial-gradient(1100px_360px_at_50%_0%,rgba(185,133,51,0.14),transparent_62%)]" />
+                    <div className="absolute -left-28 top-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.10)] blur-3xl" />
+                    <div className="absolute -right-28 bottom-10 h-80 w-80 rounded-full bg-[rgba(185,133,51,0.08)] blur-3xl" />
+                    <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_20%,transparent_52%,rgba(0,0,0,0.06)_100%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.012),transparent_38%,rgba(0,0,0,0.045))]" />
+                  </div>
 
                   {/* Header */}
                   <div className={cx('relative flex items-center justify-between gap-4 px-7 py-6 border-b', borderSoft)}>
@@ -635,8 +627,8 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'group relative overflow-hidden rounded-2xl px-4 py-3.5 transition',
-                              'bg-[linear-gradient(180deg,rgba(0,0,0,0.030),rgba(0,0,0,0.020))]',
-                              'hover:bg-[linear-gradient(180deg,rgba(0,0,0,0.050),rgba(0,0,0,0.030))]',
+                              'bg-[linear-gradient(180deg,rgba(0,0,0,0.028),rgba(0,0,0,0.018))]',
+                              'hover:bg-[linear-gradient(180deg,rgba(0,0,0,0.048),rgba(0,0,0,0.028))]',
                               'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
                             )}
                             role="menuitem"
@@ -681,7 +673,7 @@ export default function TopBar() {
                     {/* Actions */}
                     <div className="col-span-4">
                       <div className="grid gap-3">
-                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
                           <div className={cx('px-4 py-3 border-b', borderSoft)}>
                             <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Start</div>
                             <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
@@ -725,7 +717,7 @@ export default function TopBar() {
                           </div>
                         </div>
 
-                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
                           <div className={cx('px-4 py-3 border-b', borderSoft)}>
                             <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>
                               Private network
@@ -800,6 +792,28 @@ export default function TopBar() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Footer strip inside mega */}
+                  <div className={cx('relative px-7 py-5 border-t', borderSoft)}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-[12px] text-slate-700/80">
+                        Editorial gateway. The product is the search.
+                      </div>
+                      <Link
+                        href="/search"
+                        prefetch
+                        onClick={() => setMegaOpen(false)}
+                        className={cx(
+                          'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
+                          'bg-black/[0.03] hover:bg-black/[0.05]',
+                          'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
+                          'text-slate-900/80 hover:text-slate-900',
+                        )}
+                      >
+                        Open search <ArrowRight className="h-4 w-4 opacity-70" />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -837,7 +851,7 @@ export default function TopBar() {
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
                 'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition lg:hidden',
-                'bg-black/[0.035] hover:bg-black/[0.055]',
+                'bg-black/[0.03] hover:bg-black/[0.05]',
                 'ring-1 ring-inset ring-black/[0.10] hover:ring-black/[0.14]',
                 'text-slate-900/80 hover:text-slate-900',
               )}
@@ -898,7 +912,7 @@ export default function TopBar() {
 
           <div className="relative space-y-4 px-5 py-5">
             {/* Search first */}
-            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
               <div className={cx('px-4 py-3 border-b', borderSoft)}>
                 <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Search</div>
                 <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
@@ -961,7 +975,7 @@ export default function TopBar() {
             </div>
 
             {/* Places */}
-            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
               <div className={cx('px-4 py-3 border-b', borderSoft)}>
                 <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Getaway</div>
                 <div className="mt-1 text-xs text-slate-700/80">Countries and top cities.</div>
@@ -1014,7 +1028,7 @@ export default function TopBar() {
             </div>
 
             {/* Minimal nav */}
-            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
               <div className={cx('px-4 py-3 border-b', borderSoft)}>
                 <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Navigation</div>
                 <div className="mt-1 text-xs text-slate-700/80">Public entry points.</div>
@@ -1078,7 +1092,7 @@ export default function TopBar() {
 
             {/* City page switch */}
             {onCityPage ? (
-              <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+              <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.022]')}>
                 <div className={cx('px-4 py-3 border-b', borderSoft)}>
                   <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>City view</div>
                   <div className="mt-1 text-xs text-slate-700/80">Switch: facts (T) or live market (L).</div>
