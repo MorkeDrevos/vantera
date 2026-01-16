@@ -4,187 +4,29 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   VANTERA - Royal Premium Editorial System (Light)
-   Non-negotiables:
-   - Text is ALWAYS readable (no near-white-on-white accidents)
-   - Premium paper + depth (subtle gold + graphite nuance)
-   - Strong base typography + focus + selection polish
-   - Components can still theme themselves, but globals set the floor
-============================================================ */
-
 html,
 body {
   height: 100%;
 }
 
 :root {
-  color-scheme: light;
-
-  /* -----------------------------
-     Paper + Surfaces
-  ------------------------------ */
-  --paper: #fbfbfa;
-  --paper-2: #f4f3f0;
-  --paper-3: #eceae4;
-
-  --surface-1: rgba(255, 255, 255, 0.94);
-  --surface-2: rgba(255, 255, 255, 0.84);
-  --surface-3: rgba(255, 255, 255, 0.72);
-
-  /* -----------------------------
-     Ink (stronger contrast)
-  ------------------------------ */
-  --ink: rgba(10, 12, 16, 0.96);
-  --ink-2: rgba(10, 12, 16, 0.80);
-  --ink-3: rgba(10, 12, 16, 0.60);
-  --ink-4: rgba(10, 12, 16, 0.42);
-
-  /* -----------------------------
-     Lines + Depth
-  ------------------------------ */
-  --hairline: rgba(10, 12, 16, 0.12);
-  --hairline-2: rgba(10, 12, 16, 0.18);
-  --shadow-1: 0 10px 30px rgba(10, 12, 16, 0.07);
-  --shadow-2: 0 22px 60px rgba(10, 12, 16, 0.10);
-
-  /* -----------------------------
-     Royal accents (tasteful)
-  ------------------------------ */
-  --gold-1: #f7edcf;
-  --gold-2: #e6c980;
-  --gold-3: #b7863a;
-
-  --graphite: #141923;
-  --royal: #262c3f;
-
-  /* -----------------------------
-     UX polish
-  ------------------------------ */
-  --focus: rgba(183, 134, 58, 0.46);
-  --selection: rgba(183, 134, 58, 0.18);
-
-  /* Radii */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 18px;
-
-  /* Typography rhythm */
-  --track-tight: -0.015em;
-  --track-normal: -0.005em;
+  color-scheme: light; /* important: stop dark UA defaults */
 }
 
-html {
-  text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-}
-
-/* The “premium paper” background lives on BODY so hero can still go full-bleed */
 body {
-  background:
-    radial-gradient(1200px 720px at 18% -12%, rgba(230, 201, 128, 0.18), rgba(251, 251, 250, 0) 58%),
-    radial-gradient(900px 520px at 80% -10%, rgba(20, 25, 35, 0.08), rgba(251, 251, 250, 0) 55%),
-    linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
-  color: var(--ink);
-
+  background: #ffffff; /* PURE WHITE */
+  color: #0f172a;      /* slate-900 default text */
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  line-height: 1.5;
-  letter-spacing: var(--track-normal);
-  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-  font-variant-numeric: tabular-nums;
-
-  /* Prevent sideways scroll from glows/absolute layers */
-  overflow-x: hidden;
 }
 
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Selection */
 ::selection {
-  background: var(--selection);
-}
-
-/* ============================================================
-   Base readability floor (this is what fixes “too bright” text)
-============================================================ */
-
-p {
-  color: var(--ink-2);
-}
-
-small {
-  color: var(--ink-3);
-}
-
-strong {
-  color: var(--ink);
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: var(--ink);
-  letter-spacing: var(--track-tight);
-}
-
-/* Links: dark + elegant, not electric blue */
-a {
-  color: var(--royal);
-  text-decoration: none;
-  text-underline-offset: 3px;
-}
-a:hover {
-  text-decoration: underline;
-}
-
-/* Subtle separators on white */
-hr {
-  border: 0;
-  height: 1px;
-  background: var(--hairline);
-}
-
-/* Inputs: kill the “white placeholder / unreadable input” issue */
-input,
-textarea,
-select {
-  color: var(--ink);
-}
-::placeholder {
-  color: var(--ink-4);
-}
-
-/* Code blocks */
-pre {
-  background: rgba(10, 12, 16, 0.03);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-}
-code {
-  color: var(--ink);
-}
-
-/* Focus states: expensive + visible */
-:where(button, a, input, textarea, select, [role="button"], [tabindex]):focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px var(--focus);
-  border-radius: 12px;
-}
-
-/* Scrollbars (subtle) */
-@supports (scrollbar-color: auto) {
-  * {
-    scrollbar-color: rgba(10, 12, 16, 0.22) rgba(10, 12, 16, 0.06);
-    scrollbar-width: thin;
-  }
+  background: rgba(185, 133, 51, 0.18); /* subtle gold selection */
 }
 
 /* Respect reduced motion */
@@ -196,8 +38,5 @@ code {
   *::before,
   *::after {
     scroll-behavior: auto !important;
-    transition-duration: 0.001ms !important;
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
   }
 }
