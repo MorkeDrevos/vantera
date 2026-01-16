@@ -4,9 +4,21 @@
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Command, MapPin, Search, Sparkles, X, Home, Building2, Waves, Shield } from 'lucide-react';
+import {
+  ArrowRight,
+  Command,
+  MapPin,
+  Search,
+  Sparkles,
+  X,
+  Home,
+  Building2,
+  Waves,
+  Shield,
+  Clock,
+} from 'lucide-react';
 
-type PlaceKind = 'city' | 'region' | 'search';
+type PlaceKind = 'city' | 'region' | 'search' | 'recent';
 
 export type OmniCity = {
   slug: string;
@@ -63,7 +75,8 @@ type PlaceHit = {
   score: number;
   reasons: string[];
   href: string;
-  icon?: 'pin' | 'sparkles' | 'search';
+  icon?: 'pin' | 'sparkles' | 'search' | 'recent';
+  group?: 'Action' | 'Cities' | 'Regions' | 'Recent';
 };
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -438,6 +451,7 @@ function buildPlaceHits(args: {
       reasons,
       href: `/city/${c.slug}`,
       icon: 'pin',
+      group: 'Cities',
     });
   }
 
@@ -465,6 +479,7 @@ function buildPlaceHits(args: {
       reasons,
       href: `/coming-soon?region=${encodeURIComponent(r.name)}`,
       icon: 'sparkles',
+      group: 'Regions',
     });
   }
 
@@ -495,6 +510,7 @@ function iconFor(h: PlaceHit) {
   const cls = 'h-4 w-4 text-[color:var(--ink-2)]';
   if (h.icon === 'search') return <Search className={cls} />;
   if (h.icon === 'pin') return <MapPin className={cls} />;
+  if (h.icon === 'recent') return <Clock className={cls} />;
   return <Sparkles className={cls} />;
 }
 
@@ -510,7 +526,6 @@ function mergeQuery(current: string, patch: string) {
   if (!a) return b;
   if (!b) return a;
 
-  // avoid duplicates like "villa villa"
   const aN = normalize(a);
   const bN = normalize(b);
   if (aN.includes(bN)) return a;
@@ -524,6 +539,37 @@ type QuickAction = {
   patch: string;
   icon: React.ReactNode;
 };
+
+const RECENTS_KEY = 'vantera.omni.recents.v1';
+
+function readRecents(): string[] {
+  try {
+    const raw = window.localStorage.getItem(RECENTS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((x) => String(x)).filter(Boolean).slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
+function writeRecents(next: string[]) {
+  try {
+    window.localStorage.setItem(RECENTS_KEY, JSON.stringify(next.slice(0, 6)));
+  } catch {
+    // ignore
+  }
+}
+
+function pushRecent(q: string) {
+  const s = q.trim();
+  if (!s) return;
+  const existing = readRecents();
+  const n = normalize(s);
+  const next = [s, ...existing.filter((x) => normalize(x) !== n)];
+  writeRecents(next);
+}
 
 export default function VanteraOmniSearch({
   cities,
@@ -550,6 +596,9 @@ export default function VanteraOmniSearch({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
+  const [recents, setRecents] = useState<string[]>([]);
+
+  const listboxId = `${id}-listbox`;
 
   const parse = useMemo<ParseResult>(() => {
     const raw = q.trim();
@@ -582,25 +631,10 @@ export default function VanteraOmniSearch({
   const quick: QuickAction[] = useMemo(
     () => [
       { label: 'villa', hint: 'private, space, gardens', patch: 'villa', icon: <Home className="h-4 w-4" /> },
-      {
-        label: 'apartment',
-        hint: 'lock up and go',
-        patch: 'apartment',
-        icon: <Building2 className="h-4 w-4" />,
-      },
-      {
-        label: 'penthouse',
-        hint: 'views, terraces, privacy',
-        patch: 'penthouse',
-        icon: <Building2 className="h-4 w-4" />,
-      },
+      { label: 'apartment', hint: 'lock up and go', patch: 'apartment', icon: <Building2 className="h-4 w-4" /> },
+      { label: 'penthouse', hint: 'views, terraces, privacy', patch: 'penthouse', icon: <Building2 className="h-4 w-4" /> },
       { label: 'sea view', hint: 'primary view filter', patch: 'sea view', icon: <Waves className="h-4 w-4" /> },
-      {
-        label: 'waterfront',
-        hint: 'on the water line',
-        patch: 'waterfront',
-        icon: <Waves className="h-4 w-4" />,
-      },
+      { label: 'waterfront', hint: 'on the water line', patch: 'waterfront', icon: <Waves className="h-4 w-4" /> },
       { label: 'gated', hint: 'controlled access', patch: 'gated', icon: <Shield className="h-4 w-4" /> },
       { label: 'privacy', hint: 'low exposure', patch: 'privacy', icon: <Shield className="h-4 w-4" /> },
       { label: 'new build', hint: 'modern stock', patch: 'new build', icon: <Sparkles className="h-4 w-4" /> },
@@ -609,61 +643,6 @@ export default function VanteraOmniSearch({
     ],
     [],
   );
-
-  const hits = useMemo(() => {
-    if (!open) return [];
-
-    const searchHit: PlaceHit = {
-      kind: 'search',
-      slug: 'search',
-      title: q.trim() ? 'search properties' : 'start a property search',
-      subtitle: q.trim()
-        ? `open results for “${q.trim()}”`
-        : 'type a city + wishline like “sea view villa under €5m”',
-      score: 1000,
-      reasons: [
-        `${modeLabel(parse.mode)} mode`,
-        parse.placeQuery ? `place: ${parse.placeQuery}` : 'any market',
-        parse.budgetMax ? `max ${formatMoney(parse.budgetMax)}` : 'no max',
-      ],
-      href: q.trim() ? buildSearchHref(parse) : '/search',
-      icon: 'search',
-    };
-
-    if (!q.trim()) {
-      const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
-      const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
-
-      const curated: PlaceHit[] = [
-        searchHit,
-        ...topCities.map((c, i) => ({
-          kind: 'city' as const,
-          slug: c.slug,
-          title: c.name,
-          subtitle: `${c.country}${c.region ? ` · ${c.region}` : ''}`,
-          score: 200 - i,
-          reasons: ['featured'],
-          href: `/city/${c.slug}`,
-          icon: 'pin' as const,
-        })),
-        ...topClusters.map((r, i) => ({
-          kind: 'region' as const,
-          slug: r.slug,
-          title: r.name,
-          subtitle: `${r.country ?? 'region'}${r.region ? ` · ${r.region}` : ''}`,
-          score: 150 - i,
-          reasons: [`${r.citySlugs.length} cities`],
-          href: `/coming-soon?region=${encodeURIComponent(r.name)}`,
-          icon: 'sparkles' as const,
-        })),
-      ];
-
-      return curated.slice(0, limit + 1);
-    }
-
-    const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
-    return [searchHit, ...placeHits].slice(0, limit + 1);
-  }, [open, q, parse, cities, clusters, limit]);
 
   function focusAndOpen() {
     inputRef.current?.focus();
@@ -710,6 +689,9 @@ export default function VanteraOmniSearch({
   useEffect(() => {
     if (!open) return;
 
+    // load recents on open (so it stays fresh)
+    setRecents(readRecents());
+
     const onDown = (e: MouseEvent | TouchEvent) => {
       const t = e.target as Node | null;
       if (!t) return;
@@ -725,6 +707,90 @@ export default function VanteraOmniSearch({
       window.removeEventListener('touchstart', onDown);
     };
   }, [open]);
+
+  const hits = useMemo(() => {
+    if (!open) return [];
+
+    const raw = q.trim();
+    const searchHit: PlaceHit = {
+      kind: 'search',
+      slug: 'search',
+      title: raw ? 'search properties' : 'start a property search',
+      subtitle: raw ? `open results for “${raw}”` : 'type a city + wishline like “sea view villa under €5m”',
+      score: 1000,
+      reasons: [
+        `${modeLabel(parse.mode)} mode`,
+        parse.placeQuery ? `place: ${parse.placeQuery}` : 'any market',
+        parse.budgetMax ? `max ${formatMoney(parse.budgetMax)}` : 'no max',
+      ],
+      href: raw ? buildSearchHref(parse) : '/search',
+      icon: 'search',
+      group: 'Action',
+    };
+
+    // Empty query: Action + recents + curated cities + curated regions
+    if (!raw) {
+      const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
+      const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
+
+      const recentHits: PlaceHit[] = recents.map((rq, i) => ({
+        kind: 'recent',
+        slug: `recent-${i}`,
+        title: rq,
+        subtitle: 'recent search',
+        score: 900 - i,
+        reasons: ['continue'],
+        href: `/search?q=${encodeURIComponent(rq)}`,
+        icon: 'recent',
+        group: 'Recent',
+      }));
+
+      const curated: PlaceHit[] = [
+        searchHit,
+        ...recentHits,
+        ...topCities.map((c, i) => ({
+          kind: 'city' as const,
+          slug: c.slug,
+          title: c.name,
+          subtitle: `${c.country}${c.region ? ` · ${c.region}` : ''}`,
+          score: 200 - i,
+          reasons: ['featured'],
+          href: `/city/${c.slug}`,
+          icon: 'pin' as const,
+          group: 'Cities' as const,
+        })),
+        ...topClusters.map((r, i) => ({
+          kind: 'region' as const,
+          slug: r.slug,
+          title: r.name,
+          subtitle: `${r.country ?? 'region'}${r.region ? ` · ${r.region}` : ''}`,
+          score: 150 - i,
+          reasons: [`${r.citySlugs.length} cities`],
+          href: `/coming-soon?region=${encodeURIComponent(r.name)}`,
+          icon: 'sparkles' as const,
+          group: 'Regions' as const,
+        })),
+      ];
+
+      return curated.slice(0, limit + 10); // allow groups to breathe
+    }
+
+    const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
+    return [searchHit, ...placeHits].slice(0, limit + 1);
+  }, [open, q, parse, cities, clusters, limit, recents]);
+
+  const groupedHits = useMemo(() => {
+    const order: Array<NonNullable<PlaceHit['group']>> = ['Action', 'Recent', 'Cities', 'Regions'];
+    const buckets = new Map<string, PlaceHit[]>();
+    for (const h of hits) {
+      const g = h.group ?? 'Cities';
+      if (!buckets.has(g)) buckets.set(g, []);
+      buckets.get(g)!.push(h);
+    }
+    return order
+      .filter((g) => (buckets.get(g)?.length ?? 0) > 0)
+      .map((g) => ({ group: g, items: buckets.get(g)! }));
+  }, [hits]);
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (!open) return;
@@ -744,6 +810,7 @@ export default function VanteraOmniSearch({
       const h = hits[active];
       if (!h) return;
       setOpen(false);
+      if (h.kind === 'search' || h.kind === 'recent') pushRecent(q.trim() || (h.kind === 'recent' ? h.title : ''));
       router.push(h.href);
     }
   }
@@ -765,11 +832,17 @@ export default function VanteraOmniSearch({
   }
 
   function setMode(next: ParseResult['mode']) {
-    // we keep it simple: we inject a keyword token into the query so parsing stays single-source
-    // rent -> adds "rent", sell -> adds "sell", buy -> removes rent/sell tokens if present
     setQ((cur) => {
       const tokens = tokenize(cur);
-      const filtered = tokens.filter((t) => t !== 'rent' && t !== 'rental' && t !== 'lease' && t !== 'sell' && t !== 'selling' && t !== 'list');
+      const filtered = tokens.filter(
+        (t) =>
+          t !== 'rent' &&
+          t !== 'rental' &&
+          t !== 'lease' &&
+          t !== 'sell' &&
+          t !== 'selling' &&
+          t !== 'list',
+      );
       if (next === 'rent') filtered.unshift('rent');
       if (next === 'sell') filtered.unshift('sell');
       return filtered.join(' ').trim();
@@ -777,6 +850,8 @@ export default function VanteraOmniSearch({
     setOpen(true);
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }
+
+  const activeId = hits[active] ? `${id}-opt-${active}` : undefined;
 
   return (
     <div ref={rootRef} className={cx('relative w-full', className)}>
@@ -819,6 +894,10 @@ export default function VanteraOmniSearch({
               )}
               autoComplete="off"
               spellCheck={false}
+              role="combobox"
+              aria-expanded={open}
+              aria-controls={listboxId}
+              aria-activedescendant={activeId}
             />
 
             {open ? (
@@ -841,7 +920,7 @@ export default function VanteraOmniSearch({
                 className={cx(
                   'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
                   'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)]',
+                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
                   'text-[color:var(--ink-2)]',
                 )}
               >
@@ -875,9 +954,7 @@ export default function VanteraOmniSearch({
           <div className="relative border-b border-[color:var(--hairline)] px-5 py-4">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">
-                  search
-                </div>
+                <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">search</div>
 
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <Chip>{modeLabel(parse.mode)}</Chip>
@@ -895,7 +972,7 @@ export default function VanteraOmniSearch({
                 className={cx(
                   'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
                   'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)]',
+                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
                   'text-[color:var(--ink-2)]',
                 )}
               >
@@ -905,9 +982,11 @@ export default function VanteraOmniSearch({
             </div>
 
             {/* mode pills */}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-3 inline-flex rounded-full bg-white/80 p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
               {(['buy', 'rent', 'sell'] as const).map((m) => {
                 const activeMode = parse.mode === m;
+                const icon =
+                  m === 'buy' ? <Sparkles className="h-4 w-4 opacity-75" /> : m === 'rent' ? <Home className="h-4 w-4 opacity-75" /> : <ArrowRight className="h-4 w-4 opacity-75" />;
                 return (
                   <button
                     key={m}
@@ -915,14 +994,11 @@ export default function VanteraOmniSearch({
                     onClick={() => setMode(m)}
                     className={cx(
                       'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                      'ring-1 ring-inset',
-                      activeMode ? 'bg-white ring-[color:var(--hairline-2)]' : 'bg-white/85 ring-[color:var(--hairline)] hover:bg-white',
+                      activeMode ? 'bg-white ring-1 ring-inset ring-[color:var(--hairline-2)]' : 'bg-transparent hover:bg-white',
                       'text-[color:var(--ink-2)]',
                     )}
                   >
-                    {m === 'buy' ? <Sparkles className="h-4 w-4 opacity-70" /> : null}
-                    {m === 'rent' ? <Home className="h-4 w-4 opacity-70" /> : null}
-                    {m === 'sell' ? <ArrowRight className="h-4 w-4 opacity-70" /> : null}
+                    {icon}
                     {m}
                   </button>
                 );
@@ -935,9 +1011,7 @@ export default function VanteraOmniSearch({
             {/* quick actions */}
             <div className="mb-2.5 rounded-[18px] bg-white/70 p-3 ring-1 ring-inset ring-[color:var(--hairline)]">
               <div className="flex items-center justify-between gap-3">
-                <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">
-                  quick filters
-                </div>
+                <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">quick filters</div>
                 <button
                   type="button"
                   onClick={() => inputRef.current?.focus()}
@@ -972,61 +1046,88 @@ export default function VanteraOmniSearch({
               </div>
             </div>
 
-            <div className="max-h-[420px] overflow-auto p-0.5">
+            <div id={listboxId} role="listbox" className="max-h-[420px] overflow-auto p-0.5">
               {hits.length === 0 ? (
                 <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
                   no matches yet. try a city, region or keywords like “sea view modern villa”.
                 </div>
               ) : (
-                <div className="grid gap-1.5">
-                  {hits.map((h, idx) => (
-                    <Link
-                      key={`${h.kind}:${h.slug}:${h.href}`}
-                      href={h.href}
-                      prefetch
-                      onMouseEnter={() => setActive(idx)}
-                      onClick={() => setOpen(false)}
-                      className={cx(
-                        'group relative rounded-2xl px-4 py-3 transition',
-                        'bg-white hover:bg-white',
-                        'ring-1 ring-inset ring-[color:var(--hairline)]',
-                        idx === active && 'ring-[color:var(--hairline-2)]',
-                      )}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-3">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-                              {iconFor(h)}
-                            </span>
-
-                            <div className="min-w-0">
-                              <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
-                                {h.title}
-                              </div>
-                              <div className="truncate text-[11px] text-[color:var(--ink-3)]">
-                                {h.subtitle}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            {h.reasons.slice(0, 3).map((r) => (
-                              <span
-                                key={r}
-                                className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                              >
-                                {r}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
-                          open <ArrowRight className="h-4 w-4 opacity-70" />
-                        </span>
+                <div className="grid gap-2">
+                  {groupedHits.map(({ group, items }) => (
+                    <div key={group} className="rounded-2xl bg-white/60 p-2 ring-1 ring-inset ring-[color:var(--hairline)]">
+                      <div className="px-2 pb-2 pt-1 text-[10px] font-semibold tracking-[0.20em] text-[color:var(--ink-3)]">
+                        {group}
                       </div>
-                    </Link>
+
+                      <div className="grid gap-1.5">
+                        {items.map((h) => {
+                          const idx = hits.findIndex((x) => x === h);
+                          const selected = idx === active;
+                          const optId = `${id}-opt-${idx}`;
+
+                          return (
+                            <Link
+                              key={`${h.kind}:${h.slug}:${h.href}`}
+                              href={h.href}
+                              prefetch
+                              id={optId}
+                              role="option"
+                              aria-selected={selected}
+                              onMouseEnter={() => setActive(idx)}
+                              onMouseDown={() => {
+                                // keep input from losing focus on click in some browsers
+                                setOpen(true);
+                              }}
+                              onClick={() => {
+                                if (h.kind === 'search') pushRecent(q.trim());
+                                if (h.kind === 'recent') pushRecent(h.title);
+                                setOpen(false);
+                              }}
+                              className={cx(
+                                'group relative rounded-2xl px-4 py-3 transition',
+                                'bg-white hover:bg-white',
+                                'ring-1 ring-inset ring-[color:var(--hairline)]',
+                                selected && 'ring-[color:var(--hairline-2)] shadow-[0_18px_60px_rgba(11,12,16,0.08)]',
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-3">
+                                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
+                                      {iconFor(h)}
+                                    </span>
+
+                                    <div className="min-w-0">
+                                      <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
+                                        {h.title}
+                                      </div>
+                                      <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
+                                    </div>
+                                  </div>
+
+                                  {h.reasons.length ? (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {h.reasons.slice(0, 3).map((r) => (
+                                        <span
+                                          key={r}
+                                          className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
+                                        >
+                                          {r}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </div>
+
+                                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
+                                  open <ArrowRight className="h-4 w-4 opacity-70" />
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
