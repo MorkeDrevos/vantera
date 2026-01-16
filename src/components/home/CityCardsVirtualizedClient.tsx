@@ -43,8 +43,6 @@ function withFeaturedOverrides(city: City): City {
   return { ...city, image: { src: o.src, alt: o.alt } };
 }
 
-const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
-
 function goldText() {
   return 'bg-clip-text text-transparent bg-[linear-gradient(180deg,var(--gold-1)_0%,var(--gold-2)_45%,var(--gold-3)_100%)]';
 }
@@ -78,18 +76,19 @@ function FeaturedHeader() {
   return (
     <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
+        {/* one eyebrow only - no repeating */}
         <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">Featured markets</div>
 
-        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[26px]">
-          Private intelligence, city by city
+        <div className="mt-2 text-[24px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
+          A luxury portal with intelligence
         </div>
 
         <div className="mt-2 max-w-2xl text-sm leading-relaxed text-[color:var(--ink-2)]">
-          Monaco joins the flagship set. Explore like a luxury portal, but with signal you can trust.
+          City dossiers with pricing reality, liquidity read and risk flags - distilled, calm, and decisive.
         </div>
 
         <div className="mt-3 text-[12px] text-[color:var(--ink-3)]">
-          Tap a market to open its intelligence - pricing reality, liquidity read and risk flags.
+          Tap a market to enter its dossier. No noise, just signal.
         </div>
       </div>
 
@@ -97,37 +96,30 @@ function FeaturedHeader() {
         <Pill tone="gold">
           <span className={cx('font-semibold', goldText())}>Top 4</span>
         </Pill>
-        <Pill>Updated weekly</Pill>
+        {/* removed “Updated weekly” everywhere */}
       </div>
     </div>
   );
 }
 
-function FeaturedPlate({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Featured portal backdrop:
+ * - NO nested “box inside a box”
+ * - keeps a premium aura without adding another card container
+ */
+function FeaturedBackdrop() {
   return (
-    <div
-      className={cx(
-        'relative overflow-hidden rounded-[34px]',
-        'bg-white/70 backdrop-blur-[14px]',
-        RING,
-        'shadow-[0_44px_160px_rgba(11,12,16,0.12)]',
-        'p-5 sm:p-6',
-      )}
-    >
-      {/* premium paper aura (no dark) */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-40 h-[420px] w-[420px] rounded-full bg-[rgba(231,201,130,0.14)] blur-3xl" />
-        <div className="absolute -right-40 -top-44 h-[440px] w-[440px] rounded-full bg-[rgba(139,92,246,0.06)] blur-3xl" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-70" />
-        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
-      </div>
-
-      <div className="relative">{children}</div>
+    <div className="pointer-events-none absolute inset-0">
+      {/* soft paper aura (white-first) */}
+      <div className="absolute -left-48 -top-48 h-[520px] w-[520px] rounded-full bg-[rgba(231,201,130,0.14)] blur-3xl" />
+      <div className="absolute -right-44 -top-52 h-[520px] w-[520px] rounded-full bg-[rgba(139,92,246,0.06)] blur-3xl" />
+      <div className="absolute -right-56 top-10 h-[520px] w-[520px] rounded-full bg-[rgba(16,185,129,0.05)] blur-3xl" />
+      {/* gentle top hairline */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-70" />
+      {/* micro-grid texture (very subtle) */}
+      <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
+      {/* header spotlight */}
+      <div className="absolute inset-0 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
     </div>
   );
 }
@@ -197,20 +189,23 @@ export default function CityCardsVirtualizedClient({
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
-        <FeaturedPlate>
-          <FeaturedHeader />
-          {/* 1-per-row through lg, 2 cols at xl+ */}
-          <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
-            {featured.map((city) => {
-              const stats = statsByCity?.[city.slug];
-              return (
-                <div key={city.slug} className="xl:[&>div]:h-full">
-                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
-                </div>
-              );
-            })}
+        {/* single portal section, not a nested card */}
+        <div className="relative w-full overflow-hidden rounded-[28px] bg-white/70 backdrop-blur-[14px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_44px_160px_rgba(11,12,16,0.10)]">
+          <FeaturedBackdrop />
+          <div className="relative p-5 sm:p-7">
+            <FeaturedHeader />
+            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+              {featured.map((city) => {
+                const stats = statsByCity?.[city.slug];
+                return (
+                  <div key={city.slug} className="xl:[&>div]:h-full">
+                    <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </FeaturedPlate>
+        </div>
       </section>
     );
   }
@@ -246,21 +241,24 @@ export default function CityCardsVirtualizedClient({
 
   return (
     <section className={cx('w-full', className)}>
-      {/* Featured Markets - editorial / premium (optional in full mode) */}
+      {/* Featured Markets - one premium portal section (no “box inside box” look) */}
       {showFeatured && featured.length > 0 ? (
-        <FeaturedPlate>
-          <FeaturedHeader />
-          <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
-            {featured.map((city) => {
-              const stats = statsByCity?.[city.slug];
-              return (
-                <div key={city.slug} className="xl:[&>div]:h-full">
-                  <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
-                </div>
-              );
-            })}
+        <div className="relative w-full overflow-hidden rounded-[28px] bg-white/70 backdrop-blur-[14px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_44px_160px_rgba(11,12,16,0.10)]">
+          <FeaturedBackdrop />
+          <div className="relative p-5 sm:p-7">
+            <FeaturedHeader />
+            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+              {featured.map((city) => {
+                const stats = statsByCity?.[city.slug];
+                return (
+                  <div key={city.slug} className="xl:[&>div]:h-full">
+                    <CityCard city={city} stats={stats} variant="wall" showLockedCta={false} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </FeaturedPlate>
+        </div>
       ) : null}
 
       {/* Everything else */}
