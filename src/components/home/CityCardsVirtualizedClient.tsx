@@ -54,8 +54,8 @@ function Pill({
   children: React.ReactNode;
   tone?: 'neutral' | 'gold';
 }) {
-  const ring = tone === 'gold' ? 'ring-[rgba(231,201,130,0.28)]' : 'ring-[color:var(--hairline)]';
-  const bg = tone === 'gold' ? 'bg-[rgba(231,201,130,0.10)]' : 'bg-white/80';
+  const ring = tone === 'gold' ? 'ring-[rgba(231,201,130,0.30)]' : 'ring-[color:var(--hairline)]';
+  const bg = tone === 'gold' ? 'bg-[rgba(231,201,130,0.10)]' : 'bg-white/78';
   return (
     <span
       className={cx(
@@ -65,6 +65,7 @@ function Pill({
         'ring-1 ring-inset',
         ring,
         'text-[color:var(--ink-2)]',
+        'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
       )}
     >
       {children}
@@ -72,26 +73,54 @@ function Pill({
   );
 }
 
-function FeaturedHeader() {
+function FeaturedHeader({ featuredCount }: { featuredCount: number }) {
   return (
-    <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">Featured markets</div>
+    <div className="relative">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+            GLOBAL MARKETPLACE
+          </div>
 
-        <div className="mt-2 text-[24px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
-          A luxury portal with intelligence
+          <div className="mt-3 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[34px]">
+            A global catalogue of exceptional homes.
+          </div>
+
+          <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)] sm:text-[15px]">
+            Built for serious buyers. Presented with restraint. Powered by an intelligence layer that helps you move with
+            clarity - not noise.
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Pill>GLOBAL CATALOGUE</Pill>
+            <Pill>INTELLIGENCE LAYER</Pill>
+            <Pill>EDITORIAL PRESENTATION</Pill>
+
+            <Pill tone="gold">
+              <span className={cx('font-semibold', goldText())}>{featuredCount} featured</span>
+            </Pill>
+          </div>
         </div>
 
-        <div className="mt-2 max-w-2xl text-sm leading-relaxed text-[color:var(--ink-2)]">
-          City dossiers with pricing reality, liquidity read and risk flags - distilled, calm and decisive.
+        <div className="flex items-center gap-2">
+          <div
+            className={cx(
+              'hidden sm:flex items-center gap-2 rounded-full px-4 py-2 text-[12px]',
+              'bg-white/70 backdrop-blur-2xl',
+              'ring-1 ring-inset ring-[color:var(--hairline)]',
+              'text-[color:var(--ink-2)]',
+            )}
+          >
+            <span className="font-semibold text-[color:var(--ink)]">Browse</span>
+            <span className="text-[color:var(--ink-3)]">·</span>
+            <span>Markets</span>
+            <span className="text-[color:var(--ink-3)]">·</span>
+            <span>Catalogue</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Pill tone="gold">
-          <span className={cx('font-semibold', goldText())}>Top 4</span>
-        </Pill>
-      </div>
+      <div className="pointer-events-none absolute inset-x-0 -bottom-6 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.35)] to-transparent" />
     </div>
   );
 }
@@ -120,12 +149,14 @@ export default function CityCardsVirtualizedClient({
   statsByCity?: Record<string, CityListingsStats | undefined>;
 }) {
   const sorted = useMemo(() => {
+    // Keep caller ordering stable; any sorting should happen upstream.
     return [...cities];
   }, [cities]);
 
   const featured = useMemo(() => {
     if (!showFeatured && mode !== 'featured') return [] as City[];
 
+    // Marketplace hero picks (top 4)
     const preferred = ['miami', 'new-york', 'monaco', 'dubai'];
     const map = new Map(sorted.map((c) => [c.slug, c] as const));
 
@@ -156,7 +187,7 @@ export default function CityCardsVirtualizedClient({
     return sorted.filter((c) => !featuredSlugs.has(c.slug));
   }, [sorted, featuredSlugs, featured.length]);
 
-  // Featured-only mode: no virtualization, no "showing X of Y"
+  // Featured-only mode: no virtualization, no counters
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
@@ -169,8 +200,8 @@ export default function CityCardsVirtualizedClient({
           )}
         >
           <div className="relative p-5 sm:p-7">
-            <FeaturedHeader />
-            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+            <FeaturedHeader featuredCount={featured.length} />
+            <div className="relative mt-6 grid gap-4 xl:grid-cols-2">
               {featured.map((city) => {
                 const stats = statsByCity?.[city.slug];
                 return (
@@ -202,7 +233,6 @@ export default function CityCardsVirtualizedClient({
       (entries) => {
         const hit = entries.some((e) => e.isIntersecting);
         if (!hit) return;
-
         setCount((c) => Math.min(c + step, rest.length));
       },
       { root: null, rootMargin: '900px 0px', threshold: 0.01 },
@@ -227,8 +257,8 @@ export default function CityCardsVirtualizedClient({
           )}
         >
           <div className="relative p-5 sm:p-7">
-            <FeaturedHeader />
-            <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
+            <FeaturedHeader featuredCount={featured.length} />
+            <div className="relative mt-6 grid gap-4 xl:grid-cols-2">
               {featured.map((city) => {
                 const stats = statsByCity?.[city.slug];
                 return (
@@ -242,7 +272,6 @@ export default function CityCardsVirtualizedClient({
         </div>
       ) : null}
 
-      {/* Everything else */}
       <div className={cx(showFeatured && featured.length > 0 ? 'mt-6' : '')}>
         <div className={columns}>
           {visible.map((city) => {
@@ -266,7 +295,7 @@ export default function CityCardsVirtualizedClient({
                   'inline-flex items-center justify-center rounded-full px-4 py-2 text-xs font-semibold transition',
                   'bg-white/80 backdrop-blur-2xl',
                   'text-[color:var(--ink)]',
-                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(10,10,12,0.22)]',
                   'shadow-[0_18px_60px_rgba(11,12,16,0.10)]',
                 )}
               >
