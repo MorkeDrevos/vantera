@@ -1,15 +1,14 @@
+// src/components/home/HeroBackdrop.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
 import SafeImage from './SafeImage';
 
 export default function HeroBackdrop({ src, alt }: { src: string; alt: string }) {
-  const [ok, setOk] = useState(true);
+  const safeSrc = String(src || '').trim();
 
-  const safeSrc = useMemo(() => {
-    const s = String(src || '').trim();
-    return ok && s ? s : '';
-  }, [ok, src]);
+  const fallback = (
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(245,158,11,0.25),transparent_45%),radial-gradient(circle_at_70%_0%,rgba(217,70,239,0.22),transparent_50%),radial-gradient(circle_at_50%_70%,rgba(16,185,129,0.18),transparent_55%)]" />
+  );
 
   return (
     <div className="pointer-events-none absolute inset-0">
@@ -21,13 +20,10 @@ export default function HeroBackdrop({ src, alt }: { src: string; alt: string })
           sizes="100vw"
           className="object-cover opacity-70"
           priority
-          onError={() => setOk(false)}
-          fallback={
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(245,158,11,0.25),transparent_45%),radial-gradient(circle_at_70%_0%,rgba(217,70,239,0.22),transparent_50%),radial-gradient(circle_at_50%_70%,rgba(16,185,129,0.18),transparent_55%)]" />
-          }
+          fallback={fallback}
         />
       ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(245,158,11,0.25),transparent_45%),radial-gradient(circle_at_70%_0%,rgba(217,70,239,0.22),transparent_50%),radial-gradient(circle_at_50%_70%,rgba(16,185,129,0.18),transparent_55%)]" />
+        fallback
       )}
 
       {/* darken for readability */}
