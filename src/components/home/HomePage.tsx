@@ -10,11 +10,8 @@ import TrustMarquee from '@/components/trust/TrustMarquee';
 import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import MarketBriefing from './MarketBriefing';
-import RoyalPortalBackdrop from './RoyalPortalBackdrop';
-import HeroGoldCrown from './HeroGoldCrown';
 import PremiumBadgeRow from './PremiumBadgeRow';
 
-import IntentHero from './IntentHero';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
 
 import { REGION_CLUSTERS } from './cities';
@@ -73,11 +70,11 @@ function Shell({ children }: { children: ReactNode }) {
       {/* ROYAL STAGE - global cinematic paper system */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         {/* Crown light (warm) */}
-        <div className="absolute -top-64 left-1/2 h-[920px] w-[1500px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.30),transparent_62%)] blur-3xl" />
+        <div className="absolute -top-64 left-1/2 h-[920px] w-[1500px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.30),transparent_62%)] blur-3xl" />
         {/* Violet edge (right) */}
-        <div className="absolute -top-56 right-[-320px] h-[780px] w-[780px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.16),transparent_64%)] blur-3xl" />
+        <div className="absolute -top-56 right-[-320px] h-[780px] w-[780px] bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.16),transparent_64%)] blur-3xl" />
         {/* Cool lift (left-bottom) */}
-        <div className="absolute bottom-[-420px] left-[-420px] h-[980px] w-[980px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_62%)] blur-3xl" />
+        <div className="absolute bottom-[-420px] left-[-420px] h-[980px] w-[980px] bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_62%)] blur-3xl" />
 
         {/* Editorial wash and vignette */}
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.0),rgba(11,12,16,0.035))]" />
@@ -105,6 +102,7 @@ function Shell({ children }: { children: ReactNode }) {
 
 /* =========================================================
    Micro components (premium labels, plates, cards)
+   IMPORTANT: no rounded corners anywhere
    ========================================================= */
 
 function SectionKicker({
@@ -153,7 +151,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
   return (
     <div
       className={cx(
-        'relative overflow-hidden rounded-[24px]',
+        'relative overflow-hidden',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
         'bg-white/65 backdrop-blur-[18px]',
         'shadow-[0_28px_90px_rgba(11,12,16,0.12)]',
@@ -171,7 +169,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
           <div
             key={it.k}
             className={cx(
-              'group relative overflow-hidden rounded-2xl',
+              'group relative overflow-hidden',
               'ring-1 ring-inset ring-[color:var(--hairline)]',
               'bg-white/72',
               'px-3 py-2.5 sm:px-3.5 sm:py-3',
@@ -193,7 +191,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
               </div>
 
               {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full ring-1 ring-inset ring-[color:var(--hairline)] bg-white/70 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] sm:block">
+                <div className="ml-2 hidden shrink-0 ring-1 ring-inset ring-[color:var(--hairline)] bg-white/70 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] sm:block">
                   INFO
                 </div>
               ) : null}
@@ -209,7 +207,7 @@ function Pillar({ title, body }: { title: string; body: string }) {
   return (
     <div
       className={cx(
-        'relative overflow-hidden rounded-[24px] p-5',
+        'relative overflow-hidden p-5',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
         'bg-white/66 backdrop-blur-[18px]',
         'shadow-[0_20px_55px_rgba(11,12,16,0.10)]',
@@ -230,7 +228,7 @@ function Pillar({ title, body }: { title: string; body: string }) {
 
 function IntelligencePlate({ children }: { children: React.ReactNode }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px]', GLASS)}>
+    <div className={cx('relative overflow-hidden', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(1000px_360px_at_20%_0%,rgba(231,201,130,0.20),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_85%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
@@ -246,7 +244,7 @@ function IntelligencePlate({ children }: { children: React.ReactNode }) {
 
 function PortalVsTruth() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-5 sm:p-6', GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden p-5 sm:p-6', GLASS_SOFT)}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_18%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_260px_at_86%_10%,rgba(139,92,246,0.10),transparent_60%)]" />
@@ -254,7 +252,7 @@ function PortalVsTruth() {
       </div>
 
       <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[24px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/72 p-6">
+        <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-white/72 p-6">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
             LUXURY PORTALS
           </div>
@@ -267,21 +265,21 @@ function PortalVsTruth() {
 
           <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(11,12,16,0.35)]" />
               Asking price leads the story
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(11,12,16,0.35)]" />
               Verification happens elsewhere
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.35)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(11,12,16,0.35)]" />
               Risk hides late in the process
             </li>
           </ul>
         </div>
 
-        <div className="rounded-[24px] ring-1 ring-inset ring-[color:var(--hairline)] bg-[color:var(--paper-2)] p-6">
+        <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-[color:var(--paper-2)] p-6">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
             VANTERA
           </div>
@@ -294,15 +292,15 @@ function PortalVsTruth() {
 
           <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(231,201,130,0.95)]" />
               Fair value model, not theatre
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(231,201,130,0.95)]" />
               Paperwork surfaced early
             </li>
             <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(231,201,130,0.95)]" />
               Resale-killer risk flags
             </li>
           </ul>
@@ -326,7 +324,7 @@ function FeatureCard({
   bullets: string[];
 }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-6', GLASS_SOFT)}>
+    <div className={cx('relative overflow-hidden p-6', GLASS_SOFT)}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(720px_240px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
@@ -346,7 +344,7 @@ function FeatureCard({
         <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
           {bullets.map((b) => (
             <li key={b} className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
+              <span className="mt-[7px] h-1.5 w-1.5 bg-[rgba(231,201,130,0.95)]" />
               {b}
             </li>
           ))}
@@ -360,7 +358,7 @@ function FeatureCard({
 
 function CTA() {
   return (
-    <div className={cx('relative overflow-hidden rounded-[32px] p-6 sm:p-10', GLASS)}>
+    <div className={cx('relative overflow-hidden p-6 sm:p-10', GLASS)}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.22),transparent_62%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
@@ -387,7 +385,7 @@ function CTA() {
           <a
             href="/coming-soon?flow=sell"
             className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
+              'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
               'bg-white/78 hover:bg-white',
               'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
               'text-[color:var(--ink)]',
@@ -400,7 +398,7 @@ function CTA() {
           <a
             href="/coming-soon?flow=agents"
             className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
+              'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
               'bg-[color:var(--paper-2)] hover:bg-white',
               'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
               'text-[color:var(--ink)]',
@@ -433,37 +431,50 @@ export default function HomePage({
   return (
     <Shell>
       {/* =====================================================
-          HERO - Royal flagship, ultra-wide, JamesEdition vibe
+          HERO - edge-to-edge background image (/brand/hero.jpg)
+          - Omni only (no other hero search concepts)
+          - H1 smaller
+          - Right-side panel gets more width / collapses earlier
          ===================================================== */}
       <section className="relative w-full pb-12 pt-10 sm:pb-16 sm:pt-12">
-        {/* Hero edge separators (editorial, expensive) */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.18)] to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+        {/* Full-bleed hero image (edge-to-edge) */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <Image
+            src="/brand/hero.jpg"
+            alt="Vantera hero"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+          {/* premium light overlay for readability (no heavy dark) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.78),rgba(255,255,255,0.62),rgba(255,255,255,0.86))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1100px_520px_at_86%_10%,rgba(139,92,246,0.10),transparent_64%)]" />
+          {/* top/bottom hairlines to feel editorial */}
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+        </div>
 
         <div className={cx('relative', WIDE)}>
-          <div className="relative overflow-hidden rounded-[36px] ring-1 ring-inset ring-[color:var(--hairline)] bg-white/55 shadow-[0_60px_160px_rgba(11,12,16,0.16)]">
-            {/* Cinematic portal layer (subtle, premium) */}
-            <div className="pointer-events-none absolute inset-0 opacity-[0.28] mix-blend-multiply">
-              <RoyalPortalBackdrop />
-            </div>
-            <div className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply">
-              <HeroGoldCrown />
-            </div>
-
-            {/* Hero inner wash */}
+          <div className="relative ring-1 ring-inset ring-[color:var(--hairline)] bg-white/40 shadow-[0_60px_160px_rgba(11,12,16,0.14)]">
+            {/* inner wash (kept light) */}
             <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.26),transparent_60%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.14),transparent_62%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.70),rgba(255,255,255,0.55),rgba(255,255,255,0.35))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.10),transparent_62%)]" />
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
             </div>
 
             <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-18 2xl:px-20 2xl:py-20">
-              <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-                {/* LEFT: Narrative + Search */}
-                <div className="lg:col-span-7">
+              {/* Collapse earlier: side-by-side only from xl */}
+              <div className="grid gap-10 xl:grid-cols-12 xl:gap-12">
+                {/* LEFT: Narrative + Omni search */}
+                <div className="xl:col-span-6">
                   <PremiumBadgeRow />
 
-                  <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[76px] lg:leading-[1.01] 2xl:text-[84px]">
+                  {/* H1 smaller (editorial) */}
+                  <h1 className="mt-7 text-balance text-[34px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[44px] lg:text-[56px] lg:leading-[1.05] 2xl:text-[64px]">
                     Private intelligence for the world&apos;s{' '}
                     <span className="inline">
                       <GoldWord>most valuable assets</GoldWord>
@@ -478,22 +489,9 @@ export default function HomePage({
                     </span>
                   </p>
 
-                  {/* Primary: OmniSearch */}
+                  {/* OmniSearch (only hero search) */}
                   <div className="mt-7 max-w-[1200px]">
-                    <VanteraOmniSearch
-                      cities={cities as any}
-                      clusters={resolvedClusters}
-                      autoFocus={false}
-                    />
-                  </div>
-
-                  {/* Secondary: Intent console */}
-                  <div className="mt-5 max-w-[1200px]">
-                    <IntentHero
-                      cities={cities as any}
-                      defaultTop={6}
-                      onKeepScanningId="explore-index"
-                    />
+                    <VanteraOmniSearch cities={cities as any} clusters={resolvedClusters} autoFocus={false} />
                   </div>
 
                   <div className="mt-6 max-w-[1200px]">
@@ -514,12 +512,11 @@ export default function HomePage({
                     <Pillar title="Risk radar" body="Catch resale killers early." />
                   </div>
 
-                  {/* Hard divider line like print layout */}
-                  <div className="mt-10 hidden lg:block h-px w-full bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+                  <div className="mt-10 hidden xl:block h-px w-full bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
                 </div>
 
-                {/* RIGHT: Intelligence plate + Featured markets */}
-                <div className="lg:col-span-5">
+                {/* RIGHT: Intelligence plate (wider / more feature) */}
+                <div className="xl:col-span-6">
                   <IntelligencePlate>
                     <div className="px-6 py-6 sm:px-7 sm:py-7">
                       <div className="flex items-start justify-between gap-4">
@@ -535,8 +532,8 @@ export default function HomePage({
                           </div>
                         </div>
 
-                        <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
-                          <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
+                        <div className="hidden sm:flex shrink-0 items-center gap-2 bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
+                          <div className="h-2 w-2 bg-emerald-500/70" />
                           <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
                             UPDATED WEEKLY
                           </div>
@@ -547,7 +544,7 @@ export default function HomePage({
                         <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
                       </div>
 
-                      <div className="mt-5 rounded-[22px] bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
+                      <div className="mt-5 bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-5 py-4">
                         <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                           House rule
                         </div>
@@ -566,8 +563,8 @@ export default function HomePage({
               </div>
             </div>
 
-            {/* Bottom fade */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[rgba(251,251,250,0.95)]" />
+            {/* Bottom fade (kept light) */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[rgba(251,251,250,0.92)]" />
           </div>
         </div>
       </section>
@@ -597,24 +594,22 @@ export default function HomePage({
       </div>
 
       {/* =====================================================
-          BODY - upgrade spacing, widen where it matters
+          BODY - leave untouched
          ===================================================== */}
 
-      {/* Market briefing wants room - give it wide */}
       <section className="mt-12 sm:mt-14">
         <div className={WIDE}>
           <MarketBriefing cities={cities as any} />
         </div>
       </section>
 
-      {/* Featured intelligence - wide, premium stage */}
       <section className="mt-12 sm:mt-16">
         <div className={WIDE}>
           <SectionKicker
             title="Featured intelligence"
             subtitle="Believable, not fake listings"
             right={
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
+              <div className="hidden sm:flex items-center gap-2 bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
                 <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">PROOF FIRST</div>
               </div>
             }
@@ -623,7 +618,6 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Why Vantera wins - keep clean but more expensive */}
       <section className="mt-14 sm:mt-18">
         <div className={NARROW}>
           <SectionKicker title="Why Vantera wins" subtitle="Plain language, high precision" />
@@ -650,7 +644,6 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Explore index - wide, feels alive */}
       <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-18">
         <div className={WIDE}>
           <SectionKicker
@@ -658,14 +651,14 @@ export default function HomePage({
             subtitle="Coverage that feels alive"
             right={
               <div className="hidden sm:block">
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl ring-1 ring-inset ring-[color:var(--hairline)] bg-white/80">
+                <div className="relative h-11 w-11 overflow-hidden ring-1 ring-inset ring-[color:var(--hairline)] bg-white/80">
                   <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
                 </div>
               </div>
             }
           />
 
-          <div className={cx('relative overflow-hidden rounded-[34px] p-5 sm:p-7', GLASS)}>
+          <div className={cx('relative overflow-hidden p-5 sm:p-7', GLASS)}>
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.20),transparent_62%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.12),transparent_62%)]" />
@@ -685,7 +678,7 @@ export default function HomePage({
                 </div>
               </div>
 
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
+              <div className="hidden sm:flex items-center gap-2 bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)] px-3 py-1.5">
                 <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">ENTRY POINTS</div>
               </div>
             </div>
@@ -697,7 +690,6 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* CTA - narrow is fine, but still royal */}
       <section className="mt-14 sm:mt-18 pb-16 sm:pb-20">
         <div className={NARROW}>
           <CTA />
