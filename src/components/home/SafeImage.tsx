@@ -7,6 +7,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
   alt: string;
   fallback?: React.ReactNode;
+
+  // Backwards-compatible hooks (optional)
+  onLoad?: ImageProps['onLoad'];
+  onError?: ImageProps['onError'];
 };
 
 /**
@@ -15,8 +19,10 @@ type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
  * - Shows a premium shimmer while loading.
  * - Smooth fade-in on load (no harsh pop).
  * - Resets correctly when src changes.
+ * - Retries once on transient CDN failures.
+ * - Allows callers to attach onLoad/onError without breaking types.
  */
-export default function SafeImage({ alt, fallback, ...props }: Props) {
+export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: Props) {
   const srcKey = typeof props.src === 'string' ? props.src : (props.src as any)?.src ?? String(props.src);
 
   const [failed, setFailed] = useState(false);
@@ -71,30 +77,28 @@ export default function SafeImage({ alt, fallback, ...props }: Props) {
       <Image
         {...props}
         alt={alt}
-        onLoad={() => setLoaded(true)}
-        onError={() => {
+        onLoad={(e) => {
+          setLoaded(true);
+          onLoad?.(e);
+        }}
+        onError={(e) => {
+          // let caller know immediately
+          onError?.(e);
+
           const already = retriedRef.current[srcKey] === true;
           if (!already) {
             retriedRef.current[srcKey] = true;
 
-            // Soft retry: flip loaded false (keeps shimmer) and let Next attempt again on re-render.
+            // Keep shimmer and allow Next to retry naturally (some CDN glitches are transient)
             setLoaded(false);
-
-            // Trigger a microtask rerender without changing layout.
-            // If the underlying src is genuinely invalid, the next error will mark failed.
-            Promise.resolve().then(() => {
-              // no-op; state is enough to rerender
-            });
-
             return;
           }
+
           setFailed(true);
         }}
-        className={[
-          props.className ?? '',
-          'transition-opacity duration-500',
-          loaded ? 'opacity-100' : 'opacity-0',
-        ].join(' ')}
+        className={[props.className ?? '', 'transition-opacity duration-500', loaded ? 'opacity-100' : 'opacity-0'].join(
+          ' ',
+        )}
       />
     </div>
   );
