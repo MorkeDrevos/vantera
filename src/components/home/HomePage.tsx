@@ -57,8 +57,15 @@ const MID = 'mx-auto w-full max-w-[1400px] px-5 sm:px-8';
 const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 
 const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+
+// Blur token normalisation - hero should feel sharpest, lower panels slightly calmer
+const BLUR_HERO = 'backdrop-blur-[14px]';
+const BLUR_CARD = 'backdrop-blur-[12px]';
+
 const CARD =
-  'bg-[color:var(--surface-2)] backdrop-blur-[16px] ' +
+  'bg-[color:var(--surface-2)] ' +
+  BLUR_CARD +
+  ' ' +
   RING +
   ' shadow-[0_30px_90px_rgba(11,12,16,0.10)]';
 
@@ -149,7 +156,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
             key={it.k}
             className={cx(
               'group relative overflow-hidden rounded-2xl px-3 py-2.5 sm:px-3.5 sm:py-3',
-              'bg-white/80',
+              'bg-white/85',
               'ring-1 ring-inset ring-[color:var(--hairline)]',
             )}
             title={it.hint ?? undefined}
@@ -169,7 +176,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
               </div>
 
               {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full bg-white/90 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] ring-1 ring-inset ring-[color:var(--hairline)] sm:block">
+                <div className="ml-2 hidden shrink-0 rounded-full bg-white/92 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] ring-1 ring-inset ring-[color:var(--hairline)] sm:block">
                   INFO
                 </div>
               ) : null}
@@ -207,7 +214,7 @@ function PortalVsTruth() {
       </div>
 
       <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[22px] bg-white/85 p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
+        <div className="rounded-[22px] bg-white/88 p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
           <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
             Luxury portals
           </div>
@@ -346,7 +353,7 @@ function CTA() {
             href="/coming-soon?flow=agents"
             className={cx(
               'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white/60 hover:bg-white/75',
+              'bg-white/62 hover:bg-white/78',
               'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.18)]',
               'text-[color:var(--ink)]',
             )}
@@ -384,11 +391,11 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             sizes="100vw"
             className="object-cover object-center"
           />
-          {/* Editorial wash for readability (tuned, not fully opaque) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.86),rgba(251,251,250,0.76))]" />
+          {/* Editorial wash for readability (tuned) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.86),rgba(251,251,250,0.74))]" />
         </div>
 
-        {/* Hero background accents (kept subtle) */}
+        {/* Hero background accents (subtle) */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1400px_620px_at_30%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(1100px_560px_at_86%_0%,rgba(139,92,246,0.06),transparent_62%)]" />
@@ -405,7 +412,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
 
         <div className={HERO_INNER}>
-          <div className="relative pb-10 sm:pb-12 lg:pb-14">
+          {/* Hero vertical rhythm: slightly more breathing room on large screens */}
+          <div className="relative pb-12 sm:pb-14 lg:pb-[8vh]">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
               {/* LEFT: Editorial message + search */}
               <div className="lg:col-span-7">
@@ -437,16 +445,16 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                 {/* Hero support row (clean, not competing) */}
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--ink-3)]">
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
                     Typos ok
                   </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
                     Keywords included
                   </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
                     City-first intelligence
                   </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
                     Verification-first
                   </span>
                 </div>
@@ -493,7 +501,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         </div>
                       </div>
 
-                      <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+                      <div className={cx('hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/92 px-3 py-1.5', BLUR_HERO, RING)}>
                         <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
                         <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
                           UPDATED WEEKLY
@@ -505,7 +513,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                       <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
                     </div>
 
-                    <div className="mt-5 rounded-[20px] bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                    <div className="mt-5 rounded-[20px] bg-white/92 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
                       <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                         House rule
                       </div>
@@ -516,7 +524,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-[26px] bg-white/80 p-6 ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_22px_70px_rgba(11,12,16,0.10)]">
+                <div className="mt-4 rounded-[26px] bg-white/84 p-6 ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_22px_70px_rgba(11,12,16,0.10)]">
                   <div className="flex items-center justify-between gap-3">
                     <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
                       Proof stack
@@ -525,7 +533,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                   </div>
 
                   <div className="mt-3 grid gap-2">
-                    <div className="rounded-2xl bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                    <div className="rounded-2xl bg-white/92 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
                       <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                         SOURCE
                       </div>
@@ -533,7 +541,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         Logged, cross-checked, traceable.
                       </div>
                     </div>
-                    <div className="rounded-2xl bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
+                    <div className="rounded-2xl bg-white/92 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
                       <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                         SIGNAL
                       </div>
@@ -613,7 +621,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             title="Believable, not fake listings"
             subtitle="A product layer built for decisions, not screenshots."
             right={
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
+              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/84 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
                 <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">PROOF FIRST</div>
               </div>
             }
@@ -641,21 +649,13 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               eyebrow="Verification"
               title="Permits, ownership, and risk flags"
               body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
+              bullets={['Turns paperwork into plain language', 'Surfaces missing documents fast', 'Flags resale killers early']}
             />
             <FeatureCard
               eyebrow="Liquidity"
               title="A private read on demand"
               body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
+              bullets={['Demand signals over hype', 'Comparables that match reality', 'Designed for advisors and sellers']}
             />
           </div>
         </div>
