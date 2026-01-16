@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { City } from './cities';
 import CityCard from './CityCard';
+import FeaturedMarketCard from './FeaturedMarketCard';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -47,6 +48,20 @@ function withFeaturedOverrides(city: City): City {
   const o = FEATURED_IMAGE_OVERRIDES[city.slug];
   if (!o) return city;
   return { ...city, image: { src: o.src, alt: o.alt } };
+}
+
+function featuredHref(city: City) {
+  // Adjust in one place if your route differs.
+  // Common patterns: `/market/${slug}` or `/markets/${slug}`.
+  return `/market/${city.slug}`;
+}
+
+function featuredDescription(city: City) {
+  // Keep 1-2 sentences max (FeaturedMarketCard clamps to 2 lines).
+  if (city.blurb && city.blurb.trim()) return city.blurb.trim();
+
+  // Premium fallback if blurb missing (avoid empty cards).
+  return 'Private, pocket-level intelligence across prime inventory, pricing discipline, and verified demand.';
 }
 
 export default function CityCardsVirtualizedClient({
@@ -101,13 +116,38 @@ export default function CityCardsVirtualizedClient({
   }, [sorted]);
 
   // Featured-only mode: render only the six, nothing else
+  // Contract-locked Featured Market UI (no per-city drift).
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
         <div className={columns}>
           {six.map((city) => {
-            const stats = statsByCity?.[city.slug];
-            return <CityCard key={city.slug} city={city} stats={stats} />;
+            const img = city.image?.src ? city.image : null;
+
+            // If a city somehow has no image even after overrides,
+            // do not render as Featured Market (fallback to CityCard).
+            if (!img?.src) {
+              const stats = statsByCity?.[city.slug];
+              return <CityCard key={city.slug} city={city} stats={stats} />;
+            }
+
+            return (
+              <FeaturedMarketCard
+                key={city.slug}
+                slug={city.slug}
+                name={city.name}
+                country={city.country}
+                region={city.region ?? null}
+                tz={city.tz}
+                heroImageSrc={img.src}
+                heroImageAlt={img.alt ?? null}
+                description={featuredDescription(city)}
+                href={featuredHref(city)}
+                modeLabel="OPEN MARKET"
+                coverageLabel="Coverage"
+                eyebrow="FEATURED MARKET"
+              />
+            );
           })}
         </div>
       </section>
