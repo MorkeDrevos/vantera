@@ -1,6 +1,7 @@
 // src/components/search/SearchResultsPageClient.tsx
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -23,69 +24,112 @@ import {
 export type SearchParams = Record<string, string | string[] | undefined>;
 
 type Mode = 'buy' | 'rent' | 'sell';
+type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
 
-type Initial = {
-  q: string;
-  place: string;
-  kw: string;
-  mode: Mode;
-  max?: number;
-  beds?: number;
-  type: string;
-  needs: string[];
+type ListingCard = {
+  id: string;
+  slug: string;
+  title: string;
+  headline?: string | null;
+
+  price: number | null;
+  currency: string;
+
+  bedrooms: number | null;
+  bathrooms: number | null;
+  builtM2: number | null;
+  plotM2: number | null;
+
+  propertyType: string | null;
+
+  city: {
+    name: string;
+    slug: string;
+    country: string;
+    region?: string | null;
+  };
+
+  cover?: {
+    url: string;
+    alt?: string | null;
+    width?: number | null;
+    height?: number | null;
+  } | null;
+
+  updatedAtISO: string;
 };
 
 type Props = {
-  // NEW: server passes URL params here
   searchParams?: SearchParams;
 
-  // OLD: keep support if something still uses it
-  initial?: Initial;
+  listings: ListingCard[];
+  total: number;
+
+  page: number;
+  pageCount: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+
+  take: number;
 };
 
-// helper: always produce a full Initial object (so the rest of your code stays unchanged)
-function initialFromSearchParams(sp?: SearchParams): Initial {
-  const get = (k: string) => {
-    const v = sp?.[k];
-    if (Array.isArray(v)) return v[0] ?? '';
-    return typeof v === 'string' ? v : '';
-  };
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
 
-  const q = get('q');
-  const place = get('place');
-  const kw = get('kw');
+function firstString(v: string | string[] | undefined) {
+  if (!v) return '';
+  return Array.isArray(v) ? v[0] ?? '' : v;
+}
 
-  const modeRaw = get('mode');
-  const mode: Mode = modeRaw === 'rent' || modeRaw === 'sell' ? modeRaw : 'buy';
+function normalize(s: string) {
+  return s.trim().toLowerCase();
+}
 
-  const maxRaw = get('max');
-  const maxNum = maxRaw ? Number(maxRaw) : undefined;
-  const max = Number.isFinite(maxNum as number) ? (maxNum as number) : undefined;
+function shortMoney(currency: string, n: number) {
+  const sym = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '';
+  if (n >= 1_000_000) return `${sym}${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}m`;
+  if (n >= 1_000) return `${sym}${Math.round(n / 1_000)}k`;
+  return `${sym}${n}`;
+}
 
-  const bedsRaw = get('beds');
-  const bedsNum = bedsRaw ? Number(bedsRaw) : undefined;
-  const beds = Number.isFinite(bedsNum as number) ? (bedsNum as number) : undefined;
+function buildUrl(next: Record<string, string | number | undefined>) {
+  const p = new URLSearchParams();
 
-  const type = get('type') || 'any';
+  for (const [k, v] of Object.entries(next)) {
+    if (v === undefined) continue;
+    const s = String(v).trim();
+    if (!s) continue;
+    p.set(k, s);
+  }
 
-  const needsRaw = get('needs');
-  const needs = needsRaw
-    ? needsRaw
-        .split(',')
-        .map((x) => x.trim())
-        .filter(Boolean)
-    : [];
+  const qs = p.toString();
+  return qs ? `/search?${qs}` : '/search';
+}
 
-  return {
-    q,
-    place,
-    kw,
-    mode,
-    max,
-    beds,
-    type,
-    needs,
-  };
+function TagPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
+      {children}
+    </span>
+  );
+}
+
+function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
+      <span className="text-zinc-500">{icon}</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function GoldHairline() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
+    </div>
+  );
 }
 
 function useClickOutside(
@@ -118,76 +162,99 @@ function useClickOutside(
   }, [refs, onOutside, when]);
 }
 
-export default function SearchResultsPageClient({ searchParams, initial }: Props) {
+function NeedsToString(needs: string[]) {
+  return needs
+    .map((n) => n.trim())
+    .filter(Boolean)
+    .slice(0, 12)
+    .join(',');
+}
+
+export default function SearchResultsPageClient({
+  searchParams,
+  listings,
+  total,
+  page,
+  pageCount,
+  hasPrev,
+  hasNext,
+  take,
+}: Props) {
   const router = useRouter();
 
-  // ✅ unify: prefer searchParams (URL truth), fall back to initial
-  const boot: Initial = useMemo(() => {
-    if (searchParams && Object.keys(searchParams).length) return initialFromSearchParams(searchParams);
-    if (initial) return initial;
-    return initialFromSearchParams(undefined);
-  }, [searchParams, initial]);
+  // URL-driven initial values (production: URL is the truth)
+  const boot = useMemo(() => {
+    const sp = searchParams ?? {};
+    const q = firstString(sp.q);
+    const place = firstString(sp.place);
+    const city = firstString(sp.city); // optional: preferred
+    const kw = firstString(sp.kw);
+    const mode = (firstString(sp.mode) as Mode) || 'buy';
+    const max = firstString(sp.max);
+    const beds = firstString(sp.beds);
+    const type = firstString(sp.type) || 'any';
+    const needs = firstString(sp.needs)
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean);
 
-  const [mode, setMode] = useState<Mode>(boot.mode ?? 'buy');
-  const [q, setQ] = useState(boot.q ?? '');
-  const [place, setPlace] = useState(boot.place ?? '');
-  const [kw, setKw] = useState(boot.kw ?? '');
-  const [max, setMax] = useState<number | undefined>(boot.max);
-  const [beds, setBeds] = useState<number | undefined>(boot.beds);
+    const sort = (firstString(sp.sort) as SortKey) || 'price_high';
+
+    return {
+      q,
+      place: city || place,
+      kw,
+      mode: mode === 'rent' || mode === 'sell' ? mode : 'buy',
+      max: max ? Number(max) : undefined,
+      beds: beds ? Number(beds) : undefined,
+      type,
+      needs,
+      sort,
+    };
+  }, [searchParams]);
+
+  const [mode, setMode] = useState<Mode>(boot.mode);
+  const [q, setQ] = useState(boot.q);
+  const [place, setPlace] = useState(boot.place);
+  const [kw, setKw] = useState(boot.kw);
+  const [max, setMax] = useState<number | undefined>(Number.isFinite(boot.max as number) ? boot.max : undefined);
+  const [beds, setBeds] = useState<number | undefined>(Number.isFinite(boot.beds as number) ? boot.beds : undefined);
   const [type, setType] = useState<string>(boot.type || 'any');
   const [needs, setNeeds] = useState<string[]>(boot.needs ?? []);
-
-  const [sort, setSort] = useState<'price_high' | 'price_low' | 'beds' | 'sqm'>('price_high');
+  const [sort, setSort] = useState<SortKey>(boot.sort);
 
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [sortOpen, setSortOpen] = useState(false);
   const sortBtnRef = useRef<HTMLButtonElement | null>(null);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
-
   useClickOutside([sortBtnRef, sortMenuRef], () => setSortOpen(false), sortOpen);
 
-  const baseListings = useMemo(() => makeMockListings(q || kw || place || 'global', place || ''), [q, kw, place]);
-
-  const filters: Initial = useMemo(
-    () => ({
-      q,
-      place,
-      kw,
-      mode,
-      max,
-      beds,
-      type,
-      needs,
-    }),
-    [q, place, kw, mode, max, beds, type, needs],
-  );
-
-  const filtered = useMemo(() => baseListings.filter((l) => matchesFilters(l, filters)), [baseListings, filters]);
-  const results = useMemo(() => sortListings(filtered, sort), [filtered, sort]);
-
-  const activeNeeds = new Set(needs.map(normalize));
+  const activeNeeds = new Set(needs.map((x) => normalize(x)));
 
   function toggleNeed(n: string) {
     setNeeds((prev) => {
       const nn = normalize(n);
-      const set = new Set(prev.map(normalize));
+      const set = new Set(prev.map((x) => normalize(x)));
       if (set.has(nn)) return prev.filter((x) => normalize(x) !== nn);
       return [...prev, n];
     });
   }
 
-  function applyToUrl() {
+  function applyToUrl(nextPage?: number) {
     router.push(
       buildUrl({
-        q,
-        place,
-        kw,
-        mode,
-        max,
-        beds,
-        type,
-        needs,
+        q: q.trim() || undefined,
+        place: place.trim() || undefined,
+        kw: kw.trim() || undefined,
+        mode: mode !== 'buy' ? mode : undefined,
+        max: typeof max === 'number' && Number.isFinite(max) ? Math.round(max) : undefined,
+        beds: typeof beds === 'number' && Number.isFinite(beds) ? Math.round(beds) : undefined,
+        type: type && normalize(type) !== 'any' ? type : undefined,
+        needs: needs.length ? NeedsToString(needs) : undefined,
+        sort: sort !== 'price_high' ? sort : undefined,
+        page: nextPage && nextPage !== 1 ? nextPage : undefined,
+        take: take !== 24 ? take : undefined,
       }),
     );
   }
@@ -211,7 +278,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
     if (place.trim()) bits.push(place.trim());
     if (type && normalize(type) !== 'any') bits.push(type);
     if (beds) bits.push(`${beds}+ beds`);
-    if (max) bits.push(`under ${shortMoneyEUR(max)}`);
+    if (max) bits.push(`under ${shortMoney('EUR', max)}`);
     if (needs.length) bits.push(needs.slice(0, 2).join(', '));
     if (kw.trim()) bits.push(`kw: ${kw.trim()}`);
     if (q.trim() && q.trim() !== kw.trim()) bits.push(`q: ${q.trim()}`);
@@ -225,12 +292,14 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
         ? 'beds: most first'
         : sort === 'sqm'
           ? 'size: largest first'
-          : 'price: high to low';
+          : sort === 'newest'
+            ? 'newest'
+            : 'price: high to low';
 
   return (
-    <div className="relative">
-      {/* top bar */}
-      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur">
+    <div className="relative min-h-screen bg-white">
+      {/* Top rail */}
+      <div className="sticky top-0 z-30 bg-white/88 backdrop-blur">
         <div className="relative">
           <GoldHairline />
           <div className="mx-auto max-w-6xl px-4 py-4">
@@ -240,12 +309,24 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200">
                     <Search className="h-4 w-4" />
                   </span>
-                  <span>property search</span>
+                  <span>Search</span>
+                  {place.trim() ? (
+                    <>
+                      <span className="text-zinc-300">/</span>
+                      <Link
+                        href={`/city/${place.toLowerCase().trim().replace(/\s+/g, '-')}`}
+                        className="text-zinc-600 hover:text-zinc-900"
+                      >
+                        {place.trim()}
+                      </Link>
+                    </>
+                  ) : null}
                 </div>
-                <div className="mt-1 text-[18px] font-semibold text-zinc-900">
-                  results
+
+                <div className="mt-1 text-[20px] font-semibold text-zinc-900">
+                  Results
                   <span className="ml-2 text-[13px] font-medium text-zinc-500">
-                    {results.length ? `${results.length} matches` : 'no matches'}
+                    {total ? `${total.toLocaleString()} available` : 'No matches'}
                   </span>
                 </div>
               </div>
@@ -257,7 +338,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                   className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                 >
                   <Filter className="h-4 w-4 text-zinc-500" />
-                  <span>filters</span>
+                  <span>Filters</span>
                 </button>
 
                 <div className="relative">
@@ -268,29 +349,29 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                     className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                   >
                     <SlidersHorizontal className="h-4 w-4 text-zinc-500" />
-                    <span>sort</span>
+                    <span>{sortLabel}</span>
                     <ChevronDown className={cx('h-4 w-4 text-zinc-500 transition', sortOpen && 'rotate-180')} />
                   </button>
 
                   {sortOpen ? (
                     <div
                       ref={sortMenuRef}
-                      className="absolute right-0 mt-2 w-56 overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_rgba(0,0,0,0.10)] ring-1 ring-inset ring-zinc-200"
+                      className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl bg-white shadow-[0_30px_90px_rgba(0,0,0,0.10)] ring-1 ring-inset ring-zinc-200"
                     >
-                      <div className="px-4 py-3 text-[11px] text-zinc-500">current: {sortLabel}</div>
-
                       {[
                         { k: 'price_high', label: 'price: high to low' },
                         { k: 'price_low', label: 'price: low to high' },
                         { k: 'beds', label: 'beds: most first' },
                         { k: 'sqm', label: 'size: largest first' },
+                        { k: 'newest', label: 'newest' },
                       ].map((x) => (
                         <button
                           key={x.k}
                           type="button"
                           onClick={() => {
-                            setSort(x.k as any);
+                            setSort(x.k as SortKey);
                             setSortOpen(false);
+                            applyToUrl(1);
                           }}
                           className={cx(
                             'w-full px-4 py-3 text-left text-[12px] transition',
@@ -310,43 +391,39 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                   className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                 >
                   <X className="h-4 w-4 text-zinc-500" />
-                  <span>reset</span>
+                  <span>Reset</span>
                 </button>
               </div>
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <IconPill icon={<Sparkles className="h-4 w-4" />} label={mode} />
-              {summaryBits.length ? (
-                summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>)
-              ) : (
-                <TagPill>type a city + wishline like “sea view villa under €5m”</TagPill>
-              )}
+              {summaryBits.length ? summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>) : <TagPill>Try “Marbella sea view villa under €5m”</TagPill>}
             </div>
           </div>
         </div>
       </div>
 
-      {/* content */}
+      {/* Content */}
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-6">
-        {/* query bar */}
-        <div className="rounded-[24px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
+        {/* Query bar */}
+        <div className="rounded-[26px] bg-white p-4 ring-1 ring-inset ring-zinc-200 shadow-[0_22px_70px_rgba(0,0,0,0.04)]">
           <div className="grid gap-3 md:grid-cols-12">
             <div className="md:col-span-5">
-              <label className="text-[11px] font-semibold text-zinc-500">query</label>
+              <label className="text-[11px] font-semibold text-zinc-500">Query</label>
               <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
                 <Search className="h-4 w-4 text-zinc-500" />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="marbella villa for sale under €5m"
+                  placeholder="marbella villa, sea view, gated"
                   className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
                 />
               </div>
             </div>
 
             <div className="md:col-span-3">
-              <label className="text-[11px] font-semibold text-zinc-500">place</label>
+              <label className="text-[11px] font-semibold text-zinc-500">Place</label>
               <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
                 <MapPin className="h-4 w-4 text-zinc-500" />
                 <input
@@ -359,13 +436,13 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
             </div>
 
             <div className="md:col-span-4">
-              <label className="text-[11px] font-semibold text-zinc-500">keywords</label>
+              <label className="text-[11px] font-semibold text-zinc-500">Keywords</label>
               <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
                 <Sparkles className="h-4 w-4 text-zinc-500" />
                 <input
                   value={kw}
                   onChange={(e) => setKw(e.target.value)}
-                  placeholder="sea view, modern, gated"
+                  placeholder="golden mile, modern, quiet"
                   className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
                 />
               </div>
@@ -397,111 +474,194 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                 onClick={() => setFiltersOpen(true)}
                 className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
               >
-                refine
+                Refine
               </button>
 
               <button
                 type="button"
-                onClick={applyToUrl}
+                onClick={() => applyToUrl(1)}
                 className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
               >
-                apply
+                Apply
                 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* results grid */}
+        {/* Results */}
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {results.length === 0 ? (
+          {listings.length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3">
-              <div className="rounded-[24px] bg-white p-8 ring-1 ring-inset ring-zinc-200">
-                <div className="text-[18px] font-semibold text-zinc-900">no matches</div>
-                <div className="mt-2 text-[13px] text-zinc-600">loosen one filter. try removing max price or needs.</div>
+              <div className="rounded-[26px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
+                <div className="text-[18px] font-semibold text-zinc-900">No matches</div>
+                <div className="mt-2 text-[13px] text-zinc-600">Try loosening budget, bedrooms, or removing one need.</div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => setMax(undefined)}
+                    onClick={() => {
+                      setMax(undefined);
+                      applyToUrl(1);
+                    }}
                     className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                   >
-                    remove max
+                    Remove max
                   </button>
                   <button
                     type="button"
-                    onClick={() => setNeeds([])}
+                    onClick={() => {
+                      setNeeds([]);
+                      applyToUrl(1);
+                    }}
                     className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                   >
-                    clear needs
+                    Clear needs
                   </button>
                   <button
                     type="button"
                     onClick={clearAll}
                     className="rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
                   >
-                    reset all
+                    Reset all
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            results.map((l) => (
-              <div key={l.id} className="rounded-[26px] bg-white p-3 ring-1 ring-inset ring-zinc-200">
-                <CardImage seed={l.imageSeed} />
+            listings.map((l) => {
+              const href = `/property/${l.slug}`;
+              const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
+              const locLine = `${l.city.name}, ${l.city.country}`;
 
-                <div className="mt-3 px-1 pb-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
-                      <div className="mt-1 truncate text-[12px] text-zinc-600">{l.locationLine}</div>
+              return (
+                <div
+                  key={l.id}
+                  className="group rounded-[28px] bg-white p-3 ring-1 ring-inset ring-zinc-200 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:shadow-[0_38px_110px_rgba(0,0,0,0.08)]"
+                >
+                  <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-zinc-50 ring-1 ring-inset ring-zinc-200">
+                    {l.cover?.url ? (
+                      <Image
+                        src={l.cover.url}
+                        alt={l.cover.alt ?? l.title}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                        sizes="(max-width: 1024px) 50vw, 33vw"
+                        priority={false}
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            'radial-gradient(900px 320px at 18% 0%, rgba(185,133,51,0.16), transparent 60%), radial-gradient(900px 320px at 85% 8%, rgba(120,76,255,0.10), transparent 62%), linear-gradient(180deg, rgba(250,250,250,1), rgba(244,244,245,1))',
+                        }}
+                      />
+                    )}
+
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
+
+                    <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/92 px-3 py-1.5 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200 backdrop-blur">
+                      <Sparkles className="h-4 w-4 text-zinc-500" />
+                      <span>Verified pipeline</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 px-1 pb-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
+                        <div className="mt-1 truncate text-[12px] text-zinc-600">{locLine}</div>
+                        {l.headline ? (
+                          <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div>
+                        ) : null}
+                      </div>
+
+                      <button
+                        type="button"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                        aria-label="save"
+                        title="save"
+                      >
+                        <Heart className="h-4 w-4 text-zinc-500" />
+                      </button>
                     </div>
 
-                    <button
-                      type="button"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                      aria-label="save"
-                      title="save"
-                    >
-                      <Heart className="h-4 w-4 text-zinc-500" />
-                    </button>
-                  </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <TagPill>{priceLabel}</TagPill>
+                      {l.bedrooms ? (
+                        <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.bedrooms} beds`} />
+                      ) : (
+                        <IconPill icon={<Home className="h-4 w-4" />} label="residence" />
+                      )}
+                      {l.builtM2 ? <TagPill>{l.builtM2} m²</TagPill> : null}
+                      {l.propertyType ? <TagPill>{l.propertyType}</TagPill> : null}
+                    </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <TagPill>{shortMoneyEUR(l.priceEUR)}</TagPill>
-                    {l.beds ? (
-                      <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.beds} beds`} />
-                    ) : (
-                      <IconPill icon={<Home className="h-4 w-4" />} label="plot" />
-                    )}
-                    <TagPill>{l.sqm} sqm</TagPill>
-                    <TagPill>{l.type}</TagPill>
-                  </div>
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                      <Link
+                        href={href}
+                        className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                      >
+                        View
+                        <ArrowRight className="h-4 w-4 text-zinc-500" />
+                      </Link>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {l.tags.slice(0, 3).map((t) => (
-                      <TagPill key={t}>{t}</TagPill>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-2">
-                    <Link
-                      href={l.href}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                    >
-                      open
-                      <ArrowRight className="h-4 w-4 text-zinc-500" />
-                    </Link>
-
-                    <span className="text-[11px] text-zinc-500">vantera verified soon</span>
+                      <Link
+                        href={`/city/${l.city.slug}`}
+                        className="text-[11px] text-zinc-500 hover:text-zinc-900"
+                      >
+                        {l.city.name}
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
+
+        {/* Pagination */}
+        {pageCount > 1 ? (
+          <div className="mt-10 flex items-center justify-between gap-3">
+            <div className="text-[12px] text-zinc-600">
+              Page <span className="font-semibold text-zinc-900">{page}</span> of{' '}
+              <span className="font-semibold text-zinc-900">{pageCount}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={!hasPrev}
+                onClick={() => applyToUrl(Math.max(1, page - 1))}
+                className={cx(
+                  'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
+                  hasPrev
+                    ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
+                    : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
+                )}
+              >
+                Previous
+              </button>
+
+              <button
+                type="button"
+                disabled={!hasNext}
+                onClick={() => applyToUrl(Math.min(pageCount, page + 1))}
+                className={cx(
+                  'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
+                  hasNext
+                    ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
+                    : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
+                )}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      {/* filters drawer */}
+      {/* Filters drawer */}
       {filtersOpen ? (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[rgba(0,0,0,0.18)]" onClick={() => setFiltersOpen(false)} />
@@ -511,8 +671,8 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
               <GoldHairline />
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[12px] font-semibold text-zinc-900">filters</div>
-                  <div className="mt-1 text-[12px] text-zinc-600">tight, clean, forgiving</div>
+                  <div className="text-[12px] font-semibold text-zinc-900">Filters</div>
+                  <div className="mt-1 text-[12px] text-zinc-600">Signal over noise.</div>
                 </div>
 
                 <button
@@ -521,7 +681,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                   className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                 >
                   <X className="h-4 w-4 text-zinc-500" />
-                  <span>close</span>
+                  <span>Close</span>
                 </button>
               </div>
             </div>
@@ -529,7 +689,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
             <div className="h-[calc(100%-72px)] overflow-auto p-5">
               <div className="grid gap-4">
                 <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">type</div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Property type</div>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     {['any', 'villa', 'apartment', 'penthouse', 'house', 'plot'].map((t) => (
                       <button
@@ -552,8 +712,10 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                 <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold text-zinc-500">max budget</div>
-                      <div className="mt-1 text-[12px] text-zinc-600">{max ? shortMoneyEUR(max) : 'no max'}</div>
+                      <div className="text-[11px] font-semibold text-zinc-500">Max budget</div>
+                      <div className="mt-1 text-[12px] text-zinc-600">
+                        {max ? shortMoney('EUR', max) : 'No max'}
+                      </div>
                     </div>
 
                     <button
@@ -561,7 +723,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                       onClick={() => setMax(undefined)}
                       className="rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      clear
+                      Clear
                     </button>
                   </div>
 
@@ -587,8 +749,8 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                 <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold text-zinc-500">beds</div>
-                      <div className="mt-1 text-[12px] text-zinc-600">{beds ? `${beds}+ beds` : 'any'}</div>
+                      <div className="text-[11px] font-semibold text-zinc-500">Bedrooms</div>
+                      <div className="mt-1 text-[12px] text-zinc-600">{beds ? `${beds}+ beds` : 'Any'}</div>
                     </div>
 
                     <button
@@ -596,7 +758,7 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                       onClick={() => setBeds(undefined)}
                       className="rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      clear
+                      Clear
                     </button>
                   </div>
 
@@ -623,45 +785,92 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                 </div>
 
                 <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">needs</div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Needs</div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <NeedChip
-                      active={activeNeeds.has('sea view') || activeNeeds.has('sea_view')}
-                      label="sea view"
-                      icon={<Waves className="h-4 w-4" />}
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('sea view')}
-                    />
-                    <NeedChip
-                      active={activeNeeds.has('waterfront')}
-                      label="waterfront"
-                      icon={<Waves className="h-4 w-4" />}
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('sea view') || activeNeeds.has('sea_view')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <Waves className="h-4 w-4 text-zinc-500" />
+                      sea view
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('waterfront')}
-                    />
-                    <NeedChip
-                      active={activeNeeds.has('gated')}
-                      label="gated"
-                      icon={<ShieldCheck className="h-4 w-4" />}
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('waterfront')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <Waves className="h-4 w-4 text-zinc-500" />
+                      waterfront
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('gated')}
-                    />
-                    <NeedChip
-                      active={activeNeeds.has('privacy')}
-                      label="privacy"
-                      icon={<ShieldCheck className="h-4 w-4" />}
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('gated')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <ShieldCheck className="h-4 w-4 text-zinc-500" />
+                      gated
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('privacy')}
-                    />
-                    <NeedChip
-                      active={activeNeeds.has('quiet')}
-                      label="quiet"
-                      icon={<Sparkles className="h-4 w-4" />}
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('privacy')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <ShieldCheck className="h-4 w-4 text-zinc-500" />
+                      privacy
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('quiet')}
-                    />
-                    <NeedChip
-                      active={activeNeeds.has('new build') || activeNeeds.has('new_build')}
-                      label="new build"
-                      icon={<Sparkles className="h-4 w-4" />}
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('quiet')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <Sparkles className="h-4 w-4 text-zinc-500" />
+                      quiet
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => toggleNeed('new build')}
-                    />
+                      className={cx(
+                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                        activeNeeds.has('new build') || activeNeeds.has('new_build')
+                          ? 'bg-white text-zinc-900 ring-zinc-300'
+                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                      )}
+                    >
+                      <Sparkles className="h-4 w-4 text-zinc-500" />
+                      new build
+                    </button>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-2">
@@ -670,26 +879,24 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                       onClick={() => setNeeds([])}
                       className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      clear needs
+                      Clear needs
                     </button>
-                    <span className="text-[11px] text-zinc-500">
-                      {needs.length ? `${needs.length} selected` : 'none selected'}
-                    </span>
+                    <span className="text-[11px] text-zinc-500">{needs.length ? `${needs.length} selected` : 'None selected'}</span>
                   </div>
                 </div>
 
                 <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">apply</div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Apply</div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => {
-                        applyToUrl();
+                        applyToUrl(1);
                         setFiltersOpen(false);
                       }}
                       className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-[12px] text-white hover:bg-zinc-800"
                     >
-                      apply filters
+                      Apply filters
                       <ArrowRight className="h-4 w-4" />
                     </button>
 
@@ -698,14 +905,14 @@ export default function SearchResultsPageClient({ searchParams, initial }: Props
                       onClick={clearAll}
                       className="rounded-full bg-white px-5 py-2.5 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      reset all
+                      Reset all
                     </button>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 text-[11px] text-zinc-500">
-                note: listings are mocked right now. once you plug real data in, this ui stays.
+                Filtering is applied server-side against live inventory.
               </div>
             </div>
           </div>
