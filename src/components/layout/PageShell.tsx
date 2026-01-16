@@ -24,6 +24,16 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+/**
+ * PageShell responsibility (keep it strict):
+ * - Global chrome (TopBar + Footer)
+ * - Optional FULL-BLEED hero band (true edge-to-edge)
+ * - Constrained page body (content)
+ *
+ * NOTE:
+ * - Do NOT paint global backgrounds here.
+ * - Global paper, glows, and typography belong in src/app/globals.css (body).
+ */
 export default function PageShell({
   children,
   fullBleedHero,
@@ -31,21 +41,21 @@ export default function PageShell({
   bodyMaxWidthClassName = 'max-w-[1200px]',
 }: PageShellProps) {
   return (
-    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
-      {/* Global paper stage (match HomePage) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(252,251,249,1)_55%,rgba(249,248,246,1)_100%)]" />
-        <div className="absolute -top-[520px] left-1/2 h-[980px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.20),transparent_66%)] blur-3xl" />
-        <div className="absolute -top-[560px] right-[-520px] h-[980px] w-[980px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06),transparent_68%)] blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
-      </div>
-
+    <div className="min-h-[100dvh] text-[color:var(--ink)]">
       <div className="relative">
         <Suspense fallback={null}>
           <TopBar />
         </Suspense>
 
-        {fullBleedHero ? <div className="relative">{fullBleedHero}</div> : null}
+        {/* True full-bleed hero band (never boxed by containers) */}
+        {fullBleedHero ? (
+          <section className="relative">
+            {/* Force 100vw even if any ancestor ever becomes constrained */}
+            <div className="relative left-1/2 w-screen -translate-x-1/2">
+              {fullBleedHero}
+            </div>
+          </section>
+        ) : null}
 
         {!heroOnly ? (
           <main className={cx('relative mx-auto w-full px-5 pb-16 sm:px-8', bodyMaxWidthClassName)}>
