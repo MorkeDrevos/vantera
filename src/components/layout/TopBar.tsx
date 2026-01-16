@@ -505,7 +505,7 @@ export default function TopBar() {
                         <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Gateway</div>
                       </div>
                       <div className={cx('mt-2 text-[14px] leading-snug', subtleText)}>
-                        Enter by intent. Search is primary. Places are curated.
+                        Enter by intent. Search is primary. Curated entry points only.
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2">
