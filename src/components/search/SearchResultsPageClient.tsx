@@ -19,6 +19,9 @@ import {
   Sparkles,
   Waves,
   X,
+  Mail,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
 
 export type SearchParams = Record<string, string | string[] | undefined>;
@@ -171,6 +174,328 @@ function needsToString(needs: string[]) {
     .join(',');
 }
 
+function titleCase(s: string) {
+  return s
+    .trim()
+    .split(/[\s-]+/g)
+    .filter(Boolean)
+    .map((w) => w.slice(0, 1).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function isLikelyCoverageNotLive(place: string, total: number) {
+  // Production-safe heuristic:
+  // - If a place was explicitly entered and the server returned 0 results, we treat it as "coverage not live yet"
+  // - This avoids a dead-end "0 results" page and keeps the brand honest.
+  return total === 0 && place.trim().length >= 2;
+}
+
+type LeadState =
+  | { status: 'idle' }
+  | { status: 'sending' }
+  | { status: 'sent' }
+  | { status: 'error'; message: string };
+
+async function postLead(payload: {
+  name?: string;
+  email?: string;
+  subject?: string;
+  message: string;
+  honeypot?: string;
+}) {
+  const res = await fetch('/api/contact', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let msg = 'Unable to send right now. Please try again.';
+    try {
+      const j = await res.json();
+      if (typeof j?.error === 'string') msg = j.error;
+      if (typeof j?.message === 'string') msg = j.message;
+    } catch {
+      // ignore
+    }
+    throw new Error(msg);
+  }
+}
+
+function AvailabilityPanel({
+  place,
+  mode,
+  type,
+  beds,
+  max,
+  needs,
+  kw,
+  q,
+}: {
+  place: string;
+  mode: Mode;
+  type: string;
+  beds?: number;
+  max?: number;
+  needs: string[];
+  kw: string;
+  q: string;
+}) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [timeline, setTimeline] = useState<'now' | '30d' | '90d' | 'later'>('30d');
+  const [notes, setNotes] = useState('');
+  const [hp, setHp] = useState(''); // honeypot
+  const [lead, setLead] = useState<LeadState>({ status: 'idle' });
+
+  const cleanPlace = place.trim();
+  const placeTitle = cleanPlace ? titleCase(cleanPlace) : 'this market';
+
+  const brief = useMemo(() => {
+    const bits: string[] = [];
+    bits.push(`mode: ${mode}`);
+    if (cleanPlace) bits.push(`place: ${placeTitle}`);
+    if (type && normalize(type) !== 'any') bits.push(`type: ${type}`);
+    if (typeof beds === 'number' && beds > 0) bits.push(`beds: ${beds}+`);
+    if (typeof max === 'number' && Number.isFinite(max)) bits.push(`max: ${shortMoney('EUR', max)}`);
+    if (needs.length) bits.push(`needs: ${needs.slice(0, 4).join(', ')}`);
+    if (kw.trim()) bits.push(`keywords: ${kw.trim()}`);
+    if (q.trim() && q.trim() !== kw.trim()) bits.push(`q: ${q.trim()}`);
+    return bits;
+  }, [mode, cleanPlace, placeTitle, type, beds, max, needs, kw, q]);
+
+  async function submit() {
+    if (lead.status === 'sending') return;
+
+    const e = email.trim();
+    if (!e || !e.includes('@')) {
+      setLead({ status: 'error', message: 'Enter a valid email address.' });
+      return;
+    }
+
+    setLead({ status: 'sending' });
+
+    const message = [
+      `Search request`,
+      ``,
+      ...brief.map((b) => `- ${b}`),
+      ``,
+      `timeline: ${timeline}`,
+      notes.trim() ? `` : undefined,
+      notes.trim() ? `notes: ${notes.trim()}` : undefined,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    try {
+      await postLead({
+        name: name.trim() || undefined,
+        email: e,
+        subject: cleanPlace ? `Search request - ${placeTitle}` : 'Search request',
+        message,
+        honeypot: hp || undefined,
+      });
+      setLead({ status: 'sent' });
+    } catch (err: any) {
+      setLead({ status: 'error', message: err?.message || 'Unable to send right now.' });
+    }
+  }
+
+  return (
+    <div className="rounded-[28px] bg-white p-6 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
+            <ShieldCheck className="h-4 w-4 text-zinc-500" />
+            coverage status
+          </div>
+
+          <div className="mt-3 text-[20px] font-semibold text-zinc-900">
+            {placeTitle} inventory is not available yet
+          </div>
+
+          <div className="mt-2 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
+            Vantera only shows verified live listings. When a market is not live, we capture your request and notify you
+            when coverage opens.
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {brief.slice(0, 6).map((b) => (
+              <TagPill key={b}>{b}</TagPill>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+        >
+          Browse markets
+          <ArrowRight className="h-4 w-4 text-zinc-500" />
+        </Link>
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
+            <div className="text-[11px] font-semibold text-zinc-700">Request access</div>
+            <div className="mt-1 text-[12px] text-zinc-600">
+              Leave your email and we’ll contact you when this market goes live.
+            </div>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500">Name</label>
+                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Optional"
+                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500">Email</label>
+                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
+                  <Mail className="h-4 w-4 text-zinc-500" />
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@domain.com"
+                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Honeypot */}
+            <input
+              value={hp}
+              onChange={(e) => setHp(e.target.value)}
+              className="hidden"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500">Timeline</label>
+                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
+                  <select
+                    value={timeline}
+                    onChange={(e) => setTimeline(e.target.value as any)}
+                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none"
+                  >
+                    <option value="now">Immediately</option>
+                    <option value="30d">Within 30 days</option>
+                    <option value="90d">Within 90 days</option>
+                    <option value="later">Later</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-zinc-500">Notes</label>
+                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
+                  <input
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Optional details"
+                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={submit}
+                disabled={lead.status === 'sending' || lead.status === 'sent'}
+                className={cx(
+                  'inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] transition',
+                  lead.status === 'sent'
+                    ? 'bg-white text-zinc-900 ring-1 ring-inset ring-zinc-200'
+                    : 'bg-zinc-900 text-white hover:bg-zinc-800',
+                  lead.status === 'sending' && 'opacity-70 cursor-wait',
+                )}
+              >
+                {lead.status === 'sent' ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Request received
+                  </>
+                ) : lead.status === 'sending' ? (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Sending
+                  </>
+                ) : (
+                  <>
+                    <ArrowRight className="h-4 w-4" />
+                    Submit request
+                  </>
+                )}
+              </button>
+
+              {lead.status === 'error' ? (
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  {lead.message}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-3 text-[11px] text-zinc-500">
+              We only show verified live inventory. This request helps us prioritise coverage.
+            </div>
+          </div>
+        </div>
+
+        <div className="lg:col-span-5">
+          <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
+            <div className="text-[11px] font-semibold text-zinc-700">What happens next</div>
+
+            <div className="mt-3 grid gap-2">
+              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
+                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">VERIFICATION</div>
+                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
+                  We onboard real inventory and verify media and listing integrity.
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
+                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">NOTIFY</div>
+                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
+                  When the market is live, you’ll receive access and the best matching listings.
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
+                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">FILTERS</div>
+                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
+                  Your constraints are saved inside the request. No fake results, ever.
+                </div>
+              </div>
+            </div>
+
+            <Link
+              href="/contact"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+            >
+              Contact Vantera
+              <ArrowRight className="h-4 w-4 text-zinc-500" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SearchResultsPageClient({ searchParams, listings, total, page, pageCount, take }: Props) {
   const router = useRouter();
 
@@ -265,12 +590,12 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
   const summaryBits = useMemo(() => {
     const bits: string[] = [];
-    if (place.trim()) bits.push(place.trim());
+    if (place.trim()) bits.push(titleCase(place.trim()));
     if (type && normalize(type) !== 'any') bits.push(type);
     if (beds) bits.push(`${beds}+ beds`);
     if (max) bits.push(`under ${shortMoney('EUR', max)}`);
     if (needs.length) bits.push(needs.slice(0, 2).join(', '));
-    if (kw.trim()) bits.push(`kw: ${kw.trim()}`);
+    if (kw.trim()) bits.push(`keywords: ${kw.trim()}`);
     if (q.trim() && q.trim() !== kw.trim()) bits.push(`q: ${q.trim()}`);
     return bits;
   }, [place, type, beds, max, needs, kw, q]);
@@ -285,6 +610,8 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
           : sort === 'newest'
             ? 'newest'
             : 'price: high to low';
+
+  const showAvailability = isLikelyCoverageNotLive(place, total);
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -305,7 +632,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <div className="mt-1 text-[20px] font-semibold text-zinc-900">
                   Results
                   <span className="ml-2 text-[13px] font-medium text-zinc-500">
-                    {total ? `${total.toLocaleString()} available` : 'No matches'}
+                    {total ? `${total.toLocaleString()} available` : place.trim() ? 'Coverage not live' : 'No matches'}
                   </span>
                 </div>
               </div>
@@ -377,7 +704,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <IconPill icon={<Sparkles className="h-4 w-4" />} label={mode} />
-              {summaryBits.length ? summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>) : <TagPill>Try “Marbella sea view villa under €5m”</TagPill>}
+              {summaryBits.length ? summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>) : null}
             </div>
           </div>
         </div>
@@ -395,7 +722,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="marbella villa, sea view, gated"
+                  placeholder="Describe what you want"
                   className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
                 />
               </div>
@@ -408,7 +735,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <input
                   value={place}
                   onChange={(e) => setPlace(e.target.value)}
-                  placeholder="marbella"
+                  placeholder="City or region"
                   className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
                 />
               </div>
@@ -421,7 +748,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <input
                   value={kw}
                   onChange={(e) => setKw(e.target.value)}
-                  placeholder="golden mile, modern, quiet"
+                  placeholder="Optional"
                   className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
                 />
               </div>
@@ -468,57 +795,71 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
           </div>
         </div>
 
-        {/* Results */}
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {listings.length === 0 ? (
-            <div className="md:col-span-2 lg:col-span-3">
-              <div className="rounded-[26px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
-                <div className="text-[18px] font-semibold text-zinc-900">No results</div>
-                <div className="mt-2 text-[13px] text-zinc-600">Try loosening budget, bedrooms, or removing one need.</div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMax(undefined);
-                      applyToUrl(1);
-                    }}
-                    className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                  >
-                    Remove max
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNeeds([]);
-                      applyToUrl(1);
-                    }}
-                    className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                  >
-                    Clear needs
-                  </button>
-                  <button
-                    type="button"
-                    onClick={clearAll}
-                    className="rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
-                  >
-                    Reset
-                  </button>
-                </div>
+        {/* Results or Availability */}
+        <div className="mt-6">
+          {showAvailability ? (
+            <AvailabilityPanel
+              place={place}
+              mode={mode}
+              type={type}
+              beds={beds}
+              max={max}
+              needs={needs}
+              kw={kw}
+              q={q}
+            />
+          ) : listings.length === 0 ? (
+            <div className="rounded-[28px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
+              <div className="text-[18px] font-semibold text-zinc-900">No matches</div>
+              <div className="mt-2 text-[13px] text-zinc-600">
+                Your filters returned no verified live listings.
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMax(undefined);
+                    applyToUrl(1);
+                  }}
+                  className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                >
+                  Remove max
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNeeds([]);
+                    applyToUrl(1);
+                  }}
+                  className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                >
+                  Clear needs
+                </button>
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
+                >
+                  Reset
+                </button>
               </div>
             </div>
           ) : (
-            listings.map((l) => {
-              const href = `/property/${l.slug}`;
-              const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
-              const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {listings.map((l) => {
+                const href = `/property/${l.slug}`;
+                const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
+                const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
 
-              return (
-                <div
-                  key={l.id}
-                  className="group rounded-[28px] bg-white p-3 ring-1 ring-inset ring-zinc-200 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:shadow-[0_38px_110px_rgba(0,0,0,0.08)]"
-                >
-                  <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-zinc-50 ring-1 ring-inset ring-zinc-200">
-                    {l.cover?.url ? (
+                // NOTE: server now enforces coverMedia is not null. This stays defensive, but never renders fake placeholders.
+                if (!l.cover?.url) return null;
+
+                return (
+                  <div
+                    key={l.id}
+                    className="group rounded-[28px] bg-white p-3 ring-1 ring-inset ring-zinc-200 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:shadow-[0_38px_110px_rgba(0,0,0,0.08)]"
+                  >
+                    <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-zinc-200">
                       <Image
                         src={l.cover.url}
                         alt={l.cover.alt ?? l.title}
@@ -527,64 +868,63 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                         sizes="(max-width: 1024px) 50vw, 33vw"
                         priority={false}
                       />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-b from-zinc-50 to-zinc-100" />
-                    )}
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
+                    </div>
 
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
-                  </div>
+                    <div className="mt-3 px-1 pb-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
+                          <div className="mt-1 truncate text-[12px] text-zinc-600">{locLine}</div>
+                          {l.headline ? (
+                            <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div>
+                          ) : null}
+                        </div>
 
-                  <div className="mt-3 px-1 pb-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
-                        <div className="mt-1 truncate text-[12px] text-zinc-600">{locLine}</div>
-                        {l.headline ? <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div> : null}
+                        <button
+                          type="button"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                          aria-label="save"
+                          title="save"
+                        >
+                          <Heart className="h-4 w-4 text-zinc-500" />
+                        </button>
                       </div>
 
-                      <button
-                        type="button"
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                        aria-label="save"
-                        title="save"
-                      >
-                        <Heart className="h-4 w-4 text-zinc-500" />
-                      </button>
-                    </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <TagPill>{priceLabel}</TagPill>
+                        {l.bedrooms ? (
+                          <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.bedrooms} beds`} />
+                        ) : (
+                          <IconPill icon={<Home className="h-4 w-4" />} label="residence" />
+                        )}
+                        {l.builtM2 ? <TagPill>{l.builtM2} m²</TagPill> : null}
+                        {l.propertyType ? <TagPill>{l.propertyType}</TagPill> : null}
+                      </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <TagPill>{priceLabel}</TagPill>
-                      {l.bedrooms ? (
-                        <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.bedrooms} beds`} />
-                      ) : (
-                        <IconPill icon={<Home className="h-4 w-4" />} label="residence" />
-                      )}
-                      {l.builtM2 ? <TagPill>{l.builtM2} m²</TagPill> : null}
-                      {l.propertyType ? <TagPill>{l.propertyType}</TagPill> : null}
-                    </div>
+                      <div className="mt-4 flex items-center justify-between gap-2">
+                        <Link
+                          href={href}
+                          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                        >
+                          View
+                          <ArrowRight className="h-4 w-4 text-zinc-500" />
+                        </Link>
 
-                    <div className="mt-4 flex items-center justify-between gap-2">
-                      <Link
-                        href={href}
-                        className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                      >
-                        View
-                        <ArrowRight className="h-4 w-4 text-zinc-500" />
-                      </Link>
-
-                      <Link href={`/city/${l.city.slug}`} className="text-[11px] text-zinc-500 hover:text-zinc-900">
-                        {l.city.name}
-                      </Link>
+                        <Link href={`/city/${l.city.slug}`} className="text-[11px] text-zinc-500 hover:text-zinc-900">
+                          {l.city.name}
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
 
         {/* Pagination */}
-        {pageCount > 1 ? (
+        {!showAvailability && pageCount > 1 ? (
           <div className="mt-10 flex items-center justify-between gap-3">
             <div className="text-[12px] text-zinc-600">
               Page <span className="font-semibold text-zinc-900">{page}</span> of{' '}
@@ -623,6 +963,57 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             </div>
           </div>
         ) : null}
+
+        {/* Minimal footer (customer-ready finish) */}
+        <div className="mt-14 border-t border-zinc-200 pt-10">
+          <div className="grid gap-8 md:grid-cols-12">
+            <div className="md:col-span-5">
+              <div className="text-[14px] font-semibold text-zinc-900">Vantera</div>
+              <div className="mt-2 max-w-sm text-[12px] leading-relaxed text-zinc-600">
+                Verified property intelligence. Live inventory only.
+              </div>
+            </div>
+
+            <div className="md:col-span-7">
+              <div className="grid gap-6 sm:grid-cols-3">
+                <div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Markets</div>
+                  <div className="mt-3 grid gap-2 text-[12px]">
+                    <Link href="/" className="text-zinc-700 hover:text-zinc-900">
+                      Browse markets
+                    </Link>
+                    <Link href="/search" className="text-zinc-700 hover:text-zinc-900">
+                      Search
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Company</div>
+                  <div className="mt-3 grid gap-2 text-[12px]">
+                    <Link href="/contact" className="text-zinc-700 hover:text-zinc-900">
+                      Contact
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-semibold text-zinc-500">Legal</div>
+                  <div className="mt-3 grid gap-2 text-[12px]">
+                    <Link href="/privacy" className="text-zinc-700 hover:text-zinc-900">
+                      Privacy
+                    </Link>
+                    <Link href="/terms" className="text-zinc-700 hover:text-zinc-900">
+                      Terms
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 text-[11px] text-zinc-500">© {new Date().getFullYear()} Vantera</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Filters drawer */}
@@ -636,7 +1027,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-[12px] font-semibold text-zinc-900">Filters</div>
-                  <div className="mt-1 text-[12px] text-zinc-600">Server-applied.</div>
+                  <div className="mt-1 text-[12px] text-zinc-600">Applies to verified live inventory.</div>
                 </div>
 
                 <button
@@ -783,7 +1174,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                     >
                       Clear
                     </button>
-                    <span className="text-[11px] text-zinc-500">{needs.length ? `${needs.length} selected` : 'None selected'}</span>
+                    <span className="text-[11px] text-zinc-500">
+                      {needs.length ? `${needs.length} selected` : 'None selected'}
+                    </span>
                   </div>
                 </div>
 
@@ -813,7 +1206,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 </div>
               </div>
 
-              <div className="mt-6 text-[11px] text-zinc-500">Filters apply to live inventory on the server.</div>
+              <div className="mt-6 text-[11px] text-zinc-500">Filters apply to verified live inventory on the server.</div>
             </div>
           </div>
         </div>
