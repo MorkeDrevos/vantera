@@ -241,11 +241,11 @@ function FullBleedHero({
                 </div>
 
                 <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
-                  World’s Largest Luxury Marketplace
+                  A global €2M+ luxury real-estate marketplace, built city by city
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  Search fast, browse beautifully, and land on properties that feel like a catalogue, not a portal.
+                  Powered by market intelligence, not listings volume.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
