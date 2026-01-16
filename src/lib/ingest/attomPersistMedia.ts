@@ -28,15 +28,14 @@ export async function ingestAttomMediaForListing(
     if (exists) continue;
 
     await prisma.listingMedia.create({
-      data: {
-        listingId,
-        url: photo.url,
-        alt: photo.caption ?? 'Property image',
-        width: photo.width ?? null,
-        height: photo.height ?? null,
-        source: 'ATTOM',
-      },
-    });
+  data: {
+    listingId,
+    url: photo.url,
+    alt: photo.caption ?? 'Property image',
+    width: photo.width ?? null,
+    height: photo.height ?? null,
+  },
+});
 
     inserted++;
   }
