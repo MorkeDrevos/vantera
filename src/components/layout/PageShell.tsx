@@ -24,6 +24,9 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+// True full-bleed breakout (viewport width) - safe + production proven
+const FULL_BLEED = 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]';
+
 export default function PageShell({
   children,
   fullBleedHero,
@@ -46,8 +49,8 @@ export default function PageShell({
           <TopBar />
         </Suspense>
 
-        {/* TRUE FULL-BLEED HERO WRAPPER (more robust than w-screen + transform) */}
-        {fullBleedHero ? <div className="relative w-full">{fullBleedHero}</div> : null}
+        {/* TRUE FULL-BLEED HERO WRAPPER */}
+        {fullBleedHero ? <div className={cx('relative overflow-hidden', FULL_BLEED)}>{fullBleedHero}</div> : null}
 
         {!heroOnly ? (
           <main className={cx('relative mx-auto w-full px-5 pb-16 sm:px-8', bodyMaxWidthClassName)}>{children}</main>
