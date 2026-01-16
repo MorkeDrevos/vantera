@@ -1,18 +1,22 @@
 // src/app/search/page.tsx
-import type { Metadata } from 'next';
 
-import SearchResultsPage from '@/components/search/SearchResultsPage';
-
-export const metadata: Metadata = {
-  title: 'Search · Vantera',
-  description:
-    'Search Vantera by place, lifestyle, budget and keywords. Private intelligence, presented in plain language.',
+type SearchPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default function SearchPage({
-  searchParams,
-}: {
-  searchParams: Record<string, string | string[] | undefined>;
-}) {
-  return <SearchResultsPage searchParams={searchParams} />;
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const params = await searchParams;
+
+  const q = params.q;
+  const city = params.city;
+
+  return (
+    <main className="min-h-screen bg-white">
+      <h1 className="text-2xl font-semibold">Search results</h1>
+
+      <pre className="mt-6 text-sm text-neutral-600">
+        {JSON.stringify(params, null, 2)}
+      </pre>
+    </main>
+  );
 }
