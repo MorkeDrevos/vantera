@@ -6,6 +6,8 @@ import { Suspense, type ReactNode } from 'react';
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
 
+import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
+
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
 export type RuntimeCity = {
@@ -173,7 +175,14 @@ function FullBleedHero({
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
         <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
-          <Image src="/brand/hero.jpg" alt="Vantera - Global luxury marketplace" fill priority className="object-cover" sizes="100vw" />
+          <Image
+            src="/brand/hero.jpg"
+            alt="Vantera - Global luxury marketplace"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
 
           {/* White editorial wash (premium, not dark) */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.62),rgba(255,255,255,0.28))]" />
@@ -224,7 +233,7 @@ function FullBleedHero({
                 </div>
               </div>
 
-              {/* Right: Search atelier (server-safe form, feels like a product) */}
+              {/* Right: Search atelier */}
               <div className="lg:col-span-5">
                 <div
                   className={cx(
@@ -251,7 +260,6 @@ function FullBleedHero({
                     </div>
 
                     <form action="/search" method="get" className="mt-5 space-y-3">
-                      {/* Keyword */}
                       <div className="border border-[color:var(--hairline)] bg-white">
                         <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                           KEYWORDS
@@ -266,14 +274,15 @@ function FullBleedHero({
                         />
                       </div>
 
-                      {/* Country */}
                       <div className="border border-[color:var(--hairline)] bg-white">
                         <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                           COUNTRY
                         </label>
                         <select
                           name="country"
-                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
+                          className={cx(
+                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
+                          )}
                           defaultValue=""
                         >
                           <option value="">Any</option>
@@ -285,7 +294,6 @@ function FullBleedHero({
                         </select>
                       </div>
 
-                      {/* CTA row */}
                       <div className="grid gap-2 sm:grid-cols-2">
                         <button
                           type="submit"
@@ -422,9 +430,9 @@ export default function HomePage({
 
   const safeCities = Array.isArray(cities) ? cities : [];
 
-  // Build hero destinations:
+  // Hero quick destinations:
   // - sorted by priority
-  // - explicitly exclude Estepona/Benahavis from the hero quick destinations
+  // - explicitly exclude Estepona/Benahavis from hero quick destinations
   const EXCLUDE_HERO_SLUGS = new Set(['estepona', 'benahavis']);
 
   const heroCandidates = safeCities
@@ -446,14 +454,35 @@ export default function HomePage({
     .map(([k]) => k)
     .slice(0, 12);
 
+  // Adapter: RuntimeCity -> City (for CityCard)
+  const cityCards = safeCities
+    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
+    .map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      country: c.country,
+      region: c.region ?? null,
+      tz: c.tz,
+      tier: c.tier,
+      status: c.status,
+      priority: c.priority ?? 0,
+      blurb: c.blurb ?? null,
+      image: c.image
+        ? {
+            src: c.image.src,
+            alt: c.image.alt ?? null,
+          }
+        : null,
+      heroImageSrc: c.heroImageSrc ?? null,
+      heroImageAlt: c.heroImageAlt ?? null,
+    }));
+
   return (
     <Shell>
       <FullBleedHero
         cities={topForHero}
         topCountries={
-          topCountries.length
-            ? topCountries
-            : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
         }
       />
 
@@ -520,7 +549,31 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* Removed per request: the large marketplace city-card section (img 4). */}
+      {/* Keep the 6-city marketfront (FIX, don’t remove) */}
+      <section className="pb-16 sm:pb-20">
+        <div className={WIDE}>
+          <div className="mb-6">
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
+            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+              Six cities to start the marketplace
+            </div>
+            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
+            </div>
+            <div className="mt-6">
+              <Hairline />
+            </div>
+          </div>
+
+          <CityCardsVirtualizedClient
+            cities={cityCards}
+            mode="featured"
+            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          />
+        </div>
+      </section>
+
+      {/* (Per your “img 4” note) Do NOT render the full city grid anywhere on home. */}
     </Shell>
   );
 }
