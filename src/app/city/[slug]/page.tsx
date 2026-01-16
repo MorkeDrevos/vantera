@@ -8,6 +8,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+const MIN_PRICE = 2_000_000;
 
 function shortMoney(currency: string, n: number) {
   const cur = (currency || 'EUR').toUpperCase();
@@ -41,7 +42,7 @@ function PrimaryLink({ href, children }: { href: string; children: React.ReactNo
   return (
     <Link
       href={href}
-      className="inline-flex items-center justify-center gap-2 border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] px-6 py-3 text-sm font-semibold text-white hover:bg-[rgba(10,10,12,1.0)]"
+      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] px-6 py-3 text-sm font-semibold text-white hover:bg-[rgba(10,10,12,1.0)]"
     >
       {children}
     </Link>
@@ -52,7 +53,7 @@ function SecondaryLink({ href, children }: { href: string; children: React.React
   return (
     <Link
       href={href}
-      className="inline-flex items-center justify-center gap-2 border border-[color:var(--hairline)] bg-white px-6 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[color:var(--hairline)] bg-white px-6 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
     >
       {children}
     </Link>
@@ -78,8 +79,15 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
     );
   }
 
+  // Marketplace rule: €2M+ only (no placeholders, no price-on-request on city catalogue)
   const listings = await prisma.listing.findMany({
-    where: { cityId: city.id, status: 'LIVE', visibility: 'PUBLIC', coverMedia: { isNot: null } },
+    where: {
+      cityId: city.id,
+      status: 'LIVE',
+      visibility: 'PUBLIC',
+      coverMedia: { isNot: null },
+      price: { gte: MIN_PRICE },
+    },
     orderBy: [{ price: 'desc' }, { updatedAt: 'desc' }],
     take: 18,
     include: { coverMedia: true },
@@ -97,7 +105,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
       </div>
 
       {/* City hero - full bleed */}
-      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)] overflow-hidden">
+      <section className="relative left-1/2 right-1/2 w-screen -ml-[50vw] -mr-[50vw] overflow-hidden border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1400px_520px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(1400px_520px_at_85%_10%,rgba(139,92,246,0.05),transparent_66%)]" />
@@ -132,14 +140,14 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
               ) : null}
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <PrimaryLink href={`/search?city=${encodeURIComponent(city.slug)}`}>View all listings</PrimaryLink>
+                <PrimaryLink href={`/search?city=${encodeURIComponent(city.slug)}&min=${MIN_PRICE}`}>View all listings</PrimaryLink>
                 <SecondaryLink href="/search">Search</SecondaryLink>
                 <SecondaryLink href="/">Home</SecondaryLink>
               </div>
             </div>
 
             <div className="w-full max-w-[520px]">
-              <div className="border border-[color:var(--hairline)] bg-white shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
+              <div className="rounded-[26px] border border-[color:var(--hairline)] bg-white shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
                 <div className="relative p-6">
                   <GoldHairline />
                   <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
@@ -147,7 +155,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-3">
-                    <div className="border border-[color:var(--hairline)] bg-white p-4">
+                    <div className="rounded-2xl border border-[color:var(--hairline)] bg-white p-4">
                       <div className="text-[10px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">FEATURED</div>
                       <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
                         {listings.length}
@@ -155,26 +163,26 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                       <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">on this page</div>
                     </div>
 
-                    <div className="border border-[color:var(--hairline)] bg-white p-4">
-                      <div className="text-[10px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">ALL</div>
+                    <div className="rounded-2xl border border-[color:var(--hairline)] bg-white p-4">
+                      <div className="text-[10px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">FILTER</div>
                       <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                        Open
+                        €2M+
                       </div>
-                      <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">via Search</div>
+                      <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">marketplace floor</div>
                     </div>
                   </div>
 
                   <div className="mt-4">
                     <Link
-                      href={`/search?city=${encodeURIComponent(city.slug)}`}
-                      className="inline-flex w-full items-center justify-center border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+                      href={`/search?city=${encodeURIComponent(city.slug)}&min=${MIN_PRICE}`}
+                      className="inline-flex w-full items-center justify-center rounded-2xl border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
                     >
                       Explore {city.name}
                     </Link>
                   </div>
 
                   <div className="mt-4 text-[12px] text-[color:var(--ink-3)]">
-                    Only listings with verified media appear in the marketplace.
+                    Only listings with verified media and a published price appear in the marketplace.
                   </div>
                 </div>
               </div>
@@ -199,6 +207,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
 
           <div className="hidden sm:flex items-center gap-2">
             <TagPill>{meta}</TagPill>
+            <TagPill>€2M+</TagPill>
             <TagPill>Sorted by price</TagPill>
           </div>
         </div>
@@ -209,7 +218,8 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
               const hero = idx === 0 || idx === 3;
 
               const href = `/listing/${l.slug}`; // ✅ correct route
-              const priceLabel = typeof l.price === 'number' ? shortMoney(l.currency ?? 'EUR', l.price) : 'Price on request';
+              const priceLabel =
+                typeof l.price === 'number' ? shortMoney(l.currency ?? 'EUR', l.price) : 'Price on request';
               const cover = l.coverMedia;
 
               if (!cover?.url) return null;
@@ -219,11 +229,16 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                   <Link
                     href={href}
                     className={cx(
-                      'group block border border-[color:var(--hairline)] bg-white',
+                      'group block overflow-hidden rounded-[26px] border border-[color:var(--hairline)] bg-white',
                       'shadow-[0_26px_80px_rgba(11,12,16,0.05)] hover:shadow-[0_36px_110px_rgba(11,12,16,0.08)] transition',
                     )}
                   >
-                    <div className={cx('relative w-full overflow-hidden bg-[color:var(--paper-2)]', hero ? 'aspect-[16/10]' : 'aspect-[4/3]')}>
+                    <div
+                      className={cx(
+                        'relative w-full overflow-hidden bg-[color:var(--paper-2)]',
+                        hero ? 'aspect-[16/10]' : 'aspect-[4/3]',
+                      )}
+                    >
                       <Image
                         src={cover.url}
                         alt={cover.alt ?? l.title}
@@ -253,7 +268,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
             })}
           </div>
         ) : (
-          <div className="mt-8 border border-[color:var(--hairline)] bg-white p-10 shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
+          <div className="mt-8 rounded-[26px] border border-[color:var(--hairline)] bg-white p-10 shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
             <div className="text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
               Coverage is opening for {city.name}
             </div>
@@ -261,14 +276,16 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
               We only show verified live listings. Use Search to submit a request and get notified when inventory appears.
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <PrimaryLink href={`/search?city=${encodeURIComponent(city.slug)}`}>Request listings</PrimaryLink>
+              <PrimaryLink href={`/search?city=${encodeURIComponent(city.slug)}&min=${MIN_PRICE}`}>Request listings</PrimaryLink>
               <SecondaryLink href="/search">Browse all markets</SecondaryLink>
             </div>
           </div>
         )}
 
         <div className="mt-10">
-          <SecondaryLink href={`/search?city=${encodeURIComponent(city.slug)}`}>Explore {city.name} in Search</SecondaryLink>
+          <SecondaryLink href={`/search?city=${encodeURIComponent(city.slug)}&min=${MIN_PRICE}`}>
+            Explore {city.name} in Search
+          </SecondaryLink>
         </div>
       </section>
     </main>
