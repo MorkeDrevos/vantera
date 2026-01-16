@@ -57,7 +57,7 @@ function SignalChip({
 }: {
   label: string;
   value?: string;
-  tone?: 'neutral' | 'gold' | 'emerald' | 'violet';
+  tone?: 'neutral' | 'gold' | 'violet' | 'emerald';
 }) {
   const ringCls =
     tone === 'gold'
@@ -68,22 +68,11 @@ function SignalChip({
           ? 'ring-[rgba(139,92,246,0.18)]'
           : 'ring-black/[0.08]';
 
-  const tint =
-    tone === 'gold'
-      ? 'bg-[rgba(231,201,130,0.10)]'
-      : tone === 'emerald'
-        ? 'bg-[rgba(16,185,129,0.08)]'
-        : tone === 'violet'
-          ? 'bg-[rgba(139,92,246,0.07)]'
-          : 'bg-white/90';
-
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-2 whitespace-nowrap',
-        'rounded-full px-3 py-1.5 text-[11px]',
-        tint,
-        'backdrop-blur-2xl',
+        'inline-flex items-center gap-2 px-3 py-1.5 text-[11px]',
+        'bg-white/90 backdrop-blur-2xl',
         'ring-1 ring-inset',
         ringCls,
         'shadow-[0_10px_30px_rgba(11,12,16,0.06)]',
@@ -129,17 +118,18 @@ export default function CityCard({
         href={`/city/${city.slug}`}
         prefetch
         className={cx(
-          'relative block h-full overflow-hidden',
-          'flex flex-col',
+          'relative block overflow-hidden',
           'bg-white/78 backdrop-blur-[14px]',
           RING,
           'shadow-[0_26px_90px_rgba(11,12,16,0.10)]',
           'transition duration-500 hover:-translate-y-[2px] hover:shadow-[0_34px_120px_rgba(11,12,16,0.14)]',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-black/20',
+          // IMPORTANT: make every card equal-height in grid
+          'h-full flex flex-col',
         )}
         aria-label={`Open ${city.name}`}
       >
-        {/* Media (fixed height ensures consistent cards) */}
+        {/* Media (fixed height, never affects overall card height variability) */}
         <div className={cx('relative w-full shrink-0', isWall ? 'h-[260px] sm:h-[300px]' : 'h-[220px] sm:h-[260px]')}>
           {src ? (
             <SafeImage
@@ -195,14 +185,14 @@ export default function CityCard({
                 <div className="truncate text-[20px] font-semibold tracking-[-0.02em] text-slate-950">{city.name}</div>
                 <div className="mt-1 truncate text-[12px] text-slate-600">{regionLine(city)}</div>
 
-                {/* Less busy + fixed height behaviour (single line chips, no wrap) */}
-                <div className="mt-3 flex items-center gap-2 overflow-hidden">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   {showVerified ? (
                     <SignalChip label="Verified" value={`${verified}`} tone="gold" />
                   ) : (
                     <SignalChip label="Coverage" value="City dossier" tone="neutral" />
                   )}
                   <SignalChip label="Liquidity" value="Weekly" tone="emerald" />
+                  <SignalChip label="Risk" value="Tracked" tone="violet" />
                 </div>
               </div>
 
@@ -225,17 +215,13 @@ export default function CityCard({
           </div>
         </div>
 
-        {/* Editorial footer (mt-auto keeps all cards equal height) */}
-        <div className="mt-auto px-5 pb-5 pt-4">
-          {city.blurb?.trim() ? (
-            <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">{city.blurb.trim()}</p>
-          ) : (
-            <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">
-              Private market coverage with proof-first signals, not portal theatre.
-            </p>
-          )}
+        {/* Editorial footer (flex-1 makes all cards equal height) */}
+        <div className="px-5 pb-5 pt-4 flex-1 flex flex-col">
+          <p className="text-[13px] leading-relaxed text-slate-600 line-clamp-2">
+            {(city.blurb?.trim() ? city.blurb.trim() : 'Private market coverage with proof-first signals, not portal theatre.')}
+          </p>
 
-          <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="mt-auto pt-4 flex items-center justify-between gap-3">
             <div className="text-[11px] tracking-[0.20em] uppercase text-slate-500">Open dossier</div>
             <div className="h-px flex-1 bg-black/10" />
             <div className="text-[11px] text-slate-500">Updated weekly</div>
