@@ -29,6 +29,7 @@ type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
 type ListingCard = {
   id: string;
   slug: string;
+
   title: string;
   headline?: string | null;
 
@@ -37,6 +38,7 @@ type ListingCard = {
 
   bedrooms: number | null;
   bathrooms: number | null;
+
   builtM2: number | null;
   plotM2: number | null;
 
@@ -49,7 +51,7 @@ type ListingCard = {
     region?: string | null;
   };
 
-  cover?: {
+  cover: {
     url: string;
     alt?: string | null;
     width?: number | null;
@@ -67,9 +69,6 @@ type Props = {
 
   page: number;
   pageCount: number;
-  hasPrev: boolean;
-  hasNext: boolean;
-
   take: number;
 };
 
@@ -95,16 +94,22 @@ function shortMoney(currency: string, n: number) {
 
 function buildUrl(next: Record<string, string | number | undefined>) {
   const p = new URLSearchParams();
-
   for (const [k, v] of Object.entries(next)) {
     if (v === undefined) continue;
     const s = String(v).trim();
     if (!s) continue;
     p.set(k, s);
   }
-
   const qs = p.toString();
   return qs ? `/search?${qs}` : '/search';
+}
+
+function GoldHairline() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
+    </div>
+  );
 }
 
 function TagPill({ children }: { children: React.ReactNode }) {
@@ -121,14 +126,6 @@ function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
       <span className="text-zinc-500">{icon}</span>
       <span>{label}</span>
     </span>
-  );
-}
-
-function GoldHairline() {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0">
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
-    </div>
   );
 }
 
@@ -162,7 +159,7 @@ function useClickOutside(
   }, [refs, onOutside, when]);
 }
 
-function NeedsToString(needs: string[]) {
+function needsToString(needs: string[]) {
   return needs
     .map((n) => n.trim())
     .filter(Boolean)
@@ -170,25 +167,15 @@ function NeedsToString(needs: string[]) {
     .join(',');
 }
 
-export default function SearchResultsPageClient({
-  searchParams,
-  listings,
-  total,
-  page,
-  pageCount,
-  hasPrev,
-  hasNext,
-  take,
-}: Props) {
+export default function SearchResultsPageClient({ searchParams, listings, total, page, pageCount, take }: Props) {
   const router = useRouter();
 
-  // URL-driven initial values (production: URL is the truth)
   const boot = useMemo(() => {
     const sp = searchParams ?? {};
     const q = firstString(sp.q);
-    const place = firstString(sp.place);
-    const city = firstString(sp.city); // optional: preferred
     const kw = firstString(sp.kw);
+    const place = firstString(sp.place);
+    const city = firstString(sp.city);
     const mode = (firstString(sp.mode) as Mode) || 'buy';
     const max = firstString(sp.max);
     const beds = firstString(sp.beds);
@@ -197,13 +184,12 @@ export default function SearchResultsPageClient({
       .split(',')
       .map((x) => x.trim())
       .filter(Boolean);
-
     const sort = (firstString(sp.sort) as SortKey) || 'price_high';
 
     return {
       q,
-      place: city || place,
       kw,
+      place: city || place,
       mode: mode === 'rent' || mode === 'sell' ? mode : 'buy',
       max: max ? Number(max) : undefined,
       beds: beds ? Number(beds) : undefined,
@@ -251,7 +237,7 @@ export default function SearchResultsPageClient({
         max: typeof max === 'number' && Number.isFinite(max) ? Math.round(max) : undefined,
         beds: typeof beds === 'number' && Number.isFinite(beds) ? Math.round(beds) : undefined,
         type: type && normalize(type) !== 'any' ? type : undefined,
-        needs: needs.length ? NeedsToString(needs) : undefined,
+        needs: needs.length ? needsToString(needs) : undefined,
         sort: sort !== 'price_high' ? sort : undefined,
         page: nextPage && nextPage !== 1 ? nextPage : undefined,
         take: take !== 24 ? take : undefined,
@@ -310,17 +296,6 @@ export default function SearchResultsPageClient({
                     <Search className="h-4 w-4" />
                   </span>
                   <span>Search</span>
-                  {place.trim() ? (
-                    <>
-                      <span className="text-zinc-300">/</span>
-                      <Link
-                        href={`/city/${place.toLowerCase().trim().replace(/\s+/g, '-')}`}
-                        className="text-zinc-600 hover:text-zinc-900"
-                      >
-                        {place.trim()}
-                      </Link>
-                    </>
-                  ) : null}
                 </div>
 
                 <div className="mt-1 text-[20px] font-semibold text-zinc-900">
@@ -494,7 +469,7 @@ export default function SearchResultsPageClient({
           {listings.length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3">
               <div className="rounded-[26px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
-                <div className="text-[18px] font-semibold text-zinc-900">No matches</div>
+                <div className="text-[18px] font-semibold text-zinc-900">No results</div>
                 <div className="mt-2 text-[13px] text-zinc-600">Try loosening budget, bedrooms, or removing one need.</div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button
@@ -522,7 +497,7 @@ export default function SearchResultsPageClient({
                     onClick={clearAll}
                     className="rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
                   >
-                    Reset all
+                    Reset
                   </button>
                 </div>
               </div>
@@ -531,7 +506,7 @@ export default function SearchResultsPageClient({
             listings.map((l) => {
               const href = `/property/${l.slug}`;
               const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
-              const locLine = `${l.city.name}, ${l.city.country}`;
+              const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
 
               return (
                 <div
@@ -549,21 +524,10 @@ export default function SearchResultsPageClient({
                         priority={false}
                       />
                     ) : (
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            'radial-gradient(900px 320px at 18% 0%, rgba(185,133,51,0.16), transparent 60%), radial-gradient(900px 320px at 85% 8%, rgba(120,76,255,0.10), transparent 62%), linear-gradient(180deg, rgba(250,250,250,1), rgba(244,244,245,1))',
-                        }}
-                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-zinc-50 to-zinc-100" />
                     )}
 
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
-
-                    <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-white/92 px-3 py-1.5 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200 backdrop-blur">
-                      <Sparkles className="h-4 w-4 text-zinc-500" />
-                      <span>Verified pipeline</span>
-                    </div>
                   </div>
 
                   <div className="mt-3 px-1 pb-1">
@@ -571,9 +535,7 @@ export default function SearchResultsPageClient({
                       <div className="min-w-0">
                         <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
                         <div className="mt-1 truncate text-[12px] text-zinc-600">{locLine}</div>
-                        {l.headline ? (
-                          <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div>
-                        ) : null}
+                        {l.headline ? <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div> : null}
                       </div>
 
                       <button
@@ -606,10 +568,7 @@ export default function SearchResultsPageClient({
                         <ArrowRight className="h-4 w-4 text-zinc-500" />
                       </Link>
 
-                      <Link
-                        href={`/city/${l.city.slug}`}
-                        className="text-[11px] text-zinc-500 hover:text-zinc-900"
-                      >
+                      <Link href={`/city/${l.city.slug}`} className="text-[11px] text-zinc-500 hover:text-zinc-900">
                         {l.city.name}
                       </Link>
                     </div>
@@ -625,17 +584,18 @@ export default function SearchResultsPageClient({
           <div className="mt-10 flex items-center justify-between gap-3">
             <div className="text-[12px] text-zinc-600">
               Page <span className="font-semibold text-zinc-900">{page}</span> of{' '}
-              <span className="font-semibold text-zinc-900">{pageCount}</span>
+              <span className="font-semibold text-zinc-900">{pageCount}</span> ·{' '}
+              <span className="font-semibold text-zinc-900">{total.toLocaleString()}</span> total
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                disabled={!hasPrev}
+                disabled={page <= 1}
                 onClick={() => applyToUrl(Math.max(1, page - 1))}
                 className={cx(
                   'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
-                  hasPrev
+                  page > 1
                     ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
                     : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
                 )}
@@ -645,11 +605,11 @@ export default function SearchResultsPageClient({
 
               <button
                 type="button"
-                disabled={!hasNext}
+                disabled={page >= pageCount}
                 onClick={() => applyToUrl(Math.min(pageCount, page + 1))}
                 className={cx(
                   'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
-                  hasNext
+                  page < pageCount
                     ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
                     : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
                 )}
@@ -672,7 +632,7 @@ export default function SearchResultsPageClient({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <div className="text-[12px] font-semibold text-zinc-900">Filters</div>
-                  <div className="mt-1 text-[12px] text-zinc-600">Signal over noise.</div>
+                  <div className="mt-1 text-[12px] text-zinc-600">Server-applied.</div>
                 </div>
 
                 <button
@@ -713,9 +673,7 @@ export default function SearchResultsPageClient({
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <div className="text-[11px] font-semibold text-zinc-500">Max budget</div>
-                      <div className="mt-1 text-[12px] text-zinc-600">
-                        {max ? shortMoney('EUR', max) : 'No max'}
-                      </div>
+                      <div className="mt-1 text-[12px] text-zinc-600">{max ? shortMoney('EUR', max) : 'No max'}</div>
                     </div>
 
                     <button
@@ -788,89 +746,29 @@ export default function SearchResultsPageClient({
                   <div className="text-[11px] font-semibold text-zinc-500">Needs</div>
 
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('sea view')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('sea view') || activeNeeds.has('sea_view')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <Waves className="h-4 w-4 text-zinc-500" />
-                      sea view
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('waterfront')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('waterfront')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <Waves className="h-4 w-4 text-zinc-500" />
-                      waterfront
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('gated')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('gated')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <ShieldCheck className="h-4 w-4 text-zinc-500" />
-                      gated
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('privacy')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('privacy')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <ShieldCheck className="h-4 w-4 text-zinc-500" />
-                      privacy
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('quiet')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('quiet')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <Sparkles className="h-4 w-4 text-zinc-500" />
-                      quiet
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleNeed('new build')}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                        activeNeeds.has('new build') || activeNeeds.has('new_build')
-                          ? 'bg-white text-zinc-900 ring-zinc-300'
-                          : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                      )}
-                    >
-                      <Sparkles className="h-4 w-4 text-zinc-500" />
-                      new build
-                    </button>
+                    {[
+                      { k: 'sea view', icon: <Waves className="h-4 w-4 text-zinc-500" /> },
+                      { k: 'waterfront', icon: <Waves className="h-4 w-4 text-zinc-500" /> },
+                      { k: 'gated', icon: <ShieldCheck className="h-4 w-4 text-zinc-500" /> },
+                      { k: 'privacy', icon: <ShieldCheck className="h-4 w-4 text-zinc-500" /> },
+                      { k: 'quiet', icon: <Sparkles className="h-4 w-4 text-zinc-500" /> },
+                      { k: 'new build', icon: <Sparkles className="h-4 w-4 text-zinc-500" /> },
+                    ].map((n) => (
+                      <button
+                        key={n.k}
+                        type="button"
+                        onClick={() => toggleNeed(n.k)}
+                        className={cx(
+                          'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                          activeNeeds.has(normalize(n.k)) || activeNeeds.has(normalize(n.k).replace(' ', '_'))
+                            ? 'bg-white text-zinc-900 ring-zinc-300'
+                            : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                        )}
+                      >
+                        {n.icon}
+                        {n.k}
+                      </button>
+                    ))}
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-2">
@@ -879,7 +777,7 @@ export default function SearchResultsPageClient({
                       onClick={() => setNeeds([])}
                       className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      Clear needs
+                      Clear
                     </button>
                     <span className="text-[11px] text-zinc-500">{needs.length ? `${needs.length} selected` : 'None selected'}</span>
                   </div>
@@ -905,15 +803,13 @@ export default function SearchResultsPageClient({
                       onClick={clearAll}
                       className="rounded-full bg-white px-5 py-2.5 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
                     >
-                      Reset all
+                      Reset
                     </button>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 text-[11px] text-zinc-500">
-                Filtering is applied server-side against live inventory.
-              </div>
+              <div className="mt-6 text-[11px] text-zinc-500">Filters apply to live inventory on the server.</div>
             </div>
           </div>
         </div>
