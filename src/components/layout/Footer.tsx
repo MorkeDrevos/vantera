@@ -37,33 +37,34 @@ function Hairline({ className }: { className?: string }) {
   return <div className={cx('h-px w-full bg-[rgba(11,12,16,0.10)]', className)} />;
 }
 
-// Full-bleed breakout: forces true edge-to-edge even if a parent is constrained.
-const FULL_BLEED = 'w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]';
-
 export default function Footer() {
   const year = new Date().getFullYear();
 
-  // Padding only (no max width). This makes the PLATE go edge-to-edge.
-  const PAD = 'px-5 sm:px-8 lg:px-14 2xl:px-20';
+  const INNER =
+    'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-12 2xl:px-16';
 
   return (
     <footer className="mt-16 w-full">
       {/* FULL-BLEED FOOTER BAND (runs edge-to-edge) */}
-      <div className={cx('relative overflow-hidden', FULL_BLEED)}>
+      <div className="relative w-full">
         {/* full-bleed paper + aura */}
         <div className="pointer-events-none absolute inset-0">
+          {/* subtle footer band tint */}
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(251,251,250,0.65),rgba(251,251,250,0.92))]" />
+          {/* crown warmth */}
           <div className="absolute inset-x-0 top-0 h-[220px] bg-[radial-gradient(1200px_380px_at_50%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+          {/* violet lift (very faint) */}
           <div className="absolute inset-x-0 top-0 h-[240px] bg-[radial-gradient(1100px_380px_at_85%_10%,rgba(139,92,246,0.06),transparent_66%)]" />
+          {/* engineered hairlines */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
+          {/* micro grain */}
           <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
         </div>
 
-        {/* IMPORTANT: no mx-auto / max-w wrapper here */}
-        <div className={cx('relative', PAD, 'pb-14 pt-10')}>
-          {/* EDGE-TO-EDGE PLATE */}
-          <div className="relative w-full overflow-hidden bg-white/72 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_36px_120px_rgba(11,12,16,0.10)]">
+        <div className={cx('relative', INNER, 'pb-14 pt-10')}>
+          {/* FULL-WIDTH PLATE (no rounding, still premium) */}
+          <div className="relative overflow-hidden bg-white/72 backdrop-blur-[18px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_36px_120px_rgba(11,12,16,0.10)]">
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.05),transparent_62%)]" />
@@ -71,7 +72,6 @@ export default function Footer() {
               <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
             </div>
 
-            {/* Inner padding (so content doesn't slam the edge) */}
             <div className="relative px-6 py-8 sm:px-10 sm:py-10 lg:px-12">
               {/* Brand row */}
               <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
@@ -82,14 +82,15 @@ export default function Footer() {
                     </div>
 
                     <div className="min-w-0">
-                      <div className="text-sm font-semibold tracking-[0.22em] text-[color:var(--ink)]">VANTERA</div>
+                      <div className="text-sm font-semibold tracking-[0.22em] text-[color:var(--ink)]">
+                        VANTERA
+                      </div>
                       <div className="mt-0.5 text-xs text-[color:var(--ink-2)]">
                         Private intelligence for high-value real estate.
                       </div>
                     </div>
                   </div>
 
-                  {/* Constrain just the paragraph, not the whole footer */}
                   <div className="mt-4 max-w-[78ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
                     Built for clarity today, designed for truth tomorrow. This index expands as verified coverage grows.
                   </div>
@@ -130,7 +131,9 @@ export default function Footer() {
               {/* Link grid */}
               <div className="mt-7 grid gap-8 sm:grid-cols-3">
                 <div>
-                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRODUCT</div>
+                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+                    PRODUCT
+                  </div>
                   <div className="mt-3 flex flex-col gap-2">
                     <FooterLink href="/">Cities</FooterLink>
                     <FooterLink href="/coming-soon">Signals</FooterLink>
@@ -140,7 +143,9 @@ export default function Footer() {
                 </div>
 
                 <div>
-                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">COMPANY</div>
+                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+                    COMPANY
+                  </div>
                   <div className="mt-3 flex flex-col gap-2">
                     <FooterLink href="/contact">Contact</FooterLink>
                     <FooterLink href="mailto:md@vantera.io" external>
@@ -152,7 +157,9 @@ export default function Footer() {
                 </div>
 
                 <div>
-                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">LEGAL</div>
+                  <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+                    LEGAL
+                  </div>
                   <div className="mt-3 flex flex-col gap-2">
                     <FooterLink href="/coming-soon">Privacy</FooterLink>
                     <FooterLink href="/coming-soon">Terms</FooterLink>
