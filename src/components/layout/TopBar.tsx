@@ -283,12 +283,12 @@ export default function TopBar() {
 
   function openMegaSoon() {
     cancelTimers();
-    openT.current = window.setTimeout(() => setMegaOpen(true), 60);
+    openT.current = window.setTimeout(() => setMegaOpen(true), 70);
   }
 
   function closeMegaSoon() {
     cancelTimers();
-    closeT.current = window.setTimeout(() => setMegaOpen(false), 140);
+    closeT.current = window.setTimeout(() => setMegaOpen(false), 160);
   }
 
   function toggleMega() {
@@ -313,19 +313,18 @@ export default function TopBar() {
   const intelligenceHref = '/coming-soon?section=intelligence';
   const journalHref = '/coming-soon?section=journal';
 
-  // Visual system (calm, royal, minimal)
-  // Uses your existing CSS vars: --paper, --ink, --ink-2, --ink-3, --hairline.
-  const barBg = scrolled ? 'bg-[rgba(251,251,250,0.90)]' : 'bg-[rgba(251,251,250,0.78)]';
+  // White-royal system (match HomePage)
+  const barBg = scrolled ? 'bg-[rgba(251,251,250,0.92)]' : 'bg-[rgba(251,251,250,0.78)]';
 
   const ink = 'text-[color:var(--ink)]';
   const ink2 = 'text-[color:var(--ink-2)]';
   const ink3 = 'text-[color:var(--ink-3)]';
 
   const hairline = 'ring-1 ring-inset ring-[color:var(--hairline)]';
-  const hairlineHover = 'hover:ring-[rgba(11,12,16,0.16)]';
+  const hairlineHover = 'hover:ring-[rgba(11,12,16,0.18)]';
 
   const goldText =
-    'bg-clip-text text-transparent bg-gradient-to-b from-[#F7E7BF] via-[#E6C980] to-[#B7863A]';
+    'bg-clip-text text-transparent bg-[linear-gradient(180deg,#f7edcf_0%,#e6c980_45%,#b7863a_100%)]';
 
   const navBtn =
     'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[12px] tracking-[0.14em] uppercase transition';
@@ -333,20 +332,23 @@ export default function TopBar() {
   const navLink =
     'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[12px] tracking-[0.14em] uppercase transition';
 
-  const soft = cx('bg-white/62 hover:bg-white/88', hairline, hairlineHover);
-  const softTight = cx('bg-white/58 hover:bg-white/86', hairline, hairlineHover);
+  const soft = cx('bg-white/62 hover:bg-white/90', hairline, hairlineHover);
+  const softTight = cx('bg-white/58 hover:bg-white/88', hairline, hairlineHover);
+
+  // IMPORTANT: widen to match your new home widths
+  const BAR_INNER = 'mx-auto flex w-full max-w-[1600px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={cx('relative w-full backdrop-blur-[18px]', barBg)}>
-        {/* Champagne hairline + subtle editorial glow */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
+        {/* Royal top hairline */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.58)] to-transparent opacity-70" />
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(1100px_260px_at_50%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-black/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_280px_at_50%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-[rgba(11,12,16,0.10)]" />
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-7xl items-center px-4 py-3 sm:px-7 sm:py-3.5">
+        <div className={cx('relative', BAR_INNER)}>
           {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="flex shrink-0 items-center">
             <Image
@@ -356,13 +358,13 @@ export default function TopBar() {
               height={180}
               priority={false}
               className={cx(
-                'h-[36px] w-auto sm:h-[40px] md:h-[42px]',
-                'drop-shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
+                'h-[34px] w-auto sm:h-[40px] md:h-[42px]',
+                'drop-shadow-[0_18px_50px_rgba(11,12,16,0.08)]',
               )}
             />
           </Link>
 
-          {/* Desktop center nav (minimal, not five cheap links) */}
+          {/* Desktop center nav */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-2">
               {/* Places mega */}
@@ -394,9 +396,9 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'absolute left-1/2 z-[80] mt-4 w-[1120px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
-                    'rounded-[28px] bg-[color:var(--paper)]',
-                    'shadow-[0_40px_120px_rgba(11,12,16,0.16)]',
+                    'absolute left-1/2 z-[80] mt-4 w-[1180px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'rounded-[30px] bg-[color:var(--paper)]',
+                    'shadow-[0_44px_140px_rgba(11,12,16,0.14)]',
                     'ring-1 ring-inset ring-[color:var(--hairline)]',
                     'overflow-hidden',
                     'transition-[transform,opacity] duration-200',
@@ -407,10 +409,10 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Places menu"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_50%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_300px_at_50%_0%,rgba(231,201,130,0.18),transparent_60%)]" />
 
                   {/* Header */}
-                  <div className="relative flex items-center justify-between gap-4 border-b border-black/10 px-7 py-5">
+                  <div className="relative flex items-center justify-between gap-4 border-b border-[rgba(11,12,16,0.10)] px-7 py-5">
                     <div className="min-w-0">
                       <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                         Countries
@@ -442,7 +444,7 @@ export default function TopBar() {
                       onClick={() => setMegaOpen(false)}
                       className={cx(
                         'inline-flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                        'bg-white/62 hover:bg-white/88',
+                        'bg-white/62 hover:bg-white/90',
                         'ring-1 ring-inset ring-[color:var(--hairline)]',
                         'hover:ring-[rgba(11,12,16,0.16)]',
                         ink2,
@@ -505,7 +507,13 @@ export default function TopBar() {
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className={cx('truncate text-sm font-semibold', ink2, 'group-hover:text-[color:var(--ink)]')}>
+                                <div
+                                  className={cx(
+                                    'truncate text-sm font-semibold',
+                                    ink2,
+                                    'group-hover:text-[color:var(--ink)]',
+                                  )}
+                                >
                                   {c.name}
                                 </div>
                                 <div className="truncate text-[11px] text-black/50">{c.country}</div>
@@ -535,7 +543,7 @@ export default function TopBar() {
                     <div className="col-span-4">
                       <div className="grid gap-3">
                         <div className="overflow-hidden rounded-[22px] bg-white/80 ring-1 ring-inset ring-[color:var(--hairline)]">
-                          <div className="border-b border-black/10 px-4 py-3">
+                          <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Start with search
                             </div>
@@ -552,7 +560,7 @@ export default function TopBar() {
                               }}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/62 hover:bg-white/90',
+                                'bg-white/62 hover:bg-white/92',
                                 'ring-1 ring-inset ring-[color:var(--hairline)]',
                                 'hover:ring-[rgba(11,12,16,0.16)]',
                                 ink2,
@@ -587,7 +595,7 @@ export default function TopBar() {
                         </div>
 
                         <div className="overflow-hidden rounded-[22px] bg-white/80 ring-1 ring-inset ring-[color:var(--hairline)]">
-                          <div className="border-b border-black/10 px-4 py-3">
+                          <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Private network
                             </div>
@@ -600,7 +608,7 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/62 hover:bg-white/90',
+                                'bg-white/62 hover:bg-white/92',
                                 'ring-1 ring-inset ring-[color:var(--hairline)]',
                                 'hover:ring-[rgba(11,12,16,0.16)]',
                                 ink2,
@@ -635,7 +643,7 @@ export default function TopBar() {
                         </div>
 
                         <div className="overflow-hidden rounded-[22px] bg-white/80 ring-1 ring-inset ring-[color:var(--hairline)]">
-                          <div className="border-b border-black/10 px-4 py-3">
+                          <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Submissions
                             </div>
@@ -648,7 +656,7 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
-                                'bg-white/70 hover:bg-white/92',
+                                'bg-white/72 hover:bg-white/95',
                                 'ring-1 ring-inset ring-[rgba(11,12,16,0.16)]',
                                 'shadow-[0_18px_46px_rgba(11,12,16,0.10)]',
                               )}
@@ -656,9 +664,7 @@ export default function TopBar() {
                               <span className={goldText}>{sellLabel}</span>
                               <ArrowRight className="h-4 w-4 opacity-75 text-black" />
                             </Link>
-                            <div className="mt-2 text-[11px] text-black/55">
-                              Verification-first pipeline.
-                            </div>
+                            <div className="mt-2 text-[11px] text-black/55">Verification-first pipeline.</div>
                           </div>
                         </div>
                       </div>
@@ -667,7 +673,7 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Minimal nav links (3 max) */}
+              {/* Minimal nav links (keep it tight) */}
               <Link href={intelligenceHref} prefetch className={cx(navLink, softTight, ink3)}>
                 <ShieldCheck className="h-4 w-4 opacity-70" />
                 <span>Intelligence</span>
@@ -680,17 +686,13 @@ export default function TopBar() {
             </div>
           </nav>
 
-          {/* Right actions (Search is the hero) */}
+          {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
               <button
                 type="button"
                 onClick={openSearchFromAnywhere}
-                className={cx(
-                  'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition',
-                  soft,
-                  ink2,
-                )}
+                className={cx('inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition', soft, ink2)}
                 aria-label="Search"
               >
                 <Command className="h-4 w-4 opacity-70" />
@@ -704,7 +706,7 @@ export default function TopBar() {
                 prefetch
                 className={cx(
                   'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition',
-                  'bg-white/70 hover:bg-white/92',
+                  'bg-white/72 hover:bg-white/95',
                   'ring-1 ring-inset ring-[rgba(11,12,16,0.16)]',
                   'shadow-[0_18px_46px_rgba(11,12,16,0.10)]',
                 )}
@@ -718,11 +720,7 @@ export default function TopBar() {
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
-              className={cx(
-                'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition lg:hidden',
-                soft,
-                ink2,
-              )}
+              className={cx('inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition lg:hidden', soft, ink2)}
               aria-expanded={mobileOpen}
               aria-controls="vantera-mobile-menu"
             >
@@ -750,23 +748,23 @@ export default function TopBar() {
 
         <div
           className={cx(
-            'absolute right-0 top-0 h-full w-[92vw] max-w-[420px]',
+            'absolute right-0 top-0 h-full w-[92vw] max-w-[440px]',
             'bg-[color:var(--paper)] ring-1 ring-inset ring-[color:var(--hairline)]',
-            'shadow-[-30px_0_120px_rgba(11,12,16,0.18)]',
+            'shadow-[-30px_0_120px_rgba(11,12,16,0.16)]',
             'transition-transform duration-300',
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_280px_at_30%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_300px_at_26%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
 
-          <div className="relative flex items-center justify-between border-b border-black/10 px-5 py-5">
+          <div className="relative flex items-center justify-between border-b border-[rgba(11,12,16,0.10)] px-5 py-5">
             <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               className={cx(
                 'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                'bg-white/62 hover:bg-white/88',
+                'bg-white/62 hover:bg-white/90',
                 'ring-1 ring-inset ring-[color:var(--hairline)]',
                 'hover:ring-[rgba(11,12,16,0.16)]',
                 ink2,
@@ -780,7 +778,7 @@ export default function TopBar() {
           <div className="relative space-y-4 px-5 py-5">
             {/* Search first */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
-              <div className="border-b border-black/10 px-4 py-3">
+              <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Search</div>
                 <div className="mt-1 text-xs text-black/55">One box. Typos allowed. Keywords included.</div>
               </div>
@@ -793,7 +791,7 @@ export default function TopBar() {
                   }}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/62 hover:bg-white/90',
+                    'bg-white/62 hover:bg-white/92',
                     'ring-1 ring-inset ring-[color:var(--hairline)]',
                     'hover:ring-[rgba(11,12,16,0.16)]',
                     ink2,
@@ -813,7 +811,7 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
-                    'bg-white/70 hover:bg-white/92',
+                    'bg-white/72 hover:bg-white/95',
                     'ring-1 ring-inset ring-[rgba(11,12,16,0.16)]',
                   )}
                 >
@@ -827,7 +825,7 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/62 hover:bg-white/90',
+                    'bg-white/62 hover:bg-white/92',
                     'ring-1 ring-inset ring-[color:var(--hairline)]',
                     'hover:ring-[rgba(11,12,16,0.16)]',
                     ink2,
@@ -844,7 +842,7 @@ export default function TopBar() {
 
             {/* Places */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
-              <div className="border-b border-black/10 px-4 py-3">
+              <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Places</div>
                 <div className="mt-1 text-xs text-black/55">Countries and top cities.</div>
               </div>
@@ -888,7 +886,7 @@ export default function TopBar() {
 
             {/* Minimal nav */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
-              <div className="border-b border-black/10 px-4 py-3">
+              <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                 <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Navigation</div>
                 <div className="mt-1 text-xs text-black/55">Public entry points.</div>
               </div>
@@ -897,7 +895,7 @@ export default function TopBar() {
                   href={intelligenceHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/90 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 opacity-75" />
@@ -910,7 +908,7 @@ export default function TopBar() {
                   href={journalHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/90 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <BookOpen className="h-4 w-4 opacity-75" />
@@ -923,7 +921,7 @@ export default function TopBar() {
                   href={sellersHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/90 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Building2 className="h-4 w-4 opacity-75" />
@@ -937,7 +935,7 @@ export default function TopBar() {
             {/* City page switch */}
             {onCityPage ? (
               <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
-                <div className="border-b border-black/10 px-4 py-3">
+                <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
                   <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">City view</div>
                   <div className="mt-1 text-xs text-black/55">Switch: facts (T) or live market (L).</div>
                 </div>
