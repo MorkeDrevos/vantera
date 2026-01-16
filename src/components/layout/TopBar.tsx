@@ -301,79 +301,89 @@ export default function TopBar() {
   const intelligenceHref = '/coming-soon?section=intelligence';
   const journalHref = '/coming-soon?section=journal';
 
-  // visual system - borderless, premium, quiet glass
+  // Layout
   const BAR_INNER =
     'mx-auto flex w-full max-w-[1760px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
 
+  // Royal, hairline, no rounded corners
   const barShell = cx(
     'relative w-full',
     'backdrop-blur-[18px]',
-    scrolled ? 'bg-[rgba(255,255,255,0.92)]' : 'bg-[rgba(255,255,255,0.82)]',
-    scrolled ? 'shadow-[0_18px_70px_rgba(0,0,0,0.10)]' : 'shadow-[0_10px_50px_rgba(0,0,0,0.06)]',
+    'ring-1 ring-inset ring-[color:var(--hairline)]',
+    scrolled ? 'bg-[rgba(255,255,255,0.94)]' : 'bg-[rgba(255,255,255,0.86)]',
+    scrolled ? 'shadow-[0_18px_70px_rgba(11,12,16,0.10)]' : 'shadow-[0_10px_50px_rgba(11,12,16,0.06)]',
   );
-
-  const pill =
-    'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-medium text-slate-900/70 hover:text-slate-900 transition select-none hover:bg-black/[0.04]';
-
-  const pillActive = cx(
-    'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] font-medium transition select-none',
-    'text-slate-900 bg-black/[0.05]',
-  );
-
-  const signatureSearch =
-    'inline-flex h-10 items-center gap-2 rounded-full px-4 transition ' +
-    'bg-black/[0.04] hover:bg-black/[0.055] ' +
-    'shadow-[0_16px_46px_rgba(0,0,0,0.08)]';
-
-  const primaryCta =
-    'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition ' +
-    'bg-[linear-gradient(180deg,rgba(185,133,51,0.16),rgba(185,133,51,0.10))] hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.20),rgba(185,133,51,0.12))] ' +
-    'shadow-[0_20px_60px_rgba(0,0,0,0.10)]';
 
   const goldText =
     'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_48%,#8a5b12_100%)]';
 
+  const navItemBase =
+    'inline-flex h-10 items-center gap-2 px-4 text-[13px] font-medium transition select-none ' +
+    'ring-1 ring-inset ring-[color:var(--hairline)] bg-transparent hover:bg-black/[0.035] ' +
+    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]';
+
+  const navItemActive =
+    'inline-flex h-10 items-center gap-2 px-4 text-[13px] font-medium transition select-none ' +
+    'ring-1 ring-inset ring-[rgba(11,12,16,0.18)] bg-black/[0.03] text-[color:var(--ink)]';
+
+  const signatureSearch =
+    'inline-flex h-10 items-center gap-2 px-4 transition ' +
+    'ring-1 ring-inset ring-[color:var(--hairline)] ' +
+    'bg-white/70 hover:bg-white ' +
+    'shadow-[0_16px_46px_rgba(11,12,16,0.08)]';
+
+  const primaryCta =
+    'inline-flex h-10 items-center gap-2 px-5 text-sm font-semibold transition ' +
+    'ring-1 ring-inset ring-[rgba(185,133,51,0.35)] ' +
+    'bg-[linear-gradient(180deg,rgba(185,133,51,0.18),rgba(185,133,51,0.10))] ' +
+    'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.22),rgba(185,133,51,0.12))] ' +
+    'shadow-[0_18px_55px_rgba(11,12,16,0.10)]';
+
+  const iconMuted = 'text-[color:var(--ink-3)]';
+
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
-        {/* clean ambient only (no borders) */}
+        {/* Royal hairlines + warm crown wash */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1100px_220px_at_50%_0%,rgba(185,133,51,0.08),transparent_62%)]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.010),transparent_40%,rgba(0,0,0,0.030))]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1200px_240px_at_50%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,12,16,0.012),transparent_42%,rgba(11,12,16,0.030))]" />
         </div>
 
         <div className={cx('relative', BAR_INNER)}>
-          {/* Brand - logo only (left) */}
+          {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <Image
               src="/brand/vantera-logo-dark.svg"
               alt="Vantera"
-              width={620}
-              height={180}
+              width={520}
+              height={160}
               priority={false}
-              className={cx('h-[30px] w-auto sm:h-[34px] md:h-[36px]', 'contrast-[1.06]')}
+              className={cx('h-[28px] w-auto sm:h-[32px] md:h-[34px]', 'contrast-[1.06]')}
             />
           </Link>
 
           {/* Desktop center nav */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-2">
-              {/* Getaway mega */}
+              {/* Gateway mega */}
               <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
                   onClick={toggleMega}
                   onFocus={() => setMegaOpen(true)}
-                  className={cx(megaOpen ? pillActive : pill)}
+                  className={cx(megaOpen ? navItemActive : navItemBase)}
                   aria-expanded={megaOpen}
                   aria-haspopup="menu"
                 >
-                  <Globe className="h-4 w-4 opacity-75" />
-                  <span>Getaway</span>
-                  <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
+                  <Globe className={cx('h-4 w-4', iconMuted)} />
+                  <span>Gateway</span>
+                  <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
                 </button>
 
-                {/* Mega panel - simplified, less round, no borders */}
+                {/* Mega panel - editorial, no rounding, hairlines */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -382,10 +392,11 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'fixed left-1/2 top-[76px] z-[80] w-[1180px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
-                    'rounded-2xl overflow-hidden',
-                    'bg-[rgba(255,255,255,0.94)] backdrop-blur-[22px]',
-                    'shadow-[0_60px_180px_rgba(0,0,0,0.18)]',
+                    'fixed left-1/2 top-[74px] z-[80] w-[1240px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'overflow-hidden',
+                    'bg-[rgba(255,255,255,0.96)] backdrop-blur-[22px]',
+                    'ring-1 ring-inset ring-[color:var(--hairline)]',
+                    'shadow-[0_60px_180px_rgba(11,12,16,0.16)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
@@ -394,18 +405,21 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Places menu"
                 >
-                  {/* soft aura only */}
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(1100px_360px_at_50%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.010),transparent_45%,rgba(0,0,0,0.030))]" />
+                    <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(1200px_380px_at_50%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(1100px_420px_at_86%_0%,rgba(139,92,246,0.08),transparent_64%)]" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
                   </div>
 
-                  {/* Header - minimal */}
-                  <div className="relative flex items-center justify-between gap-4 px-7 py-6">
+                  {/* Header */}
+                  <div className="relative flex items-start justify-between gap-6 px-7 py-6">
                     <div className="min-w-0">
-                      <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Gateway</div>
-                      <div className="mt-2 text-[14px] leading-snug text-slate-700/80">
-                        Curated entry points. Search is primary.
+                      <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>
+                        gateway
+                      </div>
+                      <div className="mt-2 max-w-[72ch] text-[13px] leading-relaxed text-[color:var(--ink-2)]">
+                        Curated entry points into the index. Search remains the primary interface.
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -416,9 +430,10 @@ export default function TopBar() {
                             prefetch
                             onClick={() => setMegaOpen(false)}
                             className={cx(
-                              'rounded-full px-3.5 py-1.5 text-[12px] transition',
-                              'bg-black/[0.04] hover:bg-black/[0.06]',
-                              'text-slate-900/75 hover:text-slate-900',
+                              'px-3.5 py-1.5 text-[12px] transition',
+                              'ring-1 ring-inset ring-[color:var(--hairline)]',
+                              'bg-black/[0.02] hover:bg-black/[0.045]',
+                              'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                             )}
                             role="menuitem"
                           >
@@ -428,41 +443,42 @@ export default function TopBar() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                       <Link
                         href="/search"
                         prefetch
                         onClick={() => setMegaOpen(false)}
                         className={cx(
-                          'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                          'bg-black/[0.04] hover:bg-black/[0.06]',
-                          'text-slate-900/75 hover:text-slate-900',
+                          'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                          'ring-1 ring-inset ring-[color:var(--hairline)]',
+                          'bg-white/70 hover:bg-white',
+                          'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
                       >
-                        <Command className="h-4 w-4 opacity-80" />
-                        Open search
-                        <span className="ml-1 font-mono text-[11px] text-slate-700/75">/</span>
+                        <Command className={cx('h-4 w-4', iconMuted)} />
+                        Open search <span className="ml-1 font-mono text-[11px] text-[color:var(--ink-3)]">/</span>
                       </Link>
 
                       <button
                         type="button"
                         onClick={() => setMegaOpen(false)}
                         className={cx(
-                          'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                          'bg-black/[0.03] hover:bg-black/[0.05]',
-                          'text-slate-900/65 hover:text-slate-900',
+                          'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                          'ring-1 ring-inset ring-[color:var(--hairline)]',
+                          'bg-black/[0.02] hover:bg-black/[0.04]',
+                          'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
                       >
-                        <X className="h-4 w-4 opacity-80" />
+                        <X className={cx('h-4 w-4', iconMuted)} />
                         Close
                       </button>
                     </div>
                   </div>
 
-                  {/* Body - only featured cities + one action */}
+                  {/* Body */}
                   <div className="relative grid grid-cols-12 gap-6 px-7 pb-7">
                     <div className="col-span-8">
-                      <div className={cx('mb-3 text-[12px] font-semibold tracking-[0.08em]', goldText)}>
+                      <div className={cx('mb-3 text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>
                         Featured cities
                       </div>
 
@@ -474,31 +490,34 @@ export default function TopBar() {
                             prefetch
                             onClick={() => setMegaOpen(false)}
                             className={cx(
-                              'group rounded-xl px-4 py-3 transition',
-                              'bg-black/[0.035] hover:bg-black/[0.055]',
+                              'group px-4 py-3 transition',
+                              'ring-1 ring-inset ring-[color:var(--hairline)]',
+                              'bg-black/[0.02] hover:bg-black/[0.045]',
                             )}
                             role="menuitem"
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="truncate text-[14px] font-semibold text-slate-900/92">{c.name}</div>
-                                <div className="mt-0.5 truncate text-[11px] tracking-[0.14em] text-slate-700/70">
+                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">
+                                  {c.name}
+                                </div>
+                                <div className="mt-0.5 truncate text-[11px] tracking-[0.18em] text-[color:var(--ink-3)]">
                                   {c.country}
                                 </div>
                               </div>
-                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90 text-slate-900" />
+                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90 text-[color:var(--ink)]" />
                             </div>
                           </Link>
                         ))}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between rounded-xl px-4 py-3 bg-black/[0.025]">
-                        <div className="text-xs text-slate-700/80">Editorial gateway. Search is the product.</div>
+                      <div className="mt-4 flex items-center justify-between px-4 py-3 ring-1 ring-inset ring-[color:var(--hairline)] bg-black/[0.015]">
+                        <div className="text-xs text-[color:var(--ink-2)]">Editorial gateway. Search is the product.</div>
                         <Link
                           href="/search"
                           prefetch
                           onClick={() => setMegaOpen(false)}
-                          className="inline-flex items-center gap-2 text-xs text-slate-900/70 hover:text-slate-900 transition"
+                          className="inline-flex items-center gap-2 text-xs text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition"
                         >
                           Search <ArrowRight className="h-4 w-4 opacity-70" />
                         </Link>
@@ -506,34 +525,46 @@ export default function TopBar() {
                     </div>
 
                     <div className="col-span-4">
-                      <div className="rounded-2xl bg-[linear-gradient(180deg,rgba(185,133,51,0.12),rgba(185,133,51,0.06))] p-4 shadow-[0_18px_60px_rgba(0,0,0,0.08)]">
-                        <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Submissions</div>
-                        <div className="mt-1 text-xs text-slate-700/80">Private by default. Signal over noise.</div>
+                      <div className="relative overflow-hidden ring-1 ring-inset ring-[color:var(--hairline)] bg-white/72 p-4 shadow-[0_18px_60px_rgba(11,12,16,0.08)]">
+                        <div className="pointer-events-none absolute inset-0">
+                          <div className="absolute inset-0 bg-[radial-gradient(720px_220px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+                          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+                        </div>
 
-                        <Link
-                          href={sellHref}
-                          prefetch
-                          onClick={() => setMegaOpen(false)}
-                          className={cx(
-                            'mt-4 inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition',
-                            'bg-[linear-gradient(180deg,rgba(185,133,51,0.18),rgba(185,133,51,0.12))]',
-                            'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.24),rgba(185,133,51,0.14))]',
-                          )}
-                        >
-                          <span className={goldText}>{sellLabel}</span>
-                          <ArrowRight className="h-4 w-4 opacity-80 text-slate-900 transition group-hover:translate-x-0.5" />
-                        </Link>
+                        <div className="relative">
+                          <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>
+                            Submissions
+                          </div>
+                          <div className="mt-1 text-xs text-[color:var(--ink-2)]">
+                            Private by default. Signal over noise.
+                          </div>
+
+                          <Link
+                            href={sellHref}
+                            prefetch
+                            onClick={() => setMegaOpen(false)}
+                            className={cx(
+                              'mt-4 inline-flex w-full items-center justify-between px-4 py-3 text-sm font-semibold transition',
+                              'ring-1 ring-inset ring-[rgba(185,133,51,0.35)]',
+                              'bg-[linear-gradient(180deg,rgba(185,133,51,0.16),rgba(185,133,51,0.10))]',
+                              'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.20),rgba(185,133,51,0.12))]',
+                            )}
+                          >
+                            <span className={goldText}>{sellLabel}</span>
+                            <ArrowRight className="h-4 w-4 opacity-80 text-[color:var(--ink)]" />
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Minimal nav links */}
-              <Link href={intelligenceHref} prefetch className={pill}>
+              {/* Minimal nav links (no caps) */}
+              <Link href={intelligenceHref} prefetch className={navItemBase}>
                 Intelligence
               </Link>
-              <Link href={journalHref} prefetch className={pill}>
+              <Link href={journalHref} prefetch className={navItemBase}>
                 Journal
               </Link>
             </div>
@@ -542,16 +573,21 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
-                <Command className="h-4 w-4 text-slate-900/70" />
-                <span className="text-[13px] tracking-[0.04em] text-slate-900/85">Search</span>
-                <span className="text-slate-900/20">·</span>
-                <span className="font-mono text-xs text-slate-700/80">/</span>
+              <button
+                type="button"
+                onClick={openSearchResultsFromAnywhere}
+                className={signatureSearch}
+                aria-label="Search"
+              >
+                <Command className="h-4 w-4 text-[color:var(--ink-3)]" />
+                <span className="text-[13px] tracking-[0.04em] text-[color:var(--ink-2)]">Search</span>
+                <span className="text-[color:var(--ink-3)]/40">·</span>
+                <span className="font-mono text-xs text-[color:var(--ink-3)]">/</span>
               </button>
 
               <Link href={sellHref} prefetch className={primaryCta} aria-label={sellLabel}>
                 <span className={goldText}>{sellLabel}</span>
-                <ArrowRight className="h-4 w-4 opacity-80 text-slate-900" />
+                <ArrowRight className="h-4 w-4 opacity-80 text-[color:var(--ink)]" />
               </Link>
             </div>
 
@@ -559,21 +595,22 @@ export default function TopBar() {
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
-                'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition lg:hidden',
-                'bg-black/[0.04] hover:bg-black/[0.06]',
-                'text-slate-900/80 hover:text-slate-900',
+                'inline-flex h-10 items-center gap-2 px-4 text-sm transition lg:hidden',
+                'ring-1 ring-inset ring-[color:var(--hairline)]',
+                'bg-black/[0.02] hover:bg-black/[0.05]',
+                'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
               )}
               aria-expanded={mobileOpen}
               aria-controls="vantera-mobile-menu"
             >
               Menu
-              <ChevronDown className={cx('h-4 w-4 transition', mobileOpen && 'rotate-180')} />
+              <ChevronDown className={cx('h-4 w-4 transition text-[color:var(--ink-3)]', mobileOpen && 'rotate-180')} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile sheet - simplified, no borders, less rounded */}
+      {/* Mobile sheet - editorial, no rounding */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[70] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
@@ -590,36 +627,41 @@ export default function TopBar() {
 
         <div
           className={cx(
-            'absolute right-0 top-0 h-full w-[92vw] max-w-[460px]',
-            'bg-[rgba(255,255,255,0.96)] backdrop-blur-[18px]',
-            'shadow-[-40px_0_160px_rgba(0,0,0,0.16)]',
+            'absolute right-0 top-0 h-full w-[92vw] max-w-[480px]',
+            'bg-[rgba(255,255,255,0.98)] backdrop-blur-[18px]',
+            'ring-1 ring-inset ring-[color:var(--hairline)]',
+            'shadow-[-40px_0_160px_rgba(11,12,16,0.16)]',
             'transition-transform duration-300',
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(185,133,51,0.09),transparent_62%)]" />
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,12,16,0.010),transparent_45%,rgba(11,12,16,0.030))]" />
+          </div>
 
           <div className="relative flex items-center justify-between px-5 py-5">
-            <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Menu</div>
+            <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               className={cx(
-                'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                'bg-black/[0.04] hover:bg-black/[0.06]',
-                'text-slate-900/75 hover:text-slate-900',
+                'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                'ring-1 ring-inset ring-[color:var(--hairline)]',
+                'bg-black/[0.02] hover:bg-black/[0.04]',
+                'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
               )}
             >
-              <X className="h-4 w-4 opacity-85" />
+              <X className="h-4 w-4 text-[color:var(--ink-3)]" />
               Close
             </button>
           </div>
 
           <div className="relative space-y-4 px-5 pb-6">
             {/* Search */}
-            <div className="rounded-2xl bg-black/[0.025] p-4">
-              <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Search</div>
-              <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
+            <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-black/[0.015] p-4">
+              <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>Search</div>
+              <div className="mt-1 text-xs text-[color:var(--ink-2)]">One box. Keywords allowed.</div>
 
               <div className="mt-3 grid gap-2">
                 <button
@@ -629,14 +671,15 @@ export default function TopBar() {
                     setMobileOpen(false);
                   }}
                   className={cx(
-                    'inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition',
-                    'bg-black/[0.04] hover:bg-black/[0.06]',
-                    'text-slate-900/86 hover:text-slate-900',
+                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
+                    'ring-1 ring-inset ring-[color:var(--hairline)]',
+                    'bg-white/70 hover:bg-white',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <Command className="h-4 w-4 opacity-85" />
-                    Open search <span className="ml-1 font-mono text-xs text-slate-700/80">/</span>
+                    <Command className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    Open search <span className="ml-1 font-mono text-xs text-[color:var(--ink-3)]">/</span>
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-70" />
                 </button>
@@ -646,22 +689,23 @@ export default function TopBar() {
                   prefetch
                   onClick={() => setMobileOpen(false)}
                   className={cx(
-                    'inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition',
-                    'bg-[linear-gradient(180deg,rgba(185,133,51,0.18),rgba(185,133,51,0.12))]',
-                    'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.24),rgba(185,133,51,0.14))]',
-                    'text-slate-900',
+                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm font-semibold transition',
+                    'ring-1 ring-inset ring-[rgba(185,133,51,0.35)]',
+                    'bg-[linear-gradient(180deg,rgba(185,133,51,0.16),rgba(185,133,51,0.10))]',
+                    'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.20),rgba(185,133,51,0.12))]',
+                    'text-[color:var(--ink)]',
                   )}
                 >
                   <span className={goldText}>{sellLabel}</span>
-                  <ArrowRight className="h-4 w-4 opacity-85 text-slate-900" />
+                  <ArrowRight className="h-4 w-4 opacity-85" />
                 </Link>
               </div>
             </div>
 
-            {/* Getaway */}
-            <div className="rounded-2xl bg-black/[0.025] p-4">
-              <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Getaway</div>
-              <div className="mt-1 text-xs text-slate-700/80">Countries and featured cities.</div>
+            {/* Gateway */}
+            <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-black/[0.015] p-4">
+              <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>Gateway</div>
+              <div className="mt-1 text-xs text-[color:var(--ink-2)]">Countries and featured cities.</div>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {countries.map((c) => (
@@ -671,9 +715,10 @@ export default function TopBar() {
                     prefetch
                     onClick={() => setMobileOpen(false)}
                     className={cx(
-                      'rounded-full px-3 py-1.5 text-[12px] transition',
-                      'bg-black/[0.04] hover:bg-black/[0.06]',
-                      'text-slate-900/80 hover:text-slate-900',
+                      'px-3 py-1.5 text-[12px] transition',
+                      'ring-1 ring-inset ring-[color:var(--hairline)]',
+                      'bg-white/60 hover:bg-white',
+                      'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                     )}
                   >
                     {c}
@@ -688,24 +733,30 @@ export default function TopBar() {
                     href={`/city/${c.slug}`}
                     prefetch
                     onClick={() => setMobileOpen(false)}
-                    className={cx('rounded-xl px-3.5 py-3 transition', 'bg-black/[0.04] hover:bg-black/[0.06]')}
+                    className={cx(
+                      'px-3.5 py-3 transition',
+                      'ring-1 ring-inset ring-[color:var(--hairline)]',
+                      'bg-white/60 hover:bg-white',
+                    )}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold text-slate-900/92">{c.name}</div>
-                        <div className="truncate text-[11px] tracking-[0.14em] text-slate-700/70">{c.country}</div>
+                        <div className="truncate text-sm font-semibold text-[color:var(--ink)]">{c.name}</div>
+                        <div className="truncate text-[11px] tracking-[0.18em] text-[color:var(--ink-3)]">
+                          {c.country}
+                        </div>
                       </div>
-                      <ArrowRight className="h-4 w-4 opacity-70 text-slate-900" />
+                      <ArrowRight className="h-4 w-4 opacity-70 text-[color:var(--ink)]" />
                     </div>
                   </Link>
                 ))}
               </div>
             </div>
 
-            {/* Minimal nav */}
-            <div className="rounded-2xl bg-black/[0.025] p-4">
-              <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Navigation</div>
-              <div className="mt-1 text-xs text-slate-700/80">Public entry points.</div>
+            {/* Navigation */}
+            <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-black/[0.015] p-4">
+              <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>Navigation</div>
+              <div className="mt-1 text-xs text-[color:var(--ink-2)]">Public entry points.</div>
 
               <div className="mt-3 grid gap-2">
                 <Link
@@ -713,9 +764,10 @@ export default function TopBar() {
                   prefetch
                   onClick={() => setMobileOpen(false)}
                   className={cx(
-                    'inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition',
-                    'bg-black/[0.04] hover:bg-black/[0.06]',
-                    'text-slate-900/86 hover:text-slate-900',
+                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
+                    'ring-1 ring-inset ring-[color:var(--hairline)]',
+                    'bg-white/60 hover:bg-white',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                   )}
                 >
                   <span>Intelligence</span>
@@ -727,9 +779,10 @@ export default function TopBar() {
                   prefetch
                   onClick={() => setMobileOpen(false)}
                   className={cx(
-                    'inline-flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm transition',
-                    'bg-black/[0.04] hover:bg-black/[0.06]',
-                    'text-slate-900/86 hover:text-slate-900',
+                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
+                    'ring-1 ring-inset ring-[color:var(--hairline)]',
+                    'bg-white/60 hover:bg-white',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                   )}
                 >
                   <span>Journal</span>
@@ -740,9 +793,9 @@ export default function TopBar() {
 
             {/* City page switch */}
             {onCityPage ? (
-              <div className="rounded-2xl bg-black/[0.025] p-4">
-                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>City view</div>
-                <div className="mt-1 text-xs text-slate-700/80">Switch: facts (T) or live market (L).</div>
+              <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-black/[0.015] p-4">
+                <div className={cx('text-[11px] font-semibold tracking-[0.26em] uppercase', goldText)}>City view</div>
+                <div className="mt-1 text-xs text-[color:var(--ink-2)]">Switch: facts (T) or live market (L).</div>
 
                 <div className="mt-3 flex items-center gap-2">
                   <button
@@ -755,13 +808,14 @@ export default function TopBar() {
                       setMobileOpen(false);
                     }}
                     className={cx(
-                      'flex-1 rounded-full px-3 py-2 text-sm transition',
+                      'flex-1 px-3 py-2 text-sm transition',
+                      'ring-1 ring-inset ring-[color:var(--hairline)]',
                       activeTab === 'truth'
-                        ? 'bg-black/[0.06] text-slate-900'
-                        : 'bg-black/[0.04] text-slate-900/78 hover:bg-black/[0.06]',
+                        ? 'bg-white text-[color:var(--ink)]'
+                        : 'bg-white/60 hover:bg-white text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                     )}
                   >
-                    Facts <span className="ml-1 font-mono text-[11px] opacity-70">T</span>
+                    Facts <span className="ml-1 font-mono text-[11px] text-[color:var(--ink-3)]">T</span>
                   </button>
 
                   <button
@@ -774,19 +828,20 @@ export default function TopBar() {
                       setMobileOpen(false);
                     }}
                     className={cx(
-                      'flex-1 rounded-full px-3 py-2 text-sm transition',
+                      'flex-1 px-3 py-2 text-sm transition',
+                      'ring-1 ring-inset ring-[color:var(--hairline)]',
                       activeTab === 'supply'
-                        ? 'bg-black/[0.06] text-slate-900'
-                        : 'bg-black/[0.04] text-slate-900/78 hover:bg-black/[0.06]',
+                        ? 'bg-white text-[color:var(--ink)]'
+                        : 'bg-white/60 hover:bg-white text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                     )}
                   >
-                    Live market <span className="ml-1 font-mono text-[11px] opacity-70">L</span>
+                    Live market <span className="ml-1 font-mono text-[11px] text-[color:var(--ink-3)]">L</span>
                   </button>
                 </div>
               </div>
             ) : null}
 
-            <div className="pt-1 text-[11px] text-slate-700/70">Editorial entrance. Search is the product.</div>
+            <div className="pt-1 text-[11px] text-[color:var(--ink-3)]">Editorial entrance. Search is the product.</div>
           </div>
         </div>
       </div>
