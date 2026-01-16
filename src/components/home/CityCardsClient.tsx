@@ -39,10 +39,12 @@ function hashTo01(seed: string) {
 
 export default function CityCardsClient({
   cities,
-  columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  // ✅ Force 2-per-row on desktop by default (clean + JamesEdition rhythm)
+  // If you ever want 3 again, you can pass columns prop explicitly.
+  columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2',
   className,
   variant = 'default',
-  showLocalTime = false, // JamesEdition-style: off by default
+  showLocalTime = false,
 }: {
   cities: RuntimeCity[];
   columns?: string;
@@ -84,14 +86,13 @@ export default function CityCardsClient({
       <div
         className={cx(
           'grid',
-          // JamesEdition rhythm: more breathing room
-          isWall ? 'gap-5' : 'gap-5 sm:gap-6',
+          // Clean spacing. 2 columns needs a touch more air.
+          isWall ? 'gap-5' : 'gap-5 sm:gap-6 lg:gap-7',
           columns,
         )}
       >
         {enriched.map((city) => (
-          <div key={city.slug} className="relative">
-            {/* Optional local time (kept minimal if enabled) */}
+          <div key={city.slug} className="relative min-w-0">
             {showLocalTime && city.localTime ? (
               <div className="pointer-events-none absolute right-4 top-4 z-30 hidden sm:block">
                 <div className="rounded-full border border-white/12 bg-black/35 px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
