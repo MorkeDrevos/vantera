@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, TrendingUp, Lock, ScanEye, Waves, Clock4 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Sparkles, TrendingUp, Lock, ScanEye, Waves } from 'lucide-react';
 
 type TabKey = 'value' | 'liquidity' | 'risk';
 
@@ -16,43 +16,6 @@ function isEditableTarget(el: Element | null) {
   if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
   if ((el as HTMLElement).isContentEditable) return true;
   return false;
-}
-
-function formatLocalTime(d: Date) {
-  try {
-    // 24h, minute precision
-    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
-  } catch {
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mm = String(d.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
-  }
-}
-
-function useLocalTimeMinute() {
-  const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    let t1: number | undefined;
-    let t2: number | undefined;
-
-    const tick = () => setNow(new Date());
-
-    // align to next minute boundary so it changes exactly when minutes change
-    const msToNextMinute = 60_000 - (Date.now() % 60_000);
-
-    t1 = window.setTimeout(() => {
-      tick();
-      t2 = window.setInterval(tick, 60_000);
-    }, msToNextMinute);
-
-    return () => {
-      if (t1) window.clearTimeout(t1);
-      if (t2) window.clearInterval(t2);
-    };
-  }, []);
-
-  return now;
 }
 
 const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
@@ -79,12 +42,7 @@ function Badge({
           : 'bg-white/72 text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]';
 
   return (
-    <span
-      className={cx(
-        'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] backdrop-blur-[14px]',
-        toneCls,
-      )}
-    >
+    <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] backdrop-blur-[14px]', toneCls)}>
       {children}
     </span>
   );
@@ -132,12 +90,7 @@ function PortalTab({
       )}
       aria-pressed={active}
     >
-      <div
-        className={cx(
-          'pointer-events-none absolute inset-0 opacity-0 transition',
-          active ? 'opacity-100' : 'group-hover:opacity-100',
-        )}
-      >
+      <div className={cx('pointer-events-none absolute inset-0 opacity-0 transition', active ? 'opacity-100' : 'group-hover:opacity-100')}>
         <div className={cx('absolute inset-0', glow)} />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
@@ -148,12 +101,7 @@ function PortalTab({
         </span>
 
         <div className="min-w-0">
-          <div
-            className={cx(
-              'text-[13px] font-semibold tracking-[-0.01em]',
-              active ? 'text-[color:var(--ink)]' : 'text-[color:var(--ink-2)]',
-            )}
-          >
+          <div className={cx('text-[13px] font-semibold tracking-[-0.01em]', active ? 'text-[color:var(--ink)]' : 'text-[color:var(--ink-2)]')}>
             {title}
           </div>
           <div className="mt-1 text-[12px] leading-snug text-[color:var(--ink-3)]">{subtitle}</div>
@@ -174,17 +122,7 @@ function PortalTab({
   );
 }
 
-function Stat({
-  label,
-  value,
-  note,
-  tone,
-}: {
-  label: string;
-  value: string;
-  note?: string;
-  tone: 'gold' | 'emerald' | 'violet';
-}) {
+function Stat({ label, value, note, tone }: { label: string; value: string; note?: string; tone: 'gold' | 'emerald' | 'violet' }) {
   const dot =
     tone === 'gold'
       ? 'bg-[rgba(231,201,130,0.95)] shadow-[0_0_0_4px_rgba(231,201,130,0.16)]'
@@ -206,20 +144,6 @@ function Stat({
         </div>
         <div className="mt-2 text-[15px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{value}</div>
         {note ? <div className="mt-1 text-[12px] leading-snug text-[color:var(--ink-2)]">{note}</div> : null}
-      </div>
-    </div>
-  );
-}
-
-function Bullet({ children }: { children: string }) {
-  return (
-    <div className={cx('relative overflow-hidden rounded-2xl px-4 py-3', CARD)}>
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -left-10 -top-12 h-40 w-40 rounded-full bg-[rgba(11,12,16,0.05)] blur-3xl" />
-      </div>
-      <div className="relative flex items-start gap-3">
-        <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[rgba(11,12,16,0.55)] shadow-[0_0_0_4px_rgba(11,12,16,0.08)]" />
-        <div className="text-[13px] leading-relaxed text-[color:var(--ink-2)]">{children}</div>
       </div>
     </div>
   );
@@ -266,7 +190,7 @@ function PortalCard({
           <div key={it.k} className={cx('rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
             <div className="flex items-center justify-between gap-3">
               <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">{it.k}</div>
-              <div className="text-[10px] text-[color:var(--ink-3)]">portal log</div>
+              <div className="text-[10px] text-[color:var(--ink-3)]">log</div>
             </div>
             <div className="mt-2 text-[13px] leading-snug text-[color:var(--ink-2)]">{it.v}</div>
             {it.note ? <div className="mt-1 text-[11px] text-[color:var(--ink-3)]">{it.note}</div> : null}
@@ -281,20 +205,14 @@ export default function FeaturedIntelligencePanel() {
   const [tab, setTab] = useState<TabKey>('value');
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  const now = useLocalTimeMinute();
-  const localTime = formatLocalTime(now);
-
-  // Hotkeys: 1/2/3 switch modes (ignored while typing)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (isEditableTarget(e.target as Element | null)) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-
       if (e.key === '1') setTab('value');
       if (e.key === '2') setTab('liquidity');
       if (e.key === '3') setTab('risk');
     };
-
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
@@ -303,33 +221,26 @@ export default function FeaturedIntelligencePanel() {
     if (tab === 'value') {
       return {
         tone: 'gold' as const,
-        eyebrow: 'The Portal',
-        title: 'Enter Valuation',
-        lead: 'A clean answer to a dirty question: is the asking price earned or invented?',
-        sub: 'Plain language, backed by a proof trail.',
-        badgeA: 'Portal lens',
-        badgeB: 'Valuation',
+        eyebrow: 'Portal',
+        title: 'Valuation',
+        lead: 'Is the asking price earned or invented?',
+        badgeA: 'Proof-first',
         heroIcon: Sparkles,
         stats: [
           { label: 'FAIR BAND', value: 'Narrow', note: 'Confidence concentrated in a tight pocket' },
           { label: 'ASKING', value: 'Within band', note: 'No fantasy premium detected' },
           { label: 'EDGE', value: 'Opportunity', note: 'Signals point to best streets' },
         ],
-        bullets: [
-          'Cuts through "luxury narrative" pricing in seconds',
-          'Shows what matters before you fly in',
-          'Ends with a next move you can act on',
-        ],
-        proofEyebrow: 'PORTAL CHECKS',
+        proofEyebrow: 'CHECKS',
         proofTitle: 'What gets verified before a claim',
         proofIcon: ScanEye,
-        proofChip: <Badge tone="gold">Proof-first</Badge>,
+        proofChip: <Badge tone="gold">Receipts</Badge>,
         proof: [
           { k: 'Comps', v: 'Sold evidence and reductions (not list-only)', note: 'Weighting shifts by micro-area.' },
           { k: 'History', v: 'Relists, edits and timing patterns', note: 'Narrative changes are logged.' },
-          { k: 'Demand', v: 'Buyer depth by pocket and buyer origin', note: 'Where the real heat sits.' },
+          { k: 'Demand', v: 'Buyer depth by pocket and origin', note: 'Where real heat sits.' },
         ],
-        signalsTitle: 'Signals coming through the portal',
+        signalsTitle: 'Signals (examples)',
         signals: [
           'A comparable cut 6% this week (same pocket, same finish)',
           'Supply stayed tight across 14 days (clean inventory)',
@@ -342,33 +253,26 @@ export default function FeaturedIntelligencePanel() {
     if (tab === 'liquidity') {
       return {
         tone: 'emerald' as const,
-        eyebrow: 'The Portal',
-        title: 'Enter Liquidity',
-        lead: 'Speed is the truth in luxury. See how fast clean homes actually move - without the marketing fog.',
-        sub: 'Timing, velocity and buyer depth in one view.',
-        badgeA: 'Portal lens',
-        badgeB: 'Liquidity',
+        eyebrow: 'Portal',
+        title: 'Liquidity',
+        lead: 'How fast do clean homes actually move - without marketing fog?',
+        badgeA: 'Velocity',
         heroIcon: TrendingUp,
         stats: [
           { label: 'TIME TO SELL', value: 'Short', note: 'Velocity is strong on clean inventory' },
           { label: 'BUYER DEPTH', value: 'Deep', note: 'International demand confirmed' },
           { label: 'CUT RISK', value: 'Low', note: 'Comparables and pricing are clean' },
         ],
-        bullets: [
-          'Stops you overpaying for illiquid "prime" pockets',
-          'Helps you time offers instead of chasing',
-          'Shows where deals happen quietly off-market',
-        ],
-        proofEyebrow: 'PORTAL CHECKS',
+        proofEyebrow: 'CHECKS',
         proofTitle: 'What gets measured (not guessed)',
         proofIcon: Waves,
-        proofChip: <Badge tone="emerald">Velocity layer</Badge>,
+        proofChip: <Badge tone="emerald">Signal</Badge>,
         proof: [
-          { k: 'Turnover', v: 'Time-on-market by pocket and quality tier', note: 'Clean vs compromised inventory.' },
-          { k: 'Buyers', v: 'Buyer inflow and direction changes', note: 'Where demand is truly building.' },
-          { k: 'Cuts', v: 'Reductions, relists and stagnation patterns', note: 'Signals before headlines.' },
+          { k: 'Turnover', v: 'Time-on-market by pocket and tier', note: 'Clean vs compromised inventory.' },
+          { k: 'Buyers', v: 'Buyer inflow and direction changes', note: 'Where demand is building.' },
+          { k: 'Cuts', v: 'Reductions, relists and stagnation', note: 'Signals before headlines.' },
         ],
-        signalsTitle: 'Signals coming through the portal',
+        signalsTitle: 'Signals (examples)',
         signals: [
           'Two new buyers entered this pocket (verified demand)',
           'Lower quality stock is sitting longer (drag detected)',
@@ -380,33 +284,26 @@ export default function FeaturedIntelligencePanel() {
 
     return {
       tone: 'violet' as const,
-      eyebrow: 'The Portal',
-      title: 'Enter Integrity',
-      lead: 'Luxury hides risk behind beauty. Vantera surfaces it early, clearly, and with receipts.',
-      sub: 'Clean facts, clean history, clean signals.',
-      badgeA: 'Portal lens',
-      badgeB: 'Integrity',
+      eyebrow: 'Portal',
+      title: 'Integrity',
+      lead: 'Luxury hides risk behind beauty. Vantera surfaces it early and clearly.',
+      badgeA: 'Integrity',
       heroIcon: ShieldCheck,
       stats: [
         { label: 'RISK FLAGS', value: 'Low', note: 'No obvious red flags detected' },
         { label: 'DATA QUALITY', value: 'Strong', note: 'Signals cross-checked' },
         { label: 'PROOF LEVEL', value: 'Rising', note: 'Verification expands weekly' },
       ],
-      bullets: [
-        'Detects suspicious distortions before you commit',
-        'Keeps a complete change history (no surprises)',
-        'Built for outcomes, not clicks',
-      ],
-      proofEyebrow: 'PORTAL CHECKS',
+      proofEyebrow: 'CHECKS',
       proofTitle: 'What gets locked before trust',
       proofIcon: Lock,
-      proofChip: <Badge tone="violet">Integrity layer</Badge>,
+      proofChip: <Badge tone="violet">Guarded</Badge>,
       proof: [
         { k: 'Consistency', v: 'Ownership and listing alignment checks', note: 'Mismatch equals caution.' },
         { k: 'Cross-source', v: 'Verification across independent sources', note: 'Disagreement is flagged.' },
-        { k: 'Anomalies', v: 'Manipulation guards and anomaly detection', note: 'Noise gets filtered.' },
+        { k: 'Anomalies', v: 'Manipulation guards and anomaly detection', note: 'Noise is filtered.' },
       ],
-      signalsTitle: 'Signals coming through the portal',
+      signalsTitle: 'Signals (examples)',
       signals: [
         'A listing edit was detected and logged (trace preserved)',
         'One source disagreed - flagged for review',
@@ -419,30 +316,9 @@ export default function FeaturedIntelligencePanel() {
   const tabs = useMemo(
     () =>
       [
-        {
-          k: 'value' as const,
-          title: 'Valuation',
-          subtitle: 'Is the price earned?',
-          kbd: '1',
-          Icon: Sparkles,
-          tone: 'gold' as const,
-        },
-        {
-          k: 'liquidity' as const,
-          title: 'Liquidity',
-          subtitle: 'How fast does it move?',
-          kbd: '2',
-          Icon: TrendingUp,
-          tone: 'emerald' as const,
-        },
-        {
-          k: 'risk' as const,
-          title: 'Integrity',
-          subtitle: 'Any hidden risk?',
-          kbd: '3',
-          Icon: ShieldCheck,
-          tone: 'violet' as const,
-        },
+        { k: 'value' as const, title: 'Valuation', subtitle: 'Is the price earned?', kbd: '1', Icon: Sparkles, tone: 'gold' as const },
+        { k: 'liquidity' as const, title: 'Liquidity', subtitle: 'How fast does it move?', kbd: '2', Icon: TrendingUp, tone: 'emerald' as const },
+        { k: 'risk' as const, title: 'Integrity', subtitle: 'Any hidden risk?', kbd: '3', Icon: ShieldCheck, tone: 'violet' as const },
       ] as const,
     [],
   );
@@ -457,20 +333,8 @@ export default function FeaturedIntelligencePanel() {
   const toneBadge = content.tone === 'gold' ? 'gold' : content.tone === 'emerald' ? 'emerald' : 'violet';
 
   return (
-    <section
-      ref={(n) => {
-        sectionRef.current = n;
-      }}
-      className="relative"
-    >
-      {/* Crown lines */}
-      <div aria-hidden className="pointer-events-none absolute -top-4 inset-x-0">
-        <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.28)] to-transparent" />
-        <div className="mx-auto mt-2 h-px w-[76%] bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-      </div>
-
+    <section ref={(n) => { sectionRef.current = n; }} className="relative">
       <div className={cx('relative overflow-hidden rounded-[40px]', CARD)}>
-        {/* Ambient */}
         <div className="pointer-events-none absolute inset-0">
           <div className={cx('absolute inset-0', accentGlow)} />
           <div className="absolute inset-0 bg-[radial-gradient(1100px_420px_at_86%_6%,rgba(11,12,16,0.04),transparent_64%)]" />
@@ -482,28 +346,12 @@ export default function FeaturedIntelligencePanel() {
           {/* Header */}
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 max-w-2xl">
-              {/* Bring back the full pill row (incl Local time + Updated weekly) */}
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="neutral">
-                  <span className="font-semibold tracking-[0.22em]">{content.eyebrow.toUpperCase()}</span>
+                  <span className="font-semibold tracking-[0.22em] uppercase">{content.eyebrow}</span>
                 </Badge>
-
                 <Badge tone={toneBadge}>{content.badgeA}</Badge>
-
-                <Badge tone="neutral">
-                  <Clock4 className="h-3.5 w-3.5 opacity-70" />
-                  <span className="tracking-[0.22em] uppercase">Local time</span>
-                  <span className="font-mono text-[10px] text-[color:var(--ink-2)]">{localTime}</span>
-                </Badge>
-
-                <Badge tone="neutral">
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500/70" />
-                    <span className="tracking-[0.22em] uppercase">Updated weekly</span>
-                  </span>
-                </Badge>
-
-                <Badge tone="neutral">Sample dossier</Badge>
+                <Badge tone="neutral">Updated weekly</Badge>
               </div>
 
               <div className="mt-4 flex items-start gap-3">
@@ -516,28 +364,16 @@ export default function FeaturedIntelligencePanel() {
                     {content.title}
                   </h2>
                   <p className="mt-2 text-[14px] leading-relaxed text-[color:var(--ink-2)]">{content.lead}</p>
-                  <p className="mt-2 text-[13px] text-[color:var(--ink-3)]">{content.sub}</p>
                 </div>
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <Badge tone={toneBadge}>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)] shadow-[0_0_0_3px_rgba(231,201,130,0.14)]" />
-                    Portal output: proof + plain language
-                  </span>
-                </Badge>
-                <Badge tone="neutral">Typos allowed</Badge>
-                <Badge tone="neutral">Keywords included</Badge>
               </div>
             </div>
 
-            {/* Portal Selector */}
+            {/* Selector (cleaner) */}
             <div className="w-full lg:w-[460px]">
               <div className={cx('rounded-[30px] p-3', 'bg-white/72', RING, 'shadow-[0_22px_70px_rgba(11,12,16,0.08)]')}>
                 <div className="flex items-center justify-between gap-3 px-1">
-                  <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PORTAL MODES</div>
-                  <div className="text-[10px] text-[color:var(--ink-3)]">Choose your entrance</div>
+                  <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">MODES</div>
+                  <div className="text-[10px] text-[color:var(--ink-3)]">1 / 2 / 3</div>
                 </div>
 
                 <div className="mt-3 grid gap-2">
@@ -553,21 +389,6 @@ export default function FeaturedIntelligencePanel() {
                       onClick={() => setTab(t.k)}
                     />
                   ))}
-                </div>
-
-                <div className={cx('mt-3 rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-[12px] text-[color:var(--ink-2)]">
-                      Portal rule
-                      <div className="text-[11px] text-[color:var(--ink-3)]">No hype. Only what can be proven.</div>
-                    </div>
-                    <Badge tone="gold">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)] shadow-[0_0_0_3px_rgba(231,201,130,0.14)]" />
-                        Royal-grade
-                      </span>
-                    </Badge>
-                  </div>
                 </div>
               </div>
             </div>
@@ -590,12 +411,6 @@ export default function FeaturedIntelligencePanel() {
                 icon={content.proofIcon}
                 chip={content.proofChip}
               />
-
-              <div className="mt-4 grid gap-2">
-                {content.bullets.map((b) => (
-                  <Bullet key={b}>{b}</Bullet>
-                ))}
-              </div>
             </div>
 
             <div className="lg:col-span-5">
@@ -608,43 +423,27 @@ export default function FeaturedIntelligencePanel() {
 
                 <div className="relative flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">PORTAL SIGNALS</div>
+                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">SIGNALS</div>
                     <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
                       {content.signalsTitle}
                     </div>
                     <div className="mt-1 text-xs text-[color:var(--ink-3)]">Examples only. Wiring next.</div>
                   </div>
 
-                  <Badge tone={toneBadge}>
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[rgba(11,12,16,0.55)] shadow-[0_0_0_3px_rgba(11,12,16,0.10)]" />
-                      Just in
-                    </span>
-                  </Badge>
+                  <Badge tone={toneBadge}>Just in</Badge>
                 </div>
 
                 <div className="relative mt-4 grid gap-2">
                   {content.signals.map((a) => (
                     <div key={a} className={cx('relative overflow-hidden rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
-                      <div className="pointer-events-none absolute inset-0 opacity-70">
-                        <div className="absolute -left-14 -top-14 h-44 w-44 rounded-full bg-[rgba(139,92,246,0.10)] blur-3xl" />
-                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-                      </div>
-                      <div className="relative">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SIGNAL</div>
-                          <div className="text-[10px] text-[color:var(--ink-3)]">sample</div>
-                        </div>
-                        <div className="mt-2 text-[13px] leading-relaxed text-[color:var(--ink-2)]">{a}</div>
-                        <div className="mt-1 text-[11px] text-[color:var(--ink-3)]">Logged to the dossier trail.</div>
-                      </div>
+                      <div className="relative text-[13px] leading-relaxed text-[color:var(--ink-2)]">{a}</div>
                     </div>
                   ))}
                 </div>
 
                 <div className={cx('relative mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3', 'bg-white/72', RING)}>
                   <div className="text-[12px] text-[color:var(--ink-2)]">
-                    Want this on a real listing?
+                    Want this on real listings?
                     <div className="text-[11px] text-[color:var(--ink-3)]">Next: connect verified inventory.</div>
                   </div>
                   <button
@@ -663,24 +462,11 @@ export default function FeaturedIntelligencePanel() {
               </div>
 
               <div className={cx('mt-4 rounded-2xl px-4 py-3 text-[12px]', 'bg-white/72', RING, 'text-[color:var(--ink-2)]')}>
-                This is the portal layer: proof + signals + clear decisions.
-                <span className="text-[color:var(--ink-3)]"> Next we wire it to real listings and real market data.</span>
+                Proof first. Signal second. Decisions last.
               </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Tiny help row */}
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
-        <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-white/70', RING)}>
-          Tip: switch modes fast with <span className="font-mono text-[10px] text-[color:var(--ink-2)]">1</span>,{' '}
-          <span className="font-mono text-[10px] text-[color:var(--ink-2)]">2</span>,{' '}
-          <span className="font-mono text-[10px] text-[color:var(--ink-2)]">3</span>
-        </span>
-        <span className={cx('inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-white/70', RING)}>
-          The product is the dossier.
-        </span>
       </div>
     </section>
   );
