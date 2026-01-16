@@ -1,8 +1,12 @@
 // src/lib/ingest/attomPersistMedia.ts
-import { prisma } from '@/lib/db';
+
+import { prisma } from '@/lib/prisma';
 import { fetchAttomMedia } from '@/lib/attom/attomMedia';
 
-export async function ingestAttomMediaForListing(listingId: string, attomId: string) {
+export async function ingestAttomMediaForListing(
+  listingId: string,
+  attomId: string
+) {
   const res = await fetchAttomMedia(attomId);
 
   const photos = res?.property?.media?.photos;
