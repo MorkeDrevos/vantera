@@ -76,7 +76,6 @@ function FeaturedHeader() {
   return (
     <div className="relative flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {/* one eyebrow only - no repeating */}
         <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">Featured markets</div>
 
         <div className="mt-2 text-[24px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
@@ -84,11 +83,7 @@ function FeaturedHeader() {
         </div>
 
         <div className="mt-2 max-w-2xl text-sm leading-relaxed text-[color:var(--ink-2)]">
-          City dossiers with pricing reality, liquidity read and risk flags - distilled, calm, and decisive.
-        </div>
-
-        <div className="mt-3 text-[12px] text-[color:var(--ink-3)]">
-          Tap a market to enter its dossier. No noise, just signal.
+          City dossiers with pricing reality, liquidity read and risk flags - distilled, calm and decisive.
         </div>
       </div>
 
@@ -96,21 +91,7 @@ function FeaturedHeader() {
         <Pill tone="gold">
           <span className={cx('font-semibold', goldText())}>Top 4</span>
         </Pill>
-        {/* removed “Updated weekly” everywhere */}
       </div>
-    </div>
-  );
-}
-
-/**
- * Featured portal backdrop:
- * - NO nested “box inside a box”
- * - keeps a premium aura without adding another card container
- */
-function FeaturedBackdrop() {
-  return (
-    <div className="pointer-events-none absolute inset-0">
-      ...
     </div>
   );
 }
@@ -139,7 +120,6 @@ export default function CityCardsVirtualizedClient({
   statsByCity?: Record<string, CityListingsStats | undefined>;
 }) {
   const sorted = useMemo(() => {
-    // Stable sort: keep input order unless you want tier sorting later
     return [...cities];
   }, [cities]);
 
@@ -180,9 +160,14 @@ export default function CityCardsVirtualizedClient({
   if (mode === 'featured') {
     return (
       <section className={cx('w-full', className)}>
-        {/* single portal section, not a nested card */}
-        <div className="relative w-full overflow-hidden rounded-[28px] bg-white/70 backdrop-blur-[14px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_44px_160px_rgba(11,12,16,0.10)]">
-          <FeaturedBackdrop />
+        <div
+          className={cx(
+            'relative w-full overflow-hidden rounded-[28px]',
+            'bg-white',
+            'ring-1 ring-inset ring-[color:var(--hairline)]',
+            'shadow-[0_22px_80px_rgba(11,12,16,0.08)]',
+          )}
+        >
           <div className="relative p-5 sm:p-7">
             <FeaturedHeader />
             <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
@@ -232,10 +217,15 @@ export default function CityCardsVirtualizedClient({
 
   return (
     <section className={cx('w-full', className)}>
-      {/* Featured Markets - one premium portal section (no “box inside box” look) */}
       {showFeatured && featured.length > 0 ? (
-        <div className="relative w-full overflow-hidden rounded-[28px] bg-white/70 backdrop-blur-[14px] ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_44px_160px_rgba(11,12,16,0.10)]">
-          <FeaturedBackdrop />
+        <div
+          className={cx(
+            'relative w-full overflow-hidden rounded-[28px]',
+            'bg-white',
+            'ring-1 ring-inset ring-[color:var(--hairline)]',
+            'shadow-[0_22px_80px_rgba(11,12,16,0.08)]',
+          )}
+        >
           <div className="relative p-5 sm:p-7">
             <FeaturedHeader />
             <div className="relative mt-5 grid gap-4 xl:grid-cols-2">
