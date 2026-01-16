@@ -211,7 +211,7 @@ function editDistance(a: string, b: string) {
     dp[0] = i;
     for (let j = 1; j <= n; j++) {
       const tmp = dp[j];
-      const cost = aa[i - 1] === bb[j - 1] ? 0 : 1;
+      const cost = aa[i - 1] === bb[i - 1] ? 0 : 1;
       dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + cost);
       prev = tmp;
     }
@@ -489,13 +489,14 @@ function buildPlaceHits(args: {
 
 /* =========================================================
    UI helpers (royal white, no dark)
+   NOTE: no rounded corners anywhere
    ========================================================= */
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
     <span
       className={cx(
-        'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] leading-none',
+        'inline-flex items-center px-2.5 py-1 text-[11px] leading-none',
         'bg-white',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
         'text-[color:var(--ink-2)]',
@@ -689,7 +690,6 @@ export default function VanteraOmniSearch({
   useEffect(() => {
     if (!open) return;
 
-    // load recents on open (so it stays fresh)
     setRecents(readRecents());
 
     const onDown = (e: MouseEvent | TouchEvent) => {
@@ -728,7 +728,6 @@ export default function VanteraOmniSearch({
       group: 'Action',
     };
 
-    // Empty query: Action + recents + curated cities + curated regions
     if (!raw) {
       const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
       const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
@@ -772,7 +771,7 @@ export default function VanteraOmniSearch({
         })),
       ];
 
-      return curated.slice(0, limit + 10); // allow groups to breathe
+      return curated.slice(0, limit + 10);
     }
 
     const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
@@ -845,300 +844,4 @@ export default function VanteraOmniSearch({
       );
       if (next === 'rent') filtered.unshift('rent');
       if (next === 'sell') filtered.unshift('sell');
-      return filtered.join(' ').trim();
-    });
-    setOpen(true);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
-  }
-
-  const activeId = hits[active] ? `${id}-opt-${active}` : undefined;
-
-  return (
-    <div ref={rootRef} className={cx('relative w-full', className)}>
-      {/* input (pure white, royal hairlines) */}
-      <div
-        className={cx(
-          'relative w-full overflow-hidden rounded-full',
-          'bg-white',
-          'ring-1 ring-inset ring-[color:var(--hairline)]',
-          'shadow-[0_26px_80px_rgba(11,12,16,0.10)]',
-        )}
-      >
-        {/* gold crown hairline, super subtle */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.60)] to-transparent opacity-70" />
-          <div className="absolute inset-0 bg-[radial-gradient(980px_220px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
-        </div>
-
-        <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5">
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-            <Sparkles className="h-4 w-4 text-[color:var(--ink-2)]" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <input
-              id={id}
-              ref={inputRef}
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setOpen(true);
-              }}
-              onFocus={() => setOpen(true)}
-              onKeyDown={onInputKeyDown}
-              placeholder={placeholder}
-              className={cx(
-                'w-full bg-transparent outline-none',
-                'text-[15px] text-[color:var(--ink)]',
-                'placeholder:text-[color:rgba(11,12,16,0.38)]',
-              )}
-              autoComplete="off"
-              spellCheck={false}
-              role="combobox"
-              aria-expanded={open}
-              aria-controls={listboxId}
-              aria-activedescendant={activeId}
-            />
-
-            {open ? (
-              <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
-                <span className="truncate">{interpretationLine}</span>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
-              <Command className="h-3.5 w-3.5 opacity-70" />
-              <span className="font-mono text-[color:var(--ink-2)]">/</span>
-            </div>
-
-            {q ? (
-              <button
-                type="button"
-                onClick={clear}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
-                  'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                  'text-[color:var(--ink-2)]',
-                )}
-              >
-                <X className="h-3.5 w-3.5 opacity-70" />
-                clear
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      {/* dropdown */}
-      <div
-        className={cx(
-          'absolute left-0 right-0 z-50 mt-3',
-          open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-          'transition-opacity duration-150',
-        )}
-      >
-        <div
-          className={cx(
-            'relative overflow-hidden rounded-[24px]',
-            'bg-[color:var(--paper)]',
-            'ring-1 ring-inset ring-[color:var(--hairline)]',
-            'shadow-[0_44px_160px_rgba(11,12,16,0.16)]',
-          )}
-        >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_340px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
-
-          {/* header */}
-          <div className="relative border-b border-[color:var(--hairline)] px-5 py-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">search</div>
-
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Chip>{modeLabel(parse.mode)}</Chip>
-                  {parse.placeQuery ? <Chip>place: {parse.placeQuery}</Chip> : <Chip>any market</Chip>}
-                  {parse.budgetMax ? <Chip>max {formatMoney(parse.budgetMax)}</Chip> : <Chip>no max</Chip>}
-                  {parse.bedroomsMin ? <Chip>{parse.bedroomsMin}+ beds</Chip> : <Chip>any beds</Chip>}
-                  {parse.propertyType && parse.propertyType !== 'any' ? <Chip>type: {parse.propertyType}</Chip> : null}
-                  {parse.needs.length ? <Chip>need: {parse.needs[0].replace('_', ' ')}</Chip> : null}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                  'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                  'text-[color:var(--ink-2)]',
-                )}
-              >
-                <X className="h-4 w-4 opacity-70" />
-                close
-              </button>
-            </div>
-
-            {/* mode pills */}
-            <div className="mt-3 inline-flex rounded-full bg-white/80 p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
-              {(['buy', 'rent', 'sell'] as const).map((m) => {
-                const activeMode = parse.mode === m;
-                const icon =
-                  m === 'buy' ? <Sparkles className="h-4 w-4 opacity-75" /> : m === 'rent' ? <Home className="h-4 w-4 opacity-75" /> : <ArrowRight className="h-4 w-4 opacity-75" />;
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={cx(
-                      'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                      activeMode ? 'bg-white ring-1 ring-inset ring-[color:var(--hairline-2)]' : 'bg-transparent hover:bg-white',
-                      'text-[color:var(--ink-2)]',
-                    )}
-                  >
-                    {icon}
-                    {m}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* body */}
-          <div className="relative p-2.5 sm:p-3">
-            {/* quick actions */}
-            <div className="mb-2.5 rounded-[18px] bg-white/70 p-3 ring-1 ring-inset ring-[color:var(--hairline)]">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">quick filters</div>
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.focus()}
-                  className="text-[11px] text-[color:var(--ink-3)] hover:text-[color:var(--ink-2)]"
-                >
-                  keep typing
-                </button>
-              </div>
-
-              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {quick.map((x) => (
-                  <button
-                    key={x.label}
-                    type="button"
-                    onClick={() => applyQuick(x.patch)}
-                    className={cx(
-                      'group flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left transition',
-                      'bg-white hover:bg-white',
-                      'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                    )}
-                    title={x.hint}
-                  >
-                    <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-[color:var(--ink-2)]">
-                      <span className="opacity-70">{x.icon}</span>
-                      {x.label}
-                    </span>
-                    <span className="text-[11px] text-[color:var(--ink-3)] opacity-0 transition group-hover:opacity-100">
-                      add
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div id={listboxId} role="listbox" className="max-h-[420px] overflow-auto p-0.5">
-              {hits.length === 0 ? (
-                <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
-                  no matches yet. try a city, region or keywords like “sea view modern villa”.
-                </div>
-              ) : (
-                <div className="grid gap-2">
-                  {groupedHits.map(({ group, items }) => (
-                    <div key={group} className="rounded-2xl bg-white/60 p-2 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="px-2 pb-2 pt-1 text-[10px] font-semibold tracking-[0.20em] text-[color:var(--ink-3)]">
-                        {group}
-                      </div>
-
-                      <div className="grid gap-1.5">
-                        {items.map((h) => {
-                          const idx = hits.findIndex((x) => x === h);
-                          const selected = idx === active;
-                          const optId = `${id}-opt-${idx}`;
-
-                          return (
-                            <Link
-                              key={`${h.kind}:${h.slug}:${h.href}`}
-                              href={h.href}
-                              prefetch
-                              id={optId}
-                              role="option"
-                              aria-selected={selected}
-                              onMouseEnter={() => setActive(idx)}
-                              onMouseDown={() => {
-                                // keep input from losing focus on click in some browsers
-                                setOpen(true);
-                              }}
-                              onClick={() => {
-                                if (h.kind === 'search') pushRecent(q.trim());
-                                if (h.kind === 'recent') pushRecent(h.title);
-                                setOpen(false);
-                              }}
-                              className={cx(
-                                'group relative rounded-2xl px-4 py-3 transition',
-                                'bg-white hover:bg-white',
-                                'ring-1 ring-inset ring-[color:var(--hairline)]',
-                                selected && 'ring-[color:var(--hairline-2)] shadow-[0_18px_60px_rgba(11,12,16,0.08)]',
-                              )}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-3">
-                                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-                                      {iconFor(h)}
-                                    </span>
-
-                                    <div className="min-w-0">
-                                      <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
-                                        {h.title}
-                                      </div>
-                                      <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
-                                    </div>
-                                  </div>
-
-                                  {h.reasons.length ? (
-                                    <div className="mt-2 flex flex-wrap gap-2">
-                                      {h.reasons.slice(0, 3).map((r) => (
-                                        <span
-                                          key={r}
-                                          className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                                        >
-                                          {r}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  ) : null}
-                                </div>
-
-                                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
-                                  open <ArrowRight className="h-4 w-4 opacity-70" />
-                                </span>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="relative border-t border-[color:var(--hairline)] px-5 py-4 text-[11px] text-[color:var(--ink-3)]">
-            tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. typos are fine.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+      return
