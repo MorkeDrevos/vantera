@@ -254,7 +254,7 @@ function FullBleedHero({
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  Vantera is built city by city. Under the surface is a Truth Layer that verifies, scores, and explains the market.
+                  Vantera is built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
