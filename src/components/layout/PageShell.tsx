@@ -31,7 +31,7 @@ export default function PageShell({
   bodyMaxWidthClassName = 'max-w-[1200px]',
 }: PageShellProps) {
   return (
-    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
+    <div className="min-h-[100dvh] overflow-x-hidden bg-[color:var(--paper)] text-[color:var(--ink)]">
       {/* Global paper stage */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,1)_0%,rgba(252,251,249,1)_55%,rgba(249,248,246,1)_100%)]" />
