@@ -23,6 +23,10 @@ import {
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
+function asMode(v: unknown): Mode {
+  return v === 'rent' || v === 'sell' ? v : 'buy';
+}
+
 type Mode = 'buy' | 'rent' | 'sell';
 type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
 
@@ -199,7 +203,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
     };
   }, [searchParams]);
 
-  const [mode, setMode] = useState<Mode>(boot.mode);
+  const [mode, setMode] = useState<Mode>(() => asMode(boot.mode));
   const [q, setQ] = useState(boot.q);
   const [place, setPlace] = useState(boot.place);
   const [kw, setKw] = useState(boot.kw);
