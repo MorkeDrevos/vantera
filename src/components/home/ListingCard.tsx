@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
 
 import SafeImage from './SafeImage';
 import type { Listing } from './listings';
@@ -25,7 +24,6 @@ function safeAlt(listing: Listing) {
 }
 
 function locationLine(listing: Listing) {
-  // These fields exist in your listing detail page usage
   const city = (listing as any).city as string | undefined;
   const country = (listing as any).country as string | undefined;
   const region = (listing as any).region as string | undefined | null;
@@ -38,21 +36,16 @@ function locationLine(listing: Listing) {
 }
 
 function sqmValue(listing: Listing) {
-  // Some mocks use sqm, some use areaM2. This avoids future type errors.
   const sqm = (listing as any).sqm as number | undefined;
   const areaM2 = (listing as any).areaM2 as number | undefined;
   return sqm ?? areaM2 ?? null;
 }
 
 export default function ListingCard({ listing }: { listing: Listing }) {
-  const [imgOk, setImgOk] = useState(true);
-
-  const src = useMemo(() => {
-    const s = listing.image?.src?.trim();
-    return imgOk && s ? s : '';
-  }, [imgOk, listing.image?.src]);
-
+  const src = String(listing.image?.src ?? '').trim();
   const sqm = sqmValue(listing);
+
+  const fallback = <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />;
 
   return (
     <Link
@@ -68,11 +61,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
             className="object-cover opacity-90 transition duration-300 group-hover:opacity-100"
-            fallback={<div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />}
-            onError={() => setImgOk(false)}
+            fallback={fallback}
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+          fallback
         )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
