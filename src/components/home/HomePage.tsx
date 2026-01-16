@@ -442,8 +442,8 @@ export default function HomePage({
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
         </div>
 
-        {/* Constrained editorial content inside the full-bleed stage */}
-        <div className={cx('relative', WIDE)}>
+        {/* Full-width content inside the full-bleed stage */}
+<div className="relative w-full px-5 sm:px-8 lg:px-14 2xl:px-20">
           <div className="relative ring-1 ring-inset ring-[color:var(--hairline)] bg-white/40 shadow-[0_60px_160px_rgba(11,12,16,0.14)]">
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
