@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Command, MapPin, Search, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Command, MapPin, Search, Sparkles, X, Home, Building2, Waves, Shield } from 'lucide-react';
 
 type PlaceKind = 'city' | 'region' | 'search';
 
@@ -178,8 +178,8 @@ function extractNeeds(tokens: string[]): NeedTag[] {
 
 function formatMoney(n?: number) {
   if (!n) return '—';
-  if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}M`;
-  if (n >= 1_000) return `€${Math.round(n / 1_000)}K`;
+  if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}m`;
+  if (n >= 1_000) return `€${Math.round(n / 1_000)}k`;
   return `€${n}`;
 }
 
@@ -370,7 +370,7 @@ function buildInterpretationLine(parse: ParseResult) {
   if (parse.needs.length) bits.push(parse.needs.map((n) => n.replace('_', ' ')).join(', '));
   if (parse.keywordQuery && parse.keywordQuery.length >= 2) bits.push(`keywords: ${parse.keywordQuery}`);
 
-  return bits.length ? bits.join(' · ') : 'City, lifestyle, budget, keywords. Typos ok.';
+  return bits.length ? bits.join(' · ') : 'city, lifestyle, budget, keywords. typos ok.';
 }
 
 function cityMatchText(c: OmniCity) {
@@ -424,10 +424,10 @@ function buildPlaceHits(args: {
     const score = placeScore + pr + rawTie + (hasPlace ? 14 : 0);
 
     const reasons: string[] = [];
-    if (placeScore >= 130) reasons.push('Direct match');
-    else if (placeScore >= 95) reasons.push('Strong match');
-    else reasons.push('Relevant');
-    if (pr > 0) reasons.push('Featured');
+    if (placeScore >= 130) reasons.push('direct match');
+    else if (placeScore >= 95) reasons.push('strong match');
+    else reasons.push('relevant');
+    if (pr > 0) reasons.push('featured');
 
     hits.push({
       kind: 'city',
@@ -451,16 +451,16 @@ function buildPlaceHits(args: {
     const score = placeScore + pr + rawTie;
 
     const reasons: string[] = [];
-    if (placeScore >= 130) reasons.push('Direct match');
-    else if (placeScore >= 95) reasons.push('Strong match');
-    else reasons.push('Relevant');
+    if (placeScore >= 130) reasons.push('direct match');
+    else if (placeScore >= 95) reasons.push('strong match');
+    else reasons.push('relevant');
     reasons.push(`${r.citySlugs.length} cities`);
 
     hits.push({
       kind: 'region',
       slug: r.slug,
       title: r.name,
-      subtitle: `${r.country ?? 'Region'}${r.region ? ` · ${r.region}` : ''}`,
+      subtitle: `${r.country ?? 'region'}${r.region ? ` · ${r.region}` : ''}`,
       score,
       reasons,
       href: `/coming-soon?region=${encodeURIComponent(r.name)}`,
@@ -473,7 +473,7 @@ function buildPlaceHits(args: {
 }
 
 /* =========================================================
-   UI helpers (royal white)
+   UI helpers (royal white, no dark)
    ========================================================= */
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -481,7 +481,7 @@ function Chip({ children }: { children: React.ReactNode }) {
     <span
       className={cx(
         'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] leading-none',
-        'bg-white/85',
+        'bg-white',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
         'text-[color:var(--ink-2)]',
       )}
@@ -498,11 +498,38 @@ function iconFor(h: PlaceHit) {
   return <Sparkles className={cls} />;
 }
 
+function modeLabel(m: ParseResult['mode']) {
+  if (m === 'rent') return 'rent';
+  if (m === 'sell') return 'sell';
+  return 'buy';
+}
+
+function mergeQuery(current: string, patch: string) {
+  const a = current.trim();
+  const b = patch.trim();
+  if (!a) return b;
+  if (!b) return a;
+
+  // avoid duplicates like "villa villa"
+  const aN = normalize(a);
+  const bN = normalize(b);
+  if (aN.includes(bN)) return a;
+
+  return `${a} ${b}`.trim();
+}
+
+type QuickAction = {
+  label: string;
+  hint: string;
+  patch: string;
+  icon: React.ReactNode;
+};
+
 export default function VanteraOmniSearch({
   cities,
   clusters,
   id = 'vantera-omni',
-  placeholder = 'Search cities, lifestyle and keywords (typos ok)',
+  placeholder = 'search city, lifestyle, budget, keywords (typos ok)',
   className,
   autoFocus = false,
   limit = 8,
@@ -552,20 +579,52 @@ export default function VanteraOmniSearch({
 
   const interpretationLine = useMemo(() => buildInterpretationLine(parse), [parse]);
 
+  const quick: QuickAction[] = useMemo(
+    () => [
+      { label: 'villa', hint: 'private, space, gardens', patch: 'villa', icon: <Home className="h-4 w-4" /> },
+      {
+        label: 'apartment',
+        hint: 'lock up and go',
+        patch: 'apartment',
+        icon: <Building2 className="h-4 w-4" />,
+      },
+      {
+        label: 'penthouse',
+        hint: 'views, terraces, privacy',
+        patch: 'penthouse',
+        icon: <Building2 className="h-4 w-4" />,
+      },
+      { label: 'sea view', hint: 'primary view filter', patch: 'sea view', icon: <Waves className="h-4 w-4" /> },
+      {
+        label: 'waterfront',
+        hint: 'on the water line',
+        patch: 'waterfront',
+        icon: <Waves className="h-4 w-4" />,
+      },
+      { label: 'gated', hint: 'controlled access', patch: 'gated', icon: <Shield className="h-4 w-4" /> },
+      { label: 'privacy', hint: 'low exposure', patch: 'privacy', icon: <Shield className="h-4 w-4" /> },
+      { label: 'new build', hint: 'modern stock', patch: 'new build', icon: <Sparkles className="h-4 w-4" /> },
+      { label: 'golf', hint: 'near courses', patch: 'golf', icon: <Sparkles className="h-4 w-4" /> },
+      { label: 'schools', hint: 'family safe', patch: 'schools', icon: <Sparkles className="h-4 w-4" /> },
+    ],
+    [],
+  );
+
   const hits = useMemo(() => {
     if (!open) return [];
 
-    // Always show the "Search all listings" option so typos never kill the UX.
     const searchHit: PlaceHit = {
       kind: 'search',
       slug: 'search',
-      title: q.trim() ? 'Search all listings' : 'Start with global search',
-      subtitle: parse.keywordQuery ? `Keywords: “${parse.keywordQuery}”` : 'Keywords + semantic matching',
+      title: q.trim() ? 'search properties' : 'start a property search',
+      subtitle: q.trim()
+        ? `open results for “${q.trim()}”`
+        : 'type a city + wishline like “sea view villa under €5m”',
       score: 1000,
       reasons: [
-        parse.placeQuery ? `Place: ${parse.placeQuery}` : 'Any market',
-        parse.budgetMax ? `Max ${formatMoney(parse.budgetMax)}` : 'No max',
-        parse.bedroomsMin ? `${parse.bedroomsMin}+ beds` : 'Any beds',
+        `${modeLabel(parse.mode)} mode`,
+        parse.placeQuery ? `place: ${parse.placeQuery}` : 'any market',
+        parse.budgetMax ? `max ${formatMoney(parse.budgetMax)}` : 'no max',
       ],
       href: q.trim() ? buildSearchHref(parse) : '/search',
       icon: 'search',
@@ -583,7 +642,7 @@ export default function VanteraOmniSearch({
           title: c.name,
           subtitle: `${c.country}${c.region ? ` · ${c.region}` : ''}`,
           score: 200 - i,
-          reasons: ['Featured'],
+          reasons: ['featured'],
           href: `/city/${c.slug}`,
           icon: 'pin' as const,
         })),
@@ -591,7 +650,7 @@ export default function VanteraOmniSearch({
           kind: 'region' as const,
           slug: r.slug,
           title: r.name,
-          subtitle: `${r.country ?? 'Region'}${r.region ? ` · ${r.region}` : ''}`,
+          subtitle: `${r.country ?? 'region'}${r.region ? ` · ${r.region}` : ''}`,
           score: 150 - i,
           reasons: [`${r.citySlugs.length} cities`],
           href: `/coming-soon?region=${encodeURIComponent(r.name)}`,
@@ -603,7 +662,6 @@ export default function VanteraOmniSearch({
     }
 
     const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
-
     return [searchHit, ...placeHits].slice(0, limit + 1);
   }, [open, q, parse, cities, clusters, limit]);
 
@@ -700,25 +758,45 @@ export default function VanteraOmniSearch({
     focusAndOpen();
   }
 
+  function applyQuick(patch: string) {
+    setQ((cur) => mergeQuery(cur, patch));
+    setOpen(true);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function setMode(next: ParseResult['mode']) {
+    // we keep it simple: we inject a keyword token into the query so parsing stays single-source
+    // rent -> adds "rent", sell -> adds "sell", buy -> removes rent/sell tokens if present
+    setQ((cur) => {
+      const tokens = tokenize(cur);
+      const filtered = tokens.filter((t) => t !== 'rent' && t !== 'rental' && t !== 'lease' && t !== 'sell' && t !== 'selling' && t !== 'list');
+      if (next === 'rent') filtered.unshift('rent');
+      if (next === 'sell') filtered.unshift('sell');
+      return filtered.join(' ').trim();
+    });
+    setOpen(true);
+    window.setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
   return (
     <div ref={rootRef} className={cx('relative w-full', className)}>
-      {/* INPUT (white, calm, smaller) */}
+      {/* input (pure white, royal hairlines) */}
       <div
         className={cx(
           'relative w-full overflow-hidden rounded-full',
-          'bg-white/85',
+          'bg-white',
           'ring-1 ring-inset ring-[color:var(--hairline)]',
           'shadow-[0_26px_80px_rgba(11,12,16,0.10)]',
         )}
       >
-        {/* Subtle crown hairline */}
+        {/* gold crown hairline, super subtle */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
-          <div className="absolute inset-0 bg-[radial-gradient(980px_200px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.60)] to-transparent opacity-70" />
+          <div className="absolute inset-0 bg-[radial-gradient(980px_220px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
         </div>
 
         <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5">
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/80 ring-1 ring-inset ring-[color:var(--hairline)]">
+          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
             <Sparkles className="h-4 w-4 text-[color:var(--ink-2)]" />
           </div>
 
@@ -751,7 +829,7 @@ export default function VanteraOmniSearch({
           </div>
 
           <div className="hidden items-center gap-2 sm:flex">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
               <Command className="h-3.5 w-3.5 opacity-70" />
               <span className="font-mono text-[color:var(--ink-2)]">/</span>
             </div>
@@ -762,20 +840,20 @@ export default function VanteraOmniSearch({
                 onClick={clear}
                 className={cx(
                   'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
-                  'bg-white/80 hover:bg-white',
+                  'bg-white hover:bg-white',
                   'ring-1 ring-inset ring-[color:var(--hairline)]',
                   'text-[color:var(--ink-2)]',
                 )}
               >
                 <X className="h-3.5 w-3.5 opacity-70" />
-                Clear
+                clear
               </button>
             ) : null}
           </div>
         </div>
       </div>
 
-      {/* DROPDOWN */}
+      {/* dropdown */}
       <div
         className={cx(
           'absolute left-0 right-0 z-50 mt-3',
@@ -791,43 +869,113 @@ export default function VanteraOmniSearch({
             'shadow-[0_44px_160px_rgba(11,12,16,0.16)]',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_320px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_340px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
 
-          <div className="relative flex items-start justify-between gap-4 border-b border-[color:var(--hairline)] px-5 py-4">
-            <div className="min-w-0">
-              <div className="text-[11px] font-semibold tracking-[0.26em] uppercase text-[color:var(--ink-3)]">
-                Search
+          {/* header */}
+          <div className="relative border-b border-[color:var(--hairline)] px-5 py-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">
+                  search
+                </div>
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Chip>{modeLabel(parse.mode)}</Chip>
+                  {parse.placeQuery ? <Chip>place: {parse.placeQuery}</Chip> : <Chip>any market</Chip>}
+                  {parse.budgetMax ? <Chip>max {formatMoney(parse.budgetMax)}</Chip> : <Chip>no max</Chip>}
+                  {parse.bedroomsMin ? <Chip>{parse.bedroomsMin}+ beds</Chip> : <Chip>any beds</Chip>}
+                  {parse.propertyType && parse.propertyType !== 'any' ? <Chip>type: {parse.propertyType}</Chip> : null}
+                  {parse.needs.length ? <Chip>need: {parse.needs[0].replace('_', ' ')}</Chip> : null}
+                </div>
               </div>
 
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {parse.placeQuery ? <Chip>Place: {parse.placeQuery}</Chip> : <Chip>Any market</Chip>}
-                {parse.budgetMax ? <Chip>Max {formatMoney(parse.budgetMax)}</Chip> : <Chip>No max</Chip>}
-                {parse.bedroomsMin ? <Chip>{parse.bedroomsMin}+ beds</Chip> : <Chip>Any beds</Chip>}
-                {parse.propertyType && parse.propertyType !== 'any' ? <Chip>Type: {parse.propertyType}</Chip> : null}
-                {parse.needs.length ? <Chip>Need: {parse.needs[0].replace('_', ' ')}</Chip> : null}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className={cx(
+                  'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
+                  'bg-white hover:bg-white',
+                  'ring-1 ring-inset ring-[color:var(--hairline)]',
+                  'text-[color:var(--ink-2)]',
+                )}
+              >
+                <X className="h-4 w-4 opacity-70" />
+                close
+              </button>
+            </div>
+
+            {/* mode pills */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {(['buy', 'rent', 'sell'] as const).map((m) => {
+                const activeMode = parse.mode === m;
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={cx(
+                      'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
+                      'ring-1 ring-inset',
+                      activeMode ? 'bg-white ring-[color:var(--hairline-2)]' : 'bg-white/85 ring-[color:var(--hairline)] hover:bg-white',
+                      'text-[color:var(--ink-2)]',
+                    )}
+                  >
+                    {m === 'buy' ? <Sparkles className="h-4 w-4 opacity-70" /> : null}
+                    {m === 'rent' ? <Home className="h-4 w-4 opacity-70" /> : null}
+                    {m === 'sell' ? <ArrowRight className="h-4 w-4 opacity-70" /> : null}
+                    {m}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* body */}
+          <div className="relative p-2.5 sm:p-3">
+            {/* quick actions */}
+            <div className="mb-2.5 rounded-[18px] bg-white/70 p-3 ring-1 ring-inset ring-[color:var(--hairline)]">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">
+                  quick filters
+                </div>
+                <button
+                  type="button"
+                  onClick={() => inputRef.current?.focus()}
+                  className="text-[11px] text-[color:var(--ink-3)] hover:text-[color:var(--ink-2)]"
+                >
+                  keep typing
+                </button>
+              </div>
+
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+                {quick.map((x) => (
+                  <button
+                    key={x.label}
+                    type="button"
+                    onClick={() => applyQuick(x.patch)}
+                    className={cx(
+                      'group flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left transition',
+                      'bg-white hover:bg-white',
+                      'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                    )}
+                    title={x.hint}
+                  >
+                    <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-[color:var(--ink-2)]">
+                      <span className="opacity-70">{x.icon}</span>
+                      {x.label}
+                    </span>
+                    <span className="text-[11px] text-[color:var(--ink-3)] opacity-0 transition group-hover:opacity-100">
+                      add
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className={cx(
-                'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                'bg-white/85 hover:bg-white',
-                'ring-1 ring-inset ring-[color:var(--hairline)]',
-                'text-[color:var(--ink-2)]',
-              )}
-            >
-              <X className="h-4 w-4 opacity-70" />
-              Close
-            </button>
-          </div>
-
-          <div className="relative p-2.5 sm:p-3">
             <div className="max-h-[420px] overflow-auto p-0.5">
               {hits.length === 0 ? (
-                <div className="rounded-2xl bg-white/80 px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
-                  No matches yet. Try a city, region or keywords like "sea view modern villa".
+                <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
+                  no matches yet. try a city, region or keywords like “sea view modern villa”.
                 </div>
               ) : (
                 <div className="grid gap-1.5">
@@ -840,15 +988,15 @@ export default function VanteraOmniSearch({
                       onClick={() => setOpen(false)}
                       className={cx(
                         'group relative rounded-2xl px-4 py-3 transition',
-                        'bg-white/80 hover:bg-white',
+                        'bg-white hover:bg-white',
                         'ring-1 ring-inset ring-[color:var(--hairline)]',
-                        idx === active && 'bg-white ring-[color:var(--hairline-2)]',
+                        idx === active && 'ring-[color:var(--hairline-2)]',
                       )}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex items-center gap-3">
-                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/85 ring-1 ring-inset ring-[color:var(--hairline)]">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
                               {iconFor(h)}
                             </span>
 
@@ -866,7 +1014,7 @@ export default function VanteraOmniSearch({
                             {h.reasons.slice(0, 3).map((r) => (
                               <span
                                 key={r}
-                                className="inline-flex items-center rounded-full bg-white/85 px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
+                                className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
                               >
                                 {r}
                               </span>
@@ -874,8 +1022,8 @@ export default function VanteraOmniSearch({
                           </div>
                         </div>
 
-                        <span className="inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
-                          Open <ArrowRight className="h-4 w-4 opacity-70" />
+                        <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
+                          open <ArrowRight className="h-4 w-4 opacity-70" />
                         </span>
                       </div>
                     </Link>
@@ -886,7 +1034,7 @@ export default function VanteraOmniSearch({
           </div>
 
           <div className="relative border-t border-[color:var(--hairline)] px-5 py-4 text-[11px] text-[color:var(--ink-3)]">
-            Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. Typos are fine.
+            tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. typos are fine.
           </div>
         </div>
       </div>
