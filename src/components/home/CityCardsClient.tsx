@@ -37,18 +37,9 @@ function hashTo01(seed: string) {
   return (h >>> 0) / 4294967295;
 }
 
-/**
- * Premium grid logic:
- * - 1 column when there isn't real space (even on desktop)
- * - 2 columns when there is real space
- *
- * Use Tailwind's supported arbitrary grid-cols value (NOT the raw CSS property form).
- * Also guard small screens with min(520px, 100%) so we never overflow.
- */
-const AUTO_FIT_2COL_MAX = 'grid-cols-[repeat(auto-fit,minmax(min(520px,100%),1fr))]';
-
 export default function CityCardsClient({
   cities,
+  // Two-up when there is space. One-up when constrained. Never squeezed.
   columns = '[grid-template-columns:repeat(auto-fit,minmax(min(640px,100%),1fr))]',
   className,
   variant = 'default',
@@ -60,7 +51,6 @@ export default function CityCardsClient({
   variant?: 'default' | 'wall';
   showLocalTime?: boolean;
 }) {
-  
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
@@ -74,7 +64,6 @@ export default function CityCardsClient({
 
     const list = (cities ?? []).map((city) => {
       const r = hashTo01(city.slug);
-
       const sortScore =
         typeof city.priority === 'number' ? 10_000 + city.priority : Math.round(r * 10_000);
 
@@ -95,20 +84,20 @@ export default function CityCardsClient({
       <div
         className={cx(
           'grid',
-          // calmer, less cramped rhythm
-          isWall ? 'gap-6' : 'gap-6 sm:gap-8',
+          // calmer rhythm for white editorial
+          isWall ? 'gap-6' : 'gap-6 sm:gap-7 lg:gap-8',
           columns,
         )}
       >
         {enriched.map((city) => (
           <div key={city.slug} className="relative min-w-0">
-            {/* Optional local time (kept minimal if enabled) */}
+            {/* Optional local time (light system) */}
             {showLocalTime && city.localTime ? (
               <div className="pointer-events-none absolute right-4 top-4 z-30 hidden sm:block">
-                <div className="rounded-full border border-white/12 bg-black/35 px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
-                  <span className="text-zinc-300">Local</span>
-                  <span className="text-zinc-500"> · </span>
-                  <span className="font-mono text-zinc-100">{city.localTime}</span>
+                <div className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] text-[color:var(--ink-2)] backdrop-blur-2xl ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_18px_60px_rgba(11,12,16,0.10)]">
+                  <span className="text-[color:var(--ink-3)]">Local</span>
+                  <span className="text-black/20"> · </span>
+                  <span className="font-mono text-[color:var(--ink)]">{city.localTime}</span>
                 </div>
               </div>
             ) : null}
