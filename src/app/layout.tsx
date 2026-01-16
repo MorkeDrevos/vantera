@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
 
   title: {
-    default: 'Vantera – Private Intelligence for the World’s Most Valuable Assets',
+    default: 'Vantera - Private Intelligence for the World’s Most Valuable Assets',
     template: '%s · Vantera',
   },
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
   applicationName: 'Vantera',
 
-  // ✅ FAVICONS (served from /public/brand)
+  // Favicons (served from /public/brand)
   icons: {
     icon: [
       { url: '/brand/favicon.ico' },
@@ -31,21 +31,20 @@ export const metadata: Metadata = {
 
   manifest: '/brand/site.webmanifest',
 
-  // Mobile + PWA polish
-  themeColor: '#0F1115',
+  // White theme polish (matches your new royal paper)
+  themeColor: '#FBFBFA',
 
   appleWebApp: {
     title: 'Vantera',
     capable: true,
-    statusBarStyle: 'black-translucent',
+    // "default" plays nicer for white UIs than black-translucent
+    statusBarStyle: 'default',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Global schemas (1 script tag each)
   const site = {
     ...websiteJsonLd(),
-    // Add SearchAction at the WebSite level (helps Google understand your internal search)
     potentialAction: {
       '@type': 'SearchAction',
       target: `${SEO_CONFIG.domain}/listings?q={search_term_string}`,
