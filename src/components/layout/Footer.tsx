@@ -40,8 +40,8 @@ function Hairline({ className }: { className?: string }) {
 export default function Footer() {
   const year = new Date().getFullYear();
 
-  // Content width only (NOT the plate)
-  const CONTENT = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-12 2xl:px-16';
+  // Content width only (aligned with WIDE in HomePage)
+const CONTENT = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 
   return (
     <footer className="mt-16 w-full">
