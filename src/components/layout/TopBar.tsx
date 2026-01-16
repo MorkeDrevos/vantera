@@ -243,7 +243,6 @@ export default function TopBar() {
       'Netherlands',
     ];
 
-    // FIX: cityList is an array (CityLite[]). The stray ".Ultra" was a typo that broke the build.
     const present = uniqBy(
       cityList
         .map((c) => c.country)
@@ -318,12 +317,12 @@ export default function TopBar() {
 
   // collections (gateway, not directory)
   const collections = [
-    { label: 'Ultra Prime', q: 'ultra_prime' },
+    { label: 'Ultra prime', q: 'ultra_prime' },
     { label: 'Waterfront', q: 'waterfront' },
-    { label: 'Sea View', q: 'sea_view' },
+    { label: 'Sea view', q: 'sea_view' },
     { label: 'Gated', q: 'gated' },
     { label: 'Golf', q: 'golf' },
-    { label: 'New Build', q: 'new_build' },
+    { label: 'New build', q: 'new_build' },
     { label: 'Yield', q: 'yield' },
     { label: 'Walkable', q: 'walkable' },
   ];
@@ -332,9 +331,9 @@ export default function TopBar() {
     return `/coming-soon?collection=${encodeURIComponent(key)}`;
   }
 
-  // Royal visual system (dark glass header + gold crown)
+  // White royal visual system (pure white glass + gold accents)
   const goldText =
-    'bg-clip-text text-transparent bg-[linear-gradient(180deg,#fbf0d6_0%,#e9cc86_40%,#b98533_100%)]';
+    'bg-clip-text text-transparent bg-[linear-gradient(180deg,#b98533_0%,#d9b35f_45%,#8a5b12_100%)]';
 
   const BAR_INNER =
     'mx-auto flex w-full max-w-[1720px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
@@ -342,50 +341,55 @@ export default function TopBar() {
   const barShell = cx(
     'relative w-full',
     'backdrop-blur-[18px]',
-    scrolled ? 'bg-[rgba(9,11,15,0.74)]' : 'bg-[rgba(9,11,15,0.58)]',
+    scrolled ? 'bg-[rgba(255,255,255,0.86)]' : 'bg-[rgba(255,255,255,0.78)]',
   );
 
-  const pillBase =
-    'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[12px] tracking-[0.16em] uppercase transition select-none';
+  // no uppercase for menu links
+  const pillBase = 'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[13px] transition select-none';
 
   const navPill = cx(
     pillBase,
-    'text-white/76 hover:text-white',
-    'bg-white/[0.06] hover:bg-white/[0.10]',
-    'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
+    'text-slate-900/78 hover:text-slate-900',
+    'bg-black/[0.035] hover:bg-black/[0.055]',
+    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
   );
 
   const navPillActive = cx(
     pillBase,
-    'text-white',
-    'bg-white/[0.10]',
-    'ring-1 ring-inset ring-[rgba(231,201,130,0.38)]',
+    'text-slate-900',
+    'bg-black/[0.055]',
+    'ring-1 ring-inset ring-[rgba(185,133,51,0.22)]',
   );
 
   const signatureSearch =
     'inline-flex h-10 items-center gap-2 rounded-full px-4 transition ' +
-    'bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.06))] ' +
-    'ring-1 ring-inset ring-white/[0.14] hover:ring-[rgba(231,201,130,0.42)] ' +
-    'shadow-[0_22px_60px_rgba(0,0,0,0.35)]';
+    'bg-[linear-gradient(180deg,rgba(0,0,0,0.040),rgba(0,0,0,0.028))] ' +
+    'ring-1 ring-inset ring-black/[0.10] hover:ring-[rgba(185,133,51,0.22)] ' +
+    'shadow-[0_18px_52px_rgba(0,0,0,0.10)]';
 
   const primaryCta =
     'inline-flex h-10 items-center gap-2 rounded-full px-5 text-sm font-semibold transition ' +
-    'bg-[linear-gradient(180deg,rgba(251,240,214,0.18),rgba(231,201,130,0.10))] ' +
-    'ring-1 ring-inset ring-[rgba(231,201,130,0.38)] hover:ring-[rgba(231,201,130,0.62)] ' +
-    'shadow-[0_26px_74px_rgba(0,0,0,0.38)]';
+    'bg-[linear-gradient(180deg,rgba(185,133,51,0.16),rgba(185,133,51,0.10))] ' +
+    'ring-1 ring-inset ring-[rgba(185,133,51,0.28)] hover:ring-[rgba(185,133,51,0.44)] ' +
+    'shadow-[0_22px_64px_rgba(0,0,0,0.12)]';
+
+  const subtleText = 'text-slate-700/80';
+  const strongText = 'text-slate-900';
+  const borderSoft = 'border-black/[0.08]';
+  const ringSoft = 'ring-black/[0.10]';
 
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Royal crown rail */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[60] h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-80" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[60] h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-90" />
 
       {/* Full-bleed bar */}
       <div className={barShell}>
         {/* Ambient depth + crown glow */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1100px_220px_at_50%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-white/[0.10]" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.10),transparent_36%,rgba(0,0,0,0.22))]" />
+          <div className="absolute inset-x-0 top-0 h-16 bg-[radial-gradient(1100px_220px_at_50%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
+          <div className={cx('absolute inset-x-0 bottom-0 h-px', borderSoft)} />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),transparent_40%,rgba(0,0,0,0.05))]" />
         </div>
 
         <div className={cx('relative', BAR_INNER)}>
@@ -394,28 +398,25 @@ export default function TopBar() {
             <div
               className={cx(
                 'relative flex items-center gap-3 rounded-full pl-3 pr-4 py-2',
-                'bg-white/[0.06] ring-1 ring-inset ring-white/[0.12]',
-                'shadow-[0_20px_60px_rgba(0,0,0,0.35)]',
+                'bg-black/[0.035] ring-1 ring-inset ring-black/[0.10]',
+                'shadow-[0_16px_48px_rgba(0,0,0,0.10)]',
               )}
             >
-              <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(520px_120px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)] opacity-70" />
+              <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(520px_120px_at_18%_0%,rgba(185,133,51,0.12),transparent_62%)] opacity-80" />
               <div className="relative flex items-center gap-2">
-                <Crown className="h-4 w-4 text-[rgba(231,201,130,0.80)] opacity-90" />
+                <Crown className="h-4 w-4 text-[rgba(185,133,51,0.90)] opacity-90" />
                 <Image
                   src="/brand/vantera-logo-dark.svg"
                   alt="Vantera"
                   width={620}
                   height={180}
                   priority={false}
-                  className={cx(
-                    'h-[30px] w-auto sm:h-[34px] md:h-[36px]',
-                    'brightness-[1.18] contrast-[1.08]',
-                  )}
+                  className={cx('h-[30px] w-auto sm:h-[34px] md:h-[36px]', 'contrast-[1.06]')}
                 />
               </div>
               <div className="relative hidden sm:flex items-center gap-2 pl-2">
-                <span className="h-4 w-px bg-white/[0.14]" />
-                <span className={cx('text-[11px] tracking-[0.22em] uppercase', goldText)}>Private Intelligence</span>
+                <span className="h-4 w-px bg-black/[0.10]" />
+                <span className={cx('text-[12px] tracking-[0.06em]', goldText)}>Private intelligence</span>
               </div>
             </div>
           </Link>
@@ -438,7 +439,7 @@ export default function TopBar() {
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
                 </button>
 
-                {/* Mega panel (dark gateway, not directory) */}
+                {/* Mega panel (white gateway, not directory) */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -449,9 +450,9 @@ export default function TopBar() {
                   className={cx(
                     'absolute left-1/2 z-[80] mt-4 w-[1320px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'rounded-[34px] overflow-hidden',
-                    'bg-[rgba(9,11,15,0.92)] backdrop-blur-[18px]',
-                    'shadow-[0_54px_160px_rgba(0,0,0,0.62)]',
-                    'ring-1 ring-inset ring-white/[0.12]',
+                    'bg-[rgba(255,255,255,0.94)] backdrop-blur-[18px]',
+                    'shadow-[0_44px_140px_rgba(0,0,0,0.18)]',
+                    'ring-1 ring-inset ring-black/[0.10]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
@@ -461,22 +462,20 @@ export default function TopBar() {
                   aria-label="Places menu"
                 >
                   {/* Crown rail inside panel */}
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-80" />
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-90" />
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.12),transparent_40%,rgba(0,0,0,0.42))]" />
+                    <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.02),transparent_45%,rgba(0,0,0,0.05))]" />
                   </div>
 
                   {/* Header */}
-                  <div className="relative flex items-center justify-between gap-4 border-b border-white/[0.10] px-7 py-6">
+                  <div className={cx('relative flex items-center justify-between gap-4 px-7 py-6 border-b', borderSoft)}>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-[rgba(231,201,130,0.85)] opacity-90" />
-                        <div className={cx('text-[11px] font-semibold tracking-[0.30em] uppercase', goldText)}>
-                          Gateway
-                        </div>
+                        <Sparkles className="h-4 w-4 text-[rgba(185,133,51,0.92)] opacity-90" />
+                        <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Gateway</div>
                       </div>
-                      <div className="mt-2 text-[14px] leading-snug text-white/86">
+                      <div className={cx('mt-2 text-[14px] leading-snug', subtleText)}>
                         Enter by intent. Search is primary. Places are curated.
                       </div>
 
@@ -489,9 +488,9 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'rounded-full px-3.5 py-1.5 text-[12px] transition',
-                              'bg-white/[0.06] hover:bg-white/[0.10]',
-                              'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                              'text-white/78 hover:text-white',
+                              'bg-black/[0.03] hover:bg-black/[0.05]',
+                              'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                              'text-slate-900/80 hover:text-slate-900',
                             )}
                             role="menuitem"
                           >
@@ -510,14 +509,14 @@ export default function TopBar() {
                         }}
                         className={cx(
                           'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                          'bg-white/[0.06] hover:bg-white/[0.10]',
-                          'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.42)]',
-                          'text-white/80 hover:text-white',
+                          'bg-black/[0.03] hover:bg-black/[0.05]',
+                          'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
+                          'text-slate-900/80 hover:text-slate-900',
                         )}
                       >
                         <Command className="h-4 w-4 opacity-80" />
                         Open search
-                        <span className="ml-1 font-mono text-[11px] text-white/70">/</span>
+                        <span className="ml-1 font-mono text-[11px] text-slate-700/80">/</span>
                       </button>
 
                       <button
@@ -525,9 +524,9 @@ export default function TopBar() {
                         onClick={() => setMegaOpen(false)}
                         className={cx(
                           'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                          'bg-white/[0.04] hover:bg-white/[0.08]',
-                          'ring-1 ring-inset ring-white/[0.10] hover:ring-white/[0.16]',
-                          'text-white/72 hover:text-white',
+                          'bg-black/[0.02] hover:bg-black/[0.04]',
+                          'ring-1 ring-inset ring-black/[0.06] hover:ring-black/[0.10]',
+                          'text-slate-900/70 hover:text-slate-900',
                         )}
                       >
                         <X className="h-4 w-4 opacity-80" />
@@ -540,7 +539,7 @@ export default function TopBar() {
                   <div className="relative grid grid-cols-12 gap-7 px-7 py-7">
                     {/* Collections */}
                     <div className="col-span-3">
-                      <div className={cx('mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
+                      <div className={cx('mb-3 text-[12px] font-semibold tracking-[0.08em]', goldText)}>
                         Collections
                       </div>
 
@@ -553,14 +552,14 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'group relative overflow-hidden rounded-2xl px-3.5 py-3 text-sm transition',
-                              'bg-white/[0.05] hover:bg-white/[0.10]',
-                              'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.34)]',
-                              'text-white/80 hover:text-white',
+                              'bg-black/[0.03] hover:bg-black/[0.05]',
+                              'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
+                              'text-slate-900/80 hover:text-slate-900',
                             )}
                             role="menuitem"
                           >
                             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                              <div className="absolute inset-0 bg-[radial-gradient(540px_160px_at_12%_0%,rgba(231,201,130,0.18),transparent_62%)]" />
+                              <div className="absolute inset-0 bg-[radial-gradient(540px_160px_at_12%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
                             </div>
                             <div className="relative flex items-center justify-between gap-3">
                               <span className="truncate">{it.label}</span>
@@ -570,10 +569,8 @@ export default function TopBar() {
                         ))}
                       </div>
 
-                      <div className="mt-4 rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/[0.10] p-4">
-                        <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-white/60">
-                          Regions
-                        </div>
+                      <div className={cx('mt-4 rounded-2xl p-4 ring-1 ring-inset', ringSoft, 'bg-black/[0.02]')}>
+                        <div className="text-[12px] font-semibold tracking-[0.06em] text-slate-900/70">Regions</div>
                         <div className="mt-2 grid gap-2">
                           {topRegions.map((r) => (
                             <Link
@@ -583,9 +580,9 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'rounded-xl px-3 py-2 text-[13px] transition',
-                                'bg-white/[0.05] hover:bg-white/[0.10]',
-                                'ring-1 ring-inset ring-white/[0.10] hover:ring-white/[0.16]',
-                                'text-white/76 hover:text-white',
+                                'bg-black/[0.03] hover:bg-black/[0.05]',
+                                'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                                'text-slate-900/78 hover:text-slate-900',
                               )}
                               role="menuitem"
                             >
@@ -598,7 +595,7 @@ export default function TopBar() {
 
                     {/* Featured cities */}
                     <div className="col-span-5">
-                      <div className={cx('mb-3 text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
+                      <div className={cx('mb-3 text-[12px] font-semibold tracking-[0.08em]', goldText)}>
                         Featured cities
                       </div>
 
@@ -611,54 +608,52 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'group relative overflow-hidden rounded-2xl px-4 py-3.5 transition',
-                              'bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.04))]',
-                              'hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.06))]',
-                              'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.34)]',
+                              'bg-[linear-gradient(180deg,rgba(0,0,0,0.030),rgba(0,0,0,0.020))]',
+                              'hover:bg-[linear-gradient(180deg,rgba(0,0,0,0.050),rgba(0,0,0,0.030))]',
+                              'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
                             )}
                             role="menuitem"
                           >
                             <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                              <div className="absolute inset-0 bg-[radial-gradient(620px_180px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+                              <div className="absolute inset-0 bg-[radial-gradient(620px_180px_at_18%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
                             </div>
 
                             <div className="relative flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="truncate text-[14px] font-semibold text-white/92">{c.name}</div>
-                                <div className="mt-0.5 truncate text-[11px] tracking-[0.18em] uppercase text-white/55">
+                                <div className="truncate text-[14px] font-semibold text-slate-900/92">{c.name}</div>
+                                <div className="mt-0.5 truncate text-[11px] tracking-[0.14em] text-slate-700/70">
                                   {c.country}
                                 </div>
                               </div>
 
-                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90 text-white" />
+                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90 text-slate-900" />
                             </div>
                           </Link>
                         ))}
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/[0.04] ring-1 ring-inset ring-white/[0.10] px-4 py-3">
-                        <div className="text-xs text-white/60">Entry points only. Intelligence expands weekly.</div>
+                      <div className={cx('mt-4 flex items-center justify-between rounded-2xl px-4 py-3 ring-1 ring-inset', ringSoft, 'bg-black/[0.02]')}>
+                        <div className="text-xs text-slate-700/80">Entry points only. Intelligence expands weekly.</div>
                         <button
                           type="button"
                           onClick={() => {
                             setMegaOpen(false);
                             openSearchFromAnywhere();
                           }}
-                          className="inline-flex items-center gap-2 text-xs text-white/76 hover:text-white transition"
+                          className="inline-flex items-center gap-2 text-xs text-slate-900/70 hover:text-slate-900 transition"
                         >
-                          Search instead <ArrowRight className="h-4 w-4 opacity-75" />
+                          Search instead <ArrowRight className="h-4 w-4 opacity-70" />
                         </button>
                       </div>
                     </div>
 
-                    {/* Actions (commanding) */}
+                    {/* Actions */}
                     <div className="col-span-4">
                       <div className="grid gap-3">
-                        <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-                          <div className="border-b border-white/[0.10] px-4 py-3">
-                            <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
-                              Start
-                            </div>
-                            <div className="mt-1 text-xs text-white/60">One box. Typos allowed. Keywords included.</div>
+                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+                          <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                            <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Start</div>
+                            <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <button
@@ -669,9 +664,9 @@ export default function TopBar() {
                               }}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/[0.06] hover:bg-white/[0.10]',
-                                'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.34)]',
-                                'text-white/84 hover:text-white',
+                                'bg-black/[0.03] hover:bg-black/[0.05]',
+                                'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
+                                'text-slate-900/86 hover:text-slate-900',
                               )}
                             >
                               <span className="inline-flex items-center gap-2">
@@ -687,26 +682,26 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/[0.05] hover:bg-white/[0.09]',
-                                'ring-1 ring-inset ring-white/[0.10] hover:ring-white/[0.16]',
-                                'text-white/76 hover:text-white',
+                                'bg-black/[0.025] hover:bg-black/[0.045]',
+                                'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                                'text-slate-900/76 hover:text-slate-900',
                               )}
                             >
                               <span className="inline-flex items-center gap-2">
                                 <ShieldCheck className="h-4 w-4 opacity-80" />
                                 Intelligence (coming soon)
                               </span>
-                              <ArrowRight className="h-4 w-4 opacity-65" />
+                              <ArrowRight className="h-4 w-4 opacity-60" />
                             </Link>
                           </div>
                         </div>
 
-                        <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-                          <div className="border-b border-white/[0.10] px-4 py-3">
-                            <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
+                        <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+                          <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                            <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>
                               Private network
                             </div>
-                            <div className="mt-1 text-xs text-white/60">Verified sellers and advisors.</div>
+                            <div className="mt-1 text-xs text-slate-700/80">Verified sellers and advisors.</div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <Link
@@ -715,9 +710,9 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/[0.06] hover:bg-white/[0.10]',
-                                'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                                'text-white/84 hover:text-white',
+                                'bg-black/[0.03] hover:bg-black/[0.05]',
+                                'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                                'text-slate-900/86 hover:text-slate-900',
                               )}
                             >
                               <span className="inline-flex items-center gap-2">
@@ -733,26 +728,26 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                                'bg-white/[0.05] hover:bg-white/[0.09]',
-                                'ring-1 ring-inset ring-white/[0.10] hover:ring-white/[0.16]',
-                                'text-white/76 hover:text-white',
+                                'bg-black/[0.025] hover:bg-black/[0.045]',
+                                'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                                'text-slate-900/76 hover:text-slate-900',
                               )}
                             >
                               <span className="inline-flex items-center gap-2">
                                 <Users className="h-4 w-4 opacity-80" />
                                 Agents (coming soon)
                               </span>
-                              <ArrowRight className="h-4 w-4 opacity-65" />
+                              <ArrowRight className="h-4 w-4 opacity-60" />
                             </Link>
                           </div>
                         </div>
 
-                        <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-[rgba(231,201,130,0.24)]">
-                          <div className="border-b border-white/[0.10] px-4 py-3">
-                            <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
+                        <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,rgba(185,133,51,0.12),rgba(185,133,51,0.06))] ring-1 ring-inset ring-[rgba(185,133,51,0.22)]">
+                          <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                            <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>
                               Submissions
                             </div>
-                            <div className="mt-1 text-xs text-white/60">Private by default. Signal over noise.</div>
+                            <div className="mt-1 text-xs text-slate-700/80">Private by default. Signal over noise.</div>
                           </div>
                           <div className="p-4">
                             <Link
@@ -761,16 +756,16 @@ export default function TopBar() {
                               onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'group inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
-                                'bg-[linear-gradient(180deg,rgba(251,240,214,0.18),rgba(231,201,130,0.10))]',
-                                'hover:bg-[linear-gradient(180deg,rgba(251,240,214,0.26),rgba(231,201,130,0.14))]',
-                                'ring-1 ring-inset ring-[rgba(231,201,130,0.44)] hover:ring-[rgba(231,201,130,0.70)]',
-                                'shadow-[0_26px_74px_rgba(0,0,0,0.45)]',
+                                'bg-[linear-gradient(180deg,rgba(185,133,51,0.18),rgba(185,133,51,0.12))]',
+                                'hover:bg-[linear-gradient(180deg,rgba(185,133,51,0.24),rgba(185,133,51,0.14))]',
+                                'ring-1 ring-inset ring-[rgba(185,133,51,0.32)] hover:ring-[rgba(185,133,51,0.48)]',
+                                'shadow-[0_22px_70px_rgba(0,0,0,0.10)]',
                               )}
                             >
-                              <span className={goldText}>{sellLabel}</span>
-                              <ArrowRight className="h-4 w-4 opacity-85 text-white transition group-hover:translate-x-0.5" />
+                              <span className={cx(goldText, 'text-[15px]')}>{sellLabel}</span>
+                              <ArrowRight className="h-4 w-4 opacity-80 text-slate-900 transition group-hover:translate-x-0.5" />
                             </Link>
-                            <div className="mt-2 text-[11px] text-white/55">Verification-first pipeline.</div>
+                            <div className="mt-2 text-[11px] text-slate-700/70">Verification-first pipeline.</div>
                           </div>
                         </div>
                       </div>
@@ -796,15 +791,15 @@ export default function TopBar() {
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
               <button type="button" onClick={openSearchFromAnywhere} className={signatureSearch} aria-label="Search">
-                <Command className="h-4 w-4 text-white/80" />
-                <span className="text-[12px] tracking-[0.12em] uppercase text-white/85">Search</span>
-                <span className="text-white/30">·</span>
-                <span className="font-mono text-xs text-white/70">/</span>
+                <Command className="h-4 w-4 text-slate-900/70" />
+                <span className="text-[13px] tracking-[0.04em] text-slate-900/85">Search</span>
+                <span className="text-slate-900/20">·</span>
+                <span className="font-mono text-xs text-slate-700/80">/</span>
               </button>
 
               <Link href={sellHref} prefetch className={primaryCta} aria-label={sellLabel}>
                 <span className={goldText}>{sellLabel}</span>
-                <ArrowRight className="h-4 w-4 opacity-80 text-white" />
+                <ArrowRight className="h-4 w-4 opacity-80 text-slate-900" />
               </Link>
             </div>
 
@@ -813,9 +808,9 @@ export default function TopBar() {
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
                 'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm transition lg:hidden',
-                'bg-white/[0.06] hover:bg-white/[0.10]',
-                'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                'text-white/80 hover:text-white',
+                'bg-black/[0.035] hover:bg-black/[0.055]',
+                'ring-1 ring-inset ring-black/[0.10] hover:ring-black/[0.14]',
+                'text-slate-900/80 hover:text-slate-900',
               )}
               aria-expanded={mobileOpen}
               aria-controls="vantera-mobile-menu"
@@ -839,32 +834,32 @@ export default function TopBar() {
           type="button"
           aria-label="Close menu"
           onClick={() => setMobileOpen(false)}
-          className={cx('absolute inset-0 bg-black/50 transition-opacity', mobileOpen ? 'opacity-100' : 'opacity-0')}
+          className={cx('absolute inset-0 bg-black/20 transition-opacity', mobileOpen ? 'opacity-100' : 'opacity-0')}
         />
 
         <div
           className={cx(
             'absolute right-0 top-0 h-full w-[92vw] max-w-[460px]',
-            'bg-[rgba(9,11,15,0.96)] backdrop-blur-[18px]',
-            'ring-1 ring-inset ring-white/[0.12]',
-            'shadow-[-40px_0_160px_rgba(0,0,0,0.72)]',
+            'bg-[rgba(255,255,255,0.96)] backdrop-blur-[18px]',
+            'ring-1 ring-inset ring-black/[0.10]',
+            'shadow-[-40px_0_160px_rgba(0,0,0,0.18)]',
             'transition-transform duration-300',
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-80" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-90" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(185,133,51,0.10),transparent_62%)]" />
 
-          <div className="relative flex items-center justify-between border-b border-white/[0.10] px-5 py-5">
-            <div className={cx('text-[11px] font-semibold tracking-[0.30em] uppercase', goldText)}>Menu</div>
+          <div className={cx('relative flex items-center justify-between px-5 py-5 border-b', borderSoft)}>
+            <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               className={cx(
                 'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
-                'bg-white/[0.06] hover:bg-white/[0.10]',
-                'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                'text-white/78 hover:text-white',
+                'bg-black/[0.03] hover:bg-black/[0.05]',
+                'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                'text-slate-900/78 hover:text-slate-900',
               )}
             >
               <X className="h-4 w-4 opacity-85" />
@@ -874,10 +869,10 @@ export default function TopBar() {
 
           <div className="relative space-y-4 px-5 py-5">
             {/* Search first */}
-            <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-              <div className="border-b border-white/[0.10] px-4 py-3">
-                <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>Search</div>
-                <div className="mt-1 text-xs text-white/60">One box. Typos allowed. Keywords included.</div>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+              <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Search</div>
+                <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <button
@@ -888,15 +883,15 @@ export default function TopBar() {
                   }}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/[0.06] hover:bg-white/[0.10]',
-                    'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.34)]',
-                    'text-white/84 hover:text-white',
+                    'bg-black/[0.03] hover:bg-black/[0.05]',
+                    'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
+                    'text-slate-900/86 hover:text-slate-900',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
                     <Command className="h-4 w-4 opacity-85" />
                     Open search
-                    <span className="ml-2 font-mono text-xs text-white/70">/</span>
+                    <span className="ml-2 font-mono text-xs text-slate-700/80">/</span>
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-70" />
                 </button>
@@ -907,13 +902,13 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm font-semibold transition',
-                    'bg-[linear-gradient(180deg,rgba(251,240,214,0.18),rgba(231,201,130,0.10))]',
-                    'ring-1 ring-inset ring-[rgba(231,201,130,0.44)] hover:ring-[rgba(231,201,130,0.70)]',
-                    'text-white',
+                    'bg-[linear-gradient(180deg,rgba(185,133,51,0.18),rgba(185,133,51,0.12))]',
+                    'ring-1 ring-inset ring-[rgba(185,133,51,0.32)] hover:ring-[rgba(185,133,51,0.48)]',
+                    'text-slate-900',
                   )}
                 >
                   <span className={goldText}>{sellLabel}</span>
-                  <ArrowRight className="h-4 w-4 opacity-85 text-white" />
+                  <ArrowRight className="h-4 w-4 opacity-85 text-slate-900" />
                 </Link>
 
                 <Link
@@ -922,9 +917,9 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/[0.06] hover:bg-white/[0.10]',
-                    'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                    'text-white/84 hover:text-white',
+                    'bg-black/[0.03] hover:bg-black/[0.05]',
+                    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                    'text-slate-900/86 hover:text-slate-900',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
@@ -937,10 +932,10 @@ export default function TopBar() {
             </div>
 
             {/* Places */}
-            <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-              <div className="border-b border-white/[0.10] px-4 py-3">
-                <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>Places</div>
-                <div className="mt-1 text-xs text-white/60">Countries and top cities.</div>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+              <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Places</div>
+                <div className="mt-1 text-xs text-slate-700/80">Countries and top cities.</div>
               </div>
 
               <div className="p-4">
@@ -953,9 +948,9 @@ export default function TopBar() {
                       onClick={() => setMobileOpen(false)}
                       className={cx(
                         'rounded-full px-3 py-1.5 text-[12px] transition',
-                        'bg-white/[0.06] hover:bg-white/[0.10]',
-                        'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                        'text-white/78 hover:text-white',
+                        'bg-black/[0.03] hover:bg-black/[0.05]',
+                        'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                        'text-slate-900/80 hover:text-slate-900',
                       )}
                     >
                       {c}
@@ -972,18 +967,16 @@ export default function TopBar() {
                       onClick={() => setMobileOpen(false)}
                       className={cx(
                         'rounded-2xl px-3.5 py-3 transition',
-                        'bg-white/[0.06] hover:bg-white/[0.10]',
-                        'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.34)]',
+                        'bg-black/[0.03] hover:bg-black/[0.05]',
+                        'ring-1 ring-inset ring-black/[0.08] hover:ring-[rgba(185,133,51,0.22)]',
                       )}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-white/90">{c.name}</div>
-                          <div className="truncate text-[11px] tracking-[0.16em] uppercase text-white/55">
-                            {c.country}
-                          </div>
+                          <div className="truncate text-sm font-semibold text-slate-900/92">{c.name}</div>
+                          <div className="truncate text-[11px] tracking-[0.14em] text-slate-700/70">{c.country}</div>
                         </div>
-                        <ArrowRight className="h-4 w-4 opacity-70 text-white" />
+                        <ArrowRight className="h-4 w-4 opacity-70 text-slate-900" />
                       </div>
                     </Link>
                   ))}
@@ -992,10 +985,10 @@ export default function TopBar() {
             </div>
 
             {/* Minimal nav */}
-            <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-              <div className="border-b border-white/[0.10] px-4 py-3">
-                <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>Navigation</div>
-                <div className="mt-1 text-xs text-white/60">Public entry points.</div>
+            <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+              <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Navigation</div>
+                <div className="mt-1 text-xs text-slate-700/80">Public entry points.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <Link
@@ -1004,9 +997,9 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/[0.06] hover:bg-white/[0.10]',
-                    'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                    'text-white/84 hover:text-white',
+                    'bg-black/[0.03] hover:bg-black/[0.05]',
+                    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                    'text-slate-900/86 hover:text-slate-900',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
@@ -1022,9 +1015,9 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/[0.06] hover:bg-white/[0.10]',
-                    'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                    'text-white/84 hover:text-white',
+                    'bg-black/[0.03] hover:bg-black/[0.05]',
+                    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                    'text-slate-900/86 hover:text-slate-900',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
@@ -1040,9 +1033,9 @@ export default function TopBar() {
                   onClick={() => setMobileOpen(false)}
                   className={cx(
                     'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
-                    'bg-white/[0.06] hover:bg-white/[0.10]',
-                    'ring-1 ring-inset ring-white/[0.12] hover:ring-white/[0.18]',
-                    'text-white/84 hover:text-white',
+                    'bg-black/[0.03] hover:bg-black/[0.05]',
+                    'ring-1 ring-inset ring-black/[0.08] hover:ring-black/[0.12]',
+                    'text-slate-900/86 hover:text-slate-900',
                   )}
                 >
                   <span className="inline-flex items-center gap-2">
@@ -1056,12 +1049,10 @@ export default function TopBar() {
 
             {/* City page switch */}
             {onCityPage ? (
-              <div className="overflow-hidden rounded-[24px] bg-white/[0.05] ring-1 ring-inset ring-white/[0.12]">
-                <div className="border-b border-white/[0.10] px-4 py-3">
-                  <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', goldText)}>
-                    City view
-                  </div>
-                  <div className="mt-1 text-xs text-white/60">Switch: facts (T) or live market (L).</div>
+              <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
+                <div className={cx('px-4 py-3 border-b', borderSoft)}>
+                  <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>City view</div>
+                  <div className="mt-1 text-xs text-slate-700/80">Switch: facts (T) or live market (L).</div>
                 </div>
                 <div className="flex items-center gap-2 p-4">
                   <button
@@ -1076,8 +1067,8 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'truth'
-                        ? 'bg-white/[0.12] text-white ring-[rgba(231,201,130,0.40)]'
-                        : 'bg-white/[0.06] text-white/78 ring-white/[0.12] hover:bg-white/[0.10] hover:ring-white/[0.18]',
+                        ? 'bg-black/[0.05] text-slate-900 ring-[rgba(185,133,51,0.28)]'
+                        : 'bg-black/[0.03] text-slate-900/78 ring-black/[0.08] hover:bg-black/[0.05] hover:ring-black/[0.12]',
                     )}
                   >
                     Facts <span className="ml-1 font-mono text-[11px] opacity-70">T</span>
@@ -1095,8 +1086,8 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'supply'
-                        ? 'bg-white/[0.12] text-white ring-[rgba(231,201,130,0.40)]'
-                        : 'bg-white/[0.06] text-white/78 ring-white/[0.12] hover:bg-white/[0.10] hover:ring-white/[0.18]',
+                        ? 'bg-black/[0.05] text-slate-900 ring-[rgba(185,133,51,0.28)]'
+                        : 'bg-black/[0.03] text-slate-900/78 ring-black/[0.08] hover:bg-black/[0.05] hover:ring-black/[0.12]',
                     )}
                   >
                     Live market <span className="ml-1 font-mono text-[11px] opacity-70">L</span>
@@ -1105,7 +1096,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-2 text-[11px] text-white/50">Editorial entrance. Search is the product.</div>
+            <div className="pt-2 text-[11px] text-slate-700/70">Editorial entrance. Search is the product.</div>
           </div>
         </div>
       </div>
