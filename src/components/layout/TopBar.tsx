@@ -252,7 +252,8 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  const topCities = useMemo(() => cityList.slice(0, 12), [cityList]);
+  // CHANGED: 8 flagship cities in Places mega panel (was 12)
+  const topCities = useMemo(() => cityList.slice(0, 8), [cityList]);
 
   function countryHref(country: string) {
     return buildSearchHref({ country });
@@ -533,7 +534,8 @@ export default function TopBar() {
                                   {c.country}
                                 </div>
                               </div>
-                              <ArrowRight className="h-4 w-4 opacity-55 transition group-hover:translate-x-0.5 group-hover:opacity-90 text-[color:var(--ink)]" />
+
+                              {/* CHANGED: removed arrow icon from city links */}
                             </div>
                           </Link>
                         ))}
@@ -547,7 +549,8 @@ export default function TopBar() {
                           onClick={() => setMegaOpen(false)}
                           className="inline-flex items-center gap-2 text-xs text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition"
                         >
-                          Browse all <ArrowRight className="h-4 w-4 opacity-70" />
+                          {/* CHANGED: removed arrow icon from Browse all */}
+                          Browse all
                         </Link>
                       </div>
                     </div>
