@@ -844,7 +844,7 @@ export default function VanteraOmniSearch({
       );
       if (next === 'rent') filtered.unshift('rent');
       if (next === 'sell') filtered.unshift('sell');
-      return filtered.join(' ').trim();
+            return filtered.join(' ').trim();
     });
     setOpen(true);
     window.setTimeout(() => inputRef.current?.focus(), 0);
