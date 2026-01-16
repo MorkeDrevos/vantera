@@ -67,13 +67,13 @@ const CARD =
   ' shadow-[0_26px_80px_rgba(10,12,16,0.10)]';
 
 const DARK_PLATE =
-  'bg-[rgba(9,11,15,0.72)] backdrop-blur-[18px] ' +
+  'bg-[rgba(9,11,15,0.70)] backdrop-blur-[18px] ' +
   'ring-1 ring-inset ring-white/[0.14] ' +
   'shadow-[0_40px_130px_rgba(0,0,0,0.58)]';
 
 function GoldWord({ children }: { children: ReactNode }) {
   return (
-    <span className="bg-clip-text text-transparent bg-[linear-gradient(180deg,#fbf0d6_0%,#e9cc86_40%,#b98533_100%)]">
+    <span className="bg-clip-text text-transparent bg-[linear-gradient(180deg,#fff3da_0%,#ead08f_42%,#b98533_100%)]">
       {children}
     </span>
   );
@@ -124,7 +124,7 @@ function SignalStripDark({ items }: { items: SignalItem[] }) {
   return (
     <div className={cx('relative overflow-hidden rounded-[26px] p-3 sm:p-4', DARK_PLATE)}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-70" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-70" />
         <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
         <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.35)_1px,transparent_0)] [background-size:28px_28px]" />
       </div>
@@ -159,8 +159,61 @@ function SignalStripDark({ items }: { items: SignalItem[] }) {
   );
 }
 
+function HeroQuickLinks({ cities }: { cities: RuntimeCity[] }) {
+  const top = [...cities]
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+    .slice(0, 8)
+    .map((c) => ({ slug: c.slug, name: c.name }));
+
+  return (
+    <div className={cx('relative overflow-hidden rounded-[28px] p-4 sm:p-5', DARK_PLATE)}>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-60" />
+      </div>
+
+      <div className="relative">
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-white/60">Start here</div>
+          <div className="text-[11px] text-white/55">hand-picked index entries</div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {top.map((c) => (
+            <a
+              key={c.slug}
+              href={`/city/${c.slug}`}
+              className={cx(
+                'group inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] font-medium',
+                'bg-white/[0.06] hover:bg-white/[0.10] transition',
+                'ring-1 ring-inset ring-white/[0.12] hover:ring-[rgba(231,201,130,0.28)]',
+                'text-white/85',
+                'backdrop-blur-[18px]',
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.72)] opacity-80" />
+              <span className="truncate max-w-[18ch]">{c.name}</span>
+            </a>
+          ))}
+          <a
+            href="#explore-index"
+            className={cx(
+              'inline-flex items-center justify-center rounded-full px-3 py-2 text-[12px] font-semibold',
+              'bg-white/90 hover:bg-white transition text-[rgba(10,12,16,0.92)]',
+              'ring-1 ring-inset ring-white/30',
+              'shadow-[0_18px_50px_rgba(0,0,0,0.26)]',
+            )}
+          >
+            Explore the full index
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* =========================================================
-   HERO (clean, full-screen, no featured markets)
+   HERO (full-screen, cinematic, “James-edition killer”)
    ========================================================= */
 
 function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
@@ -173,20 +226,24 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
       <div className="pointer-events-none absolute inset-0">
         <Image src="/hero.jpg" alt="Vantera" fill priority sizes="100vw" className="object-cover object-center" />
 
-        {/* Cinematic veil */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(9,11,15,0.70)_0%,rgba(9,11,15,0.62)_30%,rgba(9,11,15,0.42)_58%,rgba(251,251,250,0.90)_100%)]" />
+        {/* Deep cinematic base */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(5,6,9,0.74)_0%,rgba(7,9,12,0.62)_28%,rgba(9,11,15,0.42)_56%,rgba(251,251,250,0.92)_100%)]" />
 
-        {/* Authority edges */}
+        {/* Soft vignette + authority edges */}
+        <div className="absolute inset-0 bg-[radial-gradient(1400px_760px_at_50%_18%,rgba(0,0,0,0.15),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-70" />
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,12,16,0.14)] to-transparent" />
       </div>
 
       {/* Royal accents */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-[520px] left-1/2 h-[980px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.18),transparent_66%)] blur-3xl" />
-        <div className="absolute -top-[560px] right-[-520px] h-[980px] w-[980px] rounded-full bg-[radial-gradient(circle_at_center,rgba(78,99,155,0.10),transparent_68%)] blur-3xl" />
+        <div className="absolute -top-[560px] left-1/2 h-[1040px] w-[1800px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.22),transparent_66%)] blur-3xl" />
+        <div className="absolute -top-[600px] right-[-560px] h-[1040px] w-[1040px] rounded-full bg-[radial-gradient(circle_at_center,rgba(78,99,155,0.12),transparent_68%)] blur-3xl" />
         <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.24),transparent_18%,transparent_82%,rgba(0,0,0,0.24))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.26),transparent_18%,transparent_82%,rgba(0,0,0,0.26))]" />
+
+        {/* subtle animated “breathing” glow */}
+        <div className="absolute inset-0 opacity-60 animate-[vanteraGlow_7.5s_ease-in-out_infinite]" />
       </div>
 
       {/* CONTENT */}
@@ -199,21 +256,21 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
 
           <div className="mt-6 grid gap-10 lg:grid-cols-12 lg:gap-12">
             {/* LEFT: statement + search */}
-            <div className="lg:col-span-8">
-              <h1 className="text-balance text-[30px] font-medium tracking-[-0.015em] text-white/92 sm:text-[38px] lg:text-[48px] lg:leading-[1.08]">
-                Private intelligence for the world&apos;s <GoldWord>most valuable assets</GoldWord>
+            <div className="lg:col-span-7">
+              <h1 className="text-balance text-[32px] font-medium tracking-[-0.018em] text-white/92 sm:text-[40px] lg:text-[54px] lg:leading-[1.04]">
+                The quiet edge in <GoldWord>luxury real estate</GoldWord>
               </h1>
 
               <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-white/76 sm:text-lg">
-                A quiet intelligence layer for buyers, sellers and advisors who value signal over theatre.
-                <span className="text-white/55"> Value, liquidity and risk in plain language.</span>
+                Vantera turns location noise into decision signal.
+                <span className="text-white/55"> Value, liquidity and risk - clear, comparable, and verifiable.</span>
               </p>
 
-              <div className="mt-7 max-w-[1180px]">
-                <div className={cx('relative overflow-hidden rounded-[28px] p-3 sm:p-4', DARK_PLATE)}>
+              <div className="mt-7">
+                <div className={cx('relative overflow-hidden rounded-[30px] p-3.5 sm:p-4', DARK_PLATE)}>
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.70)] to-transparent opacity-70" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_320px_at_18%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.72)] to-transparent opacity-70" />
                   </div>
                   <div className="relative">
                     <VanteraOmniSearch cities={cities as any} clusters={clusters as any} autoFocus={false} />
@@ -222,7 +279,7 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-white/60">
-                {['Typos ok', 'Keywords included', 'City-first intelligence', 'Verification-first'].map((t) => (
+                {['City-first', 'Keywords included', 'Typos ok', 'Verification-first'].map((t) => (
                   <span
                     key={t}
                     className="rounded-full bg-white/[0.06] px-3 py-1.5 ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]"
@@ -232,7 +289,7 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
                 ))}
               </div>
 
-              <div className="mt-6 max-w-[1180px]">
+              <div className="mt-6">
                 <SignalStripDark
                   items={[
                     { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
@@ -243,47 +300,90 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
                   ]}
                 />
               </div>
+
+              {/* subtle scroll cue */}
+              <div className="mt-7 hidden sm:flex items-center gap-3 text-[12px] text-white/55">
+                <span className="inline-flex h-8 w-5 items-start justify-center rounded-full ring-1 ring-inset ring-white/15 bg-white/[0.06]">
+                  <span className="mt-1.5 h-2 w-1 rounded-full bg-white/55 animate-[vanteraScroll_1.6s_ease-in-out_infinite]" />
+                </span>
+                <span>Scroll for featured markets, intelligence and the full index</span>
+              </div>
             </div>
 
-            {/* RIGHT: keep empty / minimal (no more “featured markets” in hero) */}
-            <div className="lg:col-span-4">
-              <div className="hidden lg:block">
-                <div className="rounded-[30px] bg-white/[0.06] p-6 ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
-                  <div className="text-[11px] tracking-[0.26em] text-white/60">HOUSE RULE</div>
-                  <div className="mt-2 text-sm leading-relaxed text-white/72">
-                    Signal beats story. If it cannot be verified, it cannot lead.
+            {/* RIGHT: “authority” stack */}
+            <div className="lg:col-span-5">
+              <div className="grid gap-4 sm:gap-5">
+                <div className={cx('relative overflow-hidden rounded-[28px] p-5 sm:p-6', DARK_PLATE)}>
+                  <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_74%_12%,rgba(231,201,130,0.12),transparent_64%)]" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-50" />
                   </div>
-                  <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent" />
-                  <div className="mt-4 text-[11px] text-white/55">
-                    Start with the search. The index below does the rest.
+
+                  <div className="relative">
+                    <div className="text-[11px] tracking-[0.26em] text-white/60">House rules</div>
+                    <div className="mt-2 text-[15px] leading-relaxed text-white/78">
+                      Signal beats story.
+                      <span className="text-white/55"> If it cannot be verified, it cannot lead.</span>
+                    </div>
+                    <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-white/12 to-transparent" />
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-[12px]">
+                      {[
+                        { k: 'Clarity', v: 'Plain language' },
+                        { k: 'Proof', v: 'Docs + registry' },
+                        { k: 'Scope', v: 'City-to-region' },
+                        { k: 'Use', v: 'Buyer-to-advisor' },
+                      ].map((x) => (
+                        <div
+                          key={x.k}
+                          className="rounded-2xl bg-white/[0.06] px-3 py-2 ring-1 ring-inset ring-white/[0.12]"
+                        >
+                          <div className="text-[10px] font-semibold tracking-[0.22em] text-white/55">{x.k}</div>
+                          <div className="mt-0.5 font-medium text-white/85">{x.v}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                </div>
+
+                <HeroQuickLinks cities={cities} />
+
+                {/* Trust tape stays in hero (premium + safe) */}
+                <div className="rounded-[28px] bg-white/[0.06] ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
+                  <TrustMarquee
+                    className="!mt-0"
+                    brands={[
+                      { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
+                      { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
+                      { name: 'Knight Frank', domain: 'knightfrank.com' },
+                      { name: 'Savills', domain: 'savills.com' },
+                      { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
+                      { name: 'BARNES', domain: 'barnes-international.com' },
+                      { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
+                      { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
+                      { name: 'Compass', domain: 'compass.com', invert: false },
+                      { name: 'CBRE', domain: 'cbre.com', invert: false },
+                      { name: 'JLL', domain: 'jll.com', invert: false },
+                    ]}
+                  />
                 </div>
               </div>
             </div>
           </div>
-
-          {/* Trust tape stays in hero (this is safe + premium) */}
-          <div className="mt-10 sm:mt-12">
-            <div className="rounded-[28px] bg-white/[0.06] ring-1 ring-inset ring-white/[0.12] backdrop-blur-[18px]">
-              <TrustMarquee
-                className="!mt-0"
-                brands={[
-                  { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-                  { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-                  { name: 'Knight Frank', domain: 'knightfrank.com' },
-                  { name: 'Savills', domain: 'savills.com' },
-                  { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-                  { name: 'BARNES', domain: 'barnes-international.com' },
-                  { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-                  { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-                  { name: 'Compass', domain: 'compass.com', invert: false },
-                  { name: 'CBRE', domain: 'cbre.com', invert: false },
-                  { name: 'JLL', domain: 'jll.com', invert: false },
-                ]}
-              />
-            </div>
-          </div>
         </div>
+
+        {/* local-only keyframes (kept here so you don’t need to touch globals) */}
+        <style>{`
+          @keyframes vanteraScroll {
+            0% { transform: translateY(0); opacity: .35; }
+            50% { transform: translateY(10px); opacity: .85; }
+            100% { transform: translateY(0); opacity: .35; }
+          }
+          @keyframes vanteraGlow {
+            0% { filter: saturate(1) brightness(1); }
+            50% { filter: saturate(1.05) brightness(1.06); }
+            100% { filter: saturate(1) brightness(1); }
+          }
+        `}</style>
       </div>
     </section>
   );
@@ -342,26 +442,14 @@ function CTA() {
 }
 
 /* =========================================================
-   HOME PAGE
+   HOME PAGE (re-ordered for flow + conversion)
    ========================================================= */
 
 export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; clusters: RuntimeRegionCluster[] }) {
   return (
     <PageShell fullBleedHero={<HeroBand cities={cities} clusters={clusters} />} bodyMaxWidthClassName="max-w-[1840px]">
-      {/* Featured markets (MOVED OUT OF HERO) */}
+      {/* Discovery (first thing after hero - keep momentum) */}
       <section className="mt-10 sm:mt-14">
-        <div className={WIDE}>
-          <SectionHeader
-            kicker="Featured markets"
-            title="Start with the flagship set"
-            subtitle="Two per row on wide screens, one per row when space is tight. Clean, calm, premium."
-          />
-          <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
-        </div>
-      </section>
-
-      {/* Discovery */}
-      <section className="mt-12 sm:mt-16">
         <div className={MID}>
           <SectionHeader
             kicker="Discovery"
@@ -372,10 +460,15 @@ export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; 
         </div>
       </section>
 
-      {/* Market briefing */}
-      <section className="mt-12 sm:mt-14">
+      {/* Featured markets */}
+      <section className="mt-12 sm:mt-16">
         <div className={WIDE}>
-          <MarketBriefing cities={cities as any} />
+          <SectionHeader
+            kicker="Featured markets"
+            title="The flagship set"
+            subtitle="Clean, calm and high-signal - built for fast scanning and confident next clicks."
+          />
+          <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
         </div>
       </section>
 
@@ -388,6 +481,13 @@ export default function HomePage({ cities, clusters }: { cities: RuntimeCity[]; 
             subtitle="A product layer built for serious decisions, not screenshots."
           />
           <FeaturedIntelligencePanel />
+        </div>
+      </section>
+
+      {/* Market briefing */}
+      <section className="mt-12 sm:mt-16">
+        <div className={WIDE}>
+          <MarketBriefing cities={cities as any} />
         </div>
       </section>
 
