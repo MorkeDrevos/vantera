@@ -88,6 +88,36 @@ function initialFromSearchParams(sp?: SearchParams): Initial {
   };
 }
 
+function useClickOutside(
+  refs: Array<React.RefObject<HTMLElement>>,
+  onOutside: () => void,
+  when = true,
+) {
+  useEffect(() => {
+    if (!when) return;
+
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+
+      for (const r of refs) {
+        const el = r.current;
+        if (el && el.contains(t)) return;
+      }
+
+      onOutside();
+    };
+
+    window.addEventListener('mousedown', onDown, { passive: true });
+    window.addEventListener('touchstart', onDown, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('touchstart', onDown);
+    };
+  }, [refs, onOutside, when]);
+}
+
 export default function SearchResultsPageClient({ searchParams, initial }: Props) {
   const router = useRouter();
 
