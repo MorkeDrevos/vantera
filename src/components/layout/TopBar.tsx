@@ -87,18 +87,33 @@ function useHotkeys(pathname: string | null, router: ReturnType<typeof useRouter
 
       if (wantsSearch) {
         e.preventDefault();
-        if (pathname !== '/') {
-          router.push('/');
-          window.setTimeout(() => dispatchFocusSearch(), 350);
+
+        // Primary: go to results search page
+        if (pathname !== '/search') {
+          router.push('/search');
           return;
         }
-        dispatchFocusSearch();
+
+        // Optional: if you still want the homepage omni modal behavior later,
+        // swap to dispatchFocusSearch() here.
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [pathname, router]);
+}
+
+function buildSearchHref(params: Record<string, string | number | boolean | undefined | null>) {
+  const sp = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null) continue;
+    const s = String(v).trim();
+    if (!s) continue;
+    sp.set(k, s);
+  }
+  const qs = sp.toString();
+  return qs ? `/search?${qs}` : '/search';
 }
 
 export default function TopBar() {
@@ -273,7 +288,11 @@ export default function TopBar() {
   }, [cityList, countries]);
 
   function countryHref(country: string) {
-    return `/coming-soon?country=${encodeURIComponent(country)}`;
+    return buildSearchHref({ country });
+  }
+
+  function regionHref(region: string) {
+    return buildSearchHref({ region });
   }
 
   function cancelTimers() {
@@ -298,13 +317,11 @@ export default function TopBar() {
     setMegaOpen((v) => !v);
   }
 
-  function openSearchFromAnywhere() {
-    if (pathname !== '/') {
-      router.push('/');
-      window.setTimeout(() => dispatchFocusSearch(), 350);
+  function openSearchResultsFromAnywhere() {
+    if (pathname !== '/search') {
+      router.push('/search');
       return;
     }
-    dispatchFocusSearch();
   }
 
   // routes
@@ -328,7 +345,7 @@ export default function TopBar() {
   ];
 
   function collectionHref(key: string) {
-    return `/coming-soon?collection=${encodeURIComponent(key)}`;
+    return buildSearchHref({ collection: key });
   }
 
   // White royal visual system (pure white glass + gold accents)
@@ -424,7 +441,7 @@ export default function TopBar() {
           {/* Desktop center nav */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-2">
-              {/* Places mega */}
+              {/* Getaway mega */}
               <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
@@ -435,7 +452,7 @@ export default function TopBar() {
                   aria-haspopup="menu"
                 >
                   <Globe className="h-4 w-4 opacity-80" />
-                  <span>Places</span>
+                  <span>Getaway</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
                 </button>
 
@@ -501,12 +518,10 @@ export default function TopBar() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMegaOpen(false);
-                          openSearchFromAnywhere();
-                        }}
+                      <Link
+                        href="/search"
+                        prefetch
+                        onClick={() => setMegaOpen(false)}
                         className={cx(
                           'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
                           'bg-black/[0.03] hover:bg-black/[0.05]',
@@ -517,7 +532,7 @@ export default function TopBar() {
                         <Command className="h-4 w-4 opacity-80" />
                         Open search
                         <span className="ml-1 font-mono text-[11px] text-slate-700/80">/</span>
-                      </button>
+                      </Link>
 
                       <button
                         type="button"
@@ -575,7 +590,7 @@ export default function TopBar() {
                           {topRegions.map((r) => (
                             <Link
                               key={r}
-                              href={`/coming-soon?region=${encodeURIComponent(r)}`}
+                              href={regionHref(r)}
                               prefetch
                               onClick={() => setMegaOpen(false)}
                               className={cx(
@@ -632,18 +647,22 @@ export default function TopBar() {
                         ))}
                       </div>
 
-                      <div className={cx('mt-4 flex items-center justify-between rounded-2xl px-4 py-3 ring-1 ring-inset', ringSoft, 'bg-black/[0.02]')}>
+                      <div
+                        className={cx(
+                          'mt-4 flex items-center justify-between rounded-2xl px-4 py-3 ring-1 ring-inset',
+                          ringSoft,
+                          'bg-black/[0.02]',
+                        )}
+                      >
                         <div className="text-xs text-slate-700/80">Entry points only. Intelligence expands weekly.</div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMegaOpen(false);
-                            openSearchFromAnywhere();
-                          }}
+                        <Link
+                          href="/search"
+                          prefetch
+                          onClick={() => setMegaOpen(false)}
                           className="inline-flex items-center gap-2 text-xs text-slate-900/70 hover:text-slate-900 transition"
                         >
                           Search instead <ArrowRight className="h-4 w-4 opacity-70" />
-                        </button>
+                        </Link>
                       </div>
                     </div>
 
@@ -656,12 +675,10 @@ export default function TopBar() {
                             <div className="mt-1 text-xs text-slate-700/80">One box. Typos allowed. Keywords included.</div>
                           </div>
                           <div className="grid gap-2 p-4">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setMegaOpen(false);
-                                openSearchFromAnywhere();
-                              }}
+                            <Link
+                              href="/search"
+                              prefetch
+                              onClick={() => setMegaOpen(false)}
                               className={cx(
                                 'inline-flex w-full items-center justify-between rounded-2xl px-4 py-3 text-sm transition',
                                 'bg-black/[0.03] hover:bg-black/[0.05]',
@@ -674,7 +691,7 @@ export default function TopBar() {
                                 Open search
                               </span>
                               <ArrowRight className="h-4 w-4 opacity-70" />
-                            </button>
+                            </Link>
 
                             <Link
                               href={intelligenceHref}
@@ -790,7 +807,7 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button type="button" onClick={openSearchFromAnywhere} className={signatureSearch} aria-label="Search">
+              <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
                 <Command className="h-4 w-4 text-slate-900/70" />
                 <span className="text-[13px] tracking-[0.04em] text-slate-900/85">Search</span>
                 <span className="text-slate-900/20">·</span>
@@ -878,7 +895,7 @@ export default function TopBar() {
                 <button
                   type="button"
                   onClick={() => {
-                    openSearchFromAnywhere();
+                    router.push('/search');
                     setMobileOpen(false);
                   }}
                   className={cx(
@@ -934,7 +951,7 @@ export default function TopBar() {
             {/* Places */}
             <div className={cx('overflow-hidden rounded-[24px] ring-1 ring-inset', ringSoft, 'bg-black/[0.025]')}>
               <div className={cx('px-4 py-3 border-b', borderSoft)}>
-                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Places</div>
+                <div className={cx('text-[12px] font-semibold tracking-[0.08em]', goldText)}>Getaway</div>
                 <div className="mt-1 text-xs text-slate-700/80">Countries and top cities.</div>
               </div>
 
