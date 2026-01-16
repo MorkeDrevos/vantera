@@ -6,9 +6,10 @@ export type SearchParams = Record<string, string | string[] | undefined>;
 
 type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
 
-type ListingCard = {
+export type ListingCard = {
   id: string;
   slug: string;
+
   title: string;
   headline?: string | null;
 
@@ -17,6 +18,7 @@ type ListingCard = {
 
   bedrooms: number | null;
   bathrooms: number | null;
+
   builtM2: number | null;
   plotM2: number | null;
 
@@ -29,7 +31,7 @@ type ListingCard = {
     region?: string | null;
   };
 
-  cover?: {
+  cover: {
     url: string;
     alt?: string | null;
     width?: number | null;
@@ -50,6 +52,10 @@ function toInt(v: string, fallback?: number) {
   return Math.trunc(n);
 }
 
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
 function normalizeNeeds(raw: string) {
   return raw
     .split(',')
@@ -60,33 +66,30 @@ function normalizeNeeds(raw: string) {
 
 function buildWhere(sp: SearchParams) {
   const q = firstString(sp.q).trim();
-  const city = firstString(sp.city).trim(); // preferred: city slug
-  const place = firstString(sp.place).trim(); // fallback: city name/slug-like input
-  const type = firstString(sp.type).trim(); // propertyType
+  const place = firstString(sp.place).trim(); // user text (city, region, country)
+  const citySlug = firstString(sp.city).trim(); // preferred canonical selector
+  const type = firstString(sp.type).trim();
   const beds = toInt(firstString(sp.beds), undefined);
   const max = toInt(firstString(sp.max), undefined);
   const needs = normalizeNeeds(firstString(sp.needs));
 
-  // “mode” is not in schema yet. Keep it in URL/UI but don’t filter DB on it.
-  // If you later add listing.mode, we wire it in 10 seconds.
-
-  const orText: any[] = [];
-  const and: any[] = [];
+  const AND: any[] = [];
+  const OR: any[] = [];
 
   if (q) {
-    orText.push({ title: { contains: q, mode: 'insensitive' } });
-    orText.push({ headline: { contains: q, mode: 'insensitive' } });
-    orText.push({ description: { contains: q, mode: 'insensitive' } });
-    orText.push({ neighborhood: { contains: q, mode: 'insensitive' } });
-    orText.push({ propertyType: { contains: q, mode: 'insensitive' } });
+    OR.push({ title: { contains: q, mode: 'insensitive' } });
+    OR.push({ headline: { contains: q, mode: 'insensitive' } });
+    OR.push({ description: { contains: q, mode: 'insensitive' } });
+    OR.push({ neighborhood: { contains: q, mode: 'insensitive' } });
+    OR.push({ propertyType: { contains: q, mode: 'insensitive' } });
   }
 
+  // Needs: production-safe text matching against real listing copy until you add structured features.
   if (needs.length) {
-    // Needs are mapped to text signals until you add structured features.
-    // This is production-safe, not mock: it matches real stored listing copy.
     for (const n of needs) {
-      const needle = n.replace(/_/g, ' ');
-      and.push({
+      const needle = n.replace(/_/g, ' ').trim();
+      if (!needle) continue;
+      AND.push({
         OR: [
           { title: { contains: needle, mode: 'insensitive' } },
           { headline: { contains: needle, mode: 'insensitive' } },
@@ -96,40 +99,45 @@ function buildWhere(sp: SearchParams) {
     }
   }
 
-  const cityNeedle = city || place;
-  if (cityNeedle) {
-    const slugLike = cityNeedle.toLowerCase().trim().replace(/\s+/g, '-');
-    and.push({
+  if (citySlug) {
+    AND.push({ city: { slug: citySlug } });
+  } else if (place) {
+    const slugLike = place.toLowerCase().trim().replace(/\s+/g, '-');
+    AND.push({
       city: {
         OR: [
           { slug: { equals: slugLike } },
           { slug: { contains: slugLike } },
-          { name: { contains: cityNeedle, mode: 'insensitive' } },
-          { country: { contains: cityNeedle, mode: 'insensitive' } },
-          { region: { contains: cityNeedle, mode: 'insensitive' } },
+          { name: { contains: place, mode: 'insensitive' } },
+          { region: { contains: place, mode: 'insensitive' } },
+          { country: { contains: place, mode: 'insensitive' } },
         ],
       },
     });
   }
 
   if (type && type !== 'any') {
-    and.push({ propertyType: { contains: type, mode: 'insensitive' } });
+    AND.push({ propertyType: { contains: type, mode: 'insensitive' } });
   }
 
   if (typeof beds === 'number' && beds > 0) {
-    and.push({ bedrooms: { gte: beds } });
+    AND.push({ bedrooms: { gte: beds } });
   }
 
   if (typeof max === 'number' && max > 0) {
-    and.push({ price: { lte: max } });
+    AND.push({ price: { lte: max } });
   }
 
-  return {
-    status: 'LIVE' as const,
-    visibility: 'PUBLIC' as const,
-    ...(orText.length ? { OR: orText } : {}),
-    ...(and.length ? { AND: and } : {}),
+  // Always enforce public live inventory
+  const where: any = {
+    status: 'LIVE',
+    visibility: 'PUBLIC',
   };
+
+  if (OR.length) where.OR = OR;
+  if (AND.length) where.AND = AND;
+
+  return where;
 }
 
 function buildOrderBy(sort: SortKey) {
@@ -143,11 +151,12 @@ function buildOrderBy(sort: SortKey) {
 export default async function SearchPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = (await searchParams) ?? {};
 
-  const page = Math.max(1, toInt(firstString(sp.page), 1) ?? 1);
-  const take = Math.min(48, Math.max(12, toInt(firstString(sp.take), 24) ?? 24));
+  const page = clamp(toInt(firstString(sp.page), 1) ?? 1, 1, 10_000);
+  const take = clamp(toInt(firstString(sp.take), 24) ?? 24, 12, 48);
   const skip = (page - 1) * take;
 
   const sort = (firstString(sp.sort) as SortKey) || 'price_high';
+
   const where = buildWhere(sp);
   const orderBy = buildOrderBy(sort);
 
@@ -176,6 +185,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
     bedrooms: l.bedrooms ?? null,
     bathrooms: l.bathrooms ?? null,
+
     builtM2: l.builtM2 ?? null,
     plotM2: l.plotM2 ?? null,
 
@@ -201,8 +211,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   }));
 
   const pageCount = Math.max(1, Math.ceil(total / take));
-  const hasPrev = page > 1;
-  const hasNext = page < pageCount;
 
   return (
     <SearchResultsPageClient
@@ -211,8 +219,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       total={total}
       page={page}
       pageCount={pageCount}
-      hasPrev={hasPrev}
-      hasNext={hasNext}
       take={take}
     />
   );
