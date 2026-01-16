@@ -1,37 +1,15 @@
 // src/app/layout.tsx
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
-import {
-  jsonLd,
-  websiteJsonLd,
-  organizationJsonLd,
-} from '@/lib/seo/seo.jsonld';
-
-function toAbsoluteUrl(input: string) {
-  // Ensures metadataBase is always a valid absolute URL.
-  // Accepts "https://vantera.io" or "vantera.io"
-  const s = (input || '').trim();
-  if (!s) return new URL('https://vantera.io');
-  if (s.startsWith('http://') || s.startsWith('https://')) return new URL(s);
-  return new URL(`https://${s}`);
-}
-
-const baseUrl = toAbsoluteUrl(SEO_CONFIG.domain);
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  viewportFit: 'cover',
-  themeColor: '#fbfbfa',
-};
+import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld';
 
 export const metadata: Metadata = {
-  metadataBase: baseUrl,
+  metadataBase: new URL(SEO_CONFIG.domain),
 
   title: {
-    default: 'Vantera - Private Intelligence for the World’s Most Valuable Assets',
+    default: 'Vantera – Private Intelligence for the World’s Most Valuable Assets',
     template: '%s · Vantera',
   },
 
@@ -39,23 +17,6 @@ export const metadata: Metadata = {
     'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
 
   applicationName: 'Vantera',
-
-  alternates: {
-    canonical: '/',
-  },
-
-  // Keep indexing open unless you explicitly gate prod via middleware
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
-  },
 
   // ✅ FAVICONS (served from /public/brand)
   icons: {
@@ -70,53 +31,24 @@ export const metadata: Metadata = {
 
   manifest: '/brand/site.webmanifest',
 
-  // Light editorial theme (must match globals.css)
-  themeColor: '#fbfbfa',
+  // Mobile + PWA polish
+  themeColor: '#0F1115',
 
   appleWebApp: {
     title: 'Vantera',
     capable: true,
-    statusBarStyle: 'default',
-  },
-
-  // Social previews (use your real OG asset path)
-  openGraph: {
-    type: 'website',
-    url: '/',
-    siteName: 'Vantera',
-    title: 'Vantera - Private Intelligence for the World’s Most Valuable Assets',
-    description:
-      'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
-    images: [
-      {
-        url: '/brand/og.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Vantera',
-      },
-    ],
-  },
-
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Vantera - Private Intelligence for the World’s Most Valuable Assets',
-    description:
-      'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
-    images: ['/brand/og.jpg'],
+    statusBarStyle: 'black-translucent',
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   // Global schemas (1 script tag each)
   const site = {
     ...websiteJsonLd(),
+    // Add SearchAction at the WebSite level (helps Google understand your internal search)
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${baseUrl.toString().replace(/\/$/, '')}/listings?q={search_term_string}`,
+      target: `${SEO_CONFIG.domain}/listings?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
@@ -124,8 +56,8 @@ export default function RootLayout({
   const org = organizationJsonLd();
 
   return (
-    <html lang="en" dir="ltr" suppressHydrationWarning>
-      <body className="v-paper">
+    <html lang="en">
+      <body>
         {jsonLd(site)}
         {jsonLd(org)}
         {children}
