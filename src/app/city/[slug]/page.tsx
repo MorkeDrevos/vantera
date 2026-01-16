@@ -1,118 +1,131 @@
 // src/app/city/[slug]/page.tsx
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { prisma } from '@/lib/prisma';
 
-import CityPageClient from '@/components/city/CityPageClient';
-import { CITIES } from '@/components/home/cities';
-
-import { SEO_INTENT } from '@/lib/seo/seo.intent';
-import { webPageJsonLd, jsonLd } from '@/lib/seo/seo.jsonld';
-import { crumbsCity } from '@/lib/seo/seo.breadcrumbs';
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export default async function CityPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const idx = CITIES.findIndex((c) => c.slug === slug);
-  if (idx === -1) {
-    return { title: 'City Not Found · Vantera', robots: { index: false, follow: false } };
+  const city = await prisma.city.findUnique({
+    where: { slug },
+  });
+
+  if (!city) {
+    return (
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-16">
+          <div className="text-[22px] font-semibold text-zinc-900">City not found</div>
+          <div className="mt-2 text-[13px] text-zinc-600">Check the URL or return to search.</div>
+          <div className="mt-6">
+            <Link
+              href="/search"
+              className="inline-flex items-center rounded-full bg-zinc-900 px-5 py-2.5 text-[12px] text-white hover:bg-zinc-800"
+            >
+              Back to search
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
-  const city = CITIES[idx];
-  const doc = SEO_INTENT.cityHub({
-    name: city.name,
-    slug: city.slug,
-    country: city.country,
-    region: city.region ?? null,
-  });
-
-  return {
-    title: doc.title,
-    description: doc.description,
-    alternates: { canonical: doc.canonical },
-    robots: doc.robots,
-    openGraph: {
-      type: 'article',
-      title: doc.title,
-      description: doc.description,
-      url: doc.canonical,
-      images: [doc.ogImage],
-      siteName: 'Vantera',
+  const listings = await prisma.listing.findMany({
+    where: {
+      cityId: city.id,
+      status: 'LIVE',
+      visibility: 'PUBLIC',
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: doc.title,
-      description: doc.description,
-      images: [doc.ogImage],
-    },
-  };
-}
-
-export default async function CityPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-
-  const idx = CITIES.findIndex((c) => c.slug === slug);
-  if (idx === -1) return notFound();
-
-  const city = CITIES[idx];
-  const prev = CITIES[(idx - 1 + CITIES.length) % CITIES.length];
-  const next = CITIES[(idx + 1) % CITIES.length];
-
-  const doc = SEO_INTENT.cityHub({
-    name: city.name,
-    slug: city.slug,
-    country: city.country,
-    region: city.region ?? null,
+    orderBy: [{ price: 'desc' }, { updatedAt: 'desc' }],
+    take: 12,
+    include: { coverMedia: true },
   });
-
-  const intentAbout =
-    doc.jsonld?.about?.map((a) => ({
-      '@type': a.type,
-      name: a.name,
-      ...(a.extra ?? {}),
-    })) ?? [];
-
-  const pageJsonLd = webPageJsonLd({
-    url: doc.canonical,
-    name: doc.jsonld?.name ?? doc.title,
-    description: doc.description,
-    about: [
-      { '@type': 'Thing', name: `${city.name} real estate` },
-      { '@type': 'Thing', name: 'Property intelligence' },
-      { '@type': 'Thing', name: 'Market liquidity' },
-      ...intentAbout,
-    ],
-  });
-
-  const breadcrumb = crumbsCity({ cityName: city.name, citySlug: city.slug });
 
   return (
-    <>
-      {jsonLd(pageJsonLd)}
-      {jsonLd(breadcrumb)}
+    <main className="min-h-screen bg-white">
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="rounded-[30px] bg-white ring-1 ring-inset ring-zinc-200 shadow-[0_30px_110px_rgba(0,0,0,0.06)] overflow-hidden">
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-80" />
+            <div className="px-8 py-10">
+              <div className="text-[11px] font-semibold text-zinc-500">City</div>
+              <div className="mt-2 text-[34px] font-semibold text-zinc-900">{city.name}</div>
+              <div className="mt-2 text-[13px] text-zinc-600">
+                {city.region ? `${city.region}, ` : ''}{city.country}
+              </div>
 
-      <CityPageClient
-        city={{
-          name: city.name,
-          slug: city.slug,
-          country: city.country,
-          region: city.region ?? null,
-          tz: city.tz,
-          blurb: city.blurb ?? null,
-          image: city.image?.src
-            ? { src: city.image.src, alt: city.image.alt ?? null }
-            : null,
-        }}
-        prev={{ name: prev.name, slug: prev.slug }}
-        next={{ name: next.name, slug: next.slug }}
-      />
-    </>
+              {city.blurb ? (
+                <div className="mt-5 max-w-2xl text-[14px] text-zinc-700 leading-relaxed">{city.blurb}</div>
+              ) : (
+                <div className="mt-5 max-w-2xl text-[14px] text-zinc-700 leading-relaxed">
+                  Curated, verification-first inventory. Updated continuously.
+                </div>
+              )}
+
+              <div className="mt-7 flex flex-wrap gap-2">
+                <Link
+                  href={`/search?city=${encodeURIComponent(city.slug)}`}
+                  className="inline-flex items-center rounded-full bg-zinc-900 px-5 py-2.5 text-[12px] text-white hover:bg-zinc-800"
+                >
+                  View all listings
+                </Link>
+
+                <Link
+                  href="/"
+                  className="inline-flex items-center rounded-full bg-white px-5 py-2.5 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                >
+                  Home
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-zinc-200 px-8 py-8">
+            <div className="text-[13px] font-semibold text-zinc-900">
+              Featured listings
+              <span className="ml-2 text-[12px] font-medium text-zinc-500">{listings.length ? `${listings.length} shown` : 'none yet'}</span>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {listings.map((l) => (
+                <Link
+                  key={l.id}
+                  href={`/property/${l.slug}`}
+                  className="group rounded-[24px] bg-white p-3 ring-1 ring-inset ring-zinc-200 shadow-[0_20px_70px_rgba(0,0,0,0.05)] hover:shadow-[0_34px_105px_rgba(0,0,0,0.08)] transition"
+                >
+                  <div className="relative h-40 w-full overflow-hidden rounded-2xl bg-zinc-50 ring-1 ring-inset ring-zinc-200">
+                    {l.coverMedia?.url ? (
+                      <Image
+                        src={l.coverMedia.url}
+                        alt={l.coverMedia.alt ?? l.title}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-[1.02]"
+                        sizes="(max-width: 1024px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          background:
+                            'radial-gradient(900px 320px at 18% 0%, rgba(185,133,51,0.16), transparent 60%), radial-gradient(900px 320px at 85% 8%, rgba(120,76,255,0.10), transparent 62%), linear-gradient(180deg, rgba(250,250,250,1), rgba(244,244,245,1))',
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="mt-3 px-1 pb-1">
+                    <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
+                    {l.price ? (
+                      <div className="mt-1 text-[12px] text-zinc-600">€{l.price.toLocaleString()}</div>
+                    ) : (
+                      <div className="mt-1 text-[12px] text-zinc-600">Price on request</div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
