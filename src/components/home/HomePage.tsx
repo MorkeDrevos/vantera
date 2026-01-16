@@ -39,11 +39,9 @@ function cx(...parts: Array<string | false | null | undefined>) {
    ROYAL PRIMITIVES - Refined for 2026 Ultra-Premium
    ========================================================= */
 
-// Increased max-width and internal padding for "Architectural" feel
 const WIDE = 'mx-auto w-full max-w-[1840px] px-6 sm:px-10 lg:px-16 2xl:px-24';
 const NARROW = 'mx-auto w-full max-w-7xl px-6 sm:px-10';
 
-// Multi-layered shadow system for "Floating Glass"
 const GLASS =
   'bg-white/40 backdrop-blur-[24px] ring-1 ring-inset ring-white/60 shadow-[0_45px_110px_rgba(0,0,0,0.08),0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-700';
 const GLASS_SOFT =
@@ -52,19 +50,11 @@ const GLASS_SOFT =
 function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[#FBFBFA] text-[color:var(--ink)] selection:bg-[#E6C980]/30">
-      {/* ROYAL STAGE - High-fidelity depth system */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* Softened Crown Light */}
         <div className="absolute -top-[10%] left-1/2 h-[1000px] w-[1600px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(230,201,128,0.18),transparent_70%)] blur-[120px]" />
-        
-        {/* Ambient Floating Voids */}
         <div className="absolute top-[20%] -right-64 h-[800px] w-[800px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08),transparent_65%)] blur-[100px]" />
         <div className="absolute bottom-[-10%] -left-64 h-[1000px] w-[1000px] rounded-full bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.07),transparent_60%)] blur-[120px]" />
-
-        {/* The "Vellum" Texture - More sophisticated than standard grain */}
         <div className="absolute inset-0 opacity-[0.03] [background-image:url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]" />
-        
-        {/* Refined Grid - Thinner lines, larger spacing for "Blueprint" feel */}
         <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] [background-size:160px_160px]" />
       </div>
 
@@ -97,13 +87,19 @@ function SectionKicker({ title, subtitle, right }: { title: string; subtitle?: s
 function GoldWord({ children }: { children: React.ReactNode }) {
   return (
     <span className="relative inline-block">
-      <span className="bg-clip-text text-transparent bg-gradient-to-br from-[#E6C980] via-[#B7863A] to-[#8C6221] animate-gradient-x">
+      <span className="bg-clip-text text-transparent bg-gradient-to-br from-[#E6C980] via-[#B7863A] to-[#8C6221]">
         {children}
       </span>
       <span className="absolute -bottom-1 left-0 h-[1px] w-full bg-gradient-to-r from-[#E6C980]/0 via-[#E6C980]/50 to-[#E6C980]/0" />
     </span>
   );
 }
+
+type SignalStripItem = {
+  k: string;
+  v: React.ReactNode;
+  hint?: string;
+};
 
 function SignalStrip({ items }: { items: SignalStripItem[] }) {
   return (
@@ -151,14 +147,14 @@ function HotLocations({ cities }: { cities: RuntimeCity[] }) {
             <div className="mt-3 text-2xl font-light tracking-tight text-[#1C1917]">Fast entry points into the index</div>
             <p className="mt-2 text-sm text-[#78716C] font-light italic">Hand-picked for momentum and liquidity. Search returns soon.</p>
           </div>
-          <a href="#explore-index" className="inline-flex h-12 items-center justify-center rounded-full bg-[#1C1917] px-8 text-[11px] font-bold tracking-widest text-white transition-all hover:bg-black hover:scale-[1.02] active:scale-95 shadow-lg shadow-black/10">
+          <a href="#explore-index" className="inline-flex h-12 items-center justify-center rounded-full bg-[#1C1917] px-8 text-[11px] font-bold tracking-widest text-white transition-all hover:bg-black hover:scale-[1.02] shadow-lg shadow-black/10">
             EXPLORE FULL INDEX
           </a>
         </div>
         <div className="mt-8 flex flex-wrap gap-2.5">
           {hot.map((c) => (
             <a key={c.slug} href={`/city/${c.slug}`} className="group flex items-center gap-3 rounded-full bg-white/60 px-5 py-2.5 text-[12px] font-medium text-[#44403C] ring-1 ring-black/[0.03] transition-all hover:bg-white hover:ring-[#B7863A]/30 hover:shadow-md">
-              <span className="h-1 w-1 rounded-full bg-[#B7863A] transition-transform group-hover:scale-[2.5]" />
+              <span className="h-1 w-1 rounded-full bg-[#B7863A]" />
               {c.name}
             </a>
           ))}
@@ -171,7 +167,6 @@ function HotLocations({ cities }: { cities: RuntimeCity[] }) {
 function CTA() {
   return (
     <div className={cx('relative overflow-hidden rounded-[40px] p-10 sm:p-16', GLASS)}>
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-[#B7863A]/10 blur-[80px]" />
       <div className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-3xl">
           <div className="text-[10px] font-bold tracking-[0.4em] text-[#B7863A] uppercase">Private Access</div>
@@ -180,11 +175,10 @@ function CTA() {
           </h2>
           <p className="mt-6 text-lg text-[#57534E] font-light leading-relaxed">
             Vantera is built for private sellers, advisors, and agents who want verification, clarity, and speed.
-            <span className="block mt-2 font-semibold text-[#1C1917] tracking-widest uppercase text-xs">— Signal only.</span>
           </p>
         </div>
         <div className="flex flex-col gap-4 sm:flex-row lg:flex-col xl:flex-row">
-          <a href="/coming-soon?flow=sell" className="flex h-16 items-center justify-center rounded-full bg-[#1C1917] px-10 text-sm font-bold tracking-widest text-white transition-all hover:bg-black hover:shadow-2xl">
+          <a href="/coming-soon?flow=sell" className="flex h-16 items-center justify-center rounded-full bg-[#1C1917] px-10 text-sm font-bold tracking-widest text-white transition-all hover:bg-black">
             SUBMIT PRIVATE SELLER
           </a>
           <a href="/coming-soon?flow=agents" className="flex h-16 items-center justify-center rounded-full border border-black/10 bg-white/40 px-10 text-sm font-bold tracking-widest text-[#1C1917] backdrop-blur-md transition-all hover:bg-white">
@@ -196,16 +190,24 @@ function CTA() {
   );
 }
 
-export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
+/* =========================================================
+   HOME PAGE - Fixed with clusters prop
+   ========================================================= */
+
+interface HomePageProps {
+  cities: RuntimeCity[];
+  clusters?: any[]; // Re-added to satisfy the build error from page.tsx
+}
+
+export default function HomePage({ cities, clusters }: HomePageProps) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
 
   return (
     <Shell>
       <section className="relative w-full pb-20 pt-10 sm:pb-32 sm:pt-16">
-        <div className={cx('relative transition-opacity duration-1000', WIDE)}>
+        <div className={cx('relative', WIDE)}>
           <div className="relative overflow-hidden rounded-[50px] ring-1 ring-black/[0.03] bg-white/[0.15] shadow-[0_80px_180px_-20px_rgba(0,0,0,0.12)]">
-            {/* Layered Backdrop */}
             <div className="pointer-events-none absolute inset-0 bg-white/40" />
             <div className="pointer-events-none absolute inset-0 opacity-[0.35] mix-blend-overlay"><RoyalPortalBackdrop /></div>
             <div className="pointer-events-none absolute inset-0 opacity-[0.15]"><HeroGoldCrown /></div>
@@ -218,7 +220,7 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                     Private intelligence for the world&apos;s <GoldWord>most valuable assets</GoldWord>
                   </h1>
                   <p className="mt-8 max-w-[65ch] text-pretty text-lg leading-relaxed text-[#57534E] font-light sm:text-xl">
-                    Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value <span className="text-[#1C1917] font-medium">signal over noise</span>. Built to model value, liquidity, and risk without theatre.
+                    Vantera is a quiet intelligence surface for buyers, sellers, and advisors who value <span className="text-[#1C1917] font-medium">signal over noise</span>.
                   </p>
 
                   <div className="mt-12 space-y-6">
@@ -256,11 +258,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                           <span className="text-[9px] font-bold tracking-[0.1em] text-[#78716C]">LIVE UPDATE</span>
                         </div>
                       </div>
-
                       <div className="mt-10">
                         <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
                       </div>
-
                       <div className="mt-8 rounded-3xl bg-[#1C1917] p-8 text-white">
                         <div className="text-[9px] font-bold tracking-[0.4em] text-[#E6C980] uppercase">The Vantera Rule</div>
                         <div className="mt-4 text-lg font-light leading-relaxed italic">
@@ -276,7 +276,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
       </section>
 
-      {/* TRUST - Subtle Integration */}
       <div className={cx('relative py-10 opacity-60 grayscale transition-all hover:opacity-100 hover:grayscale-0', NARROW)}>
         <TrustMarquee brands={[
             { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
@@ -286,14 +285,14 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
             { name: 'BARNES', domain: 'barnes-international.com' },
             { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-            { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-            { name: 'Compass', domain: 'compass.com', invert: false },
-            { name: 'CBRE', domain: 'cbre.com', invert: false },
-            { name: 'JLL', domain: 'jll.com', invert: false },
+            { name: 'Douglas Elliman', domain: 'elliman.com' },
+            { name: 'Compass', domain: 'compass.com' },
+            { name: 'CBRE', domain: 'cbre.com' },
+            { name: 'JLL', domain: 'jll.com' },
             { name: 'RE/MAX', domain: 'remax.com' },
             { name: 'BHHS', domain: 'bhhs.com' },
-            { name: 'Corcoran', domain: 'corcoran.com', invert: false },
-            { name: 'Century 21', domain: 'century21.com', invert: false },
+            { name: 'Corcoran', domain: 'corcoran.com' },
+            { name: 'Century 21', domain: 'century21.com' },
         ]} />
       </div>
 
@@ -313,9 +312,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             <div className="relative mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl">
                 <h3 className="text-3xl font-light tracking-tight text-[#1C1917]">Browse coverage with signal</h3>
-                <p className="mt-3 text-[#78716C] font-light">Fast scan for where value is forming, where risk is hiding, and where liquidity is strongest.</p>
+                <p className="mt-3 text-[#78716C] font-light">Fast scan for where value is forming and where risk is hiding.</p>
               </div>
-              <div className="h-16 w-16 relative grayscale hover:grayscale-0 transition-all">
+              <div className="h-16 w-16 relative">
                 <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-contain" />
               </div>
             </div>
