@@ -110,16 +110,7 @@ function FeaturedHeader() {
 function FeaturedBackdrop() {
   return (
     <div className="pointer-events-none absolute inset-0">
-      {/* soft paper aura (white-first) */}
-      <div className="absolute -left-48 -top-48 h-[520px] w-[520px] rounded-full bg-[rgba(231,201,130,0.14)] blur-3xl" />
-      <div className="absolute -right-44 -top-52 h-[520px] w-[520px] rounded-full bg-[rgba(139,92,246,0.06)] blur-3xl" />
-      <div className="absolute -right-56 top-10 h-[520px] w-[520px] rounded-full bg-[rgba(16,185,129,0.05)] blur-3xl" />
-      {/* gentle top hairline */}
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-70" />
-      {/* micro-grid texture (very subtle) */}
-      <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
-      {/* header spotlight */}
-      <div className="absolute inset-0 bg-[radial-gradient(1100px_340px_at_50%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+      ...
     </div>
   );
 }
