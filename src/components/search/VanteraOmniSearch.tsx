@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Command, MapPin, Search, Sparkles, X } from 'lucide-react';
 
@@ -368,8 +368,9 @@ function buildInterpretationLine(parse: ParseResult) {
   if (parse.bedroomsMin) bits.push(`${parse.bedroomsMin}+ beds`);
   if (parse.budgetMax) bits.push(`under ${formatMoney(parse.budgetMax)}`);
   if (parse.needs.length) bits.push(parse.needs.map((n) => n.replace('_', ' ')).join(', '));
+  if (parse.keywordQuery && parse.keywordQuery.length >= 2) bits.push(`keywords: ${parse.keywordQuery}`);
 
-  return bits.length ? bits.join(' · ') : 'City, lifestyle, budget, keywords (typos ok).';
+  return bits.length ? bits.join(' · ') : 'City, lifestyle, budget, keywords. Typos ok.';
 }
 
 function cityMatchText(c: OmniCity) {
@@ -426,8 +427,7 @@ function buildPlaceHits(args: {
     if (placeScore >= 130) reasons.push('Direct match');
     else if (placeScore >= 95) reasons.push('Strong match');
     else reasons.push('Relevant');
-
-    if (pr > 0) reasons.push('Featured market');
+    if (pr > 0) reasons.push('Featured');
 
     hits.push({
       kind: 'city',
@@ -454,7 +454,6 @@ function buildPlaceHits(args: {
     if (placeScore >= 130) reasons.push('Direct match');
     else if (placeScore >= 95) reasons.push('Strong match');
     else reasons.push('Relevant');
-
     reasons.push(`${r.citySlugs.length} cities`);
 
     hits.push({
@@ -474,7 +473,7 @@ function buildPlaceHits(args: {
 }
 
 /* =========================================================
-   UI helpers (white editorial)
+   UI helpers (royal white)
    ========================================================= */
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -482,7 +481,7 @@ function Chip({ children }: { children: React.ReactNode }) {
     <span
       className={cx(
         'inline-flex items-center rounded-full px-2.5 py-1 text-[11px] leading-none',
-        'bg-white/80',
+        'bg-white/85',
         'ring-1 ring-inset ring-[color:var(--hairline)]',
         'text-[color:var(--ink-2)]',
       )}
@@ -493,7 +492,7 @@ function Chip({ children }: { children: React.ReactNode }) {
 }
 
 function iconFor(h: PlaceHit) {
-  const cls = 'h-4 w-4 text-black/70';
+  const cls = 'h-4 w-4 text-[color:var(--ink-2)]';
   if (h.icon === 'search') return <Search className={cls} />;
   if (h.icon === 'pin') return <MapPin className={cls} />;
   return <Sparkles className={cls} />;
@@ -503,7 +502,7 @@ export default function VanteraOmniSearch({
   cities,
   clusters,
   id = 'vantera-omni',
-  placeholder = 'Search: city, lifestyle, budget, keywords (typos ok)',
+  placeholder = 'Search cities, lifestyle and keywords (typos ok)',
   className,
   autoFocus = false,
   limit = 8,
@@ -551,24 +550,33 @@ export default function VanteraOmniSearch({
     };
   }, [q]);
 
+  const interpretationLine = useMemo(() => buildInterpretationLine(parse), [parse]);
+
   const hits = useMemo(() => {
     if (!open) return [];
+
+    // Always show the "Search all listings" option so typos never kill the UX.
+    const searchHit: PlaceHit = {
+      kind: 'search',
+      slug: 'search',
+      title: q.trim() ? 'Search all listings' : 'Start with global search',
+      subtitle: parse.keywordQuery ? `Keywords: “${parse.keywordQuery}”` : 'Keywords + semantic matching',
+      score: 1000,
+      reasons: [
+        parse.placeQuery ? `Place: ${parse.placeQuery}` : 'Any market',
+        parse.budgetMax ? `Max ${formatMoney(parse.budgetMax)}` : 'No max',
+        parse.bedroomsMin ? `${parse.bedroomsMin}+ beds` : 'Any beds',
+      ],
+      href: q.trim() ? buildSearchHref(parse) : '/search',
+      icon: 'search',
+    };
 
     if (!q.trim()) {
       const topCities = [...cities].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 6);
       const topClusters = [...clusters].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0)).slice(0, 2);
 
       const curated: PlaceHit[] = [
-        {
-          kind: 'search',
-          slug: 'search',
-          title: 'Search all listings',
-          subtitle: 'Keywords + lifestyle + budget (typos ok)',
-          score: 999,
-          reasons: ['Global'],
-          href: '/search',
-          icon: 'search',
-        },
+        searchHit,
         ...topCities.map((c, i) => ({
           kind: 'city' as const,
           slug: c.slug,
@@ -596,25 +604,8 @@ export default function VanteraOmniSearch({
 
     const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
 
-    const searchHit: PlaceHit = {
-      kind: 'search',
-      slug: 'search',
-      title: 'Search all listings',
-      subtitle: parse.keywordQuery ? `Keywords: “${parse.keywordQuery}”` : 'Keywords + semantic matching',
-      score: 1000,
-      reasons: [
-        parse.placeQuery ? `Place: ${parse.placeQuery}` : 'Any market',
-        parse.budgetMax ? `Max ${formatMoney(parse.budgetMax)}` : 'No max',
-        parse.bedroomsMin ? `${parse.bedroomsMin}+ beds` : 'Any beds',
-      ],
-      href: buildSearchHref(parse),
-      icon: 'search',
-    };
-
     return [searchHit, ...placeHits].slice(0, limit + 1);
   }, [open, q, parse, cities, clusters, limit]);
-
-  const interpretationLine = useMemo(() => buildInterpretationLine(parse), [parse]);
 
   function focusAndOpen() {
     inputRef.current?.focus();
@@ -709,29 +700,26 @@ export default function VanteraOmniSearch({
     focusAndOpen();
   }
 
-  const showMetaRow = open;
-
   return (
     <div ref={rootRef} className={cx('relative w-full', className)}>
       {/* INPUT (white, calm, smaller) */}
       <div
         className={cx(
           'relative w-full overflow-hidden rounded-full',
-          'bg-white/80',
+          'bg-white/85',
           'ring-1 ring-inset ring-[color:var(--hairline)]',
-          'shadow-[0_24px_70px_rgba(11,12,16,0.10)]',
+          'shadow-[0_26px_80px_rgba(11,12,16,0.10)]',
         )}
       >
-        {/* subtle gold hairline */}
+        {/* Subtle crown hairline */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-60" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_180px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(980px_200px_at_18%_0%,rgba(231,201,130,0.10),transparent_60%)]" />
         </div>
 
         <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5">
-          {/* left mark */}
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)]">
-            <Sparkles className="h-4 w-4 text-black/70" />
+          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/80 ring-1 ring-inset ring-[color:var(--hairline)]">
+            <Sparkles className="h-4 w-4 text-[color:var(--ink-2)]" />
           </div>
 
           <div className="min-w-0 flex-1">
@@ -749,24 +737,23 @@ export default function VanteraOmniSearch({
               className={cx(
                 'w-full bg-transparent outline-none',
                 'text-[15px] text-[color:var(--ink)]',
-                'placeholder:text-black/40',
+                'placeholder:text-[color:rgba(11,12,16,0.38)]',
               )}
               autoComplete="off"
               spellCheck={false}
             />
 
-            {showMetaRow ? (
+            {open ? (
               <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
                 <span className="truncate">{interpretationLine}</span>
               </div>
             ) : null}
           </div>
 
-          {/* right controls */}
           <div className="hidden items-center gap-2 sm:flex">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
               <Command className="h-3.5 w-3.5 opacity-70" />
-              <span className="font-mono text-black/70">/</span>
+              <span className="font-mono text-[color:var(--ink-2)]">/</span>
             </div>
 
             {q ? (
@@ -775,7 +762,7 @@ export default function VanteraOmniSearch({
                 onClick={clear}
                 className={cx(
                   'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
-                  'bg-white/70 hover:bg-white/90',
+                  'bg-white/80 hover:bg-white',
                   'ring-1 ring-inset ring-[color:var(--hairline)]',
                   'text-[color:var(--ink-2)]',
                 )}
@@ -788,7 +775,7 @@ export default function VanteraOmniSearch({
         </div>
       </div>
 
-      {/* DROPDOWN (white, editorial list) */}
+      {/* DROPDOWN */}
       <div
         className={cx(
           'absolute left-0 right-0 z-50 mt-3',
@@ -801,14 +788,14 @@ export default function VanteraOmniSearch({
             'relative overflow-hidden rounded-[24px]',
             'bg-[color:var(--paper)]',
             'ring-1 ring-inset ring-[color:var(--hairline)]',
-            'shadow-[0_40px_140px_rgba(11,12,16,0.16)]',
+            'shadow-[0_44px_160px_rgba(11,12,16,0.16)]',
           )}
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_320px_at_50%_0%,rgba(231,201,130,0.14),transparent_60%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_320px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
 
-          <div className="relative flex items-start justify-between gap-4 border-b border-black/10 px-5 py-4">
+          <div className="relative flex items-start justify-between gap-4 border-b border-[color:var(--hairline)] px-5 py-4">
             <div className="min-w-0">
-              <div className="text-[11px] font-semibold tracking-[0.26em] uppercase text-black/55">
+              <div className="text-[11px] font-semibold tracking-[0.26em] uppercase text-[color:var(--ink-3)]">
                 Search
               </div>
 
@@ -826,9 +813,9 @@ export default function VanteraOmniSearch({
               onClick={() => setOpen(false)}
               className={cx(
                 'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                'bg-white/75 hover:bg-white/95',
+                'bg-white/85 hover:bg-white',
                 'ring-1 ring-inset ring-[color:var(--hairline)]',
-                'text-black/70',
+                'text-[color:var(--ink-2)]',
               )}
             >
               <X className="h-4 w-4 opacity-70" />
@@ -836,66 +823,70 @@ export default function VanteraOmniSearch({
             </button>
           </div>
 
-          <div className="relative grid gap-1.5 p-2.5 sm:p-3">
-            {hits.length === 0 ? (
-              <div className="rounded-2xl bg-white/70 px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-black/70">
-                No matches yet. Try a city, region or keywords like “sea view modern villa”.
-              </div>
-            ) : (
-              hits.map((h, idx) => (
-                <Link
-                  key={`${h.kind}:${h.slug}:${h.href}`}
-                  href={h.href}
-                  prefetch
-                  onMouseEnter={() => setActive(idx)}
-                  onClick={() => setOpen(false)}
-                  className={cx(
-                    'group relative rounded-2xl px-4 py-3 transition',
-                    'bg-white/70 hover:bg-white/92',
-                    'ring-1 ring-inset ring-[color:var(--hairline)]',
-                    idx === active && 'bg-white/95 ring-[rgba(11,12,16,0.16)]',
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/70 ring-1 ring-inset ring-[color:var(--hairline)]">
-                          {iconFor(h)}
-                        </span>
-
+          <div className="relative p-2.5 sm:p-3">
+            <div className="max-h-[420px] overflow-auto p-0.5">
+              {hits.length === 0 ? (
+                <div className="rounded-2xl bg-white/80 px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
+                  No matches yet. Try a city, region or keywords like "sea view modern villa".
+                </div>
+              ) : (
+                <div className="grid gap-1.5">
+                  {hits.map((h, idx) => (
+                    <Link
+                      key={`${h.kind}:${h.slug}:${h.href}`}
+                      href={h.href}
+                      prefetch
+                      onMouseEnter={() => setActive(idx)}
+                      onClick={() => setOpen(false)}
+                      className={cx(
+                        'group relative rounded-2xl px-4 py-3 transition',
+                        'bg-white/80 hover:bg-white',
+                        'ring-1 ring-inset ring-[color:var(--hairline)]',
+                        idx === active && 'bg-white ring-[color:var(--hairline-2)]',
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-[13px] font-semibold text-black/85">
-                            {h.title}
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/85 ring-1 ring-inset ring-[color:var(--hairline)]">
+                              {iconFor(h)}
+                            </span>
+
+                            <div className="min-w-0">
+                              <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
+                                {h.title}
+                              </div>
+                              <div className="truncate text-[11px] text-[color:var(--ink-3)]">
+                                {h.subtitle}
+                              </div>
+                            </div>
                           </div>
-                          <div className="truncate text-[11px] text-black/55">
-                            {h.subtitle}
+
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {h.reasons.slice(0, 3).map((r) => (
+                              <span
+                                key={r}
+                                className="inline-flex items-center rounded-full bg-white/85 px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
+                              >
+                                {r}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      </div>
 
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {h.reasons.slice(0, 3).map((r) => (
-                          <span
-                            key={r}
-                            className="inline-flex items-center rounded-full bg-white/80 px-2.5 py-1 text-[11px] text-black/65 ring-1 ring-inset ring-[color:var(--hairline)]"
-                          >
-                            {r}
-                          </span>
-                        ))}
+                        <span className="inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
+                          Open <ArrowRight className="h-4 w-4 opacity-70" />
+                        </span>
                       </div>
-                    </div>
-
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-[11px] text-black/70 ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[rgba(11,12,16,0.16)] transition">
-                      Open <ArrowRight className="h-4 w-4 opacity-70" />
-                    </span>
-                  </div>
-                </Link>
-              ))
-            )}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="relative border-t border-black/10 px-5 py-4 text-[11px] text-black/50">
-            Tip: press <span className="font-mono text-black/70">/</span> anywhere to focus. Typos are fine.
+          <div className="relative border-t border-[color:var(--hairline)] px-5 py-4 text-[11px] text-[color:var(--ink-3)]">
+            Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. Typos are fine.
           </div>
         </div>
       </div>
