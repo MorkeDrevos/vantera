@@ -64,14 +64,17 @@ function normalizeNeeds(raw: string) {
     .slice(0, 12);
 }
 
-function buildWhere(sp: SearchParams) {
-  const q = firstString(sp.q).trim();
+function buildWhere(sp: SearchParams, opts?: { ignoreQ?: boolean; ignoreNeeds?: boolean }) {
+  const ignoreQ = !!opts?.ignoreQ;
+  const ignoreNeeds = !!opts?.ignoreNeeds;
+
+  const q = ignoreQ ? '' : firstString(sp.q).trim();
   const place = firstString(sp.place).trim(); // user text (city, region, country)
   const citySlug = firstString(sp.city).trim(); // preferred canonical selector
   const type = firstString(sp.type).trim();
   const beds = toInt(firstString(sp.beds), undefined);
   const max = toInt(firstString(sp.max), undefined);
-  const needs = normalizeNeeds(firstString(sp.needs));
+  const needs = ignoreNeeds ? [] : normalizeNeeds(firstString(sp.needs));
 
   const AND: any[] = [];
   const OR: any[] = [];
@@ -84,7 +87,7 @@ function buildWhere(sp: SearchParams) {
     OR.push({ propertyType: { contains: q, mode: 'insensitive' } });
   }
 
-  // Needs: production-safe text matching against real listing copy until you add structured features.
+  // Needs - production-safe text matching against real listing copy until structured features land.
   if (needs.length) {
     for (const n of needs) {
       const needle = n.replace(/_/g, ' ').trim();
@@ -129,9 +132,11 @@ function buildWhere(sp: SearchParams) {
   }
 
   // Always enforce public live inventory
+  // Also enforce "customer-ready cards" - only show listings with a cover image.
   const where: any = {
     status: 'LIVE',
     visibility: 'PUBLIC',
+    coverMedia: { isNot: null },
   };
 
   if (OR.length) where.OR = OR;
@@ -156,23 +161,43 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const skip = (page - 1) * take;
 
   const sort = (firstString(sp.sort) as SortKey) || 'price_high';
-
-  const where = buildWhere(sp);
   const orderBy = buildOrderBy(sort);
 
-  const [total, rows] = await Promise.all([
-    prisma.listing.count({ where }),
-    prisma.listing.findMany({
-      where,
-      orderBy,
-      skip,
-      take,
-      include: {
-        city: true,
-        coverMedia: true,
-      },
-    }),
-  ]);
+  // Pass 1 - strict (as requested by user)
+  const whereStrict = buildWhere(sp);
+
+  let total = await prisma.listing.count({ where: whereStrict });
+
+  // Pass 2 - if place is set and strict yields 0, drop q + needs so "miami" does not accidentally filter out Miami inventory
+  // This avoids "0 results" when the user typed the city name into q.
+  let whereEffective = whereStrict;
+
+  const place = firstString(sp.place).trim();
+  const citySlug = firstString(sp.city).trim();
+  const q = firstString(sp.q).trim();
+
+  if (total === 0 && (citySlug || place) && q) {
+    const whereRelaxed = buildWhere(sp, { ignoreQ: true, ignoreNeeds: true });
+    const relaxedTotal = await prisma.listing.count({ where: whereRelaxed });
+    if (relaxedTotal > 0) {
+      whereEffective = whereRelaxed;
+      total = relaxedTotal;
+    }
+  }
+
+  const rows =
+    total > 0
+      ? await prisma.listing.findMany({
+          where: whereEffective,
+          orderBy,
+          skip,
+          take,
+          include: {
+            city: true,
+            coverMedia: true,
+          },
+        })
+      : [];
 
   const listings: ListingCard[] = rows.map((l) => ({
     id: l.id,
