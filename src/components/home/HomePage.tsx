@@ -302,10 +302,10 @@ function FullBleedHero({
                       SEARCH ATELIER
                     </div>
                     <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                      The fastest path through verified markets
+                      The fastest way to serious property intelligence
                     </div>
                     <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                      Use keywords, a country, or step directly into a city.
+                      Search by intent, location, or move directly into a market.
                     </div>
 
                     <form action="/search" method="get" className="mt-5 space-y-3">
@@ -405,26 +405,26 @@ function FullBleedHero({
                   <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                     <DnaPillar
   eyebrow="TRUTH LAYER"
-  title="What’s verified, and what isn’t"
-  body="Structured facts, cross-checks, and consistency rules. Clear separation between verified data, inferred signals, and unknowns — so you always know what you’re looking at."
+  title="Verified versus assumed"
+body="Clear attribution of what is verified, inferred, or unknown - with structured checks to remove ambiguity."
 />
 
 <DnaPillar
   eyebrow="MARKET INTELLIGENCE"
-  title="Understand price, liquidity, and risk"
-  body="City-level signals that explain how markets behave, not just what’s listed. Built market by market, designed to support real decisions."
+  title="Markets, not listings"
+body="Signals that explain pricing dynamics, liquidity and risk at a city level."
 />
 
 <DnaPillar
   eyebrow="SIGNAL OVER NOISE"
-  title="Curated, not flooded"
-  body="A controlled catalogue with editorial restraint. No duplicated feeds, no algorithmic clutter, no endless scroll — only listings that meet integrity thresholds."
+  title="Designed to reduce noise"
+body="Editorial control replaces volume. Fewer listings, higher signal density."
 />
 
 <DnaPillar
   eyebrow="PRIVATE NETWORK"
-  title="Discreet by default"
-  body="Verified sellers, private submissions, and controlled visibility. Built for serious buyers, advisors, and long-term decision-makers — not mass traffic."
+  title="Private by architecture"
+body="Controlled access, verified submissions and discretion as a system default."
 />
                   </div>
 
