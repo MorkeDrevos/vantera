@@ -31,6 +31,16 @@ body {
   --gold-1: #f7edcf;
   --gold-2: #e6c980;
   --gold-3: #b7863a;
+
+  /* Premium geometry + rhythm */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+
+  --shadow-1: 0 1px 0 rgba(11, 12, 16, 0.04), 0 12px 34px rgba(11, 12, 16, 0.08);
+  --shadow-2: 0 1px 0 rgba(11, 12, 16, 0.06), 0 22px 72px rgba(11, 12, 16, 0.12);
+
+  --ring: rgba(183, 134, 58, 0.32);
 }
 
 body {
@@ -47,6 +57,32 @@ body {
 
 ::selection {
   background: rgba(11, 12, 16, 0.10);
+}
+
+/* Better focus visibility (premium but accessible) */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+  border-radius: 10px;
+}
+
+/* Luxury scrollbar (subtle, not noisy) */
+@media (hover: hover) {
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-track {
+    background: rgba(11, 12, 16, 0.04);
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(11, 12, 16, 0.16);
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.60);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(11, 12, 16, 0.22);
+  }
 }
 
 /* Respect reduced motion */
