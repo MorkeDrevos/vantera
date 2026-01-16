@@ -33,7 +33,7 @@ function asMode(v: unknown): Mode {
   return v === 'rent' || v === 'sell' ? v : 'buy';
 }
 
-type ListingCard = {
+export type ListingCard = {
   id: string;
   slug: string;
 
@@ -83,6 +83,8 @@ function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
+const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+
 function firstString(v: string | string[] | undefined) {
   if (!v) return '';
   return Array.isArray(v) ? v[0] ?? '' : v;
@@ -102,7 +104,8 @@ function titleCase(s: string) {
 }
 
 function shortMoney(currency: string, n: number) {
-  const sym = currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '';
+  const cur = (currency || 'EUR').toUpperCase();
+  const sym = cur === 'EUR' ? '€' : cur === 'USD' ? '$' : '';
   if (n >= 1_000_000) return `${sym}${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}m`;
   if (n >= 1_000) return `${sym}${Math.round(n / 1_000)}k`;
   return `${sym}${n}`;
@@ -118,31 +121,6 @@ function buildUrl(next: Record<string, string | number | undefined>) {
   }
   const qs = p.toString();
   return qs ? `/search?${qs}` : '/search';
-}
-
-function GoldHairline() {
-  return (
-    <div className="pointer-events-none absolute inset-x-0 top-0">
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
-    </div>
-  );
-}
-
-function TagPill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-      {children}
-    </span>
-  );
-}
-
-function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-      <span className="text-zinc-500">{icon}</span>
-      <span>{label}</span>
-    </span>
-  );
 }
 
 function useClickOutside(
@@ -220,6 +198,132 @@ async function postLead(payload: {
     throw new Error(msg);
   }
 }
+
+/* =========================================================
+   Atoms (white editorial)
+   ========================================================= */
+
+function Hairline({ className }: { className?: string }) {
+  return <div className={cx('h-px w-full bg-[color:var(--hairline)]', className)} />;
+}
+
+function GoldHairline() {
+  return (
+    <div className="pointer-events-none absolute inset-x-0 top-0">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
+      {children}
+    </span>
+  );
+}
+
+function TagPill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]">
+      {children}
+    </span>
+  );
+}
+
+function IconPill({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]">
+      <span className="text-[color:var(--ink-3)]">{icon}</span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function Field({
+  icon,
+  value,
+  onChange,
+  placeholder,
+  label,
+}: {
+  icon: React.ReactNode;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  label: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">{label}</div>
+      <div className="mt-2 flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+        <span className="text-[color:var(--ink-3)]">{icon}</span>
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-[13px] text-[color:var(--ink)] outline-none placeholder:text-[color:var(--ink-3)]"
+        />
+      </div>
+    </div>
+  );
+}
+
+function PrimaryButton({
+  children,
+  onClick,
+  className,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={cx(
+        'inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold transition',
+        'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+        disabled && 'opacity-70 cursor-not-allowed',
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SecondaryButton({
+  children,
+  onClick,
+  className,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx(
+        'inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold transition',
+        'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* =========================================================
+   Coverage panel (keep your logic, polish visuals)
+   ========================================================= */
 
 function AvailabilityPanel({
   place,
@@ -301,199 +405,293 @@ function AvailabilityPanel({
   }
 
   return (
-    <div className="rounded-[28px] bg-white p-6 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="min-w-0">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-            <ShieldCheck className="h-4 w-4 text-zinc-500" />
-            coverage status
-          </div>
-
-          <div className="mt-3 text-[20px] font-semibold text-zinc-900">
-            {placeTitle} inventory is not available yet
-          </div>
-
-          <div className="mt-2 max-w-2xl text-[13px] leading-relaxed text-zinc-600">
-            Vantera only shows verified live listings. When a market is not live, we capture your request and notify you
-            when coverage opens.
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {brief.slice(0, 6).map((b) => (
-              <TagPill key={b}>{b}</TagPill>
-            ))}
-          </div>
+    <div className="border border-[color:var(--hairline)] bg-white shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
+      <div className="relative p-8 sm:p-10">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_25%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_85%_10%,rgba(139,92,246,0.05),transparent_62%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
         </div>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-        >
-          Browse markets
-          <ArrowRight className="h-4 w-4 text-zinc-500" />
-        </Link>
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-7">
-          <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-            <div className="text-[11px] font-semibold text-zinc-700">Request access</div>
-            <div className="mt-1 text-[12px] text-zinc-600">
-              Leave your email and we’ll contact you when this market goes live.
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
+              <ShieldCheck className="h-4 w-4 text-[color:var(--ink-3)]" />
+              coverage status
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-500">Name</label>
-                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Optional"
-                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-500">Email</label>
-                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                  <Mail className="h-4 w-4 text-zinc-500" />
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@domain.com"
-                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                  />
-                </div>
-              </div>
+            <div className="mt-4 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+              {placeTitle} inventory is not live yet
             </div>
 
-            {/* honeypot */}
-            <input
-              value={hp}
-              onChange={(e) => setHp(e.target.value)}
-              className="hidden"
-              tabIndex={-1}
-              autoComplete="off"
-              aria-hidden="true"
-            />
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-500">Timeline</label>
-                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                  <select
-                    value={timeline}
-                    onChange={(e) => setTimeline(e.target.value as any)}
-                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none"
-                  >
-                    <option value="now">Immediately</option>
-                    <option value="30d">Within 30 days</option>
-                    <option value="90d">Within 90 days</option>
-                    <option value="later">Later</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-zinc-500">Notes</label>
-                <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                  <input
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Optional details"
-                    className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                  />
-                </div>
-              </div>
+            <div className="mt-3 max-w-2xl text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Vantera only shows verified live listings. When a market is not live, we capture your request and notify you
+              when coverage opens.
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={submit}
-                disabled={lead.status === 'sending' || lead.status === 'sent'}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[12px] transition',
-                  lead.status === 'sent'
-                    ? 'bg-white text-zinc-900 ring-1 ring-inset ring-zinc-200'
-                    : 'bg-zinc-900 text-white hover:bg-zinc-800',
-                  lead.status === 'sending' && 'opacity-70 cursor-wait',
-                )}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {brief.slice(0, 6).map((b) => (
+                <TagPill key={b}>{b}</TagPill>
+              ))}
+            </div>
+          </div>
+
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+          >
+            Browse markets
+            <ArrowRight className="h-4 w-4 text-[color:var(--ink-3)]" />
+          </Link>
+        </div>
+
+        <div className="relative mt-8 grid gap-5 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <div className="border border-[color:var(--hairline)] bg-white p-5">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">REQUEST ACCESS</div>
+              <div className="mt-2 text-sm text-[color:var(--ink-2)]">
+                Leave your email and we’ll contact you when this market goes live.
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">NAME</div>
+                  <div className="mt-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+                    <input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Optional"
+                      className="w-full bg-transparent text-[13px] text-[color:var(--ink)] outline-none placeholder:text-[color:var(--ink-3)]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">EMAIL</div>
+                  <div className="mt-2 flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+                    <Mail className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    <input
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@domain.com"
+                      className="w-full bg-transparent text-[13px] text-[color:var(--ink)] outline-none placeholder:text-[color:var(--ink-3)]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* honeypot */}
+              <input
+                value={hp}
+                onChange={(e) => setHp(e.target.value)}
+                className="hidden"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+              />
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">TIMELINE</div>
+                  <div className="mt-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+                    <select
+                      value={timeline}
+                      onChange={(e) => setTimeline(e.target.value as any)}
+                      className="w-full bg-transparent text-[13px] text-[color:var(--ink)] outline-none"
+                    >
+                      <option value="now">Immediately</option>
+                      <option value="30d">Within 30 days</option>
+                      <option value="90d">Within 90 days</option>
+                      <option value="later">Later</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">NOTES</div>
+                  <div className="mt-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+                    <input
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder="Optional details"
+                      className="w-full bg-transparent text-[13px] text-[color:var(--ink)] outline-none placeholder:text-[color:var(--ink-3)]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                <PrimaryButton onClick={submit} disabled={lead.status === 'sending' || lead.status === 'sent'}>
+                  {lead.status === 'sent' ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      Request received
+                    </>
+                  ) : lead.status === 'sending' ? (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Sending
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRight className="h-4 w-4" />
+                      Submit request
+                    </>
+                  )}
+                </PrimaryButton>
+
+                {lead.status === 'error' ? (
+                  <span className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-4 py-3 text-sm text-[color:var(--ink-2)]">
+                    <AlertTriangle className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    {lead.message}
+                  </span>
+                ) : null}
+              </div>
+
+              <div className="mt-4 text-[12px] text-[color:var(--ink-3)]">
+                We only show verified live inventory. This request helps prioritise coverage.
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5">
+            <div className="border border-[color:var(--hairline)] bg-white p-5">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">
+                WHAT HAPPENS NEXT
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                {[
+                  {
+                    k: 'VERIFICATION',
+                    v: 'We onboard real inventory and verify media and listing integrity.',
+                  },
+                  {
+                    k: 'NOTIFY',
+                    v: 'When the market is live, you’ll receive access and the best matching listings.',
+                  },
+                  {
+                    k: 'NO FAKE RESULTS',
+                    v: 'If a market is not live, we show availability and capture the request.',
+                  },
+                ].map((x) => (
+                  <div key={x.k} className="border border-[color:var(--hairline)] bg-white p-4">
+                    <div className="text-[10px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">{x.k}</div>
+                    <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{x.v}</div>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/contact"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
               >
-                {lead.status === 'sent' ? (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Request received
-                  </>
-                ) : lead.status === 'sending' ? (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    Sending
-                  </>
-                ) : (
-                  <>
-                    <ArrowRight className="h-4 w-4" />
-                    Submit request
-                  </>
-                )}
-              </button>
-
-              {lead.status === 'error' ? (
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200">
-                  <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  {lead.message}
-                </span>
-              ) : null}
+                Contact Vantera
+                <ArrowRight className="h-4 w-4 text-[color:var(--ink-3)]" />
+              </Link>
             </div>
-
-            <div className="mt-3 text-[11px] text-zinc-500">
-              We only show verified live inventory. This request helps prioritise coverage.
-            </div>
-          </div>
-        </div>
-
-        <div className="lg:col-span-5">
-          <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-            <div className="text-[11px] font-semibold text-zinc-700">What happens next</div>
-
-            <div className="mt-3 grid gap-2">
-              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
-                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">VERIFICATION</div>
-                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
-                  We onboard real inventory and verify media and listing integrity.
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
-                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">NOTIFY</div>
-                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
-                  When the market is live, you’ll receive access and the best matching listings.
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
-                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">NO FAKE RESULTS</div>
-                <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
-                  If a market is not live, we show availability and capture the request.
-                </div>
-              </div>
-            </div>
-
-            <Link
-              href="/contact"
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-            >
-              Contact Vantera
-              <ArrowRight className="h-4 w-4 text-zinc-500" />
-            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   Listing card (catalogue grade)
+   ========================================================= */
+
+function ListingCardCatalogue({
+  l,
+  hero,
+}: {
+  l: ListingCard;
+  hero?: boolean;
+}) {
+  const href = `/listing/${l.slug}`;
+
+  const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
+  const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
+
+  if (!l.cover?.url) return null;
+
+  return (
+    <article
+      className={cx(
+        'group border border-[color:var(--hairline)] bg-white',
+        'shadow-[0_26px_80px_rgba(11,12,16,0.05)] hover:shadow-[0_36px_110px_rgba(11,12,16,0.08)] transition',
+      )}
+    >
+      <div className={cx('relative w-full overflow-hidden bg-[color:var(--paper-2)]', hero ? 'aspect-[16/10]' : 'aspect-[4/3]')}>
+        <Image
+          src={l.cover.url}
+          alt={l.cover.alt ?? l.title}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+          sizes={hero ? '(max-width: 1024px) 100vw, 66vw' : '(max-width: 1024px) 100vw, 33vw'}
+          priority={false}
+        />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,10,12,0.14)] to-transparent" />
+
+        <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.00),rgba(0,0,0,0.08))]" />
+        </div>
+      </div>
+
+      <div className={cx('p-6', hero && 'sm:p-7')}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">{locLine}</div>
+            <div className={cx('mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]', hero && 'sm:text-[22px]')}>
+              {l.title}
+            </div>
+            {l.headline ? (
+              <div className="mt-2 line-clamp-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{l.headline}</div>
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-10 w-10 items-center justify-center border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]"
+            aria-label="save"
+            title="save"
+          >
+            <Heart className="h-4 w-4 text-[color:var(--ink-3)]" />
+          </button>
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <TagPill>{priceLabel}</TagPill>
+          {l.bedrooms ? (
+            <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.bedrooms} beds`} />
+          ) : (
+            <IconPill icon={<Home className="h-4 w-4" />} label="residence" />
+          )}
+          {l.builtM2 ? <TagPill>{l.builtM2} m²</TagPill> : null}
+          {l.propertyType ? <TagPill>{l.propertyType}</TagPill> : null}
+        </div>
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <Link
+            href={href}
+            className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+          >
+            View
+            <ArrowRight className="h-4 w-4 text-[color:var(--ink-3)]" />
+          </Link>
+
+          <Link href={`/city/${l.city.slug}`} className="text-[12px] text-[color:var(--ink-3)] hover:text-[color:var(--ink)]">
+            {l.city.name}
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/* =========================================================
+   Page
+   ========================================================= */
 
 export default function SearchResultsPageClient({ searchParams, listings, total, page, pageCount, take }: Props) {
   const router = useRouter();
@@ -543,6 +741,15 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
   const sortBtnRef = useRef<HTMLButtonElement | null>(null);
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   useClickOutside([sortBtnRef, sortMenuRef], () => setSortOpen(false), sortOpen);
+
+  // subtle scroll polish for the sticky dock
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const activeNeeds = new Set(needs.map((x) => normalize(x)));
 
@@ -612,314 +819,293 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
   const isCoverageNotLive = showCoverageNotLive(place, total);
 
+  // Feature mix: one hero card (first result) + rest normal
+  const cards = useMemo(() => {
+    const base = listings.filter((l) => !!l.cover?.url);
+    if (base.length <= 3) return base.map((l, idx) => ({ l, hero: idx === 0 }));
+    return base.map((l, idx) => ({ l, hero: idx === 0 || idx === 3 }));
+  }, [listings]);
+
   return (
-    <div className="relative min-h-screen bg-white">
-      {/* Top rail */}
-      <div className="sticky top-0 z-30 bg-white/88 backdrop-blur">
-        <div className="relative">
-          <GoldHairline />
-          <div className="mx-auto max-w-6xl px-4 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 text-[12px] text-zinc-500">
-                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200">
-                    <Search className="h-4 w-4" />
-                  </span>
-                  <span>Search</span>
+    <div className="relative min-h-screen bg-white text-[color:var(--ink)]">
+      {/* Quiet paper texture */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
+        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
+      </div>
+
+      {/* Atelier header */}
+      <section
+        className={cx(
+          'relative overflow-hidden',
+          'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
+        )}
+      >
+        <div className="relative border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-0 bg-[radial-gradient(1400px_520px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(1400px_520px_at_85%_10%,rgba(139,92,246,0.05),transparent_66%)]" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(185,133,51,0.55)] to-transparent opacity-70" />
+          </div>
+
+          <div className={cx('relative py-12 sm:py-14', WIDE)}>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-[980px]">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Chip>SEARCH ATELIER</Chip>
+                  <Chip>€2M+ ONLY</Chip>
+                  <Chip>VERIFIED LIVE INVENTORY</Chip>
                 </div>
 
-                <div className="mt-1 text-[20px] font-semibold text-zinc-900">
-                  Results
-                  <span className="ml-2 text-[13px] font-medium text-zinc-500">
-                    {total ? `${total.toLocaleString()} available` : place.trim() ? 'Coverage not live' : 'No matches'}
-                  </span>
-                </div>
+                <h1 className="mt-5 text-balance text-[34px] font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-[44px] lg:text-[54px] lg:leading-[1.02]">
+                  Search and browse the marketplace
+                </h1>
+
+                <p className="mt-4 max-w-[75ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)] sm:text-[15px]">
+                  Designed like a catalogue, powered like a trading terminal. Use filters sparingly, then browse with taste.
+                </p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
                 >
-                  <Filter className="h-4 w-4 text-zinc-500" />
-                  <span>Filters</span>
-                </button>
+                  Markets
+                </Link>
 
-                <div className="relative">
-                  <button
-                    ref={sortBtnRef}
-                    type="button"
-                    onClick={() => setSortOpen((v) => !v)}
-                    className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                  >
-                    <SlidersHorizontal className="h-4 w-4 text-zinc-500" />
-                    <span>{sortLabel}</span>
-                    <ChevronDown className={cx('h-4 w-4 text-zinc-500 transition', sortOpen && 'rotate-180')} />
-                  </button>
-
-                  {sortOpen ? (
-                    <div
-                      ref={sortMenuRef}
-                      className="absolute right-0 mt-2 w-64 overflow-hidden rounded-2xl bg-white shadow-[0_30px_90px_rgba(0,0,0,0.10)] ring-1 ring-inset ring-zinc-200"
-                    >
-                      {[
-                        { k: 'price_high', label: 'price: high to low' },
-                        { k: 'price_low', label: 'price: low to high' },
-                        { k: 'beds', label: 'beds: most first' },
-                        { k: 'sqm', label: 'size: largest first' },
-                        { k: 'newest', label: 'newest' },
-                      ].map((x) => (
-                        <button
-                          key={x.k}
-                          type="button"
-                          onClick={() => {
-                            setSort(x.k as SortKey);
-                            setSortOpen(false);
-                            applyToUrl(1);
-                          }}
-                          className={cx(
-                            'w-full px-4 py-3 text-left text-[12px] transition',
-                            sort === x.k ? 'bg-zinc-50 text-zinc-900' : 'bg-white text-zinc-700 hover:bg-zinc-50',
-                          )}
-                        >
-                          {x.label}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
+                <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm">
+                  <span className="text-[color:var(--ink-2)]">Available</span>
+                  <span className="font-semibold text-[color:var(--ink)]">
+                    {total ? total.toLocaleString() : 0}
+                  </span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                >
-                  <X className="h-4 w-4 text-zinc-500" />
-                  <span>Reset</span>
-                </button>
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="mt-10">
+              <Hairline />
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-2">
               <IconPill icon={<Sparkles className="h-4 w-4" />} label={mode} />
               {summaryBits.length ? summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>) : null}
+              {!summaryBits.length ? <TagPill>Try: “Marbella” + “sea view”</TagPill> : null}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sticky Search Dock */}
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur">
+        <div className={cx('relative', scrolled && 'shadow-[0_18px_60px_rgba(11,12,16,0.06)]')}>
+          <GoldHairline />
+          <div className={cx('py-4', WIDE)}>
+            <div className="grid gap-3 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <Field
+                  icon={<Search className="h-4 w-4" />}
+                  value={q}
+                  onChange={setQ}
+                  placeholder="Describe what you want"
+                  label="QUERY"
+                />
+              </div>
+
+              <div className="lg:col-span-3">
+                <Field
+                  icon={<MapPin className="h-4 w-4" />}
+                  value={place}
+                  onChange={setPlace}
+                  placeholder="City or region"
+                  label="PLACE"
+                />
+              </div>
+
+              <div className="lg:col-span-3">
+                <Field
+                  icon={<Sparkles className="h-4 w-4" />}
+                  value={kw}
+                  onChange={setKw}
+                  placeholder="Optional"
+                  label="KEYWORDS"
+                />
+              </div>
+
+              <div className="lg:col-span-2 flex items-end justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMode(m)}
+                      className={cx(
+                        'px-3 py-2 text-[12px] font-semibold transition border',
+                        mode === m
+                          ? 'border-[rgba(10,10,12,0.22)] bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                          : 'border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]',
+                      )}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setFiltersOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+                  >
+                    <Filter className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    Filters
+                  </button>
+
+                  <div className="relative">
+                    <button
+                      ref={sortBtnRef}
+                      type="button"
+                      onClick={() => setSortOpen((v) => !v)}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]"
+                    >
+                      <SlidersHorizontal className="h-4 w-4 text-[color:var(--ink-3)]" />
+                      <span className="hidden sm:inline">{sortLabel}</span>
+                      <ChevronDown className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')} />
+                    </button>
+
+                    {sortOpen ? (
+                      <div
+                        ref={sortMenuRef}
+                        className="absolute right-0 mt-2 w-64 overflow-hidden border border-[color:var(--hairline)] bg-white shadow-[0_30px_90px_rgba(11,12,16,0.10)]"
+                      >
+                        {[
+                          { k: 'price_high', label: 'price: high to low' },
+                          { k: 'price_low', label: 'price: low to high' },
+                          { k: 'beds', label: 'beds: most first' },
+                          { k: 'sqm', label: 'size: largest first' },
+                          { k: 'newest', label: 'newest' },
+                        ].map((x) => (
+                          <button
+                            key={x.k}
+                            type="button"
+                            onClick={() => {
+                              setSort(x.k as SortKey);
+                              setSortOpen(false);
+                              applyToUrl(1);
+                            }}
+                            className={cx(
+                              'w-full px-4 py-3 text-left text-[12px] transition',
+                              sort === x.k ? 'bg-[color:var(--paper-2)] text-[color:var(--ink)]' : 'bg-white text-[color:var(--ink-2)] hover:bg-[color:var(--paper-2)]',
+                            )}
+                          >
+                            {x.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <PrimaryButton onClick={() => applyToUrl(1)} className="px-5 py-2.5">
+                    Apply
+                    <ArrowRight className="h-4 w-4" />
+                  </PrimaryButton>
+
+                  <button
+                    type="button"
+                    onClick={clearAll}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-[12px] font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
+                    title="Reset"
+                    aria-label="Reset"
+                  >
+                    <X className="h-4 w-4 text-[color:var(--ink-3)]" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {needs.length ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">NEEDS</span>
+                {needs.slice(0, 10).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => toggleNeed(n)}
+                    className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[12px] text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
+                  >
+                    <X className="h-4 w-4 text-[color:var(--ink-3)]" />
+                    {n}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="mx-auto max-w-6xl px-4 pb-16 pt-6">
-        {/* Query bar */}
-        <div className="rounded-[26px] bg-white p-4 ring-1 ring-inset ring-zinc-200 shadow-[0_22px_70px_rgba(0,0,0,0.04)]">
-          <div className="grid gap-3 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <label className="text-[11px] font-semibold text-zinc-500">Query</label>
-              <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                <Search className="h-4 w-4 text-zinc-500" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Describe what you want"
-                  className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                />
-              </div>
+      {/* Results */}
+      <section className={cx('py-10 sm:py-12', WIDE)}>
+        {isCoverageNotLive ? (
+          <AvailabilityPanel place={place} mode={mode} type={type} beds={beds} max={max} needs={needs} kw={kw} q={q} />
+        ) : cards.length === 0 ? (
+          <div className="border border-[color:var(--hairline)] bg-white p-10 shadow-[0_30px_90px_rgba(11,12,16,0.06)]">
+            <div className="text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)]">
+              No matches
             </div>
-
-            <div className="md:col-span-3">
-              <label className="text-[11px] font-semibold text-zinc-500">Place</label>
-              <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                <MapPin className="h-4 w-4 text-zinc-500" />
-                <input
-                  value={place}
-                  onChange={(e) => setPlace(e.target.value)}
-                  placeholder="City or region"
-                  className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                />
-              </div>
-            </div>
-
-            <div className="md:col-span-4">
-              <label className="text-[11px] font-semibold text-zinc-500">Keywords</label>
-              <div className="mt-1 flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-inset ring-zinc-200">
-                <Sparkles className="h-4 w-4 text-zinc-500" />
-                <input
-                  value={kw}
-                  onChange={(e) => setKw(e.target.value)}
-                  placeholder="Optional"
-                  className="w-full bg-transparent text-[13px] text-zinc-900 outline-none placeholder:text-zinc-400"
-                />
-              </div>
+            <div className="mt-2 text-sm text-[color:var(--ink-2)]">Your filters returned no verified live listings.</div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <SecondaryButton
+                onClick={() => {
+                  setMax(undefined);
+                  applyToUrl(1);
+                }}
+              >
+                Remove max
+              </SecondaryButton>
+              <SecondaryButton
+                onClick={() => {
+                  setNeeds([]);
+                  applyToUrl(1);
+                }}
+              >
+                Clear needs
+              </SecondaryButton>
+              <PrimaryButton onClick={clearAll}>Reset</PrimaryButton>
             </div>
           </div>
+        ) : (
+          <>
+            <div className="flex items-end justify-between gap-6">
+              <div>
+                <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">RESULTS</div>
+                <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+                  {total.toLocaleString()} available
+                </div>
+              </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMode(m)}
-                  className={cx(
-                    'rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                    mode === m
-                      ? 'bg-white text-zinc-900 ring-zinc-300'
-                      : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                  )}
-                >
-                  {m}
-                </button>
+              <div className="hidden sm:flex items-center gap-2">
+                <TagPill>{sortLabel}</TagPill>
+                {place.trim() ? <TagPill>{titleCase(place.trim())}</TagPill> : null}
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {cards.map(({ l, hero }, idx) => (
+                <div key={l.id} className={cx(hero && 'md:col-span-2')}>
+                  <ListingCardCatalogue l={l} hero={hero} />
+                </div>
               ))}
             </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setFiltersOpen(true)}
-                className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-800 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-              >
-                Refine
-              </button>
-
-              <button
-                type="button"
-                onClick={() => applyToUrl(1)}
-                className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
-              >
-                Apply
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Results or availability */}
-        <div className="mt-6">
-          {isCoverageNotLive ? (
-            <AvailabilityPanel place={place} mode={mode} type={type} beds={beds} max={max} needs={needs} kw={kw} q={q} />
-          ) : listings.length === 0 ? (
-            <div className="rounded-[28px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
-              <div className="text-[18px] font-semibold text-zinc-900">No matches</div>
-              <div className="mt-2 text-[13px] text-zinc-600">Your filters returned no verified live listings.</div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMax(undefined);
-                    applyToUrl(1);
-                  }}
-                  className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                >
-                  Remove max
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNeeds([]);
-                    applyToUrl(1);
-                  }}
-                  className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                >
-                  Clear needs
-                </button>
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="rounded-full bg-zinc-900 px-4 py-2 text-[12px] text-white hover:bg-zinc-800"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {listings.map((l) => {
-                // ✅ correct route
-                const href = `/listing/${l.slug}`;
-
-                const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
-                const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
-
-                // no placeholders: if no cover, render nothing
-                if (!l.cover?.url) return null;
-
-                return (
-                  <div
-                    key={l.id}
-                    className="group rounded-[28px] bg-white p-3 ring-1 ring-inset ring-zinc-200 shadow-[0_24px_80px_rgba(0,0,0,0.05)] transition hover:shadow-[0_38px_110px_rgba(0,0,0,0.08)]"
-                  >
-                    <div className="relative h-44 w-full overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-zinc-200">
-                      <Image
-                        src={l.cover.url}
-                        alt={l.cover.alt ?? l.title}
-                        fill
-                        className="object-cover transition duration-500 group-hover:scale-[1.02]"
-                        sizes="(max-width: 1024px) 50vw, 33vw"
-                        priority={false}
-                      />
-                      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(0,0,0,0.10)] to-transparent" />
-                    </div>
-
-                    <div className="mt-3 px-1 pb-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="truncate text-[13px] font-semibold text-zinc-900">{l.title}</div>
-                          <div className="mt-1 truncate text-[12px] text-zinc-600">{locLine}</div>
-                          {l.headline ? (
-                            <div className="mt-2 line-clamp-2 text-[12px] text-zinc-600">{l.headline}</div>
-                          ) : null}
-                        </div>
-
-                        <button
-                          type="button"
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                          aria-label="save"
-                          title="save"
-                        >
-                          <Heart className="h-4 w-4 text-zinc-500" />
-                        </button>
-                      </div>
-
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <TagPill>{priceLabel}</TagPill>
-                        {l.bedrooms ? (
-                          <IconPill icon={<BedDouble className="h-4 w-4" />} label={`${l.bedrooms} beds`} />
-                        ) : (
-                          <IconPill icon={<Home className="h-4 w-4" />} label="residence" />
-                        )}
-                        {l.builtM2 ? <TagPill>{l.builtM2} m²</TagPill> : null}
-                        {l.propertyType ? <TagPill>{l.propertyType}</TagPill> : null}
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between gap-2">
-                        <Link
-                          href={href}
-                          className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-[12px] text-zinc-900 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                        >
-                          View
-                          <ArrowRight className="h-4 w-4 text-zinc-500" />
-                        </Link>
-
-                        <Link href={`/city/${l.city.slug}`} className="text-[11px] text-zinc-500 hover:text-zinc-900">
-                          {l.city.name}
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+          </>
+        )}
 
         {/* Pagination */}
         {!isCoverageNotLive && pageCount > 1 ? (
-          <div className="mt-10 flex items-center justify-between gap-3">
-            <div className="text-[12px] text-zinc-600">
-              Page <span className="font-semibold text-zinc-900">{page}</span> of{' '}
-              <span className="font-semibold text-zinc-900">{pageCount}</span> ·{' '}
-              <span className="font-semibold text-zinc-900">{total.toLocaleString()}</span> total
+          <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[color:var(--ink-2)]">
+              Page <span className="font-semibold text-[color:var(--ink)]">{page}</span> of{' '}
+              <span className="font-semibold text-[color:var(--ink)]">{pageCount}</span> ·{' '}
+              <span className="font-semibold text-[color:var(--ink)]">{total.toLocaleString()}</span> total
             </div>
 
             <div className="flex items-center gap-2">
@@ -928,10 +1114,10 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 disabled={page <= 1}
                 onClick={() => applyToUrl(Math.max(1, page - 1))}
                 className={cx(
-                  'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
+                  'px-5 py-3 text-sm font-semibold border transition',
                   page > 1
-                    ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
-                    : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
+                    ? 'border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]'
+                    : 'border-[color:var(--hairline)] bg-[color:var(--paper-2)] text-[color:var(--ink-3)] cursor-not-allowed',
                 )}
               >
                 Previous
@@ -942,10 +1128,10 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 disabled={page >= pageCount}
                 onClick={() => applyToUrl(Math.min(pageCount, page + 1))}
                 className={cx(
-                  'rounded-full px-4 py-2 text-[12px] ring-1 ring-inset transition',
+                  'px-5 py-3 text-sm font-semibold border transition',
                   page < pageCount
-                    ? 'bg-white text-zinc-900 ring-zinc-200 hover:ring-zinc-300'
-                    : 'bg-zinc-50 text-zinc-400 ring-zinc-200 cursor-not-allowed',
+                    ? 'border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]'
+                    : 'border-[color:var(--hairline)] bg-[color:var(--paper-2)] text-[color:var(--ink-3)] cursor-not-allowed',
                 )}
               >
                 Next
@@ -953,67 +1139,73 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             </div>
           </div>
         ) : null}
-      </div>
+      </section>
 
-      {/* Filters drawer */}
+      {/* Filters drawer (Atelier Panel) */}
       {filtersOpen ? (
         <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-[rgba(0,0,0,0.18)]" onClick={() => setFiltersOpen(false)} />
+          <div className="absolute inset-0 bg-[rgba(10,10,12,0.20)]" onClick={() => setFiltersOpen(false)} />
 
-          <div className="absolute right-0 top-0 h-full w-full max-w-[520px] bg-white shadow-[0_40px_140px_rgba(0,0,0,0.18)]">
-            <div className="relative border-b border-zinc-200 px-5 py-4">
+          <div className="absolute right-0 top-0 h-full w-full max-w-[560px] bg-white shadow-[0_40px_140px_rgba(0,0,0,0.18)]">
+            <div className="relative border-b border-[color:var(--hairline)] px-6 py-5">
               <GoldHairline />
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[12px] font-semibold text-zinc-900">Filters</div>
-                  <div className="mt-1 text-[12px] text-zinc-600">Applies to verified live inventory.</div>
+                  <div className="text-[12px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">FILTERS</div>
+                  <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                    Refine the catalogue
+                  </div>
+                  <div className="mt-2 text-sm text-[color:var(--ink-2)]">Applies to verified live inventory.</div>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setFiltersOpen(false)}
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                  className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
                 >
-                  <X className="h-4 w-4 text-zinc-500" />
-                  <span>Close</span>
+                  <X className="h-4 w-4 text-[color:var(--ink-3)]" />
+                  Close
                 </button>
               </div>
             </div>
 
-            <div className="h-[calc(100%-72px)] overflow-auto p-5">
-              <div className="grid gap-4">
-                <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">Property type</div>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {['any', 'villa', 'apartment', 'penthouse', 'house', 'plot'].map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setType(t)}
-                        className={cx(
-                          'rounded-2xl px-3 py-3 text-left text-[12px] ring-1 ring-inset transition',
-                          normalize(type) === normalize(t)
-                            ? 'bg-white text-zinc-900 ring-zinc-300'
-                            : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                        )}
-                      >
-                        {t}
-                      </button>
-                    ))}
+            <div className="h-[calc(100%-92px)] overflow-auto p-6">
+              <div className="grid gap-5">
+                <div className="border border-[color:var(--hairline)] bg-white p-5">
+                  <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">PROPERTY TYPE</div>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {['any', 'villa', 'apartment', 'penthouse', 'house', 'plot'].map((t) => {
+                      const active = normalize(type) === normalize(t);
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setType(t)}
+                          className={cx(
+                            'px-4 py-3 text-left text-sm font-semibold border transition',
+                            active
+                              ? 'border-[rgba(10,10,12,0.22)] bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                              : 'border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]',
+                          )}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
+                <div className="border border-[color:var(--hairline)] bg-white p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold text-zinc-500">Max budget</div>
-                      <div className="mt-1 text-[12px] text-zinc-600">{max ? shortMoney('EUR', max) : 'No max'}</div>
+                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">MAX BUDGET</div>
+                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">{max ? shortMoney('EUR', max) : 'No max'}</div>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => setMax(undefined)}
-                      className="rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                      className="px-4 py-3 text-sm font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
                     >
                       Clear
                     </button>
@@ -1029,32 +1221,32 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                       const v = Number(e.target.value);
                       setMax(v >= 25000000 ? undefined : v);
                     }}
-                    className="mt-3 w-full"
+                    className="mt-4 w-full"
                   />
 
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-500">
+                  <div className="mt-3 flex items-center justify-between text-[12px] text-[color:var(--ink-3)]">
                     <span>€250k</span>
                     <span>€25m+</span>
                   </div>
                 </div>
 
-                <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
+                <div className="border border-[color:var(--hairline)] bg-white p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold text-zinc-500">Bedrooms</div>
-                      <div className="mt-1 text-[12px] text-zinc-600">{beds ? `${beds}+ beds` : 'Any'}</div>
+                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">BEDROOMS</div>
+                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">{beds ? `${beds}+ beds` : 'Any'}</div>
                     </div>
 
                     <button
                       type="button"
                       onClick={() => setBeds(undefined)}
-                      className="rounded-full bg-white px-3 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                      className="px-4 py-3 text-sm font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
                     >
                       Clear
                     </button>
                   </div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {[undefined, 1, 2, 3, 4, 5, 6].map((b) => {
                       const active = (beds ?? undefined) === (b as any);
                       return (
@@ -1063,10 +1255,10 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                           type="button"
                           onClick={() => setBeds(b as any)}
                           className={cx(
-                            'rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
+                            'px-4 py-3 text-sm font-semibold border transition',
                             active
-                              ? 'bg-white text-zinc-900 ring-zinc-300'
-                              : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
+                              ? 'border-[rgba(10,10,12,0.22)] bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                              : 'border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]',
                           )}
                         >
                           {typeof b === 'number' ? `${b}+` : 'any'}
@@ -1076,76 +1268,71 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                   </div>
                 </div>
 
-                <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">Needs</div>
+                <div className="border border-[color:var(--hairline)] bg-white p-5">
+                  <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">NEEDS</div>
 
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {[
-                      { k: 'sea view', icon: <Waves className="h-4 w-4 text-zinc-500" /> },
-                      { k: 'waterfront', icon: <Waves className="h-4 w-4 text-zinc-500" /> },
-                      { k: 'gated', icon: <ShieldCheck className="h-4 w-4 text-zinc-500" /> },
-                      { k: 'privacy', icon: <ShieldCheck className="h-4 w-4 text-zinc-500" /> },
-                      { k: 'quiet', icon: <Sparkles className="h-4 w-4 text-zinc-500" /> },
-                      { k: 'new build', icon: <Sparkles className="h-4 w-4 text-zinc-500" /> },
-                    ].map((n) => (
-                      <button
-                        key={n.k}
-                        type="button"
-                        onClick={() => toggleNeed(n.k)}
-                        className={cx(
-                          'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] ring-1 ring-inset transition',
-                          activeNeeds.has(normalize(n.k)) || activeNeeds.has(normalize(n.k).replace(' ', '_'))
-                            ? 'bg-white text-zinc-900 ring-zinc-300'
-                            : 'bg-white text-zinc-700 ring-zinc-200 hover:ring-zinc-300',
-                        )}
-                      >
-                        {n.icon}
-                        {n.k}
-                      </button>
-                    ))}
+                      { k: 'sea view', icon: <Waves className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                      { k: 'waterfront', icon: <Waves className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                      { k: 'gated', icon: <ShieldCheck className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                      { k: 'privacy', icon: <ShieldCheck className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                      { k: 'quiet', icon: <Sparkles className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                      { k: 'new build', icon: <Sparkles className="h-4 w-4 text-[color:var(--ink-3)]" /> },
+                    ].map((n) => {
+                      const active = activeNeeds.has(normalize(n.k)) || activeNeeds.has(normalize(n.k).replace(' ', '_'));
+                      return (
+                        <button
+                          key={n.k}
+                          type="button"
+                          onClick={() => toggleNeed(n.k)}
+                          className={cx(
+                            'inline-flex items-center gap-2 px-4 py-3 text-sm font-semibold border transition',
+                            active
+                              ? 'border-[rgba(10,10,12,0.22)] bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                              : 'border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]',
+                          )}
+                        >
+                          {n.icon}
+                          {n.k}
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className="mt-3 flex items-center justify-between gap-2">
+                  <div className="mt-4 flex items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => setNeeds([])}
-                      className="rounded-full bg-white px-4 py-2 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
+                      className="px-4 py-3 text-sm font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
                     >
                       Clear
                     </button>
-                    <span className="text-[11px] text-zinc-500">
-                      {needs.length ? `${needs.length} selected` : 'None selected'}
-                    </span>
+                    <span className="text-sm text-[color:var(--ink-3)]">{needs.length ? `${needs.length} selected` : 'None selected'}</span>
                   </div>
                 </div>
 
-                <div className="rounded-[22px] bg-white p-4 ring-1 ring-inset ring-zinc-200">
-                  <div className="text-[11px] font-semibold text-zinc-500">Apply</div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
+                <div className="border border-[color:var(--hairline)] bg-white p-5">
+                  <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">APPLY</div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <PrimaryButton
                       onClick={() => {
                         applyToUrl(1);
                         setFiltersOpen(false);
                       }}
-                      className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-[12px] text-white hover:bg-zinc-800"
                     >
                       Apply filters
                       <ArrowRight className="h-4 w-4" />
-                    </button>
+                    </PrimaryButton>
 
-                    <button
-                      type="button"
-                      onClick={clearAll}
-                      className="rounded-full bg-white px-5 py-2.5 text-[12px] text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:ring-zinc-300"
-                    >
-                      Reset
-                    </button>
+                    <SecondaryButton onClick={clearAll}>Reset</SecondaryButton>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 text-[11px] text-zinc-500">Filters apply to verified live inventory on the server.</div>
+              <div className="mt-6 text-[12px] text-[color:var(--ink-3)]">
+                Filters apply to verified live inventory on the server.
+              </div>
             </div>
           </div>
         </div>
