@@ -26,12 +26,12 @@ import {
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
+type Mode = 'buy' | 'rent' | 'sell';
+type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
+
 function asMode(v: unknown): Mode {
   return v === 'rent' || v === 'sell' ? v : 'buy';
 }
-
-type Mode = 'buy' | 'rent' | 'sell';
-type SortKey = 'price_high' | 'price_low' | 'beds' | 'sqm' | 'newest';
 
 type ListingCard = {
   id: string;
@@ -90,6 +90,15 @@ function firstString(v: string | string[] | undefined) {
 
 function normalize(s: string) {
   return s.trim().toLowerCase();
+}
+
+function titleCase(s: string) {
+  return s
+    .trim()
+    .split(/[\s-]+/g)
+    .filter(Boolean)
+    .map((w) => w.slice(0, 1).toUpperCase() + w.slice(1))
+    .join(' ');
 }
 
 function shortMoney(currency: string, n: number) {
@@ -174,19 +183,9 @@ function needsToString(needs: string[]) {
     .join(',');
 }
 
-function titleCase(s: string) {
-  return s
-    .trim()
-    .split(/[\s-]+/g)
-    .filter(Boolean)
-    .map((w) => w.slice(0, 1).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
-function isLikelyCoverageNotLive(place: string, total: number) {
-  // Production-safe heuristic:
-  // - If a place was explicitly entered and the server returned 0 results, we treat it as "coverage not live yet"
-  // - This avoids a dead-end "0 results" page and keeps the brand honest.
+// Production-safe heuristic:
+// if a user explicitly searched a place and we have 0 verified live results, we treat as "coverage not live yet".
+function showCoverageNotLive(place: string, total: number) {
   return total === 0 && place.trim().length >= 2;
 }
 
@@ -245,7 +244,7 @@ function AvailabilityPanel({
   const [email, setEmail] = useState('');
   const [timeline, setTimeline] = useState<'now' | '30d' | '90d' | 'later'>('30d');
   const [notes, setNotes] = useState('');
-  const [hp, setHp] = useState(''); // honeypot
+  const [hp, setHp] = useState('');
   const [lead, setLead] = useState<LeadState>({ status: 'idle' });
 
   const cleanPlace = place.trim();
@@ -265,7 +264,7 @@ function AvailabilityPanel({
   }, [mode, cleanPlace, placeTitle, type, beds, max, needs, kw, q]);
 
   async function submit() {
-    if (lead.status === 'sending') return;
+    if (lead.status === 'sending' || lead.status === 'sent') return;
 
     const e = email.trim();
     if (!e || !e.includes('@')) {
@@ -370,7 +369,7 @@ function AvailabilityPanel({
               </div>
             </div>
 
-            {/* Honeypot */}
+            {/* honeypot */}
             <input
               value={hp}
               onChange={(e) => setHp(e.target.value)}
@@ -450,7 +449,7 @@ function AvailabilityPanel({
             </div>
 
             <div className="mt-3 text-[11px] text-zinc-500">
-              We only show verified live inventory. This request helps us prioritise coverage.
+              We only show verified live inventory. This request helps prioritise coverage.
             </div>
           </div>
         </div>
@@ -475,9 +474,9 @@ function AvailabilityPanel({
               </div>
 
               <div className="rounded-2xl bg-white px-4 py-3 ring-1 ring-inset ring-zinc-200">
-                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">FILTERS</div>
+                <div className="text-[10px] font-semibold tracking-[0.20em] text-zinc-500">NO FAKE RESULTS</div>
                 <div className="mt-2 text-[12px] leading-relaxed text-zinc-600">
-                  Your constraints are saved inside the request. No fake results, ever.
+                  If a market is not live, we show availability and capture the request.
                 </div>
               </div>
             </div>
@@ -611,7 +610,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             ? 'newest'
             : 'price: high to low';
 
-  const showAvailability = isLikelyCoverageNotLive(place, total);
+  const isCoverageNotLive = showCoverageNotLive(place, total);
 
   return (
     <div className="relative min-h-screen bg-white">
@@ -795,25 +794,14 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
           </div>
         </div>
 
-        {/* Results or Availability */}
+        {/* Results or availability */}
         <div className="mt-6">
-          {showAvailability ? (
-            <AvailabilityPanel
-              place={place}
-              mode={mode}
-              type={type}
-              beds={beds}
-              max={max}
-              needs={needs}
-              kw={kw}
-              q={q}
-            />
+          {isCoverageNotLive ? (
+            <AvailabilityPanel place={place} mode={mode} type={type} beds={beds} max={max} needs={needs} kw={kw} q={q} />
           ) : listings.length === 0 ? (
             <div className="rounded-[28px] bg-white p-8 ring-1 ring-inset ring-zinc-200 shadow-[0_28px_90px_rgba(0,0,0,0.05)]">
               <div className="text-[18px] font-semibold text-zinc-900">No matches</div>
-              <div className="mt-2 text-[13px] text-zinc-600">
-                Your filters returned no verified live listings.
-              </div>
+              <div className="mt-2 text-[13px] text-zinc-600">Your filters returned no verified live listings.</div>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -847,11 +835,13 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {listings.map((l) => {
-                const href = `/property/${l.slug}`;
+                // ✅ correct route
+                const href = `/listing/${l.slug}`;
+
                 const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
                 const locLine = `${l.city.name}${l.city.region ? `, ${l.city.region}` : ''}, ${l.city.country}`;
 
-                // NOTE: server now enforces coverMedia is not null. This stays defensive, but never renders fake placeholders.
+                // no placeholders: if no cover, render nothing
                 if (!l.cover?.url) return null;
 
                 return (
@@ -924,7 +914,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
         </div>
 
         {/* Pagination */}
-        {!showAvailability && pageCount > 1 ? (
+        {!isCoverageNotLive && pageCount > 1 ? (
           <div className="mt-10 flex items-center justify-between gap-3">
             <div className="text-[12px] text-zinc-600">
               Page <span className="font-semibold text-zinc-900">{page}</span> of{' '}
@@ -963,57 +953,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             </div>
           </div>
         ) : null}
-
-        {/* Minimal footer (customer-ready finish) */}
-        <div className="mt-14 border-t border-zinc-200 pt-10">
-          <div className="grid gap-8 md:grid-cols-12">
-            <div className="md:col-span-5">
-              <div className="text-[14px] font-semibold text-zinc-900">Vantera</div>
-              <div className="mt-2 max-w-sm text-[12px] leading-relaxed text-zinc-600">
-                Verified property intelligence. Live inventory only.
-              </div>
-            </div>
-
-            <div className="md:col-span-7">
-              <div className="grid gap-6 sm:grid-cols-3">
-                <div>
-                  <div className="text-[11px] font-semibold text-zinc-500">Markets</div>
-                  <div className="mt-3 grid gap-2 text-[12px]">
-                    <Link href="/" className="text-zinc-700 hover:text-zinc-900">
-                      Browse markets
-                    </Link>
-                    <Link href="/search" className="text-zinc-700 hover:text-zinc-900">
-                      Search
-                    </Link>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-semibold text-zinc-500">Company</div>
-                  <div className="mt-3 grid gap-2 text-[12px]">
-                    <Link href="/contact" className="text-zinc-700 hover:text-zinc-900">
-                      Contact
-                    </Link>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[11px] font-semibold text-zinc-500">Legal</div>
-                  <div className="mt-3 grid gap-2 text-[12px]">
-                    <Link href="/privacy" className="text-zinc-700 hover:text-zinc-900">
-                      Privacy
-                    </Link>
-                    <Link href="/terms" className="text-zinc-700 hover:text-zinc-900">
-                      Terms
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 text-[11px] text-zinc-500">© {new Date().getFullYear()} Vantera</div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Filters drawer */}
