@@ -17,8 +17,6 @@ import PremiumBadgeRow from './PremiumBadgeRow';
 import IntentHero from './IntentHero';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
 
-import { REGION_CLUSTERS } from './cities';
-
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
 export type RuntimeCity = {
@@ -41,6 +39,15 @@ export type RuntimeCity = {
 
   heroImageSrc?: string | null;
   heroImageAlt?: string | null;
+};
+
+export type RuntimeRegionCluster = {
+  slug: string;
+  name: string;
+  country?: string | null;
+  region?: string | null;
+  priority?: number | null;
+  citySlugs: string[];
 };
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -72,7 +79,6 @@ const CARD =
 function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
-      {/* Global paper stage (very restrained) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-72 left-1/2 h-[820px] w-[1400px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.18),transparent_66%)] blur-3xl" />
         <div className="absolute -top-72 right-[-420px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08),transparent_66%)] blur-3xl" />
@@ -367,21 +373,25 @@ function CTA() {
 }
 
 /* =========================================================
-   HOME PAGE (flagship rebuild)
+   HOME PAGE
    - FULL-BLEED hero (100vw)
    - Search-first
-   - Intent moves BELOW hero
+   - All DB-driven (cities + clusters are props)
    ========================================================= */
 
-export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
+export default function HomePage({
+  cities,
+  clusters,
+}: {
+  cities: RuntimeCity[];
+  clusters: RuntimeRegionCluster[];
+}) {
   const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
   const timezoneCount = new Set(cities.map((c) => c.tz)).size;
 
   return (
     <Shell>
-      {/* FULL-BLEED HERO */}
       <section className="relative w-full overflow-hidden pt-10 sm:pt-12">
-        {/* HERO MEDIA (image background) */}
         <div className="pointer-events-none absolute inset-0 -z-[1]">
           <Image
             src="/hero.jpg"
@@ -391,11 +401,9 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
             sizes="100vw"
             className="object-cover object-center"
           />
-          {/* Editorial wash for readability (tuned) */}
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.86),rgba(251,251,250,0.74))]" />
         </div>
 
-        {/* Hero background accents (subtle) */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1400px_620px_at_30%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(1100px_560px_at_86%_0%,rgba(139,92,246,0.06),transparent_62%)]" />
@@ -403,7 +411,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.08)] to-transparent" />
         </div>
 
-        {/* Optional FX (kept subtle, on white) */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.16]">
           <RoyalPortalBackdrop />
         </div>
@@ -412,10 +419,8 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
 
         <div className={HERO_INNER}>
-          {/* Hero vertical rhythm: slightly more breathing room on large screens */}
           <div className="relative pb-12 sm:pb-14 lg:pb-[8vh]">
             <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-              {/* LEFT: Editorial message + search */}
               <div className="lg:col-span-7">
                 <PremiumBadgeRow />
 
@@ -428,35 +433,22 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                 <p className="mt-4 max-w-[84ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
                   Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-[color:var(--ink-3)]">
-                    {' '}
-                    Built to model value, liquidity and risk without theatre.
-                  </span>
+                  <span className="text-[color:var(--ink-3)]"> Built to model value, liquidity and risk without theatre.</span>
                 </p>
 
-                {/* Primary search (hero crown jewel) */}
                 <div className="mt-7 max-w-[1240px]">
                   <VanteraOmniSearch
                     cities={cities as any}
-                    clusters={REGION_CLUSTERS as any}
+                    clusters={clusters as any}
                     autoFocus={false}
                   />
                 </div>
 
-                {/* Hero support row (clean, not competing) */}
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--ink-3)]">
-                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
-                    Typos ok
-                  </span>
-                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
-                    Keywords included
-                  </span>
-                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
-                    City-first intelligence
-                  </span>
-                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>
-                    Verification-first
-                  </span>
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>Typos ok</span>
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>Keywords included</span>
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>City-first intelligence</span>
+                  <span className={cx('rounded-full bg-white/84 px-3 py-1.5', BLUR_HERO, RING)}>Verification-first</span>
                 </div>
 
                 <div className="mt-6 max-w-[1240px]">
@@ -478,7 +470,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                 </div>
               </div>
 
-              {/* RIGHT: Featured markets plate */}
               <div className="lg:col-span-5">
                 <div className={cx('relative overflow-hidden rounded-[28px] p-6 sm:p-7', CARD)}>
                   <div className="pointer-events-none absolute inset-0">
@@ -501,11 +492,15 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
                         </div>
                       </div>
 
-                      <div className={cx('hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/92 px-3 py-1.5', BLUR_HERO, RING)}>
+                      <div
+                        className={cx(
+                          'hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/92 px-3 py-1.5',
+                          BLUR_HERO,
+                          RING,
+                        )}
+                      >
                         <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
-                        <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                          UPDATED WEEKLY
-                        </div>
+                        <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">UPDATED WEEKLY</div>
                       </div>
                     </div>
 
@@ -534,17 +529,11 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
 
                   <div className="mt-3 grid gap-2">
                     <div className="rounded-2xl bg-white/92 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                        SOURCE
-                      </div>
-                      <div className="mt-1 text-sm text-[color:var(--ink-2)]">
-                        Logged, cross-checked, traceable.
-                      </div>
+                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">SOURCE</div>
+                      <div className="mt-1 text-sm text-[color:var(--ink-2)]">Logged, cross-checked, traceable.</div>
                     </div>
                     <div className="rounded-2xl bg-white/92 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                        SIGNAL
-                      </div>
+                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">SIGNAL</div>
                       <div className="mt-1 text-sm text-[color:var(--ink-2)]">
                         Price reality, liquidity read, risk flags.
                       </div>
@@ -558,7 +547,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
               </div>
             </div>
 
-            {/* Why section inside hero, but calm and readable */}
             <div className="mt-10">
               <SectionHeader
                 kicker="Why this exists"
@@ -570,7 +558,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
           </div>
         </div>
 
-        {/* Trust tape - clean, centered */}
         <div className={cx('mt-10 sm:mt-12', MID)}>
           <TrustMarquee
             className="!mt-0"
@@ -595,7 +582,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
       </section>
 
-      {/* INTENT (moved BELOW hero - search stays crown jewel) */}
       <section className="mt-12 sm:mt-14">
         <div className={MID}>
           <SectionHeader
@@ -607,7 +593,6 @@ export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
         </div>
       </section>
 
-      {/* BODY */}
       <section className="mt-12 sm:mt-14">
         <div className={WIDE}>
           <MarketBriefing cities={cities as any} />
