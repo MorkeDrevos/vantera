@@ -69,21 +69,15 @@ function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
       {/* ROYAL STAGE - global cinematic paper system */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        {/* Crown light (warm) */}
         <div className="absolute -top-64 left-1/2 h-[920px] w-[1500px] -translate-x-1/2 bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.30),transparent_62%)] blur-3xl" />
-        {/* Violet edge (right) */}
         <div className="absolute -top-56 right-[-320px] h-[780px] w-[780px] bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.16),transparent_64%)] blur-3xl" />
-        {/* Cool lift (left-bottom) */}
         <div className="absolute bottom-[-420px] left-[-420px] h-[980px] w-[980px] bg-[radial-gradient(circle_at_center,rgba(62,196,255,0.10),transparent_62%)] blur-3xl" />
 
-        {/* Editorial wash and vignette */}
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.0),rgba(11,12,16,0.035))]" />
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(255,255,255,0.70),transparent_62%)] opacity-60" />
         <div className="absolute inset-0 bg-[radial-gradient(1400px_900px_at_50%_60%,rgba(11,12,16,0.10),transparent_70%)] opacity-30" />
 
-        {/* Micro grain */}
         <div className="absolute inset-0 opacity-[0.040] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
-        {/* Subtle grid (very faint, feels engineered) */}
         <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,rgba(11,12,16,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(11,12,16,0.18)_1px,transparent_1px)] [background-size:120px_120px]" />
       </div>
 
@@ -120,9 +114,7 @@ function SectionKicker({
         <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
           {title}
         </div>
-        {subtitle ? (
-          <div className="mt-1 text-sm text-[color:var(--ink-2)]">{subtitle}</div>
-        ) : null}
+        {subtitle ? <div className="mt-1 text-sm text-[color:var(--ink-2)]">{subtitle}</div> : null}
       </div>
 
       <div className="flex items-center gap-3">
@@ -185,9 +177,7 @@ function SignalStrip({ items }: { items: SignalStripItem[] }) {
                 <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                   {it.k}
                 </div>
-                <div className="mt-1 truncate text-sm font-medium text-[color:var(--ink)]">
-                  {it.v}
-                </div>
+                <div className="mt-1 truncate text-sm font-medium text-[color:var(--ink)]">{it.v}</div>
               </div>
 
               {it.hint ? (
@@ -280,9 +270,7 @@ function PortalVsTruth() {
         </div>
 
         <div className="ring-1 ring-inset ring-[color:var(--hairline)] bg-[color:var(--paper-2)] p-6">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-            VANTERA
-          </div>
+          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">VANTERA</div>
           <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
             Quiet intelligence
           </div>
@@ -334,11 +322,7 @@ function FeatureCard({
         <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
           {eyebrow}
         </div>
-
-        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-          {title}
-        </div>
-
+        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
         <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
 
         <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
@@ -431,11 +415,17 @@ export default function HomePage({
   return (
     <Shell>
       {/* =====================================================
-          HERO - ONLY the hero content has the background image
-          Fix: moved "Why this exists" OUTSIDE this section
+          HERO - FULL BLEED (edge-to-edge)
          ===================================================== */}
-      <section className="relative w-full pb-12 pt-10 sm:pb-16 sm:pt-12">
-        {/* Full-bleed hero image (edge-to-edge) */}
+      <section
+        className={cx(
+          'relative overflow-hidden',
+          // FULL BLEED breakout (works even if something above adds padding/max-width later)
+          'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
+          'pb-12 pt-10 sm:pb-16 sm:pt-12',
+        )}
+      >
+        {/* Full-bleed hero image */}
         <div className="pointer-events-none absolute inset-0 -z-10">
           <Image
             src="/brand/hero.jpg"
@@ -445,18 +435,16 @@ export default function HomePage({
             className="object-cover"
             sizes="100vw"
           />
-          {/* premium light overlay for readability (no heavy dark) */}
           <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.78),rgba(255,255,255,0.62),rgba(255,255,255,0.86))]" />
           <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
           <div className="absolute inset-0 bg-[radial-gradient(1100px_520px_at_86%_10%,rgba(139,92,246,0.10),transparent_64%)]" />
-          {/* top/bottom hairlines to feel editorial */}
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
         </div>
 
+        {/* Constrained editorial content inside the full-bleed stage */}
         <div className={cx('relative', WIDE)}>
           <div className="relative ring-1 ring-inset ring-[color:var(--hairline)] bg-white/40 shadow-[0_60px_160px_rgba(11,12,16,0.14)]">
-            {/* inner wash (kept light) */}
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_25%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
               <div className="absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_0%,rgba(139,92,246,0.10),transparent_62%)]" />
@@ -465,13 +453,10 @@ export default function HomePage({
             </div>
 
             <div className="relative px-6 py-10 sm:px-10 sm:py-14 lg:px-14 lg:py-18 2xl:px-20 2xl:py-20">
-              {/* Collapse earlier: side-by-side only from xl */}
               <div className="grid gap-10 xl:grid-cols-12 xl:gap-12">
-                {/* LEFT: Narrative + Omni search */}
                 <div className="xl:col-span-6">
                   <PremiumBadgeRow />
 
-                  {/* H1 smaller (editorial) */}
                   <h1 className="mt-7 text-balance text-[34px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[44px] lg:text-[56px] lg:leading-[1.05] 2xl:text-[64px]">
                     Private intelligence for the world&apos;s{' '}
                     <span className="inline">
@@ -487,7 +472,6 @@ export default function HomePage({
                     </span>
                   </p>
 
-                  {/* OmniSearch (only hero search) */}
                   <div className="mt-7 max-w-[1200px]">
                     <VanteraOmniSearch cities={cities as any} clusters={resolvedClusters} autoFocus={false} />
                   </div>
@@ -513,7 +497,6 @@ export default function HomePage({
                   <div className="mt-10 hidden xl:block h-px w-full bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.14)] to-transparent" />
                 </div>
 
-                {/* RIGHT: Intelligence plate (wider / more feature) */}
                 <div className="xl:col-span-6">
                   <IntelligencePlate>
                     <div className="px-6 py-6 sm:px-7 sm:py-7">
@@ -556,13 +539,12 @@ export default function HomePage({
               </div>
             </div>
 
-            {/* Bottom fade (kept light) */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-[rgba(251,251,250,0.92)]" />
           </div>
         </div>
       </section>
 
-      {/* WHY THIS EXISTS - now on clean paper (no hero image behind it) */}
+      {/* WHY THIS EXISTS - now on clean paper */}
       <section className="mt-10 sm:mt-12">
         <div className={WIDE}>
           <div className={cx('relative overflow-hidden p-6 sm:p-8', GLASS)}>
@@ -581,7 +563,6 @@ export default function HomePage({
         </div>
       </section>
 
-      {/* TRUST - keep but make it feel like an institutional tape */}
       <div className={cx('relative mt-10 sm:mt-12', NARROW)}>
         <TrustMarquee
           className=""
@@ -604,10 +585,6 @@ export default function HomePage({
           ]}
         />
       </div>
-
-      {/* =====================================================
-          BODY - leave untouched
-         ===================================================== */}
 
       <section className="mt-12 sm:mt-14">
         <div className={WIDE}>
