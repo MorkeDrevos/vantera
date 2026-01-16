@@ -313,9 +313,7 @@ export default function TopBar() {
   const intelligenceHref = '/coming-soon?section=intelligence';
   const journalHref = '/coming-soon?section=journal';
 
-  // White-royal system (match HomePage)
-  const barBg = scrolled ? 'bg-[rgba(251,251,250,0.92)]' : 'bg-[rgba(251,251,250,0.78)]';
-
+  // Royal system (use your global CSS vars)
   const ink = 'text-[color:var(--ink)]';
   const ink2 = 'text-[color:var(--ink-2)]';
   const ink3 = 'text-[color:var(--ink-3)]';
@@ -326,26 +324,28 @@ export default function TopBar() {
   const goldText =
     'bg-clip-text text-transparent bg-[linear-gradient(180deg,#f7edcf_0%,#e6c980_45%,#b7863a_100%)]';
 
-  const navBtn =
-    'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[12px] tracking-[0.14em] uppercase transition';
+  // Full-bleed header background + premium blur
+  const barBg = scrolled ? 'bg-[rgba(251,251,250,0.88)]' : 'bg-[rgba(251,251,250,0.72)]';
 
-  const navLink =
+  // IMPORTANT: match hero inner max width
+  const BAR_INNER =
+    'mx-auto flex w-full max-w-[1680px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
+
+  const pill =
     'inline-flex h-10 items-center gap-2 rounded-full px-3.5 text-[12px] tracking-[0.14em] uppercase transition';
 
   const soft = cx('bg-white/62 hover:bg-white/90', hairline, hairlineHover);
   const softTight = cx('bg-white/58 hover:bg-white/88', hairline, hairlineHover);
 
-  // IMPORTANT: widen to match your new home widths
-  const BAR_INNER = 'mx-auto flex w-full max-w-[1600px] items-center px-5 py-3 sm:px-8 sm:py-3.5 lg:px-12 2xl:px-16';
-
   return (
     <header className="sticky top-0 z-50 w-full">
+      {/* Full-bleed bar (does not constrain hero) */}
       <div className={cx('relative w-full backdrop-blur-[18px]', barBg)}>
-        {/* Royal top hairline */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.58)] to-transparent opacity-70" />
+        {/* Royal hairlines + subtle crown glow */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-70" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[rgba(11,12,16,0.10)]" />
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(1200px_280px_at_50%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-[rgba(11,12,16,0.10)]" />
         </div>
 
         <div className={cx('relative', BAR_INNER)}>
@@ -378,7 +378,7 @@ export default function TopBar() {
                   type="button"
                   onClick={toggleMega}
                   onFocus={() => setMegaOpen(true)}
-                  className={cx(navBtn, softTight, ink3, megaOpen && ink)}
+                  className={cx(pill, softTight, ink3, megaOpen && ink)}
                   aria-expanded={megaOpen}
                   aria-haspopup="menu"
                 >
@@ -387,7 +387,7 @@ export default function TopBar() {
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180')} />
                 </button>
 
-                {/* Mega panel */}
+                {/* Mega panel (wider, more premium, still safe on small screens) */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -396,8 +396,8 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'absolute left-1/2 z-[80] mt-4 w-[1180px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
-                    'rounded-[30px] bg-[color:var(--paper)]',
+                    'absolute left-1/2 z-[80] mt-4 w-[1260px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'rounded-[32px] bg-[color:var(--paper)]',
                     'shadow-[0_44px_140px_rgba(11,12,16,0.14)]',
                     'ring-1 ring-inset ring-[color:var(--hairline)]',
                     'overflow-hidden',
@@ -516,7 +516,7 @@ export default function TopBar() {
                                 >
                                   {c.name}
                                 </div>
-                                <div className="truncate text-[11px] text-black/50">{c.country}</div>
+                                <div className="truncate text-[11px] text-[color:var(--ink-3)]">{c.country}</div>
                               </div>
                               <ArrowRight className="h-4 w-4 opacity-45 transition group-hover:translate-x-0.5 group-hover:opacity-80" />
                             </div>
@@ -525,14 +525,14 @@ export default function TopBar() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)] px-4 py-3">
-                        <div className="text-xs text-black/55">Entry points only. Intelligence expands weekly.</div>
+                        <div className="text-xs text-[color:var(--ink-3)]">Entry points only. Intelligence expands weekly.</div>
                         <button
                           type="button"
                           onClick={() => {
                             setMegaOpen(false);
                             openSearchFromAnywhere();
                           }}
-                          className="inline-flex items-center gap-2 text-xs text-black/70 hover:text-black transition"
+                          className="inline-flex items-center gap-2 text-xs text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition"
                         >
                           Search instead <ArrowRight className="h-4 w-4 opacity-70" />
                         </button>
@@ -547,7 +547,7 @@ export default function TopBar() {
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Start with search
                             </div>
-                            <div className="mt-1 text-xs text-black/55">
+                            <div className="mt-1 text-xs text-[color:var(--ink-3)]">
                               One box. Typos allowed. Keywords included.
                             </div>
                           </div>
@@ -599,7 +599,7 @@ export default function TopBar() {
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Private network
                             </div>
-                            <div className="mt-1 text-xs text-black/55">Verified sellers and advisors.</div>
+                            <div className="mt-1 text-xs text-[color:var(--ink-3)]">Verified sellers and advisors.</div>
                           </div>
                           <div className="grid gap-2 p-4">
                             <Link
@@ -647,7 +647,7 @@ export default function TopBar() {
                             <div className={cx('text-[11px] font-semibold tracking-[0.28em] uppercase', ink3)}>
                               Submissions
                             </div>
-                            <div className="mt-1 text-xs text-black/55">Private by default. Signal over noise.</div>
+                            <div className="mt-1 text-xs text-[color:var(--ink-3)]">Private by default. Signal over noise.</div>
                           </div>
                           <div className="p-4">
                             <Link
@@ -662,9 +662,9 @@ export default function TopBar() {
                               )}
                             >
                               <span className={goldText}>{sellLabel}</span>
-                              <ArrowRight className="h-4 w-4 opacity-75 text-black" />
+                              <ArrowRight className="h-4 w-4 opacity-75 text-[color:var(--ink)]" />
                             </Link>
-                            <div className="mt-2 text-[11px] text-black/55">Verification-first pipeline.</div>
+                            <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">Verification-first pipeline.</div>
                           </div>
                         </div>
                       </div>
@@ -673,13 +673,13 @@ export default function TopBar() {
                 </div>
               </div>
 
-              {/* Minimal nav links (keep it tight) */}
-              <Link href={intelligenceHref} prefetch className={cx(navLink, softTight, ink3)}>
+              {/* Minimal nav links */}
+              <Link href={intelligenceHref} prefetch className={cx(pill, softTight, ink3)}>
                 <ShieldCheck className="h-4 w-4 opacity-70" />
                 <span>Intelligence</span>
               </Link>
 
-              <Link href={journalHref} prefetch className={cx(navLink, softTight, ink3)}>
+              <Link href={journalHref} prefetch className={cx(pill, softTight, ink3)}>
                 <BookOpen className="h-4 w-4 opacity-70" />
                 <span>Journal</span>
               </Link>
@@ -697,8 +697,8 @@ export default function TopBar() {
               >
                 <Command className="h-4 w-4 opacity-70" />
                 <span className="text-[12px] tracking-[0.10em] uppercase">Search</span>
-                <span className="text-black/15">·</span>
-                <span className="font-mono text-xs text-black/70">/</span>
+                <span className="text-[color:var(--ink-3)]/40">·</span>
+                <span className="font-mono text-xs text-[color:var(--ink-2)]">/</span>
               </button>
 
               <Link
@@ -713,7 +713,7 @@ export default function TopBar() {
                 aria-label={sellLabel}
               >
                 <span className={goldText}>{sellLabel}</span>
-                <ArrowRight className="h-4 w-4 opacity-70 text-black" />
+                <ArrowRight className="h-4 w-4 opacity-70 text-[color:var(--ink)]" />
               </Link>
             </div>
 
@@ -758,7 +758,7 @@ export default function TopBar() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_300px_at_26%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
 
           <div className="relative flex items-center justify-between border-b border-[rgba(11,12,16,0.10)] px-5 py-5">
-            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Menu</div>
+            <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-[color:var(--ink-3)]">Menu</div>
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
@@ -779,8 +779,10 @@ export default function TopBar() {
             {/* Search first */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
               <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Search</div>
-                <div className="mt-1 text-xs text-black/55">One box. Typos allowed. Keywords included.</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-[color:var(--ink-3)]">
+                  Search
+                </div>
+                <div className="mt-1 text-xs text-[color:var(--ink-3)]">One box. Typos allowed. Keywords included.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <button
@@ -800,7 +802,7 @@ export default function TopBar() {
                   <span className="inline-flex items-center gap-2">
                     <Command className="h-4 w-4 opacity-75" />
                     Open search
-                    <span className="ml-2 font-mono text-xs text-black/65">/</span>
+                    <span className="ml-2 font-mono text-xs text-[color:var(--ink-2)]">/</span>
                   </span>
                   <ArrowRight className="h-4 w-4 opacity-60" />
                 </button>
@@ -816,7 +818,7 @@ export default function TopBar() {
                   )}
                 >
                   <span className={goldText}>{sellLabel}</span>
-                  <ArrowRight className="h-4 w-4 opacity-70 text-black" />
+                  <ArrowRight className="h-4 w-4 opacity-70 text-[color:var(--ink)]" />
                 </Link>
 
                 <Link
@@ -843,8 +845,10 @@ export default function TopBar() {
             {/* Places */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
               <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Places</div>
-                <div className="mt-1 text-xs text-black/55">Countries and top cities.</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-[color:var(--ink-3)]">
+                  Places
+                </div>
+                <div className="mt-1 text-xs text-[color:var(--ink-3)]">Countries and top cities.</div>
               </div>
 
               <div className="p-4">
@@ -855,7 +859,7 @@ export default function TopBar() {
                       href={countryHref(c)}
                       prefetch
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-full bg-white/80 px-3 py-1.5 text-[12px] text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)] transition"
+                      className="rounded-full bg-white/80 px-3 py-1.5 text-[12px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)] transition"
                     >
                       {c}
                     </Link>
@@ -873,8 +877,8 @@ export default function TopBar() {
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold text-black/80">{c.name}</div>
-                          <div className="truncate text-[11px] text-black/50">{c.country}</div>
+                          <div className="truncate text-sm font-semibold text-[color:var(--ink-2)]">{c.name}</div>
+                          <div className="truncate text-[11px] text-[color:var(--ink-3)]">{c.country}</div>
                         </div>
                         <ArrowRight className="h-4 w-4 opacity-55" />
                       </div>
@@ -887,15 +891,17 @@ export default function TopBar() {
             {/* Minimal nav */}
             <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
               <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
-                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">Navigation</div>
-                <div className="mt-1 text-xs text-black/55">Public entry points.</div>
+                <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-[color:var(--ink-3)]">
+                  Navigation
+                </div>
+                <div className="mt-1 text-xs text-[color:var(--ink-3)]">Public entry points.</div>
               </div>
               <div className="grid gap-2 p-4">
                 <Link
                   href={intelligenceHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 opacity-75" />
@@ -908,7 +914,7 @@ export default function TopBar() {
                   href={journalHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <BookOpen className="h-4 w-4 opacity-75" />
@@ -921,7 +927,7 @@ export default function TopBar() {
                   href={sellersHref}
                   prefetch
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-black/75 ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
+                  className="inline-flex w-full items-center justify-between rounded-2xl bg-white/62 px-4 py-3 text-sm text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] hover:bg-white/92 hover:ring-[rgba(11,12,16,0.16)] transition"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Building2 className="h-4 w-4 opacity-75" />
@@ -936,8 +942,10 @@ export default function TopBar() {
             {onCityPage ? (
               <div className="overflow-hidden rounded-[22px] bg-white/75 ring-1 ring-inset ring-[color:var(--hairline)]">
                 <div className="border-b border-[rgba(11,12,16,0.10)] px-4 py-3">
-                  <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-black/50">City view</div>
-                  <div className="mt-1 text-xs text-black/55">Switch: facts (T) or live market (L).</div>
+                  <div className="text-[11px] font-semibold tracking-[0.28em] uppercase text-[color:var(--ink-3)]">
+                    City view
+                  </div>
+                  <div className="mt-1 text-xs text-[color:var(--ink-3)]">Switch: facts (T) or live market (L).</div>
                 </div>
                 <div className="flex items-center gap-2 p-4">
                   <button
@@ -952,8 +960,8 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'truth'
-                        ? 'bg-white/95 text-black ring-[rgba(11,12,16,0.16)]'
-                        : 'bg-white/80 text-black/70 ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)]',
+                        ? 'bg-white/95 text-[color:var(--ink)] ring-[rgba(11,12,16,0.16)]'
+                        : 'bg-white/80 text-[color:var(--ink-2)] ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)]',
                     )}
                   >
                     Facts <span className="ml-1 font-mono text-[11px] opacity-70">T</span>
@@ -971,8 +979,8 @@ export default function TopBar() {
                     className={cx(
                       'flex-1 rounded-full px-3 py-2 text-sm ring-1 ring-inset transition',
                       activeTab === 'supply'
-                        ? 'bg-white/95 text-black ring-[rgba(11,12,16,0.16)]'
-                        : 'bg-white/80 text-black/70 ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)]',
+                        ? 'bg-white/95 text-[color:var(--ink)] ring-[rgba(11,12,16,0.16)]'
+                        : 'bg-white/80 text-[color:var(--ink-2)] ring-[color:var(--hairline)] hover:bg-white/95 hover:ring-[rgba(11,12,16,0.16)]',
                     )}
                   >
                     Live market <span className="ml-1 font-mono text-[11px] opacity-70">L</span>
@@ -981,7 +989,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-2 text-[11px] text-black/45">Editorial entrance. Search is the product.</div>
+            <div className="pt-2 text-[11px] text-[color:var(--ink-3)]">Editorial entrance. Search is the product.</div>
           </div>
         </div>
       </div>
