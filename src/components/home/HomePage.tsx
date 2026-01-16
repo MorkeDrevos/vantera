@@ -5,7 +5,6 @@ import { Suspense, type ReactNode } from 'react';
 
 import TopBar from '@/components/layout/TopBar';
 import Footer from '@/components/layout/Footer';
-import TrustMarquee from '@/components/trust/TrustMarquee';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -172,15 +171,7 @@ function ListingCardTease({ item }: { item: ListingTease }) {
   );
 }
 
-function QuickLink({
-  href,
-  label,
-  hint,
-}: {
-  href: string;
-  label: string;
-  hint?: string;
-}) {
+function QuickLink({ href, label, hint }: { href: string; label: string; hint?: string }) {
   return (
     <Link
       href={href}
@@ -196,6 +187,24 @@ function QuickLink({
       </div>
       <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
     </Link>
+  );
+}
+
+function DnaPillar({
+  eyebrow,
+  title,
+  body,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="border border-[color:var(--hairline)] bg-white p-5">
+      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
+      <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
+      <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
+    </div>
   );
 }
 
@@ -218,7 +227,7 @@ function FullBleedHero({
         <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
           <Image
             src="/brand/hero.jpg"
-            alt="Vantera - World’s Largest Luxury Marketplace"
+            alt="Vantera - Global €2M+ marketplace"
             fill
             priority
             className="object-cover"
@@ -237,15 +246,15 @@ function FullBleedHero({
                 <div className="flex flex-wrap items-center gap-2">
                   <Chip>€2M+ ONLY</Chip>
                   <Chip>GLOBAL CURATION</Chip>
-                  <Chip>CATALOGUE PRESENTATION</Chip>
+                  <Chip>TRUTH LAYER</Chip>
                 </div>
 
                 <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
-                  A global €2M+ luxury real-estate marketplace, built city by city
+                  A global €2M+ luxury marketplace, powered by intelligence
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  Powered by market intelligence, not listings volume.
+                  Vantera is built city by city. Under the surface is a Truth Layer that verifies, scores, and explains the market.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -322,9 +331,7 @@ function FullBleedHero({
                         </label>
                         <select
                           name="country"
-                          className={cx(
-                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
-                          )}
+                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
                           defaultValue=""
                         >
                           <option value="">Any</option>
@@ -365,12 +372,7 @@ function FullBleedHero({
                         </div>
                         <div className="mt-2 grid gap-2 sm:grid-cols-2">
                           {cities.slice(0, 6).map((c) => (
-                            <QuickLink
-                              key={c.slug}
-                              href={`/city/${c.slug}`}
-                              label={c.name}
-                              hint={c.country}
-                            />
+                            <QuickLink key={c.slug} href={`/city/${c.slug}`} label={c.name} hint={c.country} />
                           ))}
                         </div>
                       </div>
@@ -384,27 +386,78 @@ function FullBleedHero({
               </div>
             </div>
 
-            {/* Trust row (quiet, still powerful) */}
+            {/* Vantera DNA (replaces Institutional benchmark) */}
             <div className="pb-10 sm:pb-12">
-              <TrustMarquee
-                eyebrow="Institutional benchmark"
-                title="Measured against the world’s most established luxury real-estate standards"
-                subtitle="Presentation, disclosure, and credibility are not optional at €2M+."
-                brands={[
-                  { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-                  { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-                  { name: 'Knight Frank', domain: 'knightfrank.com' },
-                  { name: 'Savills', domain: 'savills.com' },
-                  { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-                  { name: 'BARNES', domain: 'barnes-international.com' },
-                  { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-                  { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-                  { name: 'Compass', domain: 'compass.com', invert: false },
-                  { name: 'CBRE', domain: 'cbre.com', invert: false },
-                  { name: 'JLL', domain: 'jll.com', invert: false },
-                ]}
-              />
+              <div className="border border-[color:var(--hairline)] bg-white/84 backdrop-blur-[14px] shadow-[0_40px_140px_rgba(10,10,12,0.10)]">
+                <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
+                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                    VANTERA DNA
+                  </div>
+                  <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
+                    Meet the Truth Layer behind the marketplace
+                  </div>
+                  <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+                    Listings are the surface. Vantera is the intelligence underneath - verification, scoring, and clarity that removes noise.
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-7">
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <DnaPillar
+                      eyebrow="TRUTH LAYER"
+                      title="Verify and explain"
+                      body="Structured facts and consistency checks. Reduce ambiguity, surface gaps, and show what is known vs assumed."
+                    />
+                    <DnaPillar
+                      eyebrow="MARKET INTELLIGENCE"
+                      title="Price, liquidity, risk"
+                      body="City-level signals that turn browsing into decision-making. Not volume - insight. Built city by city."
+                    />
+                    <DnaPillar
+                      eyebrow="SIGNAL OVER NOISE"
+                      title="Curate, don’t flood"
+                      body="€2M+ threshold with editorial restraint. No duplicated feeds, no portal chaos, no endless clutter."
+                    />
+                    <DnaPillar
+                      eyebrow="PRIVATE NETWORK"
+                      title="Discreet by default"
+                      body="Private submissions and verified sellers. Designed for serious buyers and advisors, not mass traffic."
+                    />
+                  </div>
+
+                  <div className="mt-6">
+                    <Hairline />
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-[color:var(--ink-2)]">
+                      This is the foundation of Vantera. The marketplace is how you enter.
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Link
+                        href="/coming-soon?section=intelligence"
+                        className={cx(
+                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                          'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                        )}
+                      >
+                        Explore intelligence (soon)
+                      </Link>
+                      <Link
+                        href="/search"
+                        className={cx(
+                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                          'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                        )}
+                      >
+                        Open search
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            {/* end DNA */}
           </div>
         </div>
 
@@ -511,7 +564,9 @@ export default function HomePage({
     <Shell>
       <FullBleedHero
         cities={topForHero.map((c) => ({ name: c.name, slug: c.slug, country: c.country }))}
-        topCountries={topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']}
+        topCountries={
+          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+        }
       />
 
       {/* Editorial intro */}
@@ -568,7 +623,9 @@ export default function HomePage({
 
             <div className="border border-[color:var(--hairline)] bg-white p-5">
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                Catalogue grade
+              </div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
                 Layouts designed to sell desire, not checkboxes.
               </div>
