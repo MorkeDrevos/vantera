@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
 import { attomFetchJson } from '@/lib/attom/attom';
+import { ingestAttomMediaForListing } from '@/lib/ingest/attomPersistMedia';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -437,46 +438,48 @@ export async function GET(req: Request) {
           continue;
         }
 
-        await prisma.listing.create({
-          data: {
-            slug,
-            source: 'attom',
-            sourceId: bestSourceId,
-            city: { connect: { id: city.id } },
+        const listing = await prisma.listing.create({
+  data: {
+    slug,
+    source: 'attom',
+    sourceId: bestSourceId,
+    city: { connect: { id: city.id } },
 
-            status: 'LIVE',
-            visibility: 'PUBLIC',
-            verification: 'SELF_REPORTED',
+    status: 'LIVE',
+    visibility: 'PUBLIC',
+    verification: 'SELF_REPORTED',
 
-            title,
-            headline: 'Imported from ATTOM - verification and media layers come next.',
-            description: ['ATTOM import (trial)', bestSourceId ? `ATTOM ID: ${bestSourceId}` : null, address]
-              .filter(Boolean)
-              .join('\n'),
+    title,
+    headline: 'Imported from ATTOM - verification and media layers come next.',
+    description: ['ATTOM import (trial)', bestSourceId ? `ATTOM ID: ${bestSourceId}` : null, address]
+      .filter(Boolean)
+      .join('\n'),
 
-            address,
-            addressHidden: true,
+    address,
+    addressHidden: true,
 
-            lat: lat ?? undefined,
-            lng: lng ?? undefined,
+    lat: lat ?? undefined,
+    lng: lng ?? undefined,
 
-            propertyType: propertyType ?? undefined,
-            bedrooms: beds ?? undefined,
-            bathrooms: baths ?? undefined,
+    propertyType: propertyType ?? undefined,
+    bedrooms: beds ?? undefined,
+    bathrooms: baths ?? undefined,
 
-            builtSqft: builtSqft ?? undefined,
-            plotSqft: lotSqft ?? undefined,
+    builtSqft: builtSqft ?? undefined,
+    plotSqft: lotSqft ?? undefined,
 
-            builtM2: builtM2 ?? undefined,
-            plotM2: plotM2 ?? undefined,
+    builtM2: builtM2 ?? undefined,
+    plotM2: plotM2 ?? undefined,
 
-            price: avmValue ?? undefined,
-            currency: 'USD',
+    price: avmValue ?? undefined,
+    currency: 'USD',
 
-            priceConfidence: priceConfidence ?? undefined,
-            dataCompleteness: dataCompleteness ?? undefined,
-          },
-        });
+    priceConfidence: priceConfidence ?? undefined,
+    dataCompleteness: dataCompleteness ?? undefined,
+  },
+});
+
+await ingestAttomMediaForListing(listing.id, bestSourceId);
 
         created += 1;
       } catch (e: any) {
