@@ -492,6 +492,42 @@ export default function IntentHero({
             </div>
           </div>
         </div>
+
+        {/* Bottom action bar (matches your screenshot vibe) */}
+        <div className="relative border-t border-white/10 bg-white/[0.02]">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent,rgba(255,255,255,0.03),transparent)]" />
+          </div>
+
+          <div className="relative flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-7">
+            <div className="text-[12px] text-zinc-400">
+              The marketplace is how you enter. The intelligence is why you stay.
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link
+                href="/intelligence"
+                className={cx(
+                  'inline-flex items-center justify-center rounded-lg border px-4 py-2 text-[12px] font-semibold transition',
+                  'border-black/10 bg-white text-black shadow-[0_12px_28px_rgba(0,0,0,0.14)]',
+                  'hover:shadow-[0_16px_40px_rgba(0,0,0,0.18)]',
+                )}
+              >
+                Explore intelligence (soon)
+              </Link>
+
+              <Link
+                href="/search"
+                className={cx(
+                  'inline-flex items-center justify-center rounded-lg border px-4 py-2 text-[12px] font-semibold transition',
+                  'border-white/12 bg-black/20 text-zinc-100 hover:bg-white/[0.06] hover:border-white/16',
+                )}
+              >
+                Open search
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
