@@ -298,7 +298,7 @@ function HeroBand({ cities, clusters }: { cities: RuntimeCity[]; clusters: Runti
                 <PremiumBadgeRow />
               </div>
 
-              <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.040em] text-white sm:text-6xl lg:text-[86px] lg:leading-[1.00] 2xl:text-[98px]">
+              <h1 className="mt-5 text-balance text-[26px] font-medium tracking-[-0.015em] text-white/90 sm:text-[30px] lg:text-[36px] lg:leading-[1.15]">
                 Private intelligence for the world&apos;s <GoldWord>most valuable assets</GoldWord>
               </h1>
 
