@@ -376,10 +376,10 @@ function FullBleedHero({
                           'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
                         )}
                       >
-                        Explore intelligence
+                        Explore intelligence (soon)
                       </Link>
                       <Link
-                        href="/intelligence"
+                        href="/search"
                         className={cx(
                           'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
                           'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
