@@ -375,7 +375,6 @@ function extractKeywordQuery(raw: string, placeQuery?: string) {
 }
 
 function buildInterpretationLine(parse: ParseResult) {
-  // Invisible assistant: reads like metadata, not chatbot
   const bits: string[] = [];
 
   if (parse.placeQuery) bits.push(parse.placeQuery);
@@ -489,19 +488,15 @@ function buildPlaceHits(args: {
   return hits.slice(0, limit);
 }
 
-function Chip({
-  children,
-  subtle,
-}: {
-  children: React.ReactNode;
-  subtle?: boolean;
-}) {
+function Chip({ children, subtle }: { children: React.ReactNode; subtle?: boolean }) {
   return (
     <span
       className={cx(
         'inline-flex items-center px-2.5 py-1 text-[11px] leading-none whitespace-nowrap',
         'bg-white',
-        subtle ? 'ring-1 ring-inset ring-[rgba(10,10,12,0.10)] text-[color:var(--ink-3)]' : 'ring-1 ring-inset ring-[color:var(--hairline)] text-[color:var(--ink-2)]',
+        subtle
+          ? 'ring-1 ring-inset ring-[rgba(10,10,12,0.10)] text-[color:var(--ink-3)]'
+          : 'ring-1 ring-inset ring-[color:var(--hairline)] text-[color:var(--ink-2)]',
       )}
     >
       {children}
@@ -626,6 +621,9 @@ export default function VanteraOmniSearch({
   const [recents, setRecents] = useState<string[]>([]);
   const [showRefine, setShowRefine] = useState(false);
 
+  // Dropdown placement (prevents hero clipping + keeps it “attached”)
+  const [dropTop, setDropTop] = useState<number>(0);
+
   const listboxId = `${id}-listbox`;
 
   const parse = useMemo<ParseResult>(() => {
@@ -671,6 +669,15 @@ export default function VanteraOmniSearch({
     ],
     [],
   );
+
+  function runSearch() {
+    const raw = q.trim();
+    const href = raw ? buildSearchHref(parse) : '/search';
+    if (raw) pushRecent(raw);
+    setOpen(false);
+    setShowRefine(false);
+    router.push(href);
+  }
 
   function focusAndOpen() {
     inputRef.current?.focus();
@@ -739,6 +746,15 @@ export default function VanteraOmniSearch({
     };
   }, [open]);
 
+  // Measure position so dropdown is “attached” but not clipped by hero overflow
+  useEffect(() => {
+    if (!open) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setDropTop(Math.round(r.bottom + 8));
+  }, [open, q]);
+
   const hits = useMemo(() => {
     if (!open) return [];
 
@@ -759,7 +775,6 @@ export default function VanteraOmniSearch({
       group: 'Action',
     };
 
-    // empty query: keep it tiny - show search + recents + curated cities only
     if (!raw) {
       const topCities = pickCuratedCities(cities, 6);
       const recentHits: PlaceHit[] = recents.map((rq, i) => ({
@@ -797,7 +812,6 @@ export default function VanteraOmniSearch({
     return [searchHit, ...placeHits].slice(0, limit + 1);
   }, [open, q, parse, cities, clusters, limit, recents]);
 
-  // Slim list: no giant grouped blocks. We keep group labels as tiny separators only.
   const slimList = useMemo(() => {
     const out: Array<{ label?: string; item: PlaceHit }> = [];
     let lastGroup: string | undefined;
@@ -828,14 +842,11 @@ export default function VanteraOmniSearch({
       setActive((v) => Math.max(0, v - 1));
       return;
     }
+
+    // ENTER always runs a search (never “random row”)
     if (e.key === 'Enter') {
       e.preventDefault();
-      const h = hits[active];
-      if (!h) return;
-      setOpen(false);
-      setShowRefine(false);
-      if (h.kind === 'search' || h.kind === 'recent') pushRecent(q.trim() || (h.kind === 'recent' ? h.title : ''));
-      router.push(h.href);
+      runSearch();
     }
   }
 
@@ -924,7 +935,6 @@ export default function VanteraOmniSearch({
               aria-activedescendant={activeId}
             />
 
-            {/* Invisible assistant line (metadata, not “chat”) */}
             {open ? (
               <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
                 <span className="truncate">{interpretationLine}</span>
@@ -932,7 +942,22 @@ export default function VanteraOmniSearch({
             ) : null}
           </div>
 
+          {/* Desktop actions */}
           <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              onClick={runSearch}
+              className={cx(
+                'inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition',
+                'bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1)]',
+                'shadow-[0_14px_44px_rgba(10,10,12,0.14)] hover:shadow-[0_18px_62px_rgba(206,160,74,0.18)]',
+              )}
+              aria-label="Search"
+            >
+              <Search className="h-4 w-4 opacity-90" />
+              search
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -973,17 +998,50 @@ export default function VanteraOmniSearch({
               </button>
             ) : null}
           </div>
+
+          {/* Mobile actions */}
+          <div className="flex items-center gap-2 sm:hidden">
+            <button
+              type="button"
+              onClick={runSearch}
+              className={cx(
+                'inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] font-semibold transition',
+                'bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1)]',
+                'shadow-[0_14px_44px_rgba(10,10,12,0.14)]',
+              )}
+              aria-label="Search"
+            >
+              <Search className="h-4 w-4 opacity-90" />
+            </button>
+
+            {q ? (
+              <button
+                type="button"
+                onClick={clear}
+                className={cx(
+                  'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] transition',
+                  'bg-white',
+                  'ring-1 ring-inset ring-[color:var(--hairline)]',
+                  'text-[color:var(--ink-2)]',
+                )}
+              >
+                <X className="h-4 w-4 opacity-70" />
+                clear
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      {/* Dropdown: slim, attached, not a bus */}
+      {/* Dropdown */}
       <div
         className={cx(
-          'absolute left-0 right-0 z-50 mt-2',
+          'fixed left-1/2 z-[9999] mt-2 w-[min(980px,calc(100vw-24px))] -translate-x-1/2',
           open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
           'transition duration-150',
           open ? 'translate-y-0 scale-[1.0]' : 'translate-y-1 scale-[0.985]',
         )}
+        style={{ top: dropTop }}
       >
         <div
           className={cx(
@@ -995,7 +1053,7 @@ export default function VanteraOmniSearch({
         >
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
 
-          {/* Top bar (tight) */}
+          {/* Top bar */}
           <div className="relative flex items-center justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-3">
             <div className="min-w-0">
               <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SEARCH</div>
@@ -1008,7 +1066,6 @@ export default function VanteraOmniSearch({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* mode: compact */}
               <div className="hidden sm:inline-flex rounded-full bg-white p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
                 {(['buy', 'rent', 'sell'] as const).map((m) => {
                   const activeMode = parse.mode === m;
@@ -1060,7 +1117,7 @@ export default function VanteraOmniSearch({
             </div>
           </div>
 
-          {/* Refine row (only if toggled) */}
+          {/* Refine row */}
           {showRefine ? (
             <div className="relative border-b border-[color:var(--hairline)] px-4 py-3">
               <div className="flex items-center justify-between gap-3">
@@ -1074,7 +1131,6 @@ export default function VanteraOmniSearch({
                 </button>
               </div>
 
-              {/* horizontal chips - no big grid */}
               <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {quick.map((x) => (
                   <button
@@ -1097,7 +1153,7 @@ export default function VanteraOmniSearch({
             </div>
           ) : null}
 
-          {/* Results (compact list) */}
+          {/* Results */}
           <div className="relative p-2">
             <div id={listboxId} role="listbox" className="max-h-[320px] overflow-auto p-1">
               {hits.length === 0 ? (
@@ -1106,11 +1162,12 @@ export default function VanteraOmniSearch({
                 </div>
               ) : (
                 <div className="grid gap-1.5">
-                  {slimList.map((row, i) => {
+                  {slimList.map((row) => {
                     const h = row.item;
                     const idxHit = hits.findIndex((x) => x === h);
                     const selected = idxHit === active;
                     const optId = `${id}-opt-${idxHit}`;
+                    const isPrimary = h.kind === 'search';
 
                     return (
                       <React.Fragment key={`${h.kind}:${h.slug}:${h.href}`}>
@@ -1170,8 +1227,15 @@ export default function VanteraOmniSearch({
                               ) : null}
                             </div>
 
-                            <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
-                              open <ArrowRight className="h-4 w-4 opacity-70" />
+                            <span
+                              className={cx(
+                                'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] ring-1 ring-inset transition',
+                                isPrimary
+                                  ? 'bg-[rgba(10,10,12,0.94)] text-white ring-[rgba(10,10,12,0.0)]'
+                                  : 'bg-white text-[color:var(--ink-2)] ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)]',
+                              )}
+                            >
+                              open <ArrowRight className={cx('h-4 w-4', isPrimary ? 'opacity-90' : 'opacity-70')} />
                             </span>
                           </div>
                         </Link>
@@ -1183,7 +1247,6 @@ export default function VanteraOmniSearch({
             </div>
           </div>
 
-          {/* micro-footer: only if you want it (kept tiny) */}
           <div className="relative border-t border-[color:var(--hairline)] px-4 py-3 text-[11px] text-[color:var(--ink-3)]">
             press <span className="font-mono text-[color:var(--ink-2)]">/</span> to focus.
           </div>
