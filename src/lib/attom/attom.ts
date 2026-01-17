@@ -6,22 +6,6 @@ type FetchJsonOpts = {
   query?: Record<string, string | number | boolean | null | undefined>;
 };
 
-export class AttomError extends Error {
-  status: number;
-  statusText: string;
-  url: string;
-  bodyText: string;
-
-  constructor(args: { status: number; statusText: string; url: string; bodyText: string }) {
-    super(`ATTOM ${args.status} ${args.statusText} for ${args.url}\n${args.bodyText.slice(0, 400)}`);
-    this.name = 'AttomError';
-    this.status = args.status;
-    this.statusText = args.statusText;
-    this.url = args.url;
-    this.bodyText = args.bodyText;
-  }
-}
-
 function toQueryString(query: FetchJsonOpts['query']) {
   if (!query) return '';
   const params = new URLSearchParams();
@@ -33,10 +17,11 @@ function toQueryString(query: FetchJsonOpts['query']) {
   return s ? `?${s}` : '';
 }
 
-function looksLikeSuccessWithNoResult(bodyText: string) {
-  const t = (bodyText || '').toLowerCase();
-  // ATTOM commonly returns 460 with "SuccessWithNoResult" in body (JSON or text)
-  return t.includes('successwithnoresult');
+function looksLikeNoResultsPayload(payload: any) {
+  const msg = String(payload?.status?.msg ?? payload?.status?.message ?? '').toLowerCase();
+  // ATTOM sometimes returns 404/400 but with a JSON body like:
+  // { "status": { "code": 0, "msg": "SuccessfulWithoutResult" }, "property": [] }
+  return msg.includes('successfulwithoutresult') || msg.includes('successwithoutresult') || msg.includes('withoutresult');
 }
 
 export async function attomFetchJson<T>({ path, query }: FetchJsonOpts): Promise<T> {
@@ -57,28 +42,29 @@ export async function attomFetchJson<T>({ path, query }: FetchJsonOpts): Promise
     cache: 'no-store',
   });
 
-  // Special-case: ATTOM sometimes uses 460 for "SuccessWithNoResult"
-  // We treat it as a valid empty response, not a failure.
-  if (!res.ok) {
-    const bodyText = await res.text().catch(() => '');
-
-    if (res.status === 460 && looksLikeSuccessWithNoResult(bodyText)) {
-      // Prefer returning JSON if possible (ATTOM often returns JSON even on 460)
-      try {
-        return JSON.parse(bodyText) as T;
-      } catch {
-        // Fallback: return an empty-shaped payload that won't break snapshot consumers
-        return ({ property: [], status: { msg: 'SuccessWithNoResult', code: 460 } } as unknown) as T;
-      }
-    }
-
-    throw new AttomError({
-      status: res.status,
-      statusText: res.statusText,
-      url,
-      bodyText,
-    });
+  // Normal success
+  if (res.ok) {
+    return (await res.json()) as T;
   }
 
-  return (await res.json()) as T;
+  // ATTOM "no results" quirk:
+  // They can return non-2xx (often 404/400) while still sending a JSON body that indicates "SuccessfulWithoutResult".
+  const text = await res.text().catch(() => '');
+  const trimmed = text.trim();
+
+  if (trimmed) {
+    // Try parse JSON body
+    try {
+      const payload = JSON.parse(trimmed);
+
+      // Treat "SuccessfulWithoutResult" as a valid empty response (not an error)
+      if (looksLikeNoResultsPayload(payload)) {
+        return payload as T;
+      }
+    } catch {
+      // ignore parse errors, we'll throw below
+    }
+  }
+
+  throw new Error(`ATTOM ${res.status} ${res.statusText} for ${url}\n${trimmed.slice(0, 400)}`);
 }
