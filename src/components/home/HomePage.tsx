@@ -473,8 +473,28 @@ export default function HomePage({
         }
       />
 
-      {/* Editorial intro */}
+      {/* Keep the 6-city marketfront (FIX, don’t remove) */}
       <section className="py-12 sm:py-16">
+        <div className={WIDE}>
+          <div className="mb-6">
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
+            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+              Six cities to start the marketplace
+            </div>
+            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
+            </div>
+            <div className="mt-6">
+              <Hairline />
+            </div>
+          </div>
+
+          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+        </div>
+      </section>
+
+      {/* Editorial intro */}
+      <section className="pb-16 sm:pb-20">
         <div className={NARROW}>
           <SectionHeader
             eyebrow="VANTERA"
@@ -533,26 +553,6 @@ export default function HomePage({
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Keep the 6-city marketfront (FIX, don’t remove) */}
-      <section className="pb-16 sm:pb-20">
-        <div className={WIDE}>
-          <div className="mb-6">
-            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
-            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-              Six cities to start the marketplace
-            </div>
-            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
-            </div>
-            <div className="mt-6">
-              <Hairline />
-            </div>
-          </div>
-
-          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
         </div>
       </section>
 
