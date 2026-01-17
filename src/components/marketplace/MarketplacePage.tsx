@@ -6,8 +6,10 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
-import TopBar from '@/components/layout/TopBar';
-import Footer from '@/components/layout/Footer';
+// CHANGED: remove TopBar/Footer from page-level (layout already renders them)
+// import TopBar from '@/components/layout/TopBar';
+// import Footer from '@/components/layout/Footer';
+
 import VanteraOmniSearch, { type OmniCity, type OmniRegionCluster } from '@/components/search/VanteraOmniSearch';
 
 import { CITIES } from '@/components/home/cities';
@@ -148,13 +150,7 @@ function DestinationGrid({ items }: { items: DestinationCard[] }) {
   );
 }
 
-function AtelierHero({
-  cities,
-  clusters,
-}: {
-  cities: OmniCity[];
-  clusters: OmniRegionCluster[];
-}) {
+function AtelierHero({ cities, clusters }: { cities: OmniCity[]; clusters: OmniRegionCluster[] }) {
   const featuredCountries = useMemo(() => {
     const preferred = [
       'Spain',
@@ -219,14 +215,7 @@ function AtelierHero({
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
         <div className="relative min-h-[78vh] w-full bg-[color:var(--paper-2)]">
-          <Image
-            src="/brand/hero.jpg"
-            alt="Vantera Marketplace"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
+          <Image src="/brand/hero.jpg" alt="Vantera Marketplace" fill priority className="object-cover" sizes="100vw" />
 
           {/* editorial wash */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.60),rgba(255,255,255,0.22))]" />
@@ -247,8 +236,8 @@ function AtelierHero({
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  The search and browse experience of your lifetime. A single destination for €2M+ properties,
-                  built like an atelier - not a portal.
+                  The search and browse experience of your lifetime. A single destination for €2M+ properties, built like
+                  an atelier - not a portal.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -411,7 +400,8 @@ export default function MarketplacePage() {
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-      <TopBar />
+      {/* CHANGED: remove duplicate TopBar (layout renders it) */}
+      {/* <TopBar /> */}
 
       <main className="w-full">
         <AtelierHero cities={cities} clusters={clusters} />
@@ -484,7 +474,8 @@ export default function MarketplacePage() {
         </section>
       </main>
 
-      <Footer />
+      {/* CHANGED: remove duplicate Footer (layout renders it) */}
+      {/* <Footer /> */}
     </div>
   );
 }
