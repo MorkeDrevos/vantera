@@ -2,26 +2,20 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
-import TopBar from '@/components/layout/TopBar';
-import Footer from '@/components/layout/Footer';
+import AppChrome from '@/components/layout/AppChrome';
 
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
 import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
-
   title: {
     default: 'Vantera · World’s Largest Luxury Marketplace',
     template: '%s · Vantera',
   },
-
   description:
     'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.',
-
   applicationName: 'Vantera',
-
-  // Favicons (served from /public/brand)
   icons: {
     icon: [
       { url: '/brand/favicon.ico' },
@@ -31,9 +25,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/brand/apple-touch-icon.png', sizes: '180x180' }],
     shortcut: [{ url: '/brand/favicon.ico' }],
   },
-
   manifest: '/brand/site.webmanifest',
-
   appleWebApp: {
     title: 'Vantera',
     capable: true,
@@ -58,20 +50,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const org = organizationJsonLd();
 
   return (
-    <html
-      lang="en"
-      className="h-full bg-white antialiased scroll-smooth"
-      suppressHydrationWarning
-    >
+    <html lang="en" className="h-full bg-white antialiased scroll-smooth" suppressHydrationWarning>
       <body className="min-h-[100dvh] bg-white text-slate-950 selection:bg-black/10 selection:text-slate-950">
         {jsonLd(site)}
         {jsonLd(org)}
 
-        {/* App root */}
         <div id="__vantera" className="min-h-[100dvh] bg-white">
-          <TopBar />
-          {children}
-          <Footer />
+          <AppChrome>{children}</AppChrome>
         </div>
       </body>
     </html>
