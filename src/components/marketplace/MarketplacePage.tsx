@@ -232,12 +232,12 @@ function AtelierHero({ cities, clusters }: { cities: OmniCity[]; clusters: OmniR
                 </div>
 
                 <h1 className="mt-5 text-balance text-[42px] font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
-                  World’s Largest Luxury Marketplace
+                  Global property intelligence for the world’s most valuable homes.
                 </h1>
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  The search and browse experience of your lifetime. A single destination for €2M+ properties, built like
-                  an atelier - not a portal.
+                  A private catalogue built city by city, combining verified listings,
+    editorial presentation, and a truth layer designed for clarity over noise.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
