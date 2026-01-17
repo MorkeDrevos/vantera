@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 import VanteraSignatureBackdrop from './VanteraSignatureBackdrop';
+import DnaChapterBreak from './DnaChapterBreak';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -168,9 +169,6 @@ function DnaPillar({
     </div>
   );
 }
-
-// src/components/home/HomePage.tsx
-// (inside the same file, add these two helpers near your micro components)
 
 function DnaSeal() {
   return (
@@ -387,10 +385,6 @@ function FullBleedHero({
               </div>
             </div>
 
-            {/* Vantera DNA */}
-            // src/components/home/HomePage.tsx
-// (inside FullBleedHero, replace the entire {/* Vantera DNA */} section with this)
-
 {/* Vantera DNA - hero-level band */}
 <div className="pb-12 sm:pb-14">
   <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px] shadow-[0_50px_170px_rgba(10,10,12,0.14)]">
@@ -542,16 +536,21 @@ export default function HomePage({
     }));
 
   return (
-    <Shell>
-      <FullBleedHero
-        cities={topForHero}
-        topCountries={
-          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
-        }
-      />
+  <Shell>
+    <FullBleedHero
+      cities={topForHero}
+      topCountries={
+        topCountries.length
+          ? topCountries
+          : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+      }
+    />
 
-      {/* Keep the 6-city marketfront (FIX, don’t remove) */}
-      <section className="py-12 sm:py-16">
+    {/* NEW: DNA chapter break (hero -> marketfront transition) */}
+    <DnaChapterBreak />
+
+    {/* Keep the 6-city marketfront (FIX, don’t remove) */}
+    <section className="py-12 sm:py-16">
         <div className={WIDE}>
           <div className="mb-6">
             <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
