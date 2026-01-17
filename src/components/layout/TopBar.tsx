@@ -252,7 +252,6 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  // 8 flagship cities in Explore mega panel
   const topCities = useMemo(() => cityList.slice(0, 8), [cityList]);
 
   function countryHref(country: string) {
@@ -285,90 +284,88 @@ export default function TopBar() {
     if (pathname !== '/search') router.push('/search');
   }
 
-  // routes (marketplace-first)
   const sellLabel = 'List privately';
   const sellHref = '/coming-soon?flow=sell';
 
   const marketplaceHref = '/marketplace';
   const listingsHref = '/listings';
 
-  // layout
   const BAR_INNER = 'mx-auto flex w-full max-w-[1760px] items-center px-5 sm:px-8 lg:px-14 2xl:px-20';
   const STRIP_INNER = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 
-  // royal header shell (white editorial + visible gold)
-  const barShell = cx(
-    'relative w-full',
-    'bg-white/78 backdrop-blur-[22px]',
-    'shadow-[0_1px_0_rgba(10,10,12,0.06)]',
-    scrolled && 'bg-white/88 shadow-[0_1px_0_rgba(10,10,12,0.08)]',
-  );
-
-  // editorial nav
-  const navLink =
-    'relative inline-flex h-10 items-center px-1 text-[13px] font-medium text-[color:var(--ink-2)] transition ' +
-    'hover:text-[color:var(--ink)]';
-  const navActive =
-    'text-[color:var(--ink)] after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-[rgba(206,160,74,0.88)] after:opacity-100';
-
   const iconMuted = 'text-[color:var(--ink-3)]';
 
-  // right side actions (royal treatment)
-  const signatureSearch =
-    'group relative inline-flex h-10 items-center gap-2 px-4 transition select-none ' +
-    'border border-[rgba(10,10,12,0.12)] bg-white/92 hover:border-[rgba(10,10,12,0.22)]';
+  const barShell = cx(
+    'relative w-full',
+    'bg-white/82 backdrop-blur-[22px]',
+    'supports-[backdrop-filter]:bg-white/72',
+    scrolled && 'bg-white/92 supports-[backdrop-filter]:bg-white/82',
+  );
 
-  const primaryCta =
-    'relative inline-flex h-10 items-center justify-between gap-3 px-5 text-sm font-semibold transition ' +
-    'border border-[rgba(10,10,12,0.16)] text-white ' +
-    'bg-[linear-gradient(180deg,rgba(10,10,12,0.96),rgba(10,10,12,0.88))] hover:bg-[linear-gradient(180deg,rgba(10,10,12,1.0),rgba(10,10,12,0.92))]';
+  const navLink =
+    'relative inline-flex h-10 items-center px-1 text-[13px] font-medium text-[color:var(--ink-2)] transition select-none ' +
+    'hover:text-[color:var(--ink)]';
+  const navActive =
+    'text-[color:var(--ink)] after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.55]';
 
-  // country strip
+  // Royal actions (stronger, still editorial)
+  const signatureSearch = cx(
+    'group relative inline-flex h-10 items-center gap-2 px-4 transition',
+    'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
+    'hover:border-[rgba(10,10,12,0.22)]',
+    'shadow-[0_10px_40px_rgba(10,10,12,0.06)] hover:shadow-[0_16px_60px_rgba(206,160,74,0.12)]',
+  );
+
+  const primaryCta = cx(
+    'group relative inline-flex h-10 items-center justify-between gap-3 px-5 text-sm font-semibold transition',
+    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+    'shadow-[0_14px_55px_rgba(10,10,12,0.10)] hover:shadow-[0_18px_80px_rgba(206,160,74,0.18)]',
+  );
+
   const stripItem =
     'relative inline-flex h-8 items-center px-2 text-[12px] text-[color:var(--ink-2)] transition ' +
     'hover:text-[color:var(--ink)]';
   const stripActive =
-    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px after:bg-[rgba(206,160,74,0.80)] after:opacity-100';
+    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.45]';
 
   const activeCountry = (searchParams?.get('country') ?? '').trim();
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
-        {/* Royal crown stack + gilded edges */}
+        {/* Royal crown + hairlines */}
         <div className="pointer-events-none absolute inset-0">
-          {/* top/bottom hairlines */}
-          <div className="absolute inset-x-0 top-0 h-px bg-[rgba(10,10,12,0.10)]" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-[rgba(10,10,12,0.10)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
-          {/* crown lines */}
+          {/* Crown double-line (visible gold, still tasteful) */}
           <div className="absolute inset-x-0 top-0">
-            <div className="h-[2px] bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent opacity-90" />
-            <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-80" />
+            <div className="h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.55),transparent)] opacity-80" />
+            <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.35),transparent)] opacity-80" />
           </div>
 
-          {/* subtle gold wash so it reads premium everywhere, not only hero */}
-          <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_18%_0%,rgba(206,160,74,0.10),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_82%_0%,rgba(231,201,130,0.08),transparent_58%)]" />
-
-          {/* micro grain */}
-          <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
+          {/* Warm halo under bar (makes it feel expensive over hero) */}
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_220px_at_50%_0%,rgba(206,160,74,0.08),transparent_60%)]" />
         </div>
 
         {/* Row 1 */}
         <div className={cx('relative', BAR_INNER, 'py-3')}>
           {/* Brand */}
-          <Link href="/" prefetch aria-label="Vantera home" className="group relative flex shrink-0 items-center">
-            {/* gold halo behind mark */}
-            <span className="pointer-events-none absolute -inset-x-3 -inset-y-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(120px_36px_at_35%_50%,rgba(206,160,74,0.22),transparent_70%)]" />
-            <Image
-              src="/brand/vantera-logo-dark.svg"
-              alt="Vantera"
-              width={520}
-              height={160}
-              priority={false}
-              className={cx('relative h-[26px] w-auto sm:h-[30px] md:h-[32px]', 'contrast-[1.08]')}
-            />
+          <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
+            <div className="relative">
+              <Image
+  src="/brand/vantera-landscape-black.svg"
+  alt="Vantera"
+  width={420}
+  height={120}
+  priority
+  className={cx(
+    'relative h-[22px] w-auto sm:h-[26px] md:h-[28px]'
+  )}
+/>
+              {/* Tiny gold underline on hover (subtle signature) */}
+              <div className="pointer-events-none absolute -bottom-1 left-0 h-px w-0 bg-[linear-gradient(90deg,rgba(206,160,74,0.85),transparent)] opacity-0 transition-all duration-300 group-hover:w-16 group-hover:opacity-100" />
+            </div>
           </Link>
 
           {/* Desktop nav */}
@@ -392,8 +389,8 @@ export default function TopBar() {
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
                   <span
                     className={cx(
-                      'absolute left-1 right-1 bottom-1 h-px bg-[rgba(206,160,74,0.88)] opacity-0 transition-opacity',
-                      megaOpen && 'opacity-100',
+                      'absolute left-1 right-1 bottom-1 h-px bg-[color:var(--ink)] opacity-0',
+                      megaOpen && 'opacity-[0.35]',
                     )}
                   />
                 </button>
@@ -428,11 +425,10 @@ export default function TopBar() {
                   }}
                   onPointerLeave={closeMegaSoon}
                   className={cx(
-                    'fixed left-1/2 top-[72px] z-[80] w-[1220px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
+                    'fixed left-1/2 top-[72px] z-[80] w-[1240px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'overflow-hidden border border-[rgba(10,10,12,0.14)]',
                     'bg-[rgba(255,255,255,0.985)]',
-                    'backdrop-blur-[12px]',
-                    'shadow-[0_60px_210px_rgba(10,10,12,0.26)]',
+                    'shadow-[0_55px_190px_rgba(10,10,12,0.24)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
                       ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
@@ -441,21 +437,23 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Explore menu"
                 >
-                  {/* crown + depth */}
+                  {/* Royal internal backdrop so it never feels flat */}
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-x-0 top-0">
-                      <div className="h-[2px] bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent opacity-90" />
-                      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-85" />
+                      <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.85),transparent)]" />
+                      <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.45),transparent)]" />
                     </div>
-                    <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(206,160,74,0.12),transparent_60%)]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.68),rgba(255,255,255,0.92))]" />
                     <div className="absolute inset-x-0 bottom-0 h-px bg-[rgba(10,10,12,0.10)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_35%_0%,rgba(206,160,74,0.10),transparent_60%)]" />
+                    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.72),rgba(255,255,255,0.92))]" />
                   </div>
 
                   {/* Header */}
                   <div className="relative flex items-start justify-between gap-6 px-8 py-7">
                     <div className="min-w-0">
-                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">EXPLORE</div>
+                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                        EXPLORE
+                      </div>
                       <div className="mt-3 max-w-[74ch] text-[28px] leading-[1.05] font-semibold text-[color:var(--ink)]">
                         A global luxury marketplace built city by city.
                       </div>
@@ -463,9 +461,6 @@ export default function TopBar() {
                         Countries and flagship cities. Clean entry points.
                       </div>
 
-                      <div className="mt-4 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
-
-                      {/* quick country tabs */}
                       <div className="mt-5 flex flex-wrap gap-2">
                         {countries.map((c) => (
                           <Link
@@ -481,7 +476,7 @@ export default function TopBar() {
                             )}
                             role="menuitem"
                           >
-                            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.38)] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.35),transparent)] opacity-0 transition-opacity hover:opacity-100" />
                             {c}
                           </Link>
                         ))}
@@ -494,7 +489,7 @@ export default function TopBar() {
                         prefetch
                         onClick={() => setMegaOpen(false)}
                         className={cx(
-                          'relative inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                          'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
                           'border border-[rgba(10,10,12,0.12)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                           'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
@@ -507,7 +502,7 @@ export default function TopBar() {
                         type="button"
                         onClick={() => setMegaOpen(false)}
                         className={cx(
-                          'relative inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                          'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
                           'border border-[rgba(10,10,12,0.12)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                           'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
@@ -542,13 +537,16 @@ export default function TopBar() {
                               'group relative px-4 py-3 transition',
                               'border border-[rgba(10,10,12,0.12)] bg-white',
                               'hover:border-[rgba(10,10,12,0.22)]',
+                              'hover:shadow-[0_14px_55px_rgba(10,10,12,0.07)]',
                             )}
                             role="menuitem"
                           >
-                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.35),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">{c.name}</div>
+                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">
+                                  {c.name}
+                                </div>
                                 <div className="mt-0.5 truncate text-[11px] tracking-[0.18em] text-[color:var(--ink-3)]">
                                   {c.country}
                                 </div>
@@ -574,13 +572,14 @@ export default function TopBar() {
                     {/* Right: Search Atelier + submissions */}
                     <div className="col-span-4 space-y-3">
                       <div className="relative border border-[rgba(10,10,12,0.12)] bg-white p-4">
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-0 top-0">
+                          <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.65),transparent)]" />
+                        </div>
+
                         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
                           SEARCH ATELIER
                         </div>
-                        <div className="mt-1 text-xs text-[color:var(--ink-2)]">
-                          The fastest way to serious property intelligence.
-                        </div>
+                        <div className="mt-2 text-xs text-[color:var(--ink-2)]">The fastest way to a serious property.</div>
 
                         <button
                           type="button"
@@ -589,9 +588,10 @@ export default function TopBar() {
                             router.push('/search');
                           }}
                           className={cx(
-                            'mt-4 inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
+                            'mt-4 group inline-flex w-full items-center justify-between px-4 py-3 text-sm transition',
                             'border border-[rgba(10,10,12,0.12)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                             'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                            'shadow-[0_10px_40px_rgba(10,10,12,0.05)] hover:shadow-[0_14px_55px_rgba(206,160,74,0.12)]',
                           )}
                         >
                           <span className="inline-flex items-center gap-2">
@@ -608,27 +608,24 @@ export default function TopBar() {
                       </div>
 
                       <div className="relative border border-[rgba(10,10,12,0.12)] bg-white p-4">
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
+                        <div className="pointer-events-none absolute inset-x-0 top-0">
+                          <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.65),transparent)]" />
+                        </div>
+
                         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
                           SUBMISSIONS
                         </div>
-                        <div className="mt-1 text-xs text-[color:var(--ink-2)]">Private by architecture.</div>
+                        <div className="mt-1 text-xs text-[color:var(--ink-2)]">Private by default. High intent only.</div>
 
                         <Link
                           href={sellHref}
                           prefetch
                           onClick={() => setMegaOpen(false)}
-                          className={cx('mt-4 inline-flex w-full', primaryCta)}
+                          className={primaryCta}
                         >
-                          {/* gold edge + sheen */}
-                          <span className="pointer-events-none absolute inset-0">
-                            <span className="absolute inset-0 ring-1 ring-inset ring-[rgba(206,160,74,0.18)]" />
-                            <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.75)] to-transparent opacity-90" />
-                            <span className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.16),transparent)] opacity-60" />
-                          </span>
-
-                          <span className="relative">{sellLabel}</span>
-                          <ArrowRight className="relative h-4 w-4 opacity-85" />
+                          <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.55),transparent)] opacity-70" />
+                          <span>{sellLabel}</span>
+                          <ArrowRight className="h-4 w-4 opacity-85" />
                         </Link>
                       </div>
                     </div>
@@ -649,9 +646,7 @@ export default function TopBar() {
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
               <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
-                {/* crown microline */}
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent opacity-70" />
-
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.45),transparent)] opacity-60" />
                 <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
                 <span className="text-[13px] text-[color:var(--ink-2)] group-hover:text-[color:var(--ink)] transition">
                   Search
@@ -661,15 +656,9 @@ export default function TopBar() {
               </button>
 
               <Link href={sellHref} prefetch className={primaryCta} aria-label={sellLabel}>
-                {/* gold edge + sheen */}
-                <span className="pointer-events-none absolute inset-0">
-                  <span className="absolute inset-0 ring-1 ring-inset ring-[rgba(206,160,74,0.18)]" />
-                  <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.75)] to-transparent opacity-90" />
-                  <span className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.16),transparent)] opacity-60" />
-                </span>
-
-                <span className="relative">{sellLabel}</span>
-                <ArrowRight className="relative h-4 w-4 opacity-80" />
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.55),transparent)] opacity-70" />
+                <span>{sellLabel}</span>
+                <ArrowRight className="h-4 w-4 opacity-80" />
               </Link>
             </div>
 
@@ -677,27 +666,25 @@ export default function TopBar() {
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
-                'relative inline-flex h-10 items-center gap-2 px-4 text-sm transition lg:hidden',
-                'border border-[rgba(10,10,12,0.12)] bg-white/92 hover:border-[rgba(10,10,12,0.22)]',
+                'inline-flex h-10 items-center gap-2 px-4 text-sm transition lg:hidden',
+                'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px] hover:border-[rgba(10,10,12,0.22)]',
                 'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                'shadow-[0_10px_40px_rgba(10,10,12,0.06)]',
               )}
               aria-expanded={mobileOpen}
               aria-controls="vantera-mobile-menu"
             >
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent opacity-70" />
               Menu
               <ChevronDown className={cx('h-4 w-4 transition text-[color:var(--ink-3)]', mobileOpen && 'rotate-180')} />
             </button>
           </div>
         </div>
 
-        {/* Row 2: countries strip (thin, quiet) */}
+        {/* Row 2: countries strip (thin, quiet, but premium) */}
         <div className="relative hidden lg:block">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[rgba(10,10,12,0.10)]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[rgba(10,10,12,0.10)]" />
-
-          {/* extra crown line in strip */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.35)] to-transparent opacity-80" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.20),transparent)] opacity-60" />
 
           <div className={cx('relative flex h-9 items-center', STRIP_INNER)}>
             <div className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -718,14 +705,14 @@ export default function TopBar() {
             </div>
 
             <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-              <span className="h-1.5 w-1.5 bg-[rgba(206,160,74,0.70)]" />
+              <span className="h-1.5 w-1.5 bg-[rgba(206,160,74,0.55)]" />
               Countries
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile sheet */}
+      {/* Mobile sheet (kept as your structure, only slightly richer shell) */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[90] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
@@ -743,19 +730,19 @@ export default function TopBar() {
         <div
           className={cx(
             'absolute right-0 top-0 h-full w-[92vw] max-w-[480px]',
-            'bg-white backdrop-blur-[20px]',
-            'border-l border-[rgba(10,10,12,0.10)]',
-            'shadow-[-30px_0_140px_rgba(10,10,12,0.16)]',
+            'bg-white/94 backdrop-blur-[22px]',
+            'border-l border-[color:var(--hairline)]',
+            'shadow-[-30px_0_140px_rgba(10,10,12,0.18)]',
             'transition-transform duration-300',
             mobileOpen ? 'translate-x-0' : 'translate-x-full',
           )}
         >
           <div className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(10,10,12,0.05),transparent_62%)]" />
             <div className="absolute inset-x-0 top-0">
-              <div className="h-[2px] bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.90)] to-transparent opacity-85" />
-              <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-80" />
+              <div className="h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.40),transparent)] opacity-80" />
+              <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.22),transparent)] opacity-80" />
             </div>
+            <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_26%_0%,rgba(206,160,74,0.07),transparent_62%)]" />
           </div>
 
           <div className="relative flex items-center justify-between px-5 py-5">
@@ -764,18 +751,17 @@ export default function TopBar() {
               type="button"
               onClick={() => setMobileOpen(false)}
               className={cx(
-                'relative inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
-                'border border-[rgba(10,10,12,0.12)] bg-white hover:border-[rgba(10,10,12,0.22)]',
+                'inline-flex items-center gap-2 px-3.5 py-2 text-[12px] transition',
+                'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                 'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
               )}
             >
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent opacity-70" />
               <X className="h-4 w-4 text-[color:var(--ink-3)]" />
               Close
             </button>
           </div>
 
-          {/* rest of mobile panel exactly as you had it */}
+          {/* Rest of your mobile panel: kept exactly (only shell upgraded) */}
           <div className="relative space-y-4 px-5 pb-6">
             {/* Actions */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
@@ -807,19 +793,12 @@ export default function TopBar() {
                   prefetch
                   onClick={() => setMobileOpen(false)}
                   className={cx(
-                    'relative inline-flex w-full items-center justify-between px-4 py-3 text-sm font-semibold transition',
-                    'border border-[rgba(10,10,12,0.16)] text-white',
-                    'bg-[linear-gradient(180deg,rgba(10,10,12,0.96),rgba(10,10,12,0.88))] hover:bg-[linear-gradient(180deg,rgba(10,10,12,1.0),rgba(10,10,12,0.92))]',
+                    'inline-flex w-full items-center justify-between px-4 py-3 text-sm font-semibold transition',
+                    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
                   )}
                 >
-                  <span className="pointer-events-none absolute inset-0">
-                    <span className="absolute inset-0 ring-1 ring-inset ring-[rgba(206,160,74,0.18)]" />
-                    <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.75)] to-transparent opacity-90" />
-                    <span className="absolute -left-1/3 top-0 h-full w-1/3 rotate-12 bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.16),transparent)] opacity-60" />
-                  </span>
-
-                  <span className="relative">{sellLabel}</span>
-                  <ArrowRight className="relative h-4 w-4 opacity-85" />
+                  <span>{sellLabel}</span>
+                  <ArrowRight className="h-4 w-4 opacity-85" />
                 </Link>
               </div>
             </div>
@@ -889,11 +868,10 @@ export default function TopBar() {
                     prefetch
                     onClick={() => setMobileOpen(false)}
                     className={cx(
-                      'relative px-3.5 py-3 transition',
+                      'px-3.5 py-3 transition',
                       'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
                     )}
                   >
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.35)] to-transparent opacity-70" />
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
                         <div className="truncate text-sm font-semibold text-[color:var(--ink)]">{c.name}</div>
@@ -956,7 +934,7 @@ export default function TopBar() {
               </div>
             ) : null}
 
-            <div className="pt-1 text-[11px] text-[color:var(--ink-3)]">White, editorial, quiet. Gold crown.</div>
+            <div className="pt-1 text-[11px] text-[color:var(--ink-3)]">White, editorial, quiet. Gold crown accents.</div>
           </div>
         </div>
       </div>
