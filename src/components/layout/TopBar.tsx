@@ -354,7 +354,7 @@ export default function TopBar() {
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <div className="relative">
               <Image
-  src="images/brand/vantera-logo-light.svg.svg"
+  src="images/brand/vantera-logo-light.svg"
   alt="Vantera"
   width={420}
   height={120}
