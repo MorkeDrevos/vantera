@@ -362,7 +362,7 @@ export default function TopBar() {
             {/* gold halo behind mark */}
             <span className="pointer-events-none absolute -inset-x-3 -inset-y-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(120px_36px_at_35%_50%,rgba(206,160,74,0.22),transparent_70%)]" />
             <Image
-  src="/brand/vantera-landscape-black.svg"
+  src="/brand/vantera-landscape-with-icon.svg"
   alt="Vantera"
   width={420}
   height={120}
