@@ -56,10 +56,10 @@ function Shell({ children }: { children: ReactNode }) {
       {/* Quiet paper texture + micro grid (luxury editorial) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
         <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 opacity-[0.028] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
+        <div className="absolute inset-0 opacity-[0.026] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
         {/* faint gold paper warmth (royal, still white) */}
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_16%_8%,rgba(206,160,74,0.06),transparent_62%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_16%_8%,rgba(206,160,74,0.07),transparent_62%)]" />
       </div>
 
       <main className="w-full">{children}</main>
@@ -71,16 +71,6 @@ function Shell({ children }: { children: ReactNode }) {
    Micro components
    ========================================================= */
 
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(180px_48px_at_50%_0%,rgba(206,160,74,0.08),transparent_70%)]" />
-      {children}
-    </div>
-  );
-}
-
 function Hairline() {
   return <div className="h-px w-full bg-[color:var(--hairline)]" />;
 }
@@ -89,10 +79,29 @@ function GoldHairline({ className }: { className?: string }) {
   return (
     <div
       className={cx(
-        'h-px w-full bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent',
+        'h-px w-full bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.90)] to-transparent',
         className,
       )}
     />
+  );
+}
+
+function CrownRail({ className }: { className?: string }) {
+  return (
+    <div className={cx('pointer-events-none absolute inset-x-0 top-0', className)}>
+      <div className="h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.60),transparent)] opacity-90" />
+      <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.34),transparent)] opacity-90" />
+    </div>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative inline-flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.70)] to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(180px_52px_at_50%_0%,rgba(206,160,74,0.10),transparent_72%)]" />
+      {children}
+    </div>
   );
 }
 
@@ -134,11 +143,12 @@ function QuickLink({ href, label, hint }: { href: string; label: string; hint?: 
       href={href}
       className={cx(
         'group relative flex items-center justify-between gap-4 px-4 py-3',
-        'border border-[color:var(--hairline)] bg-white',
+        'border border-[rgba(10,10,12,0.12)] bg-white',
         'transition hover:border-[rgba(10,10,12,0.22)]',
+        'hover:shadow-[0_16px_60px_rgba(10,10,12,0.06)]',
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.35)] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
       <div className="min-w-0">
         <div className="text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{label}</div>
@@ -150,31 +160,23 @@ function QuickLink({ href, label, hint }: { href: string; label: string; hint?: 
   );
 }
 
-function DnaPillar({
-  eyebrow,
-  title,
-  body,
-}: {
-  eyebrow: string;
-  title: string;
-  body: string;
-}) {
+function DnaPillar({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
-    <div className="group relative border border-[color:var(--hairline)] bg-white p-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.45)] to-transparent opacity-60" />
+    <div className="group relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white p-5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.48)] to-transparent opacity-70" />
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(680px_220px_at_18%_0%,rgba(206,160,74,0.07),transparent_60%)]" />
       <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
       <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
       <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(520px_180px_at_20%_0%,rgba(206,160,74,0.06),transparent_65%)]" />
     </div>
   );
 }
 
 function DnaSeal() {
   return (
-    <div className="relative inline-flex items-center gap-3 border border-[color:var(--hairline)] bg-white px-4 py-3">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(220px_90px_at_20%_0%,rgba(206,160,74,0.10),transparent_70%)]" />
+    <div className="relative inline-flex items-center gap-3 border border-[rgba(10,10,12,0.12)] bg-white px-4 py-3">
+      <CrownRail />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(260px_120px_at_20%_0%,rgba(206,160,74,0.12),transparent_70%)]" />
 
       <div className="grid h-9 w-9 place-items-center border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.02)]">
         <div className="h-3 w-3 rotate-45 border border-[rgba(206,160,74,0.75)] bg-[rgba(206,160,74,0.08)]" />
@@ -190,8 +192,9 @@ function DnaSeal() {
 
 function TruthLayerMeter() {
   return (
-    <div className="relative border border-[color:var(--hairline)] bg-white px-4 py-3">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.65)] to-transparent" />
+    <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white px-4 py-3">
+      <CrownRail />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
 
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
@@ -202,12 +205,10 @@ function TruthLayerMeter() {
       </div>
 
       <div className="mt-3 h-2 w-full overflow-hidden border border-[rgba(10,10,12,0.16)] bg-[rgba(10,10,12,0.03)]">
-        <div className="h-full w-[74%] bg-[linear-gradient(90deg,rgba(10,10,12,0.90),rgba(206,160,74,0.55))]" />
+        <div className="h-full w-[74%] bg-[linear-gradient(90deg,rgba(10,10,12,0.92),rgba(206,160,74,0.62))]" />
       </div>
 
-      <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">
-        Built to attribute what is verified, inferred and unknown.
-      </div>
+      <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">Built to attribute what is verified, inferred and unknown.</div>
     </div>
   );
 }
@@ -218,31 +219,30 @@ function TruthLayerMeter() {
 
 const BTN_PRIMARY = cx(
   'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white',
-  'hover:bg-[rgba(10,10,12,1.0)]',
-  'shadow-[0_18px_60px_rgba(10,10,12,0.12)] hover:shadow-[0_22px_80px_rgba(206,160,74,0.16)]',
+  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+  'shadow-[0_18px_60px_rgba(10,10,12,0.12)] hover:shadow-[0_22px_90px_rgba(206,160,74,0.18)]',
 );
 
 const BTN_SECONDARY = cx(
   'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
-  'hover:border-[rgba(10,10,12,0.22)]',
+  'border border-[rgba(10,10,12,0.12)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+  'shadow-[0_10px_40px_rgba(10,10,12,0.05)] hover:shadow-[0_16px_60px_rgba(10,10,12,0.06)]',
 );
 
 const BTN_PRIMARY_SM = cx(
   'relative inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
   'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-  'shadow-[0_16px_52px_rgba(10,10,12,0.10)] hover:shadow-[0_20px_70px_rgba(206,160,74,0.14)]',
+  'shadow-[0_16px_52px_rgba(10,10,12,0.10)] hover:shadow-[0_20px_76px_rgba(206,160,74,0.16)]',
 );
 
 const BTN_SECONDARY_SM = cx(
   'relative inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+  'border border-[rgba(10,10,12,0.12)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
 );
 
 /* =========================================================
    HERO (full-bleed, marketplace statement + search atelier)
-   Signature Vantera (no stock city photo)
+   Signature Vantera (ownable)
    ========================================================= */
 
 function FullBleedHero({
@@ -257,9 +257,17 @@ function FullBleedHero({
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        <div className="relative min-h-[820px] w-full bg-[color:var(--paper-2)]">
-          {/* NEW: Signature Vantera backdrop (ownable, not a generic city photo) */}
+        <div className="relative min-h-[840px] w-full bg-[color:var(--paper-2)]">
           <VanteraSignatureBackdrop />
+
+          {/* Hero frame system (this is where the “gold presence” comes from) */}
+          <div className="pointer-events-none absolute inset-0">
+            <CrownRail />
+            <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_6%,rgba(206,160,74,0.12),transparent_60%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.10),rgba(255,255,255,0.58),rgba(255,255,255,0.92))]" />
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+          </div>
 
           <div className={cx('relative z-10', WIDE)}>
             <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
@@ -271,13 +279,14 @@ function FullBleedHero({
                   <Chip>EDITORIAL</Chip>
                 </div>
 
-                <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
+                {/* More JamesEdition: slightly smaller, tighter, calmer */}
+                <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[64px] lg:leading-[0.98]">
                   A global catalogue of exceptional homes, powered by intelligence
                 </h1>
 
-                <div className="mt-5 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
+                <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
 
-                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
+                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
                   Built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market so you can
                   move with clarity - not noise.
                 </p>
@@ -298,17 +307,17 @@ function FullBleedHero({
                 <div
                   className={cx(
                     'relative overflow-hidden',
-                    'border border-[color:var(--hairline)] bg-white/92 backdrop-blur-[14px]',
-                    'shadow-[0_34px_120px_rgba(10,10,12,0.12)]',
+                    // Gold-trim + inner bevel (this makes it read premium instantly)
+                    'border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[16px]',
+                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 top-0">
-                      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent" />
-                      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent" />
-                    </div>
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
+                    <CrownRail />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.11),transparent_62%)]" />
                     <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+                    {/* inner bevel */}
+                    <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.65)]" />
                   </div>
 
                   <div className="relative p-5 sm:p-6">
@@ -321,7 +330,7 @@ function FullBleedHero({
                     </div>
 
                     <form action="/search" method="get" className="mt-5 space-y-3">
-                      <div className="border border-[color:var(--hairline)] bg-white">
+                      <div className="border border-[rgba(10,10,12,0.12)] bg-white">
                         <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                           KEYWORDS
                         </label>
@@ -335,15 +344,13 @@ function FullBleedHero({
                         />
                       </div>
 
-                      <div className="border border-[color:var(--hairline)] bg-white">
+                      <div className="border border-[rgba(10,10,12,0.12)] bg-white">
                         <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
                           COUNTRY
                         </label>
                         <select
                           name="country"
-                          className={cx(
-                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
-                          )}
+                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
                           defaultValue=""
                         >
                           <option value="">Any</option>
@@ -385,88 +392,82 @@ function FullBleedHero({
               </div>
             </div>
 
-{/* Vantera DNA - hero-level band */}
-<div className="pb-12 sm:pb-14">
-  <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px] shadow-[0_50px_170px_rgba(10,10,12,0.14)]">
-    <div className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-x-0 top-0">
-        <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.90)] to-transparent" />
-        <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent" />
-      </div>
-      <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_30%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
-      <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-    </div>
+            {/* Vantera DNA - hero-level band */}
+            <div className="pb-12 sm:pb-14">
+              <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[12px] shadow-[0_60px_190px_rgba(10,10,12,0.16)]">
+                <div className="pointer-events-none absolute inset-0">
+                  <CrownRail />
+                  <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_30%_0%,rgba(206,160,74,0.11),transparent_62%)]" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+                  <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.62)]" />
+                </div>
 
-    {/* Top row: manifesto */}
-    <div className="relative px-6 py-6 sm:px-8 sm:py-7 border-b border-[color:var(--hairline)]">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
-          <div className="mt-2 text-balance text-[24px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[30px]">
-            Intelligence is the product, the marketplace is the interface
-          </div>
-          <div className="mt-2 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Every listing is treated as an asset record with attribution. Calm presentation on top, structured truth underneath.
-          </div>
+                <div className="relative px-6 py-6 sm:px-8 sm:py-7 border-b border-[color:var(--hairline)]">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
+                      <div className="mt-2 text-balance text-[24px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[30px]">
+                        Intelligence is the product, the marketplace is the interface
+                      </div>
+                      <div className="mt-2 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+                        Every listing is treated as an asset record with attribution. Calm presentation on top, structured truth underneath.
+                      </div>
 
-          <div className="mt-5 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.90)] to-transparent" />
-        </div>
+                      <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.90)] to-transparent" />
+                    </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-          <DnaSeal />
-          <TruthLayerMeter />
-        </div>
-      </div>
-    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+                      <DnaSeal />
+                      <TruthLayerMeter />
+                    </div>
+                  </div>
+                </div>
 
-    {/* Bottom row: pillars (bigger, more premium spacing) */}
-    <div className="relative p-6 sm:p-8">
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <DnaPillar
-          eyebrow="TRUTH LAYER"
-          title="Verified versus assumed"
-          body="Clear attribution of what is verified, inferred or unknown with structured checks to remove ambiguity."
-        />
-        <DnaPillar
-          eyebrow="MARKET INTELLIGENCE"
-          title="Markets, with clarity"
-          body="Signals that explain pricing dynamics, liquidity and risk at a city level built progressively as coverage expands."
-        />
-        <DnaPillar
-          eyebrow="SIGNAL OVER NOISE"
-          title="Designed for signal"
-          body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
-        />
-        <DnaPillar
-          eyebrow="PRIVATE NETWORK"
-          title="Private by architecture"
-          body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
-        />
-      </div>
+                <div className="relative p-6 sm:p-8">
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <DnaPillar
+                      eyebrow="TRUTH LAYER"
+                      title="Verified versus assumed"
+                      body="Clear attribution of what is verified, inferred or unknown with structured checks to remove ambiguity."
+                    />
+                    <DnaPillar
+                      eyebrow="MARKET INTELLIGENCE"
+                      title="Markets, with clarity"
+                      body="Signals that explain pricing dynamics, liquidity and risk at a city level built progressively as coverage expands."
+                    />
+                    <DnaPillar
+                      eyebrow="SIGNAL OVER NOISE"
+                      title="Designed for signal"
+                      body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
+                    />
+                    <DnaPillar
+                      eyebrow="PRIVATE NETWORK"
+                      title="Private by architecture"
+                      body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
+                    />
+                  </div>
 
-      <div className="mt-7">
-        <Hairline />
-        <div className="mt-1">
-          <GoldHairline className="opacity-70" />
-        </div>
-      </div>
+                  <div className="mt-7">
+                    <Hairline />
+                    <div className="mt-1">
+                      <GoldHairline className="opacity-75" />
+                    </div>
+                  </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-[color:var(--ink-2)]">
-          The marketplace is how you enter. The intelligence is why you stay.
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
-            Explore intelligence (soon)
-          </Link>
-          <Link href="/search" className={BTN_PRIMARY_SM}>
-            Open search
-          </Link>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-[color:var(--ink-2)]">The marketplace is how you enter. The intelligence is why you stay.</div>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
+                        Explore intelligence (soon)
+                      </Link>
+                      <Link href="/search" className={BTN_PRIMARY_SM}>
+                        Open search
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* end DNA */}
           </div>
         </div>
@@ -536,100 +537,103 @@ export default function HomePage({
     }));
 
   return (
-  <Shell>
-    <FullBleedHero
-      cities={topForHero}
-      topCountries={
-        topCountries.length
-          ? topCountries
-          : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
-      }
-    />
+    <Shell>
+      <FullBleedHero
+        cities={topForHero}
+        topCountries={
+          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+        }
+      />
 
-    <DnaChapterBreak />
+      <DnaChapterBreak />
 
-    <section className="py-12 sm:py-16">
-      <div className={WIDE}>
-        <div className="mb-6">
-          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
-          <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-            Six cities to start the marketplace
+      <section className="py-12 sm:py-16">
+        <div className={WIDE}>
+          <div className="mb-6">
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
+            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+              Six cities to start the marketplace
+            </div>
+            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
+            </div>
+
+            <div className="mt-6">
+              <Hairline />
+              <div className="mt-1">
+                <GoldHairline className="opacity-60" />
+              </div>
+            </div>
           </div>
-          <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Real signals only. Local time, verified supply when available, and a catalogue-first experience.
-          </div>
 
-          <div className="mt-6">
+          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+        </div>
+      </section>
+
+      <section className="pb-16 sm:pb-20">
+        <div className={NARROW}>
+          <SectionHeader
+            eyebrow="VANTERA"
+            title="Search and browse, the way luxury should feel"
+            subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
+            right={
+              <div className="hidden sm:flex items-center gap-3">
+                <Link href="/search" className={BTN_SECONDARY_SM}>
+                  Open search
+                </Link>
+                <Link href="/marketplace" className={BTN_PRIMARY_SM}>
+                  Browse
+                </Link>
+              </div>
+            }
+          />
+
+          <div className="mt-8">
             <Hairline />
             <div className="mt-1">
-              <GoldHairline className="opacity-60" />
+              <GoldHairline className="opacity-55" />
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white p-5">
+              <CrownRail className="opacity-60" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(720px_240px_at_20%_0%,rgba(206,160,74,0.06),transparent_60%)]" />
+              <div className="relative">
+                <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
+                <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
+                <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                  Verification, structured facts and clear attribution of what is known versus assumed.
+                </div>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white p-5">
+              <CrownRail className="opacity-60" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(720px_240px_at_20%_0%,rgba(206,160,74,0.06),transparent_60%)]" />
+              <div className="relative">
+                <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
+                <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
+                <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                  Keywords first, destinations second, and results designed to feel editorial, not noisy.
+                </div>
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white p-5">
+              <CrownRail className="opacity-60" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(720px_240px_at_20%_0%,rgba(206,160,74,0.06),transparent_60%)]" />
+              <div className="relative">
+                <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
+                <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
+                <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                  Big imagery, quiet typography and layouts that sell desire with restraint.
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <CityCardsVirtualizedClient
-          cities={cityCards}
-          mode="featured"
-          columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        />
-      </div>
-    </section>
-
-    <section className="pb-16 sm:pb-20">
-      <div className={NARROW}>
-        <SectionHeader
-          eyebrow="VANTERA"
-          title="Search and browse, the way luxury should feel"
-          subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
-          right={
-            <div className="hidden sm:flex items-center gap-3">
-              <Link href="/search" className={BTN_SECONDARY_SM}>
-                Open search
-              </Link>
-              <Link href="/marketplace" className={BTN_PRIMARY_SM}>
-                Browse
-              </Link>
-            </div>
-          }
-        />
-
-        <div className="mt-8">
-          <Hairline />
-          <div className="mt-1">
-            <GoldHairline className="opacity-55" />
-          </div>
-        </div>
-
-        <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
-            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
-            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-              Verification, structured facts and clear attribution of what is known versus assumed.
-            </div>
-          </div>
-
-          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
-            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
-            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-              Keywords first, destinations second, and results designed to feel editorial, not noisy.
-            </div>
-          </div>
-
-          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
-            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
-            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-              Big imagery, quiet typography and layouts that sell desire with restraint.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </Shell>
-);
+      </section>
+    </Shell>
+  );
 }
