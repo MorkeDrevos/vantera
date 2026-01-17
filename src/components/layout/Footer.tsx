@@ -93,10 +93,8 @@ export default function Footer() {
   </div>
 
   <p className="text-sm text-slate-700 leading-relaxed">
-    Global property intelligence for the world’s most valuable homes.
-    A private catalogue built city by city, combining verified listings,
-    editorial presentation, and a truth layer designed for clarity over noise.
-  </p>
+  A truth layer designed for clarity over noise.
+</p>
 </div>
               </div>
 
