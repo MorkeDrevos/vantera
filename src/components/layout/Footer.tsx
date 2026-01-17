@@ -79,14 +79,12 @@ export default function Footer() {
             <div className="min-w-0">
               <div className="flex items-center gap-3">
                 <div className="relative h-10 w-10">
-  <Image
-    src="/brand/vantera-icon.svg"
-    alt="Vantera"
-    width={40}
-    height={40}
-    className="opacity-90"
-  />
-</div>
+  <img
+  src="/brand/favicon.svg"
+  alt="Vantera"
+  width={40}
+  height={40}
+/>
 
                 <div className="min-w-0">
                   <div className="text-[12px] font-semibold tracking-[0.26em] text-[color:var(--ink)]">
