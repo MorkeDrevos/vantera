@@ -1,3 +1,25 @@
 // src/app/api/attom/ingest/route.ts
-export { runtime, dynamic } from '../ingest/properties/route';
-export { GET } from '../ingest/properties/route';
+import { NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: 'ATTOM ingest endpoint disabled (route wiring pending).',
+    },
+    { status: 410 },
+  );
+}
+
+export async function POST() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: 'ATTOM ingest endpoint disabled (route wiring pending).',
+    },
+    { status: 410 },
+  );
+}
