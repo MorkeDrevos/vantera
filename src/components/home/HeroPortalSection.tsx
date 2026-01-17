@@ -40,7 +40,7 @@ export type HeroCluster = {
   citySlugs: string[];
 };
 
-const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+const DEFAULT_WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 
 const BTN_PRIMARY =
   'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition ' +
@@ -59,10 +59,6 @@ function formatCompactNumber(n?: number | null) {
   if (v >= 1_000_000) return `${Math.round(v / 100_000) / 10}m`;
   if (v >= 1_000) return `${Math.round(v / 100) / 10}k`;
   return `${Math.round(v)}`;
-}
-
-function clamp01(n: number) {
-  return Math.max(0, Math.min(1, n));
 }
 
 function scoreLabel(v?: number | null, kind?: 'liquidity' | 'risk') {
@@ -103,13 +99,26 @@ export default function HeroPortalSection({
   cities,
   clusters,
   rotateMs = 6500,
+  wideClassName,
+  topCountries,
 }: {
   cities: HeroCity[];
   clusters: HeroCluster[];
   rotateMs?: number;
+
+  // from HomePage (so you can control page-wide layout primitives)
+  wideClassName?: string;
+
+  // optional quiet strip (desktop only)
+  topCountries?: string[];
 }) {
+  const WIDE = wideClassName ?? DEFAULT_WIDE;
+
   const safeCities = Array.isArray(cities) ? cities.filter(Boolean) : [];
   const list = safeCities.length ? safeCities : [];
+
+  const safeClusters = Array.isArray(clusters) ? clusters.filter(Boolean) : [];
+  const safeTopCountries = Array.isArray(topCountries) ? topCountries.filter(Boolean) : [];
 
   const [idx, setIdx] = useState(0);
   const [prevIdx, setPrevIdx] = useState<number | null>(null);
@@ -183,8 +192,10 @@ export default function HeroPortalSection({
     const s = active.signals;
     const out: Array<{ label: string; value: string }> = [];
 
-    if (typeof s.liquidity === 'number') out.push({ label: 'LIQ', value: `${Math.round(s.liquidity)}/100 ${scoreLabel(s.liquidity, 'liquidity')}` });
-    if (typeof s.risk === 'number') out.push({ label: 'RISK', value: `${Math.round(s.risk)}/100 ${scoreLabel(s.risk, 'risk')}` });
+    if (typeof s.liquidity === 'number')
+      out.push({ label: 'LIQ', value: `${Math.round(s.liquidity)}/100 ${scoreLabel(s.liquidity, 'liquidity')}` });
+    if (typeof s.risk === 'number')
+      out.push({ label: 'RISK', value: `${Math.round(s.risk)}/100 ${scoreLabel(s.risk, 'risk')}` });
     if (typeof s.verifiedSupply === 'number') out.push({ label: 'VER', value: formatCompactNumber(s.verifiedSupply) });
     if (typeof s.medianEurSqm === 'number') out.push({ label: '€/SQM', value: `€${formatCompactNumber(s.medianEurSqm)}` });
 
@@ -220,11 +231,7 @@ export default function HeroPortalSection({
                   fill
                   priority={false}
                   sizes="100vw"
-                  className={cx(
-                    'object-cover',
-                    // reduce blur: NONE on the image itself
-                    'opacity-100',
-                  )}
+                  className={cx('object-cover', 'opacity-100')}
                 />
               </div>
             ) : null}
@@ -253,16 +260,7 @@ export default function HeroPortalSection({
           </div>
 
           {/* Preload next (hidden) */}
-          {preloadNextSrc ? (
-            <Image
-              src={preloadNextSrc}
-              alt=""
-              width={8}
-              height={8}
-              className="hidden"
-              priority={false}
-            />
-          ) : null}
+          {preloadNextSrc ? <Image src={preloadNextSrc} alt="" width={8} height={8} className="hidden" priority={false} /> : null}
         </div>
 
         {/* Hero frame + crown */}
@@ -275,6 +273,19 @@ export default function HeroPortalSection({
 
         {/* Content */}
         <div className={cx('relative z-10', WIDE)}>
+          {/* quiet countries strip (desktop only) */}
+          {safeTopCountries.length ? (
+            <div className="hidden pt-6 sm:block">
+              <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                <span className="text-[color:var(--ink-3)]">COVERAGE</span>
+                <span className="h-px flex-1 bg-[color:var(--hairline)]" />
+                <span className="max-w-[70%] truncate tracking-[0.22em] text-[color:var(--ink-2)]">
+                  {safeTopCountries.slice(0, 10).join(' · ')}
+                </span>
+              </div>
+            </div>
+          ) : null}
+
           <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
             {/* Left: statement */}
             <div className="lg:col-span-7">
@@ -327,15 +338,11 @@ export default function HeroPortalSection({
                 </div>
 
                 <div className="relative p-5 sm:p-6">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                    SEARCH ATELIER
-                  </div>
+                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">SEARCH ATELIER</div>
                   <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
                     Type and it reacts instantly
                   </div>
-                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    City, lifestyle, budget, keywords. Typos are fine.
-                  </div>
+                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">City, lifestyle, budget, keywords. Typos are fine.</div>
 
                   <div className="mt-4">
                     <VanteraOmniSearch
@@ -347,7 +354,7 @@ export default function HeroPortalSection({
                         tz: 'UTC',
                         priority: 0,
                       }))}
-                      clusters={clusters}
+                      clusters={safeClusters}
                       placeholder="marbella sea view villa under €5m"
                       autoFocus={false}
                     />
@@ -373,9 +380,7 @@ export default function HeroPortalSection({
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.07),transparent_62%)]" />
 
-                    <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                      FEATURED CITY
-                    </div>
+                    <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED CITY</div>
 
                     <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
                       {active ? active.name : 'Editorial'}
@@ -400,10 +405,7 @@ export default function HeroPortalSection({
                   {/* tiny progress rail (desktop only) - makes the rotation noticeable */}
                   <div className="mt-3 hidden sm:block">
                     <div className="h-px w-full bg-[color:var(--hairline)]" />
-                    <div
-                      className="mt-1 h-[2px] w-full bg-[rgba(10,10,12,0.06)]"
-                      aria-hidden="true"
-                    >
+                    <div className="mt-1 h-[2px] w-full bg-[rgba(10,10,12,0.06)]" aria-hidden="true">
                       <div
                         className="h-full bg-[linear-gradient(90deg,rgba(10,10,12,0.92),rgba(206,160,74,0.55))]"
                         style={{
