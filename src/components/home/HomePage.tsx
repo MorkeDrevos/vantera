@@ -70,7 +70,7 @@ function Shell({ children }: { children: ReactNode }) {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
+    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)]">
       {children}
     </div>
   );
@@ -149,6 +149,7 @@ function DnaPillar({
 
 /* =========================================================
    HERO (full-bleed, marketplace statement + search atelier)
+   JamesEdition clean editorial: crisp background, restrained wash
    ========================================================= */
 
 function FullBleedHero({
@@ -163,29 +164,42 @@ function FullBleedHero({
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
+        <div className="relative min-h-[780px] w-full bg-[color:var(--paper-2)]">
           <Image
             src="/brand/hero.jpg"
             alt="Vantera - Global luxury marketplace"
             fill
             priority
-            className="object-cover"
+            className={cx(
+              'object-cover',
+              // Keep the image crisp (no blur), add just a touch of editorial punch
+              'contrast-[1.04] saturate-[1.04]',
+            )}
             sizes="100vw"
           />
 
-          {/* White editorial wash (premium, not dark) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.62),rgba(255,255,255,0.28))]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.44),rgba(255,255,255,0.30),rgba(255,255,255,0.92))]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+          {/* Editorial paper veil (lighter than before, keeps detail) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.86),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.26),rgba(255,255,255,0.12),rgba(255,255,255,0.86))]" />
+
+          {/* Paper sheen + micro grain (texture, not blur) */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.055] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_380px_at_22%_12%,rgba(231,201,130,0.12),transparent_62%)]" />
+
+          {/* JamesEdition-style hairline frame + crown line */}
+          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-70" />
+
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
 
           <div className={cx('relative z-10', WIDE)}>
             <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
               {/* Left: statement */}
               <div className="lg:col-span-7">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Chip>Curated</Chip>
-                  <Chip>Verified</Chip>
-                  <Chip>Global</Chip>
+                  <Chip>GLOBAL CATALOGUE</Chip>
+                  <Chip>TRUTH LAYER</Chip>
+                  <Chip>EDITORIAL</Chip>
                 </div>
 
                 <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
@@ -227,14 +241,13 @@ function FullBleedHero({
                 <div
                   className={cx(
                     'relative overflow-hidden',
-                    'border border-[color:var(--hairline)] bg-white/82 backdrop-blur-[18px]',
-                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
+                    'border border-[color:var(--hairline)] bg-white/88',
+                    'shadow-[0_34px_120px_rgba(10,10,12,0.12)]',
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,10,12,0.14)] to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_20%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
                   </div>
 
                   <div className="relative p-5 sm:p-6">
@@ -269,7 +282,9 @@ function FullBleedHero({
                         </label>
                         <select
                           name="country"
-                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
+                          className={cx(
+                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
+                          )}
                           defaultValue=""
                         >
                           <option value="">Any</option>
@@ -325,14 +340,14 @@ function FullBleedHero({
 
             {/* Vantera DNA */}
             <div className="pb-10 sm:pb-12">
-              <div className="border border-[color:var(--hairline)] bg-white/84 backdrop-blur-[14px] shadow-[0_40px_140px_rgba(10,10,12,0.10)]">
+              <div className="border border-[color:var(--hairline)] bg-white/88 shadow-[0_34px_120px_rgba(10,10,12,0.10)]">
                 <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
                   <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
                   <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
                     Meet the intelligence behind the marketplace
                   </div>
                   <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    Listings are one layer. Vantera adds verification, scoring, and clarity that removes noise.
+                    Listings are one layer. Vantera adds verification, scoring and clarity that removes noise.
                   </div>
                 </div>
 
@@ -489,7 +504,11 @@ export default function HomePage({
             </div>
           </div>
 
-          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+          <CityCardsVirtualizedClient
+            cities={cityCards}
+            mode="featured"
+            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          />
         </div>
       </section>
 
