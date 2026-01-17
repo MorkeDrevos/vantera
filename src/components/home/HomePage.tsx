@@ -546,91 +546,90 @@ export default function HomePage({
       }
     />
 
-    {/* NEW: DNA chapter break (hero -> marketfront transition) */}
     <DnaChapterBreak />
 
-    {/* Keep the 6-city marketfront (FIX, don’t remove) */}
     <section className="py-12 sm:py-16">
-        <div className={WIDE}>
-          <div className="mb-6">
-            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
-            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-              Six cities to start the marketplace
-            </div>
-            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
-            </div>
-
-            <div className="mt-6">
-              <Hairline />
-              <div className="mt-1">
-                <GoldHairline className="opacity-60" />
-              </div>
-            </div>
+      <div className={WIDE}>
+        <div className="mb-6">
+          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
+          <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+            Six cities to start the marketplace
+          </div>
+          <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+            Real signals only. Local time, verified supply when available, and a catalogue-first experience.
           </div>
 
-          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
-        </div>
-      </section>
-
-      {/* Editorial intro */}
-      <section className="pb-16 sm:pb-20">
-        <div className={NARROW}>
-          <SectionHeader
-            eyebrow="VANTERA"
-            title="Search and browse, the way luxury should feel"
-            subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
-            right={
-              <div className="hidden sm:flex items-center gap-3">
-                <Link href="/search" className={BTN_SECONDARY_SM}>
-                  Open search
-                </Link>
-                <Link href="/marketplace" className={BTN_PRIMARY_SM}>
-                  Browse
-                </Link>
-              </div>
-            }
-          />
-
-          <div className="mt-8">
+          <div className="mt-6">
             <Hairline />
             <div className="mt-1">
-              <GoldHairline className="opacity-55" />
-            </div>
-          </div>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
-              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Verification, structured facts and clear attribution of what is known versus assumed.
-              </div>
-            </div>
-
-            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
-              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Keywords first, destinations second, and results designed to feel editorial, not noisy.
-              </div>
-            </div>
-
-            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
-              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
-              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
-              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                Big imagery, quiet typography and layouts that sell desire with restraint.
-              </div>
+              <GoldHairline className="opacity-60" />
             </div>
           </div>
         </div>
-      </section>
 
-      {/* (Per your “img 4” note) Do NOT render the full city grid anywhere on home. */}
-    </Shell>
-  );
+        <CityCardsVirtualizedClient
+          cities={cityCards}
+          mode="featured"
+          columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        />
+      </div>
+    </section>
+
+    <section className="pb-16 sm:pb-20">
+      <div className={NARROW}>
+        <SectionHeader
+          eyebrow="VANTERA"
+          title="Search and browse, the way luxury should feel"
+          subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
+          right={
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/search" className={BTN_SECONDARY_SM}>
+                Open search
+              </Link>
+              <Link href="/marketplace" className={BTN_PRIMARY_SM}>
+                Browse
+              </Link>
+            </div>
+          }
+        />
+
+        <div className="mt-8">
+          <Hairline />
+          <div className="mt-1">
+            <GoldHairline className="opacity-55" />
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
+            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
+            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Verification, structured facts and clear attribution of what is known versus assumed.
+            </div>
+          </div>
+
+          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
+            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
+            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Keywords first, destinations second, and results designed to feel editorial, not noisy.
+            </div>
+          </div>
+
+          <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
+            <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
+            <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
+            <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Big imagery, quiet typography and layouts that sell desire with restraint.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Shell>
+);
 }
