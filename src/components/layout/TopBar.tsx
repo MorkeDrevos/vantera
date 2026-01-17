@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ArrowRight, ChevronDown, Command, Globe, Search, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, Command, Search, X } from 'lucide-react';
 
 import { CITIES } from '@/components/home/cities';
 
@@ -252,7 +252,7 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  // CHANGED: 8 flagship cities in Places mega panel (was 12)
+  // 8 flagship cities in Explore mega panel
   const topCities = useMemo(() => cityList.slice(0, 8), [cityList]);
 
   function countryHref(country: string) {
@@ -352,7 +352,7 @@ export default function TopBar() {
           {/* Desktop nav */}
           <nav className="hidden flex-1 items-center justify-center lg:flex" aria-label="Primary">
             <div className="flex items-center gap-7">
-              {/* Places (mega) */}
+              {/* Explore (mega) */}
               <div ref={wrapRef} className="relative" onPointerEnter={openMegaSoon} onPointerLeave={closeMegaSoon}>
                 <button
                   type="button"
@@ -366,8 +366,8 @@ export default function TopBar() {
                   aria-expanded={megaOpen}
                   aria-haspopup="menu"
                 >
-                  <Globe className={cx('h-4 w-4', iconMuted)} />
-                  <span>Places</span>
+                  {/* CHANGED: removed Globe icon + renamed Places -> Explore */}
+                  <span>Explore</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
                   <span
                     className={cx(
@@ -410,9 +410,7 @@ export default function TopBar() {
                   className={cx(
                     'fixed left-1/2 top-[72px] z-[80] w-[1220px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'overflow-hidden border border-[rgba(10,10,12,0.14)]',
-                    // Key fix: make it "porcelain" not see-through
                     'bg-[rgba(255,255,255,0.985)]',
-                    // Keep blur only as a luxury detail, not as transparency
                     'backdrop-blur-[10px]',
                     'shadow-[0_50px_180px_rgba(10,10,12,0.22)]',
                     'transition-[transform,opacity] duration-200',
@@ -421,7 +419,7 @@ export default function TopBar() {
                       : 'pointer-events-none -translate-y-2 scale-[0.99] opacity-0',
                   )}
                   role="menu"
-                  aria-label="Places menu"
+                  aria-label="Explore menu"
                 >
                   {/* Internal soft depth (still readable) */}
                   <div className="pointer-events-none absolute inset-0">
@@ -435,7 +433,7 @@ export default function TopBar() {
                   <div className="relative flex items-start justify-between gap-6 px-8 py-7">
                     <div className="min-w-0">
                       <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                        PLACES
+                        EXPLORE
                       </div>
                       <div className="mt-3 max-w-[74ch] text-[28px] leading-[1.05] font-semibold text-[color:var(--ink)]">
                         A global luxury marketplace built city by city.
@@ -454,7 +452,6 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'px-3.5 py-2 text-[12px] transition',
-                              // Make chips solid so hero never bleeds into text
                               'border border-[rgba(10,10,12,0.12)] bg-white',
                               'hover:border-[rgba(10,10,12,0.22)]',
                               'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
@@ -519,7 +516,6 @@ export default function TopBar() {
                             onClick={() => setMegaOpen(false)}
                             className={cx(
                               'group px-4 py-3 transition',
-                              // Solid card backgrounds for perfect readability
                               'border border-[rgba(10,10,12,0.12)] bg-white',
                               'hover:border-[rgba(10,10,12,0.22)]',
                             )}
@@ -534,8 +530,6 @@ export default function TopBar() {
                                   {c.country}
                                 </div>
                               </div>
-
-                              {/* CHANGED: removed arrow icon from city links */}
                             </div>
                           </Link>
                         ))}
@@ -549,7 +543,6 @@ export default function TopBar() {
                           onClick={() => setMegaOpen(false)}
                           className="inline-flex items-center gap-2 text-xs text-[color:var(--ink-2)] hover:text-[color:var(--ink)] transition"
                         >
-                          {/* CHANGED: removed arrow icon from Browse all */}
                           Browse all
                         </Link>
                       </div>
@@ -806,9 +799,9 @@ export default function TopBar() {
               </div>
             </div>
 
-            {/* Places */}
+            {/* Explore */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
-              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Places</div>
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Explore</div>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {countries.map((c) => (
