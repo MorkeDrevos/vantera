@@ -4,6 +4,12 @@ import { NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+/**
+ * ATTOM ingest endpoint
+ * Currently disabled to unblock production builds.
+ * Proper ingest wiring should live in /src/lib and be imported here later.
+ */
+
 export async function GET() {
   return NextResponse.json(
     {
