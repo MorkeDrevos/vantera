@@ -19,7 +19,7 @@ import {
   Clock,
 } from 'lucide-react';
 
-type PlaceKind = 'city' | 'region' | 'search' | 'recent' | 'suggestion';
+type PlaceKind = 'city' | 'region' | 'search' | 'recent';
 
 export type OmniCity = {
   slug: string;
@@ -59,9 +59,7 @@ type ParseResult = {
   tokens: string[];
   placeQuery?: string;
 
-  budgetMin?: number;
   budgetMax?: number;
-
   bedroomsMin?: number;
   propertyType?: 'villa' | 'apartment' | 'penthouse' | 'plot' | 'house' | 'any';
   needs: NeedTag[];
@@ -79,8 +77,7 @@ type PlaceHit = {
   reasons: string[];
   href: string;
   icon?: 'pin' | 'sparkles' | 'search' | 'recent';
-  group?: 'Action' | 'Suggestions' | 'Cities' | 'Regions' | 'Recent';
-  onPick?: () => void; // local-only actions (e.g. apply suggestion)
+  group?: 'Action' | 'Cities' | 'Regions' | 'Recent';
 };
 
 function cx(...parts: Array<string | false | null | undefined>) {
@@ -104,68 +101,28 @@ function tokenize(input: string) {
     .filter(Boolean);
 }
 
-function parseMoneyToken(raw: string): number | undefined {
-  // Accept: 5m, 5.5m, 500k, 2500000, 2,5m (EU comma)
-  const s = normalize(raw).replace(/€/g, '').replace(/\s+/g, '').replace(/,/g, '.');
-  const m = s.match(/^([0-9]+(?:\.[0-9]+)?)\s*(m|k)?$/);
-  if (!m) return undefined;
-  const n = Number(m[1]);
-  const unit = m[2];
-  if (!Number.isFinite(n)) return undefined;
-  if (unit === 'm') return Math.round(n * 1_000_000);
-  if (unit === 'k') return Math.round(n * 1_000);
-  return Math.round(n);
-}
+function parseBudgetMax(raw: string): number | undefined {
+  const s = normalize(raw).replace(/€/g, '').replace(/\s+/g, ' ');
 
-function parseBudgetRange(raw: string): { min?: number; max?: number } {
-  const s = normalize(raw).replace(/€/g, '').replace(/\s+/g, ' ').trim();
-
-  // between 3m and 6m
-  const between = s.match(/(?:between)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?\s*(?:and|to)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?/);
-  if (between) {
-    const a = parseMoneyToken(`${between[1]}${between[2] ?? ''}`);
-    const b = parseMoneyToken(`${between[3]}${between[4] ?? ''}`);
-    if (a && b) return { min: Math.min(a, b), max: Math.max(a, b) };
+  const m = s.match(/(?:under|max|<|<=|below)\s*([0-9]+(?:\.[0-9]+)?)\s*(m|k)?/);
+  if (m) {
+    const n = Number(m[1]);
+    const unit = m[2];
+    if (!Number.isFinite(n)) return undefined;
+    if (unit === 'm') return Math.round(n * 1_000_000);
+    if (unit === 'k') return Math.round(n * 1_000);
+    return Math.round(n);
   }
 
-  // 3m-6m / 3m – 6m / 3-6m (unit on right allowed)
-  const dash = s.match(/([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?\s*(?:-|–|—)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?/);
-  if (dash) {
-    const a = parseMoneyToken(`${dash[1]}${dash[2] ?? ''}`);
-    const b = parseMoneyToken(`${dash[3]}${dash[4] ?? dash[2] ?? ''}`);
-    if (a && b) return { min: Math.min(a, b), max: Math.max(a, b) };
+  const m2 = s.match(/([0-9]+(?:\.[0-9]+)?)\s*(m|k)\b/);
+  if (m2) {
+    const n = Number(m2[1]);
+    const unit = m2[2];
+    if (!Number.isFinite(n)) return undefined;
+    return unit === 'm' ? Math.round(n * 1_000_000) : Math.round(n * 1_000);
   }
 
-  // from 3m to 6m
-  const fromTo = s.match(/(?:from|min)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?(?:\s*(?:to|until|up to|max)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?)?/);
-  if (fromTo) {
-    const min = parseMoneyToken(`${fromTo[1]}${fromTo[2] ?? ''}`);
-    const max = fromTo[3] ? parseMoneyToken(`${fromTo[3]}${fromTo[4] ?? fromTo[2] ?? ''}`) : undefined;
-    if (min || max) return { min: min ?? undefined, max: max ?? undefined };
-  }
-
-  // under / max / below / <= 5m
-  const under = s.match(/(?:under|max|<=|<|below|up to)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?/);
-  if (under) {
-    const max = parseMoneyToken(`${under[1]}${under[2] ?? ''}`);
-    if (max) return { max };
-  }
-
-  // over / min / >= 3m
-  const over = s.match(/(?:over|min|>=|>|from)\s*([0-9]+(?:[.,][0-9]+)?)\s*(m|k)?/);
-  if (over) {
-    const min = parseMoneyToken(`${over[1]}${over[2] ?? ''}`);
-    if (min) return { min };
-  }
-
-  // lone money token: "5m"
-  const lone = s.match(/\b([0-9]+(?:[.,][0-9]+)?)\s*(m|k)\b/);
-  if (lone) {
-    const max = parseMoneyToken(`${lone[1]}${lone[2] ?? ''}`);
-    if (max) return { max };
-  }
-
-  return {};
+  return undefined;
 }
 
 function parseBedroomsMin(tokens: string[]) {
@@ -213,17 +170,17 @@ function extractNeeds(tokens: string[]): NeedTag[] {
   const dict: Array<[NeedTag, string[]]> = [
     ['beach', ['beach', 'beachfront']],
     ['waterfront', ['waterfront', 'seafront']],
-    ['sea_view', ['seaview', 'sea-view', 'sea', 'view', 'views', 'sea-views', 'seaviews']],
+    ['sea_view', ['seaview', 'sea-view', 'views', 'view']],
     ['golf', ['golf']],
     ['schools', ['schools', 'school', 'international', 'kids', 'family']],
     ['walkable', ['walkable', 'walk', 'walking']],
     ['privacy', ['privacy', 'private']],
     ['gated', ['gated', 'security', 'guarded']],
-    ['investment', ['investment', 'invest', 'value']],
+    ['investment', ['investment', 'invest']],
     ['yield', ['yield', 'roi', 'cashflow']],
-    ['new_build', ['newbuild', 'new', 'development', 'offplan', 'off-plan', 'newbuilds']],
-    ['quiet', ['quiet', 'calm', 'low-noise', 'lownoise', 'peaceful']],
-    ['ultra_prime', ['ultraprime', 'ultra-prime', 'trophy', 'prime', 'ultra']],
+    ['new_build', ['newbuild', 'new', 'development', 'offplan', 'off-plan']],
+    ['quiet', ['quiet', 'calm', 'low-noise', 'lownoise']],
+    ['ultra_prime', ['ultraprime', 'ultra-prime', 'trophy', 'prime']],
   ];
 
   const found: NeedTag[] = [];
@@ -238,13 +195,6 @@ function formatMoney(n?: number) {
   if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)}m`;
   if (n >= 1_000) return `€${Math.round(n / 1_000)}k`;
   return `€${n}`;
-}
-
-function formatBudgetLine(min?: number, max?: number) {
-  if (min && max) return `${formatMoney(min)} to ${formatMoney(max)}`;
-  if (min) return `from ${formatMoney(min)}`;
-  if (max) return `under ${formatMoney(max)}`;
-  return '—';
 }
 
 function editDistance(a: string, b: string) {
@@ -262,7 +212,7 @@ function editDistance(a: string, b: string) {
     dp[0] = i;
     for (let j = 1; j <= n; j++) {
       const tmp = dp[j];
-      const cost = aa[i - 1] === bb[j - 1] ? 0 : 1;
+      const cost = aa[i - 1] === bb[i - 1] ? 0 : 1;
       dp[j] = Math.min(dp[j] + 1, dp[j - 1] + 1, prev + cost);
       prev = tmp;
     }
@@ -317,11 +267,8 @@ function placeStopwords() {
     'min',
     'from',
     'to',
-    'between',
     '<',
     '<=',
-    '>',
-    '>=',
     'buy',
     'rent',
     'sell',
@@ -347,7 +294,6 @@ function placeStopwords() {
     'seafront',
     'seaview',
     'sea-view',
-    'sea',
     'view',
     'views',
     'golf',
@@ -366,7 +312,6 @@ function placeStopwords() {
     'guarded',
     'investment',
     'invest',
-    'value',
     'yield',
     'roi',
     'cashflow',
@@ -406,7 +351,7 @@ function extractPlaceQuery(raw: string) {
 
   for (let i = 0; i < tokens.length; i++) {
     const t = tokens[i];
-    if (/^[0-9]+(?:[.,][0-9]+)?$/.test(t)) break;
+    if (/^[0-9]+(?:\.[0-9]+)?$/.test(t)) break;
     if (stop.has(t)) break;
 
     out.push(t);
@@ -435,11 +380,11 @@ function buildInterpretationLine(parse: ParseResult) {
   if (parse.placeQuery) bits.push(parse.placeQuery);
   if (parse.propertyType && parse.propertyType !== 'any') bits.push(parse.propertyType);
   if (parse.bedroomsMin) bits.push(`${parse.bedroomsMin}+ beds`);
-  if (parse.budgetMin || parse.budgetMax) bits.push(formatBudgetLine(parse.budgetMin, parse.budgetMax));
+  if (parse.budgetMax) bits.push(`under ${formatMoney(parse.budgetMax)}`);
   if (parse.needs.length) bits.push(parse.needs.map((n) => n.replace('_', ' ')).join(', '));
-  if (parse.keywordQuery && parse.keywordQuery.length >= 2) bits.push(`keywords: ${parse.keywordQuery}`);
+  if (parse.keywordQuery && parse.keywordQuery.length >= 2) bits.push(parse.keywordQuery);
 
-  return bits.length ? bits.join(' · ') : 'city, lifestyle, budget, keywords. typos ok.';
+  return bits.length ? bits.join(' · ') : 'city · lifestyle · budget · keywords (typos ok)';
 }
 
 function cityMatchText(c: OmniCity) {
@@ -460,7 +405,6 @@ function buildSearchHref(parse: ParseResult) {
   if (parse.placeQuery) params.set('place', parse.placeQuery);
   if (parse.keywordQuery) params.set('kw', parse.keywordQuery);
 
-  if (parse.budgetMin) params.set('min', String(parse.budgetMin));
   if (parse.budgetMax) params.set('max', String(parse.budgetMax));
   if (parse.bedroomsMin) params.set('beds', String(parse.bedroomsMin));
   if (parse.propertyType && parse.propertyType !== 'any') params.set('type', parse.propertyType);
@@ -494,8 +438,8 @@ function buildPlaceHits(args: {
     const score = placeScore + pr + rawTie + (hasPlace ? 14 : 0);
 
     const reasons: string[] = [];
-    if (placeScore >= 130) reasons.push('direct match');
-    else if (placeScore >= 95) reasons.push('strong match');
+    if (placeScore >= 130) reasons.push('direct');
+    else if (placeScore >= 95) reasons.push('strong');
     else reasons.push('relevant');
     if (pr > 0) reasons.push('featured');
 
@@ -522,8 +466,8 @@ function buildPlaceHits(args: {
     const score = placeScore + pr + rawTie;
 
     const reasons: string[] = [];
-    if (placeScore >= 130) reasons.push('direct match');
-    else if (placeScore >= 95) reasons.push('strong match');
+    if (placeScore >= 130) reasons.push('direct');
+    else if (placeScore >= 95) reasons.push('strong');
     else reasons.push('relevant');
     reasons.push(`${r.citySlugs.length} cities`);
 
@@ -545,7 +489,7 @@ function buildPlaceHits(args: {
 }
 
 /* =========================================================
-   UI helpers (royal white)
+   UI helpers (royal white, calm)
    ========================================================= */
 
 function Chip({ children }: { children: React.ReactNode }) {
@@ -597,7 +541,7 @@ type QuickAction = {
   icon: React.ReactNode;
 };
 
-const RECENTS_KEY = 'vantera.omni.recents.v2';
+const RECENTS_KEY = 'vantera.omni.recents.v1';
 
 function readRecents(): string[] {
   try {
@@ -652,44 +596,56 @@ function pickCuratedCities(cities: OmniCity[], limit = 6): OmniCity[] {
   return picked.slice(0, limit);
 }
 
-function bestDidYouMeanCity(raw: string, cities: OmniCity[]) {
-  const q = raw.trim();
-  if (!q) return null;
+type SignalChip = {
+  label: string;
+  patch: string;
+  icon: React.ReactNode;
+};
 
-  // Only attempt if query looks like it starts with a place-ish token
-  const guess = extractPlaceQuery(q) ?? q.split(' ')[0] ?? '';
-  const g = guess.trim();
-  if (g.length < 3) return null;
+function buildSignalStrip(parse: ParseResult, curatedCities: OmniCity[]): SignalChip[] {
+  const out: SignalChip[] = [];
 
-  let best: { city: OmniCity; score: number } | null = null;
+  const hasType = parse.propertyType && parse.propertyType !== 'any';
+  const hasBudget = Boolean(parse.budgetMax);
+  const hasBeds = Boolean(parse.bedroomsMin);
+  const hasPlace = Boolean(parse.placeQuery && parse.placeQuery.length >= 2);
+  const needsSet = new Set(parse.needs);
 
-  for (const c of cities) {
-    const t = cityMatchText(c);
-    const sc = fuzzyTokenScore(g, t);
-    if (!best || sc > best.score) best = { city: c, score: sc };
+  // If no place, show curated cities first (acts like a silent guide)
+  if (!hasPlace) {
+    for (const c of curatedCities.slice(0, 5)) {
+      out.push({
+        label: c.name,
+        patch: c.name,
+        icon: <MapPin className="h-4 w-4 opacity-70" />,
+      });
+    }
   }
 
-  if (!best) return null;
+  // If missing type/budget/beds, offer one-step anchors (keep it tight)
+  if (!hasType) out.push({ label: 'villa', patch: 'villa', icon: <Home className="h-4 w-4 opacity-70" /> });
+  if (!hasBudget) out.push({ label: 'under €5m', patch: 'under 5m', icon: <Sparkles className="h-4 w-4 opacity-70" /> });
+  if (!hasBeds) out.push({ label: '4+ beds', patch: '4 beds', icon: <Sparkles className="h-4 w-4 opacity-70" /> });
 
-  // Only show if it’s strong AND the typed token isn’t already basically the city name
-  const same = normalize(best.city.name) === normalize(g) || normalize(best.city.slug.replace(/-/g, ' ')) === normalize(g);
-  if (same) return null;
+  // Needs - only add what is missing (max 3)
+  const needCandidates: Array<[NeedTag, string, React.ReactNode]> = [
+    ['sea_view', 'sea view', <Waves className="h-4 w-4 opacity-70" />],
+    ['waterfront', 'waterfront', <Waves className="h-4 w-4 opacity-70" />],
+    ['gated', 'gated', <Shield className="h-4 w-4 opacity-70" />],
+    ['privacy', 'privacy', <Shield className="h-4 w-4 opacity-70" />],
+    ['golf', 'golf', <Sparkles className="h-4 w-4 opacity-70" />],
+  ];
 
-  if (best.score >= 110) return best.city;
-  return null;
-}
+  let addedNeeds = 0;
+  for (const [tag, word, icon] of needCandidates) {
+    if (addedNeeds >= 3) break;
+    if (!needsSet.has(tag)) {
+      out.push({ label: word, patch: word, icon });
+      addedNeeds++;
+    }
+  }
 
-/* =========================================================
-   Portal dropdown positioning (fixes "typing but nothing happens"
-   when parent has overflow hidden / complex hero layouts)
-   ========================================================= */
-
-type AnchorRect = { top: number; left: number; width: number; height: number };
-
-function getAnchorRect(el: HTMLElement | null): AnchorRect | null {
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  return { top: r.top, left: r.left, width: r.width, height: r.height };
+  return out.slice(0, 10);
 }
 
 export default function VanteraOmniSearch({
@@ -718,8 +674,10 @@ export default function VanteraOmniSearch({
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
   const [recents, setRecents] = useState<string[]>([]);
-  const [anchor, setAnchor] = useState<AnchorRect | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Portal positioning (fix clipping and weird placements)
+  const [anchor, setAnchor] = useState<{ left: number; top: number; width: number } | null>(null);
 
   const listboxId = `${id}-listbox`;
 
@@ -729,7 +687,7 @@ export default function VanteraOmniSearch({
 
     const mode = detectMode(tokens);
     const bedroomsMin = parseBedroomsMin(tokens);
-    const { min: budgetMin, max: budgetMax } = parseBudgetRange(raw);
+    const budgetMax = parseBudgetMax(raw);
     const propertyType = parsePropertyType(tokens);
     const needs = extractNeeds(tokens);
 
@@ -741,7 +699,6 @@ export default function VanteraOmniSearch({
       tokens,
       mode,
       bedroomsMin,
-      budgetMin,
       budgetMax,
       propertyType,
       needs,
@@ -754,9 +711,9 @@ export default function VanteraOmniSearch({
 
   const quick: QuickAction[] = useMemo(
     () => [
-      { label: 'villa', hint: 'space, gardens, privacy', patch: 'villa', icon: <Home className="h-4 w-4" /> },
+      { label: 'villa', hint: 'private, space, gardens', patch: 'villa', icon: <Home className="h-4 w-4" /> },
       { label: 'apartment', hint: 'lock up and go', patch: 'apartment', icon: <Building2 className="h-4 w-4" /> },
-      { label: 'penthouse', hint: 'terraces, views', patch: 'penthouse', icon: <Building2 className="h-4 w-4" /> },
+      { label: 'penthouse', hint: 'views, terraces, privacy', patch: 'penthouse', icon: <Building2 className="h-4 w-4" /> },
       { label: 'sea view', hint: 'primary view filter', patch: 'sea view', icon: <Waves className="h-4 w-4" /> },
       { label: 'waterfront', hint: 'on the water line', patch: 'waterfront', icon: <Waves className="h-4 w-4" /> },
       { label: 'gated', hint: 'controlled access', patch: 'gated', icon: <Shield className="h-4 w-4" /> },
@@ -764,19 +721,6 @@ export default function VanteraOmniSearch({
       { label: 'new build', hint: 'modern stock', patch: 'new build', icon: <Sparkles className="h-4 w-4" /> },
       { label: 'golf', hint: 'near courses', patch: 'golf', icon: <Sparkles className="h-4 w-4" /> },
       { label: 'schools', hint: 'family safe', patch: 'schools', icon: <Sparkles className="h-4 w-4" /> },
-      { label: 'ultra prime', hint: 'trophy assets', patch: 'ultra prime', icon: <Sparkles className="h-4 w-4" /> },
-      { label: '€2m-€6m', hint: 'budget band', patch: '2m-6m', icon: <Sparkles className="h-4 w-4" /> },
-    ],
-    [],
-  );
-
-  const tryExamples = useMemo(
-    () => [
-      'marbella sea view villa under 5m',
-      'london townhouse 4 beds',
-      'miami waterfront penthouse',
-      'dubai new build 3m-8m',
-      'monaco ultra prime',
     ],
     [],
   );
@@ -786,12 +730,42 @@ export default function VanteraOmniSearch({
     setOpen(true);
   }
 
-  // Mounted (for portal)
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Global focus shortcuts
+  // Keep anchor position updated when open (scroll/resize/layout)
+  useLayoutEffect(() => {
+    if (!mounted) return;
+
+    const update = () => {
+      const root = rootRef.current;
+      if (!root) return;
+      const r = root.getBoundingClientRect();
+
+      const margin = 12;
+      const width = Math.min(r.width, window.innerWidth - margin * 2);
+      const left = Math.max(margin, Math.min(r.left, window.innerWidth - width - margin));
+      const top = r.bottom + 12;
+
+      setAnchor({ left, top, width });
+    };
+
+    if (open) update();
+
+    const onScroll = () => {
+      if (open) update();
+    };
+
+    window.addEventListener('resize', update, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [open, mounted]);
+
   useEffect(() => {
     const onFocus = () => focusAndOpen();
     window.addEventListener('vantera:focus-search', onFocus as any);
@@ -803,7 +777,6 @@ export default function VanteraOmniSearch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // "/" shortcut and escape
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
@@ -823,7 +796,6 @@ export default function VanteraOmniSearch({
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -831,107 +803,48 @@ export default function VanteraOmniSearch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFocus]);
 
-  // When open, read recents and position dropdown
   useEffect(() => {
     if (!open) return;
 
     setRecents(readRecents());
 
-    const update = () => {
-      const r = getAnchorRect(rootRef.current);
-      setAnchor(r);
-    };
-
-    update();
-
     const onDown = (e: MouseEvent | TouchEvent) => {
       const t = e.target as Node | null;
       if (!t) return;
+
       const root = rootRef.current;
       if (root && root.contains(t)) return;
+
       setOpen(false);
     };
 
     window.addEventListener('mousedown', onDown, { passive: true });
     window.addEventListener('touchstart', onDown, { passive: true });
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
-
     return () => {
       window.removeEventListener('mousedown', onDown);
       window.removeEventListener('touchstart', onDown);
-      window.removeEventListener('scroll', update as any);
-      window.removeEventListener('resize', update as any);
     };
   }, [open]);
-
-  // Keep anchor synced as layout changes (hero animations, font load, etc)
-  useLayoutEffect(() => {
-    if (!open) return;
-    const r = getAnchorRect(rootRef.current);
-    setAnchor(r);
-  }, [open, q]);
-
-  const didYouMean = useMemo(() => bestDidYouMeanCity(q, cities), [q, cities]);
 
   const hits = useMemo(() => {
     if (!open) return [];
 
     const raw = q.trim();
-
     const searchHit: PlaceHit = {
       kind: 'search',
       slug: 'search',
-      title: raw ? 'search properties' : 'start a property search',
-      subtitle: raw ? `open results for “${raw}”` : 'type a city + wishline like “sea view villa under €5m”',
+      title: raw ? 'open search' : 'start a search',
+      subtitle: raw ? `results for “${raw}”` : 'try: “sea view villa under €5m”',
       score: 1000,
       reasons: [
-        `${modeLabel(parse.mode)} mode`,
-        parse.placeQuery ? `place: ${parse.placeQuery}` : 'any market',
-        parse.budgetMin || parse.budgetMax ? `budget: ${formatBudgetLine(parse.budgetMin, parse.budgetMax)}` : 'no budget',
+        `${modeLabel(parse.mode)}`,
+        parse.placeQuery ? `${parse.placeQuery}` : 'any market',
+        parse.budgetMax ? `max ${formatMoney(parse.budgetMax)}` : 'no max',
       ],
       href: raw ? buildSearchHref(parse) : '/search',
       icon: 'search',
       group: 'Action',
     };
-
-    const suggestionHits: PlaceHit[] = [];
-
-    // "Did you mean" (wow moment, but still quiet)
-    if (raw && didYouMean) {
-      const patch = didYouMean.name;
-      suggestionHits.push({
-        kind: 'suggestion',
-        slug: `dym-${didYouMean.slug}`,
-        title: `Did you mean ${didYouMean.name}?`,
-        subtitle: `${didYouMean.country}${didYouMean.region ? ` · ${didYouMean.region}` : ''}`,
-        score: 980,
-        reasons: ['typo fix'],
-        href: '#',
-        icon: 'sparkles',
-        group: 'Suggestions',
-        onPick: () => {
-          setQ((cur) => {
-            const curRaw = cur.trim();
-            if (!curRaw) return patch;
-            const placeQ = extractPlaceQuery(curRaw);
-            if (!placeQ) return mergeQuery(curRaw, patch);
-            // Replace the place chunk at the start only
-            const a = normalize(curRaw);
-            const b = normalize(placeQ);
-            const replaced = a.replace(new RegExp(`^${b}`), normalize(patch));
-            // Keep original casing for non-place parts by doing a simpler string op
-            const idxStart = curRaw.toLowerCase().indexOf(placeQ.toLowerCase());
-            if (idxStart === 0) {
-              return `${patch}${curRaw.slice(placeQ.length)}`.trim();
-            }
-            return replaced.trim();
-          });
-          setOpen(true);
-          window.setTimeout(() => inputRef.current?.focus(), 0);
-        },
-      });
-    }
 
     if (!raw) {
       const topCities = pickCuratedCities(cities, 6);
@@ -941,7 +854,7 @@ export default function VanteraOmniSearch({
         kind: 'recent',
         slug: `recent-${i}`,
         title: rq,
-        subtitle: 'recent search',
+        subtitle: 'recent',
         score: 900 - i,
         reasons: ['continue'],
         href: `/search?q=${encodeURIComponent(rq)}`,
@@ -951,7 +864,6 @@ export default function VanteraOmniSearch({
 
       const curated: PlaceHit[] = [
         searchHit,
-        ...suggestionHits,
         ...recentHits,
         ...topCities.map((c, i) => ({
           kind: 'city' as const,
@@ -977,15 +889,15 @@ export default function VanteraOmniSearch({
         })),
       ];
 
-      return curated.slice(0, limit + 14);
+      return curated.slice(0, limit + 10);
     }
 
     const placeHits = buildPlaceHits({ parse, cities, clusters, limit });
-    return [searchHit, ...suggestionHits, ...placeHits].slice(0, limit + 2);
-  }, [open, q, parse, cities, clusters, limit, recents, didYouMean]);
+    return [searchHit, ...placeHits].slice(0, limit + 1);
+  }, [open, q, parse, cities, clusters, limit, recents]);
 
   const groupedHits = useMemo(() => {
-    const order: Array<NonNullable<PlaceHit['group']>> = ['Action', 'Suggestions', 'Recent', 'Cities', 'Regions'];
+    const order: Array<NonNullable<PlaceHit['group']>> = ['Action', 'Recent', 'Cities', 'Regions'];
     const buckets = new Map<string, PlaceHit[]>();
     for (const h of hits) {
       const g = h.group ?? 'Cities';
@@ -998,10 +910,7 @@ export default function VanteraOmniSearch({
   }, [hits]);
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!open) {
-      if (e.key === 'ArrowDown' || e.key === 'Enter') setOpen(true);
-      return;
-    }
+    if (!open) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -1018,14 +927,13 @@ export default function VanteraOmniSearch({
       const h = hits[active];
       if (!h) return;
 
-      // Local-only action (suggestions)
-      if (h.onPick) {
-        h.onPick();
-        return;
+      setOpen(false);
+
+      if (h.kind === 'search' || h.kind === 'recent') {
+        const toStore = q.trim() || (h.kind === 'recent' ? h.title : '');
+        if (toStore) pushRecent(toStore);
       }
 
-      setOpen(false);
-      if (h.kind === 'search' || h.kind === 'recent') pushRecent(q.trim() || (h.kind === 'recent' ? h.title : ''));
       router.push(h.href);
     }
   }
@@ -1068,25 +976,265 @@ export default function VanteraOmniSearch({
 
   const activeId = hits[active] ? `${id}-opt-${active}` : undefined;
 
-  // Smart "understands" pills (quiet wow)
-  const understands = useMemo(() => {
-    const out: Array<{ k: string; v: string }> = [];
-    out.push({ k: 'MODE', v: modeLabel(parse.mode) });
-    out.push({ k: 'PLACE', v: parse.placeQuery ? parse.placeQuery : 'any' });
-    out.push({ k: 'BUDGET', v: parse.budgetMin || parse.budgetMax ? formatBudgetLine(parse.budgetMin, parse.budgetMax) : 'any' });
-    out.push({ k: 'BEDS', v: parse.bedroomsMin ? `${parse.bedroomsMin}+` : 'any' });
-    if (parse.propertyType && parse.propertyType !== 'any') out.push({ k: 'TYPE', v: parse.propertyType });
-    if (parse.needs.length) out.push({ k: 'NEED', v: parse.needs[0].replace('_', ' ') });
-    return out.slice(0, 6);
-  }, [parse]);
+  const curatedCities = useMemo(() => pickCuratedCities(cities, 6), [cities]);
+  const signalStrip = useMemo(() => buildSignalStrip(parse, curatedCities), [parse, curatedCities]);
 
-  /* =========================================================
-     Render
-     ========================================================= */
+  const dropdown = (
+    <div
+      style={
+        anchor
+          ? {
+              position: 'fixed',
+              left: anchor.left,
+              top: anchor.top,
+              width: anchor.width,
+              zIndex: 80,
+            }
+          : undefined
+      }
+      className={cx(
+        open && anchor ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+        'transition-opacity duration-150',
+      )}
+    >
+      <div
+        className={cx(
+          'relative overflow-hidden rounded-[24px]',
+          'bg-[color:var(--paper)]',
+          'ring-1 ring-inset ring-[color:var(--hairline)]',
+          'shadow-[0_44px_160px_rgba(11,12,16,0.16)]',
+        )}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_340px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
+
+        {/* header */}
+        <div className="relative border-b border-[color:var(--hairline)] px-5 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">search</div>
+
+              {/* Invisible assistant rail (quiet understanding) */}
+              <div className="mt-2 text-[12px] leading-relaxed text-[color:var(--ink-2)]">
+                <span className="opacity-80">{interpretationLine}</span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Chip>{modeLabel(parse.mode)}</Chip>
+                {parse.placeQuery ? <Chip>{parse.placeQuery}</Chip> : <Chip>any market</Chip>}
+                {parse.budgetMax ? <Chip>max {formatMoney(parse.budgetMax)}</Chip> : <Chip>no max</Chip>}
+                {parse.bedroomsMin ? <Chip>{parse.bedroomsMin}+ beds</Chip> : <Chip>any beds</Chip>}
+                {parse.propertyType && parse.propertyType !== 'any' ? <Chip>{parse.propertyType}</Chip> : null}
+                {parse.needs.length ? <Chip>{parse.needs[0].replace('_', ' ')}</Chip> : null}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className={cx(
+                'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
+                'bg-white hover:bg-white',
+                'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                'text-[color:var(--ink-2)]',
+              )}
+            >
+              <X className="h-4 w-4 opacity-70" />
+              close
+            </button>
+          </div>
+
+          {/* Signal strip (replaces the big "refine next" section) */}
+          {signalStrip.length ? (
+            <div className="mt-3">
+              <div className="flex flex-wrap gap-2">
+                {signalStrip.map((x) => (
+                  <button
+                    key={`${x.label}:${x.patch}`}
+                    type="button"
+                    onClick={() => applyQuick(x.patch)}
+                    className={cx(
+                      'group inline-flex items-center gap-2 rounded-full px-3 py-2 transition',
+                      'bg-white',
+                      'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                    )}
+                    title="add"
+                  >
+                    <span className="opacity-70">{x.icon}</span>
+                    <span className="text-[11px] font-semibold text-[color:var(--ink-2)]">{x.label}</span>
+                    <span className="text-[11px] text-[color:var(--ink-3)] opacity-0 transition group-hover:opacity-100">
+                      add
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {/* mode pills */}
+          <div className="mt-3 inline-flex rounded-full bg-white/80 p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
+            {(['buy', 'rent', 'sell'] as const).map((m) => {
+              const activeMode = parse.mode === m;
+              const icon =
+                m === 'buy' ? (
+                  <Sparkles className="h-4 w-4 opacity-75" />
+                ) : m === 'rent' ? (
+                  <Home className="h-4 w-4 opacity-75" />
+                ) : (
+                  <ArrowRight className="h-4 w-4 opacity-75" />
+                );
+
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  className={cx(
+                    'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
+                    activeMode ? 'bg-white ring-1 ring-inset ring-[color:var(--hairline-2)]' : 'bg-transparent hover:bg-white',
+                    'text-[color:var(--ink-2)]',
+                  )}
+                >
+                  {icon}
+                  {m}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* body */}
+        <div className="relative p-2.5 sm:p-3">
+          {/* keep the original quick actions */}
+          <div className="mb-2.5 rounded-[18px] bg-white/70 p-3 ring-1 ring-inset ring-[color:var(--hairline)]">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">quick filters</div>
+              <button
+                type="button"
+                onClick={() => inputRef.current?.focus()}
+                className="text-[11px] text-[color:var(--ink-3)] hover:text-[color:var(--ink-2)]"
+              >
+                keep typing
+              </button>
+            </div>
+
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {quick.map((x) => (
+                <button
+                  key={x.label}
+                  type="button"
+                  onClick={() => applyQuick(x.patch)}
+                  className={cx(
+                    'group flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left transition',
+                    'bg-white hover:bg-white',
+                    'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+                  )}
+                  title={x.hint}
+                >
+                  <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-[color:var(--ink-2)]">
+                    <span className="opacity-70">{x.icon}</span>
+                    {x.label}
+                  </span>
+                  <span className="text-[11px] text-[color:var(--ink-3)] opacity-0 transition group-hover:opacity-100">
+                    add
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div id={listboxId} role="listbox" className="max-h-[420px] overflow-auto p-0.5">
+            {hits.length === 0 ? (
+              <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
+                no strong matches yet - add a city or a budget.
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {groupedHits.map(({ group, items }) => (
+                  <div key={group} className="rounded-2xl bg-white/60 p-2 ring-1 ring-inset ring-[color:var(--hairline)]">
+                    <div className="px-2 pb-2 pt-1 text-[10px] font-semibold tracking-[0.20em] text-[color:var(--ink-3)]">
+                      {group}
+                    </div>
+
+                    <div className="grid gap-1.5">
+                      {items.map((h) => {
+                        const idx = hits.findIndex((x) => x === h);
+                        const selected = idx === active;
+                        const optId = `${id}-opt-${idx}`;
+
+                        return (
+                          <Link
+                            key={`${h.kind}:${h.slug}:${h.href}`}
+                            href={h.href}
+                            prefetch
+                            id={optId}
+                            role="option"
+                            aria-selected={selected}
+                            onMouseEnter={() => setActive(idx)}
+                            onMouseDown={() => setOpen(true)}
+                            onClick={() => {
+                              if (h.kind === 'search') pushRecent(q.trim());
+                              if (h.kind === 'recent') pushRecent(h.title);
+                              setOpen(false);
+                            }}
+                            className={cx(
+                              'group relative rounded-2xl px-4 py-3 transition',
+                              'bg-white hover:bg-white',
+                              'ring-1 ring-inset ring-[color:var(--hairline)]',
+                              selected && 'ring-[color:var(--hairline-2)] shadow-[0_18px_60px_rgba(11,12,16,0.08)]',
+                            )}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-3">
+                                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
+                                    {iconFor(h)}
+                                  </span>
+
+                                  <div className="min-w-0">
+                                    <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">{h.title}</div>
+                                    <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
+                                  </div>
+                                </div>
+
+                                {h.reasons.length ? (
+                                  <div className="mt-2 flex flex-wrap gap-2">
+                                    {h.reasons.slice(0, 3).map((r) => (
+                                      <span
+                                        key={r}
+                                        className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
+                                      >
+                                        {r}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : null}
+                              </div>
+
+                              <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
+                                open <ArrowRight className="h-4 w-4 opacity-70" />
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="relative border-t border-[color:var(--hairline)] px-5 py-4 text-[11px] text-[color:var(--ink-3)]">
+          tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. typos are fine.
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div ref={rootRef} className={cx('relative w-full', className)}>
-      {/* input (pure white, royal hairlines) */}
+      {/* input */}
       <div
         className={cx(
           'relative w-full overflow-hidden rounded-full',
@@ -1095,7 +1243,6 @@ export default function VanteraOmniSearch({
           'shadow-[0_26px_80px_rgba(11,12,16,0.10)]',
         )}
       >
-        {/* gold crown hairline, super subtle */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.60)] to-transparent opacity-70" />
           <div className="absolute inset-0 bg-[radial-gradient(980px_220px_at_18%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
@@ -1132,20 +1279,8 @@ export default function VanteraOmniSearch({
             />
 
             {open ? (
-              <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
+              <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
                 <span className="truncate">{interpretationLine}</span>
-                <span className="hidden sm:inline-block">·</span>
-                <div className="hidden sm:flex flex-wrap gap-2">
-                  {understands.map((x) => (
-                    <span
-                      key={`${x.k}:${x.v}`}
-                      className="inline-flex items-center gap-2 rounded-full bg-white px-2.5 py-1 text-[10px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                    >
-                      <span className="tracking-[0.22em] text-[color:var(--ink-3)]">{x.k}</span>
-                      <span className="font-semibold text-[color:var(--ink)]">{x.v}</span>
-                    </span>
-                  ))}
-                </div>
               </div>
             ) : null}
           </div>
@@ -1175,321 +1310,8 @@ export default function VanteraOmniSearch({
         </div>
       </div>
 
-      {/* Portal dropdown (fixed positioning - never clipped) */}
-      {mounted && open && anchor
-        ? createPortal(
-            <div className="fixed inset-0 z-[9999]">
-              {/* invisible click-catcher */}
-              <button
-                type="button"
-                aria-label="Close search"
-                className="absolute inset-0 cursor-default"
-                onClick={() => setOpen(false)}
-              />
-
-              <div
-                className="absolute"
-                style={{
-                  left: Math.max(12, Math.round(anchor.left)),
-                  top: Math.round(anchor.top + anchor.height + 10),
-                  width: Math.round(anchor.width),
-                }}
-              >
-                <div
-                  className={cx(
-                    'relative overflow-hidden rounded-[24px]',
-                    'bg-[color:var(--paper)]',
-                    'ring-1 ring-inset ring-[color:var(--hairline)]',
-                    'shadow-[0_44px_160px_rgba(11,12,16,0.16)]',
-                  )}
-                >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_340px_at_50%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
-
-                  {/* header */}
-                  <div className="relative border-b border-[color:var(--hairline)] px-5 py-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-semibold tracking-[0.18em] text-[color:var(--ink-3)]">
-                          intelligent search
-                        </div>
-
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <Chip>{modeLabel(parse.mode)}</Chip>
-                          {parse.placeQuery ? <Chip>place: {parse.placeQuery}</Chip> : <Chip>any market</Chip>}
-                          {(parse.budgetMin || parse.budgetMax) ? (
-                            <Chip>budget: {formatBudgetLine(parse.budgetMin, parse.budgetMax)}</Chip>
-                          ) : (
-                            <Chip>any budget</Chip>
-                          )}
-                          {parse.bedroomsMin ? <Chip>{parse.bedroomsMin}+ beds</Chip> : <Chip>any beds</Chip>}
-                          {parse.propertyType && parse.propertyType !== 'any' ? <Chip>type: {parse.propertyType}</Chip> : null}
-                          {parse.needs.length ? <Chip>need: {parse.needs[0].replace('_', ' ')}</Chip> : null}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setOpen(false)}
-                        className={cx(
-                          'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                          'bg-white hover:bg-white',
-                          'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                          'text-[color:var(--ink-2)]',
-                        )}
-                      >
-                        <X className="h-4 w-4 opacity-70" />
-                        close
-                      </button>
-                    </div>
-
-                    {/* mode pills */}
-                    <div className="mt-3 inline-flex rounded-full bg-white/80 p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      {(['buy', 'rent', 'sell'] as const).map((m) => {
-                        const activeMode = parse.mode === m;
-                        const icon =
-                          m === 'buy' ? (
-                            <Sparkles className="h-4 w-4 opacity-75" />
-                          ) : m === 'rent' ? (
-                            <Home className="h-4 w-4 opacity-75" />
-                          ) : (
-                            <ArrowRight className="h-4 w-4 opacity-75" />
-                          );
-
-                        return (
-                          <button
-                            key={m}
-                            type="button"
-                            onClick={() => setMode(m)}
-                            className={cx(
-                              'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                              activeMode
-                                ? 'bg-white ring-1 ring-inset ring-[color:var(--hairline-2)]'
-                                : 'bg-transparent hover:bg-white',
-                              'text-[color:var(--ink-2)]',
-                            )}
-                          >
-                            {icon}
-                            {m}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* body */}
-                  <div className="relative p-2.5 sm:p-3">
-                    {/* quick actions */}
-                    <div className="mb-2.5 rounded-[18px] bg-white/70 p-3 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-[11px] font-semibold tracking-[0.14em] text-[color:var(--ink-3)]">
-                          quick intent
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => inputRef.current?.focus()}
-                          className="text-[11px] text-[color:var(--ink-3)] hover:text-[color:var(--ink-2)]"
-                        >
-                          keep typing
-                        </button>
-                      </div>
-
-                      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-6">
-                        {quick.map((x) => (
-                          <button
-                            key={x.label}
-                            type="button"
-                            onClick={() => applyQuick(x.patch)}
-                            className={cx(
-                              'group flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left transition',
-                              'bg-white hover:bg-white',
-                              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                            )}
-                            title={x.hint}
-                          >
-                            <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-[color:var(--ink-2)]">
-                              <span className="opacity-70">{x.icon}</span>
-                              {x.label}
-                            </span>
-                            <span className="text-[11px] text-[color:var(--ink-3)] opacity-0 transition group-hover:opacity-100">
-                              add
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-
-                      {!q.trim() ? (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {tryExamples.slice(0, 3).map((ex) => (
-                            <button
-                              key={ex}
-                              type="button"
-                              onClick={() => {
-                                setQ(ex);
-                                setOpen(true);
-                                window.setTimeout(() => inputRef.current?.focus(), 0);
-                              }}
-                              className="inline-flex items-center rounded-full bg-white px-3 py-1.5 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]"
-                            >
-                              try: <span className="ml-2 font-semibold text-[color:var(--ink)]">{ex}</span>
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div id={listboxId} role="listbox" className="max-h-[420px] overflow-auto p-0.5">
-                      {hits.length === 0 ? (
-                        <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
-                          no matches yet. try a city, region or keywords like “sea view modern villa”.
-                        </div>
-                      ) : (
-                        <div className="grid gap-2">
-                          {groupedHits.map(({ group, items }) => (
-                            <div
-                              key={group}
-                              className="rounded-2xl bg-white/60 p-2 ring-1 ring-inset ring-[color:var(--hairline)]"
-                            >
-                              <div className="px-2 pb-2 pt-1 text-[10px] font-semibold tracking-[0.20em] text-[color:var(--ink-3)]">
-                                {group}
-                              </div>
-
-                              <div className="grid gap-1.5">
-                                {items.map((h) => {
-                                  const idx2 = hits.findIndex((x) => x === h);
-                                  const selected = idx2 === active;
-                                  const optId = `${id}-opt-${idx2}`;
-
-                                  const shared = cx(
-                                    'group relative rounded-2xl px-4 py-3 transition',
-                                    'bg-white hover:bg-white',
-                                    'ring-1 ring-inset ring-[color:var(--hairline)]',
-                                    selected &&
-                                      'ring-[color:var(--hairline-2)] shadow-[0_18px_60px_rgba(11,12,16,0.08)]',
-                                  );
-
-                                  const Right = (
-                                    <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)] transition">
-                                      open <ArrowRight className="h-4 w-4 opacity-70" />
-                                    </span>
-                                  );
-
-                                  if (h.onPick) {
-                                    return (
-                                      <button
-                                        key={`${h.kind}:${h.slug}`}
-                                        type="button"
-                                        id={optId}
-                                        role="option"
-                                        aria-selected={selected}
-                                        onMouseEnter={() => setActive(idx2)}
-                                        onClick={() => h.onPick?.()}
-                                        className={shared}
-                                      >
-                                        <div className="flex items-start justify-between gap-3">
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-3">
-                                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-                                                {iconFor(h)}
-                                              </span>
-
-                                              <div className="min-w-0">
-                                                <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
-                                                  {h.title}
-                                                </div>
-                                                <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
-                                              </div>
-                                            </div>
-
-                                            {h.reasons.length ? (
-                                              <div className="mt-2 flex flex-wrap gap-2">
-                                                {h.reasons.slice(0, 3).map((r) => (
-                                                  <span
-                                                    key={r}
-                                                    className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                                                  >
-                                                    {r}
-                                                  </span>
-                                                ))}
-                                              </div>
-                                            ) : null}
-                                          </div>
-
-                                          {Right}
-                                        </div>
-                                      </button>
-                                    );
-                                  }
-
-                                  return (
-                                    <Link
-                                      key={`${h.kind}:${h.slug}:${h.href}`}
-                                      href={h.href}
-                                      prefetch
-                                      id={optId}
-                                      role="option"
-                                      aria-selected={selected}
-                                      onMouseEnter={() => setActive(idx2)}
-                                      onMouseDown={() => {
-                                        setOpen(true);
-                                      }}
-                                      onClick={() => {
-                                        if (h.kind === 'search') pushRecent(q.trim());
-                                        if (h.kind === 'recent') pushRecent(h.title);
-                                        setOpen(false);
-                                      }}
-                                      className={shared}
-                                    >
-                                      <div className="flex items-start justify-between gap-3">
-                                        <div className="min-w-0">
-                                          <div className="flex items-center gap-3">
-                                            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-                                              {iconFor(h)}
-                                            </span>
-
-                                            <div className="min-w-0">
-                                              <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
-                                                {h.title}
-                                              </div>
-                                              <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
-                                            </div>
-                                          </div>
-
-                                          {h.reasons.length ? (
-                                            <div className="mt-2 flex flex-wrap gap-2">
-                                              {h.reasons.slice(0, 3).map((r) => (
-                                                <span
-                                                  key={r}
-                                                  className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                                                >
-                                                  {r}
-                                                </span>
-                                              ))}
-                                            </div>
-                                          ) : null}
-                                        </div>
-
-                                        {Right}
-                                      </div>
-                                    </Link>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="relative border-t border-[color:var(--hairline)] px-5 py-4 text-[11px] text-[color:var(--ink-3)]">
-                    tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere to focus. typos are fine.
-                  </div>
-                </div>
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+      {/* Portal dropdown */}
+      {mounted ? createPortal(dropdown, document.body) : null}
     </div>
   );
 }
