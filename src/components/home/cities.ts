@@ -46,10 +46,6 @@ export type City = {
 
 /**
  * Canonical Vantera coverage clusters
- *
- * Locked rule:
- * - Costa del Sol is represented by ONE city: Marbella (Costa del Sol)
- * - Benahavís and Estepona are NOT cities
  */
 export const REGION_CLUSTERS: RegionCluster[] = [
   {
@@ -77,14 +73,30 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     tier: 'TIER_1',
     status: 'TRACKING',
     priority: 8,
-    headline: 'Coverage tracking',
+    headline: 'Single-market lock',
     blurb:
-      'Costa del Sol is tracked as one canonical market under Marbella, with sub-areas handled as intelligence later.',
+      'One market, one city. Costa del Sol is represented as Marbella for clean data, clean UX and disciplined signals.',
     image: {
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Mediterranean coastline near Marbella',
+      alt: 'Costa del Sol coastline at dusk',
     },
     citySlugs: ['marbella'],
+  },
+  {
+    slug: 'balearic-islands',
+    name: 'Balearic Islands',
+    country: 'Spain',
+    region: 'Europe',
+    tier: 'TIER_3',
+    status: 'EXPANDING',
+    priority: 3,
+    headline: 'Coverage expanding',
+    blurb: 'Ultra-prime island markets. Clean structure first, deeper verification later.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Balearic Islands coastline at golden hour',
+    },
+    citySlugs: ['mallorca', 'ibiza'],
   },
   {
     slug: 'french-riviera',
@@ -102,22 +114,7 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
   },
-  {
-    slug: 'balearics',
-    name: 'Balearic Islands',
-    country: 'Spain',
-    region: 'Europe',
-    tier: 'TIER_3',
-    status: 'EXPANDING',
-    priority: 3,
-    headline: 'Coverage expanding',
-    blurb: 'Island prime markets tracked cleanly under Mallorca and Ibiza.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Balearic coastline at dusk',
-    },
-    citySlugs: ['mallorca', 'ibiza'],
-  },
+
   {
     slug: 'lake-como-region',
     name: 'Lake Como Region',
@@ -156,7 +153,7 @@ export const REGION_CLUSTERS: RegionCluster[] = [
  * Core launch cities (Tiers 0-2)
  */
 export const CITIES: City[] = [
-  // Tier 0 (flagship)
+  // Tier 0
   {
     slug: 'miami',
     name: 'Miami',
@@ -167,7 +164,8 @@ export const CITIES: City[] = [
     status: 'LIVE',
     priority: 100,
     clusterSlug: 'miami-metro',
-    blurb: 'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
+    blurb:
+      'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
     image: {
       src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2600&q=85',
       alt: 'Miami skyline across the water',
@@ -237,7 +235,7 @@ export const CITIES: City[] = [
     },
   },
 
-  // Costa del Sol - locked as ONE city
+  // Marbella = Costa del Sol (single city)
   {
     slug: 'marbella',
     name: 'Marbella (Costa del Sol)',
@@ -248,7 +246,7 @@ export const CITIES: City[] = [
     status: 'TRACKING',
     priority: 70,
     clusterSlug: 'costa-del-sol',
-    blurb: 'Costa del Sol tracked under one canonical market. Sub-areas become intelligence, not cities.',
+    blurb: 'Costa del Sol, locked as one market. Prime coastal living and global luxury demand.',
     image: {
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Mediterranean coastline near Marbella',
@@ -311,38 +309,6 @@ export const CITIES: City[] = [
  */
 export const WATCHLIST_CITIES: City[] = [
   {
-    slug: 'mallorca',
-    name: 'Mallorca',
-    country: 'Spain',
-    region: 'Europe',
-    tz: 'Europe/Madrid',
-    tier: 'TIER_3',
-    status: 'EXPANDING',
-    priority: 22,
-    clusterSlug: 'balearics',
-    blurb: 'Prime island market. Coverage expanding with clean verification signals.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Mallorca coastline',
-    },
-  },
-  {
-    slug: 'ibiza',
-    name: 'Ibiza',
-    country: 'Spain',
-    region: 'Europe',
-    tz: 'Europe/Madrid',
-    tier: 'TIER_3',
-    status: 'EXPANDING',
-    priority: 18,
-    clusterSlug: 'balearics',
-    blurb: 'Ultra-prime seasonal market. Coverage expanding.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Ibiza coastline',
-    },
-  },
-  {
     slug: 'paris',
     name: 'Paris',
     country: 'France',
@@ -390,6 +356,38 @@ export const WATCHLIST_CITIES: City[] = [
     },
   },
   {
+    slug: 'mallorca',
+    name: 'Mallorca',
+    country: 'Spain',
+    region: 'Europe',
+    tz: 'Europe/Madrid',
+    tier: 'TIER_3',
+    status: 'EXPANDING',
+    priority: 19,
+    clusterSlug: 'balearic-islands',
+    blurb: 'Ultra-prime coastal estates and trophy hillside assets. Coverage expanding.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Mallorca coastline',
+    },
+  },
+  {
+    slug: 'ibiza',
+    name: 'Ibiza',
+    country: 'Spain',
+    region: 'Europe',
+    tz: 'Europe/Madrid',
+    tier: 'TIER_3',
+    status: 'EXPANDING',
+    priority: 18,
+    clusterSlug: 'balearic-islands',
+    blurb: 'Ultra-prime seasonal market. Coverage expanding.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Ibiza coastline',
+    },
+  },
+  {
     slug: 'singapore',
     name: 'Singapore',
     country: 'Singapore',
@@ -406,7 +404,6 @@ export const WATCHLIST_CITIES: City[] = [
   },
 ];
 
-// Canonical combined list (use this everywhere you want "all cities")
 export const ALL_CITIES: City[] = [...CITIES, ...WATCHLIST_CITIES].sort(
   (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
 );
