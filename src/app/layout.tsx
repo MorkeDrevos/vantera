@@ -10,7 +10,7 @@ import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld'
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
   title: {
-    default: 'Vantera · Private Intelligence for the World’s Most Valuable Assets',
+    default: 'Vantera',
     template: '%s · Vantera',
   },
   description:
