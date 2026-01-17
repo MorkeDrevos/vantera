@@ -10,11 +10,11 @@ import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld'
 export const metadata: Metadata = {
   metadataBase: new URL(SEO_CONFIG.domain),
   title: {
-    default: 'Vantera · World’s Largest Luxury Marketplace',
+    default: 'Vantera · Private Intelligence for the World’s Most Valuable Assets',
     template: '%s · Vantera',
   },
   description:
-    'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.',
+    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
   applicationName: 'Vantera',
   icons: {
     icon: [
