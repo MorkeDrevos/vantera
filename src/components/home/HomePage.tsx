@@ -43,7 +43,7 @@ function cx(...parts: Array<string | false | null | undefined>) {
 }
 
 /* =========================================================
-   Layout primitives (white, editorial, full-bleed)
+   Layout primitives (white, editorial, full-bleed, royal)
    ========================================================= */
 
 const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
@@ -55,8 +55,10 @@ function Shell({ children }: { children: ReactNode }) {
       {/* Quiet paper texture + micro grid (luxury editorial) */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
         <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
-        <div className="absolute inset-0 opacity-[0.030] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
+        <div className="absolute inset-0 opacity-[0.028] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
+        {/* faint gold paper warmth (royal, still white) */}
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_16%_8%,rgba(206,160,74,0.06),transparent_62%)]" />
       </div>
 
       <main className="w-full">{children}</main>
@@ -70,7 +72,9 @@ function Shell({ children }: { children: ReactNode }) {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)]">
+    <div className="relative inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(180px_48px_at_50%_0%,rgba(206,160,74,0.08),transparent_70%)]" />
       {children}
     </div>
   );
@@ -78,6 +82,17 @@ function Chip({ children }: { children: React.ReactNode }) {
 
 function Hairline() {
   return <div className="h-px w-full bg-[color:var(--hairline)]" />;
+}
+
+function GoldHairline({ className }: { className?: string }) {
+  return (
+    <div
+      className={cx(
+        'h-px w-full bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent',
+        className,
+      )}
+    />
+  );
 }
 
 function SectionHeader({
@@ -95,9 +110,11 @@ function SectionHeader({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
+
         <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
           {title}
         </div>
+
         {subtitle ? (
           <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
             {subtitle}
@@ -115,15 +132,18 @@ function QuickLink({ href, label, hint }: { href: string; label: string; hint?: 
     <Link
       href={href}
       className={cx(
-        'group flex items-center justify-between gap-4 px-4 py-3',
+        'group relative flex items-center justify-between gap-4 px-4 py-3',
         'border border-[color:var(--hairline)] bg-white',
         'transition hover:border-[rgba(10,10,12,0.22)]',
       )}
     >
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.35)] to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+
       <div className="min-w-0">
         <div className="text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{label}</div>
         {hint ? <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">{hint}</div> : null}
       </div>
+
       <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
     </Link>
   );
@@ -139,17 +159,47 @@ function DnaPillar({
   body: string;
 }) {
   return (
-    <div className="border border-[color:var(--hairline)] bg-white p-5">
+    <div className="group relative border border-[color:var(--hairline)] bg-white p-5">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.45)] to-transparent opacity-60" />
       <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
       <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
       <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(520px_180px_at_20%_0%,rgba(206,160,74,0.06),transparent_65%)]" />
     </div>
   );
 }
 
 /* =========================================================
+   Buttons (royal editorial)
+   ========================================================= */
+
+const BTN_PRIMARY = cx(
+  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white',
+  'hover:bg-[rgba(10,10,12,1.0)]',
+  'shadow-[0_18px_60px_rgba(10,10,12,0.12)] hover:shadow-[0_22px_80px_rgba(206,160,74,0.16)]',
+);
+
+const BTN_SECONDARY = cx(
+  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
+  'hover:border-[rgba(10,10,12,0.22)]',
+);
+
+const BTN_PRIMARY_SM = cx(
+  'relative inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+  'shadow-[0_16px_52px_rgba(10,10,12,0.10)] hover:shadow-[0_20px_70px_rgba(206,160,74,0.14)]',
+);
+
+const BTN_SECONDARY_SM = cx(
+  'relative inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+  'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+);
+
+/* =========================================================
    HERO (full-bleed, marketplace statement + search atelier)
-   JamesEdition clean editorial: crisp background, restrained wash
+   JamesEdition clean editorial with royal gold cues
    ========================================================= */
 
 function FullBleedHero({
@@ -164,7 +214,7 @@ function FullBleedHero({
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        <div className="relative min-h-[780px] w-full bg-[color:var(--paper-2)]">
+        <div className="relative min-h-[820px] w-full bg-[color:var(--paper-2)]">
           <Image
             src="/brand/hero.jpg"
             alt="Vantera - Global luxury marketplace"
@@ -172,24 +222,33 @@ function FullBleedHero({
             priority
             className={cx(
               'object-cover',
-              // Keep the image crisp (no blur), add just a touch of editorial punch
-              'contrast-[1.04] saturate-[1.04]',
+              // Crisp / less hazy, slightly richer detail
+              'contrast-[1.06] saturate-[1.05] brightness-[1.02]',
             )}
             sizes="100vw"
           />
 
-          {/* Editorial paper veil (lighter than before, keeps detail) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.86),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.26),rgba(255,255,255,0.12),rgba(255,255,255,0.86))]" />
+          {/* Editorial paper veil (keeps detail, still white) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.84),rgba(255,255,255,0.54),rgba(255,255,255,0.18))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.20),rgba(255,255,255,0.10),rgba(255,255,255,0.88))]" />
 
-          {/* Paper sheen + micro grain (texture, not blur) */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.055] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_380px_at_22%_12%,rgba(231,201,130,0.12),transparent_62%)]" />
+          {/* Paper grain (texture, not blur) */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.050] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
 
-          {/* JamesEdition-style hairline frame + crown line */}
-          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.62)] to-transparent opacity-70" />
+          {/* Royal gold atmosphere (must be visible) */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_420px_at_18%_6%,rgba(206,160,74,0.18),transparent_62%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_82%_30%,rgba(231,201,130,0.14),transparent_58%)]" />
 
+          {/* Crisp editorial frame */}
+          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.12)]" />
+
+          {/* Double crown line (reads premium on white) */}
+          <div className="pointer-events-none absolute inset-x-0 top-0">
+            <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.60)] to-transparent" />
+          </div>
+
+          {/* Bottom paper fade */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
 
           <div className={cx('relative z-10', WIDE)}>
@@ -206,31 +265,20 @@ function FullBleedHero({
                   A global catalogue of exceptional homes, powered by intelligence
                 </h1>
 
+                {/* Gold editorial anchor (small but unmistakable) */}
+                <div className="mt-5 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
+
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
                   Built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market so you can
                   move with clarity - not noise.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    href="/marketplace"
-                    className={cx(
-                      'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
-                      'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white',
-                      'hover:bg-[rgba(10,10,12,1.0)] transition',
-                    )}
-                  >
+                  <Link href="/marketplace" className={BTN_PRIMARY}>
                     Browse marketplace
                   </Link>
 
-                  <Link
-                    href="/coming-soon?flow=sell"
-                    className={cx(
-                      'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
-                      'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
-                      'hover:border-[rgba(10,10,12,0.22)] transition',
-                    )}
-                  >
+                  <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
                     List privately
                   </Link>
                 </div>
@@ -241,19 +289,22 @@ function FullBleedHero({
                 <div
                   className={cx(
                     'relative overflow-hidden',
-                    'border border-[color:var(--hairline)] bg-white/88',
+                    'border border-[color:var(--hairline)] bg-white/92 backdrop-blur-[14px]',
                     'shadow-[0_34px_120px_rgba(10,10,12,0.12)]',
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,10,12,0.14)] to-transparent" />
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_20%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+                    {/* Crown for panel */}
+                    <div className="absolute inset-x-0 top-0">
+                      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent" />
+                      <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent" />
+                    </div>
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
+                    <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
                   </div>
 
                   <div className="relative p-5 sm:p-6">
-                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                      SEARCH ATELIER
-                    </div>
+                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">SEARCH ATELIER</div>
                     <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
                       The fastest way to serious property intelligence
                     </div>
@@ -297,23 +348,11 @@ function FullBleedHero({
                       </div>
 
                       <div className="grid gap-2 sm:grid-cols-2">
-                        <button
-                          type="submit"
-                          className={cx(
-                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
-                            'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-                          )}
-                        >
+                        <button type="submit" className={BTN_PRIMARY_SM}>
                           Search
                         </button>
 
-                        <Link
-                          href="/marketplace"
-                          className={cx(
-                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
-                            'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-                          )}
-                        >
+                        <Link href="/marketplace" className={BTN_SECONDARY_SM}>
                           Browse
                         </Link>
                       </div>
@@ -340,7 +379,11 @@ function FullBleedHero({
 
             {/* Vantera DNA */}
             <div className="pb-10 sm:pb-12">
-              <div className="border border-[color:var(--hairline)] bg-white/88 shadow-[0_34px_120px_rgba(10,10,12,0.10)]">
+              <div className="relative border border-[color:var(--hairline)] bg-white/92 backdrop-blur-[10px] shadow-[0_34px_120px_rgba(10,10,12,0.10)]">
+                <div className="pointer-events-none absolute inset-x-0 top-0">
+                  <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.70)] to-transparent" />
+                </div>
+
                 <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
                   <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
                   <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
@@ -377,6 +420,9 @@ function FullBleedHero({
 
                   <div className="mt-6">
                     <Hairline />
+                    <div className="mt-1">
+                      <GoldHairline className="opacity-70" />
+                    </div>
                   </div>
 
                   <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -384,22 +430,10 @@ function FullBleedHero({
                       The marketplace is how you enter. The intelligence is why you stay.
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row">
-                      <Link
-                        href="/coming-soon?section=intelligence"
-                        className={cx(
-                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-                          'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-                        )}
-                      >
+                      <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
                         Explore intelligence (soon)
                       </Link>
-                      <Link
-                        href="/search"
-                        className={cx(
-                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-                          'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-                        )}
-                      >
+                      <Link href="/search" className={BTN_PRIMARY_SM}>
                         Open search
                       </Link>
                     </div>
@@ -499,16 +533,16 @@ export default function HomePage({
             <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
               Real signals only. Local time, verified supply when available, and a catalogue-first experience.
             </div>
+
             <div className="mt-6">
               <Hairline />
+              <div className="mt-1">
+                <GoldHairline className="opacity-60" />
+              </div>
             </div>
           </div>
 
-          <CityCardsVirtualizedClient
-            cities={cityCards}
-            mode="featured"
-            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          />
+          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
         </div>
       </section>
 
@@ -521,22 +555,10 @@ export default function HomePage({
             subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
             right={
               <div className="hidden sm:flex items-center gap-3">
-                <Link
-                  href="/search"
-                  className={cx(
-                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-                  )}
-                >
+                <Link href="/search" className={BTN_SECONDARY_SM}>
                   Open search
                 </Link>
-                <Link
-                  href="/marketplace"
-                  className={cx(
-                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
-                    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-                  )}
-                >
+                <Link href="/marketplace" className={BTN_PRIMARY_SM}>
                   Browse
                 </Link>
               </div>
@@ -545,10 +567,14 @@ export default function HomePage({
 
           <div className="mt-8">
             <Hairline />
+            <div className="mt-1">
+              <GoldHairline className="opacity-55" />
+            </div>
           </div>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="border border-[color:var(--hairline)] bg-white p-5">
+            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
               <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
@@ -556,7 +582,8 @@ export default function HomePage({
               </div>
             </div>
 
-            <div className="border border-[color:var(--hairline)] bg-white p-5">
+            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
               <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
@@ -564,7 +591,8 @@ export default function HomePage({
               </div>
             </div>
 
-            <div className="border border-[color:var(--hairline)] bg-white p-5">
+            <div className="relative border border-[color:var(--hairline)] bg-white p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.40)] to-transparent" />
               <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
               <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
               <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
