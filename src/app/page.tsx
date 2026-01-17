@@ -14,25 +14,30 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = (() => {
+  // Keep your SEO intent system, but hard-tilt copy toward Marketplace positioning.
   const doc = SEO_INTENT.home();
 
+  const title = 'Vantera · World’s Largest Luxury Marketplace';
+  const description =
+    'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.';
+
   return {
-    title: doc.title,
-    description: doc.description,
+    title,
+    description,
     alternates: { canonical: doc.canonical },
     robots: doc.robots,
     openGraph: {
       type: 'website',
-      title: doc.title,
-      description: doc.description,
+      title,
+      description,
       url: doc.canonical,
       siteName: 'Vantera',
       images: [doc.ogImage],
     },
     twitter: {
       card: 'summary_large_image',
-      title: doc.title,
-      description: doc.description,
+      title,
+      description,
       images: [doc.ogImage],
     },
   };
@@ -64,28 +69,33 @@ export default async function Page() {
   const isProd = process.env.NODE_ENV === 'production';
   const comingSoon = isProd && process.env.NEXT_PUBLIC_COMING_SOON === '1';
 
-  const doc = SEO_INTENT.home();
+  const canonical = SEO_INTENT.home().canonical;
 
   const pageJsonLd = webPageJsonLd({
-    url: doc.canonical,
-    name: 'Vantera',
-    description: doc.description,
+    url: canonical,
+    name: 'Vantera · World’s Largest Luxury Marketplace',
+    description:
+      'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.',
     about: [
-      { '@type': 'Thing', name: 'Luxury real estate' },
-      { '@type': 'Thing', name: 'Property intelligence' },
-      { '@type': 'Thing', name: 'Market pricing signals' },
-      { '@type': 'Thing', name: 'Private asset analysis' },
+      { '@type': 'Thing', name: 'Luxury real estate marketplace' },
+      { '@type': 'Thing', name: '€2M+ properties' },
+      { '@type': 'Thing', name: 'Ultra-prime homes' },
+      { '@type': 'Thing', name: 'Global luxury property listings' },
     ],
   });
 
   if (comingSoon) return <ComingSoon />;
+
+  // HomePage expects clusters too (keep it simple while wiring data)
+  const clusters: any[] = [];
+  const emptyCities: RuntimeCity[] = [];
 
   // Build/preview safety: don’t crash if env isn’t set
   if (!process.env.DATABASE_URL) {
     return (
       <>
         {jsonLd(pageJsonLd)}
-        <HomePage cities={[]} />
+        <HomePage cities={emptyCities} clusters={clusters} />
       </>
     );
   }
@@ -94,12 +104,12 @@ export default async function Page() {
     orderBy: [{ priority: 'desc' }, { name: 'asc' }],
   });
 
-  const cities = rows.map(toRuntimeCity);
+  const cities: RuntimeCity[] = rows.map(toRuntimeCity);
 
   return (
     <>
       {jsonLd(pageJsonLd)}
-      <HomePage cities={cities} />
+      <HomePage cities={cities} clusters={clusters} />
     </>
   );
 }

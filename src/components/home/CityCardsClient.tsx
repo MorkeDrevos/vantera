@@ -39,10 +39,11 @@ function hashTo01(seed: string) {
 
 export default function CityCardsClient({
   cities,
-  columns = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  // Two-up when there is space. One-up when constrained. Never squeezed.
+  columns = '[grid-template-columns:repeat(auto-fit,minmax(min(640px,100%),1fr))]',
   className,
   variant = 'default',
-  showLocalTime = false, // JamesEdition-style: off by default
+  showLocalTime = false,
 }: {
   cities: RuntimeCity[];
   columns?: string;
@@ -63,7 +64,6 @@ export default function CityCardsClient({
 
     const list = (cities ?? []).map((city) => {
       const r = hashTo01(city.slug);
-
       const sortScore =
         typeof city.priority === 'number' ? 10_000 + city.priority : Math.round(r * 10_000);
 
@@ -84,20 +84,20 @@ export default function CityCardsClient({
       <div
         className={cx(
           'grid',
-          // JamesEdition rhythm: more breathing room
-          isWall ? 'gap-5' : 'gap-5 sm:gap-6',
+          // calmer rhythm for white editorial
+          isWall ? 'gap-6' : 'gap-6 sm:gap-7 lg:gap-8',
           columns,
         )}
       >
         {enriched.map((city) => (
-          <div key={city.slug} className="relative">
-            {/* Optional local time (kept minimal if enabled) */}
+          <div key={city.slug} className="relative min-w-0">
+            {/* Optional local time (light system) */}
             {showLocalTime && city.localTime ? (
               <div className="pointer-events-none absolute right-4 top-4 z-30 hidden sm:block">
-                <div className="rounded-full border border-white/12 bg-black/35 px-3 py-1.5 text-[11px] text-zinc-100/90 backdrop-blur-2xl">
-                  <span className="text-zinc-300">Local</span>
-                  <span className="text-zinc-500"> · </span>
-                  <span className="font-mono text-zinc-100">{city.localTime}</span>
+                <div className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] text-[color:var(--ink-2)] backdrop-blur-2xl ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_18px_60px_rgba(11,12,16,0.10)]">
+                  <span className="text-[color:var(--ink-3)]">Local</span>
+                  <span className="text-black/20"> · </span>
+                  <span className="font-mono text-[color:var(--ink)]">{city.localTime}</span>
                 </div>
               </div>
             ) : null}

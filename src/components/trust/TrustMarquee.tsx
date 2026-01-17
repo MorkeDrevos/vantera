@@ -25,6 +25,12 @@ function splitIntoChunks<T>(items: T[], size: number) {
   return out;
 }
 
+function titleCase(s: string) {
+  const t = (s ?? '').trim();
+  if (!t) return '';
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
 export default function TrustMarquee({
   brands,
   eyebrow = 'Institutional benchmark',
@@ -51,9 +57,10 @@ export default function TrustMarquee({
       }, {})
     : null;
 
-  // Ungrouped: stable, premium grid (no scattered collage).
-  // 12 items per "band" keeps it balanced across screen sizes.
+  // Ungrouped: stable, premium grid (no collage).
   const chunks = splitIntoChunks(brands, 12);
+
+  const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
 
   return (
     <section className={cx('w-full', className)}>
@@ -120,7 +127,7 @@ export default function TrustMarquee({
               </div>
             </div>
 
-            {/* right premium reference plate */}
+            {/* right reference plate */}
             <div className="lg:col-span-7">
               <div
                 className={cx(
@@ -156,7 +163,6 @@ export default function TrustMarquee({
                     </div>
                   </div>
 
-                  {/* content */}
                   <div className="mt-7 space-y-7">
                     {grouped ? (
                       Object.entries(grouped).map(([groupName, groupBrands]) => (
@@ -174,19 +180,30 @@ export default function TrustMarquee({
                           <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                             {groupBrands.map((b) => (
                               <div key={`${groupName}:${b.domain}`} className="group flex items-center justify-center">
-                                <Image
-                                  src={brandfetchLogoUrl(b.domain)}
-                                  alt={`${b.name} logo`}
-                                  width={340}
-                                  height={100}
-                                  unoptimized
+                                <div
                                   className={cx(
                                     'h-7 w-auto max-w-[200px] object-contain opacity-80 grayscale-[0.55] transition',
                                     'group-hover:opacity-100 group-hover:grayscale-0',
                                     // Light mode: default to NOT invert (logos are usually dark)
                                     (b.invert ?? false) && 'invert'
                                   )}
-                                />
+                                >
+                                  <Image
+                                    src={brandfetchLogoUrl(b.domain)}
+                                    alt={`${b.name} logo`}
+                                    width={320}
+                                    height={96}
+                                    unoptimized
+                                    loading="lazy"
+                                    decoding="async"
+                                    className={cx(
+                                      'h-6 w-auto max-w-[210px] object-contain',
+                                      'opacity-80 grayscale-[0.55] transition',
+                                      'group-hover:opacity-100 group-hover:grayscale-0',
+                                      (b.invert ?? false) && 'invert',
+                                    )}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -208,18 +225,29 @@ export default function TrustMarquee({
                           <div className="mt-5 grid grid-cols-2 gap-x-10 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
                             {chunk.map((b) => (
                               <div key={b.domain} className="group flex items-center justify-center">
-                                <Image
-                                  src={brandfetchLogoUrl(b.domain)}
-                                  alt={`${b.name} logo`}
-                                  width={340}
-                                  height={100}
-                                  unoptimized
+                                <div
                                   className={cx(
                                     'h-7 w-auto max-w-[210px] object-contain opacity-80 grayscale-[0.55] transition',
                                     'group-hover:opacity-100 group-hover:grayscale-0',
                                     (b.invert ?? false) && 'invert'
                                   )}
-                                />
+                                >
+                                  <Image
+                                    src={brandfetchLogoUrl(b.domain)}
+                                    alt={`${b.name} logo`}
+                                    width={320}
+                                    height={96}
+                                    unoptimized
+                                    loading="lazy"
+                                    decoding="async"
+                                    className={cx(
+                                      'h-6 w-auto max-w-[210px] object-contain',
+                                      'opacity-80 grayscale-[0.55] transition',
+                                      'group-hover:opacity-100 group-hover:grayscale-0',
+                                      (b.invert ?? false) && 'invert',
+                                    )}
+                                  />
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -228,7 +256,6 @@ export default function TrustMarquee({
                     )}
                   </div>
 
-                  {/* bottom stamp */}
                   <div className="mt-8 flex items-center justify-between gap-4">
                     <div className="text-xs text-[color:var(--ink-3)]">
                       Disclosure depth • Data discipline • Presentation rigor

@@ -6,6 +6,7 @@ import { CITIES } from '@/components/home/cities';
 
 import { SEO_INTENT } from '@/lib/seo/seo.intent';
 import { jsonLd, webPageJsonLd } from '@/lib/seo/seo.jsonld';
+import { breadcrumbJsonLd } from '@/lib/seo/seo.breadcrumbs';
 
 export const dynamic = 'force-static';
 
@@ -36,26 +37,64 @@ export const metadata: Metadata = (() => {
   };
 })();
 
-function Pill({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function cx(...parts: Array<string | false | null | undefined>) {
+  return parts.filter(Boolean).join(' ');
+}
+
+const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+const NARROW = 'mx-auto w-full max-w-6xl px-5 sm:px-8';
+
+function Hairline() {
+  return <div className="h-px w-full bg-[color:var(--hairline)]" />;
+}
+
+function Breadcrumbs() {
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-      <h2 className="text-lg font-semibold tracking-tight text-white">{title}</h2>
-      <div className="mt-3 text-sm leading-relaxed text-zinc-300">{children}</div>
-    </section>
+    <nav aria-label="Breadcrumb" className="w-full">
+      <div className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.26em] uppercase text-[color:var(--ink-3)]">
+        <Link href="/" className="hover:text-[color:var(--ink-2)]">
+          Home
+        </Link>
+        <span className="opacity-60">/</span>
+        <Link href="/marketplace" className="hover:text-[color:var(--ink-2)]">
+          Marketplace
+        </Link>
+        <span className="opacity-60">/</span>
+        <span className="text-[color:var(--ink-2)]">Luxury real estate</span>
+      </div>
+    </nav>
   );
 }
 
-function Tag({ children }: { children: React.ReactNode }) {
+function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-zinc-200">
+    <span
+      className={cx(
+        'inline-flex items-center px-3 py-2 text-[11px] font-semibold tracking-[0.22em]',
+        'border border-[color:var(--hairline)] bg-white',
+        'text-[color:var(--ink-2)]',
+      )}
+    >
       {children}
     </span>
+  );
+}
+
+function Card({
+  eyebrow,
+  title,
+  body,
+}: {
+  eyebrow: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <section className="border border-[color:var(--hairline)] bg-white p-6 sm:p-7">
+      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
+      <h2 className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</h2>
+      <p className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</p>
+    </section>
   );
 }
 
@@ -84,131 +123,184 @@ export default function LuxuryRealEstatePage() {
     ],
   });
 
-  const exampleCities = CITIES.slice(0, 8);
+  // Breadcrumb JSON-LD (SEO-grade)
+  const crumbsJsonLd = breadcrumbJsonLd([
+    { name: 'Home', path: '/' },
+    { name: 'Marketplace', path: '/marketplace' },
+    { name: 'Luxury real estate', path: '/luxury-real-estate' },
+  ]);
+
+  const exampleCities = CITIES.slice(0, 12);
 
   return (
-    <main className="min-h-screen bg-[#06060a] text-zinc-100">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 h-[620px] w-[980px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(232,190,92,0.16),transparent_55%)] blur-2xl" />
-        <div className="absolute -bottom-40 left=1/2 h-[660px] w-[1100px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(155,109,255,0.16),transparent_60%)] blur-2xl" />
+    <main className="min-h-[100dvh] bg-white text-[color:var(--ink)]">
+      {/* Quiet paper texture + micro grid (matches home tokens) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
+        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 opacity-[0.030] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
+      {/* JSON-LD */}
       {jsonLd(pageJsonLd)}
+      {jsonLd(crumbsJsonLd)}
 
-      <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-        <div className="flex flex-col gap-6">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-zinc-200">
-            <span className="h-2 w-2 rounded-full bg-[rgba(232,190,92,0.9)]" />
-            Vantera Luxury Intelligence
-          </div>
+      {/* Top hairline */}
+      <div className="w-full">
+        <div className="h-px w-full bg-[color:var(--hairline)]" />
+      </div>
 
-          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-            Luxury Real Estate for Sale
-          </h1>
+      <section className="py-10 sm:py-14">
+        <div className={WIDE}>
+          <Breadcrumbs />
 
-          <p className="max-w-3xl text-base leading-relaxed text-zinc-300 sm:text-lg">
-            Not just listings. A truth layer.
-            <br />
-            Prime markets, real value signals, and liquidity reality - built to separate asking price from what the market will actually pay.
-          </p>
+          <div className="mt-6 border border-[color:var(--hairline)] bg-white/84 backdrop-blur-[14px] shadow-[0_40px_140px_rgba(10,10,12,0.08)]">
+            <div className="px-5 py-6 sm:px-7 sm:py-7">
+              <div className="flex flex-wrap items-center gap-2">
+                <Chip>Private intelligence</Chip>
+                <Chip>Truth Layer</Chip>
+                <Chip>Signal over noise</Chip>
+              </div>
 
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Tag>Prime areas</Tag>
-            <Tag>Pricing reality</Tag>
-            <Tag>Liquidity signals</Tag>
-            <Tag>Risk flags</Tag>
-          </div>
+              <h1 className="mt-7 text-balance text-[34px] font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-[46px] lg:text-[56px] lg:leading-[1.02]">
+                Luxury real estate for sale, with pricing reality and market context
+              </h1>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="/"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
-              Explore cities
-            </Link>
+              <p className="mt-4 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
+                Not just listings. Vantera adds a Truth Layer that verifies what’s known, surfaces what’s missing, and helps you
+                move with clarity - not noise.
+              </p>
 
-            <Link
-              href="/agents"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
-              For agents
-            </Link>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/marketplace"
+                  className={cx(
+                    'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+                    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                  )}
+                >
+                  Browse marketplace
+                </Link>
 
-            <Link
-              href="/sell-luxury-property"
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10"
-            >
-              Sell privately
-            </Link>
+                <Link
+                  href="/search"
+                  className={cx(
+                    'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                  )}
+                >
+                  Open search
+                </Link>
+
+                <Link
+                  href="/sell-luxury-property"
+                  className={cx(
+                    'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
+                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                  )}
+                >
+                  Sell privately
+                </Link>
+              </div>
+            </div>
+
+            <div className="px-5 pb-6 sm:px-7 sm:pb-7">
+              <Hairline />
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <Card
+                  eyebrow="TRUTH LAYER"
+                  title="Verified versus assumed"
+                  body="Clear attribution of what is verified, inferred, or unknown - with structured checks to remove ambiguity."
+                />
+                <Card
+                  eyebrow="MARKET INTELLIGENCE"
+                  title="Markets, not listings"
+                  body="Signals that explain pricing dynamics, liquidity and risk at a city level - built city by city."
+                />
+                <Card
+                  eyebrow="SIGNAL OVER NOISE"
+                  title="Designed to reduce noise"
+                  body="Editorial control replaces volume. Fewer listings, higher signal density, and calmer decision-making."
+                />
+                <Card
+                  eyebrow="PRIVATE NETWORK"
+                  title="Private by architecture"
+                  body="Controlled access, verified submissions, and discretion as a system default for serious buyers and advisors."
+                />
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
-          <Pill title="What defines luxury beyond price">
-            Luxury is not price alone. True luxury is scarcity, location power, privacy, planning constraints, and a buyer pool that stays deep through cycles.
-            Vantera models the parts portals cannot: value, liquidity, and risk in context.
-          </Pill>
-
-          <Pill title="Asking price is not value">
-            The biggest lie in real estate is that asking price equals value. Luxury amplifies this gap.
-            We track signals that reveal reality: reductions, velocity, dispersion, and comparable pressure.
-          </Pill>
-
-          <Pill title="Liquidity matters more than finishes">
-            A beautiful home that cannot sell is not prime. Liquidity is the real luxury.
-            Vantera highlights demand depth and time-to-sell pressure so buyers and sellers stop guessing.
-          </Pill>
-
-          <Pill title="Truth-first listings, sellers, and agents">
-            Vantera is a listings portal and selling platform, but the truth layer leads.
-            Private sellers and agents publish inside reality constraints, not marketing narratives.
-          </Pill>
-        </div>
-
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] p-6 sm:p-8">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <section className="pb-14 sm:pb-18">
+        <div className={NARROW}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="text-lg font-semibold tracking-tight text-white">Explore luxury by city</h2>
-              <p className="mt-2 text-sm leading-relaxed text-zinc-300">
-                City pages are where Vantera wins long-tail searches like “luxury real estate for sale in {`{city}` }”.
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">CITY CLUSTERS</div>
+              <div className="mt-2 text-balance text-[24px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[30px]">
+                Explore luxury by city
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                City pages are where Vantera wins long-tail searches and delivers the intelligence layer that portals don’t have.
               </p>
             </div>
+
             <Link
               href="/"
-              className="mt-3 w-fit rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:bg-white/10 sm:mt-0"
+              className={cx(
+                'mt-2 w-fit sm:mt-0',
+                'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+              )}
             >
               Browse all cities
             </Link>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-7">
+            <Hairline />
+          </div>
+
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {exampleCities.map((c) => (
               <Link
                 key={c.slug}
                 href={`/city/${c.slug}/luxury-real-estate`}
-                className="group rounded-2xl border border-white/10 bg-white/[0.02] p-4 hover:bg-white/[0.05]"
+                className={cx(
+                  'group flex items-center justify-between gap-4 px-4 py-4',
+                  'border border-[color:var(--hairline)] bg-white',
+                  'transition hover:border-[rgba(10,10,12,0.22)]',
+                )}
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-white">{c.name}</div>
-                    <div className="truncate text-xs text-zinc-400">
-                      {[c.region, c.country].filter(Boolean).join(', ')}
-                    </div>
+                <div className="min-w-0">
+                  <div className="truncate text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
+                    {c.name}
                   </div>
-                  <div className="text-xs text-zinc-400 group-hover:text-zinc-200">View</div>
+                  <div className="mt-1 truncate text-[12px] text-[color:var(--ink-2)]">
+                    {[c.region, c.country].filter(Boolean).join(' · ')}
+                  </div>
                 </div>
+                <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
               </Link>
             ))}
           </div>
 
-          <div className="mt-6 text-xs text-zinc-500">
-            Popular searches: luxury real estate for sale, luxury homes for sale, prime real estate, high-end property, exclusive homes, off-market luxury.
+          <div className="mt-8 text-[12px] text-[color:var(--ink-3)]">
+            Popular searches: luxury real estate for sale, luxury homes for sale, prime real estate, high-end property, exclusive
+            homes, off-market luxury.
+          </div>
+
+          <div className="mt-8 border border-[color:var(--hairline)] bg-white p-5">
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">CANONICAL</div>
+            <div className="mt-2 text-sm text-[color:var(--ink-2)]">{doc.canonical}</div>
           </div>
         </div>
+      </section>
 
-        <div className="mt-12 text-xs text-zinc-600">
-          <div>Canonical: {doc.canonical}</div>
-        </div>
+      {/* Bottom hairline */}
+      <div className="w-full">
+        <div className="h-px w-full bg-[color:var(--hairline)]" />
       </div>
     </main>
   );

@@ -1,14 +1,41 @@
 // src/components/home/FeaturedIntelligencePanel.tsx
 'use client';
 
-import { useMemo, useState } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+  Lock,
+  ScanEye,
+  Waves,
+  ChevronDown,
+  MapPin,
+} from 'lucide-react';
+
+import { CITIES, type City } from '@/components/home/cities';
 
 type TabKey = 'value' | 'liquidity' | 'risk';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
+
+function isEditableTarget(el: Element | null) {
+  if (!el) return false;
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'input' || tag === 'textarea' || tag === 'select') return true;
+  if ((el as HTMLElement).isContentEditable) return true;
+  return false;
+}
+
+const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
+
+const CARD =
+  'bg-[color:var(--surface-2)] backdrop-blur-[14px] ' +
+  RING +
+  ' shadow-[0_30px_90px_rgba(11,12,16,0.10)]';
 
 function Badge({
   children,
@@ -19,18 +46,17 @@ function Badge({
 }) {
   const toneCls =
     tone === 'gold'
-      ? 'border-[#E7C982]/25 bg-[#E7C982]/[0.07] text-[#F3E3B7]'
-      : tone === 'violet'
-        ? 'border-violet-300/20 bg-violet-500/[0.10] text-violet-100'
-        : tone === 'emerald'
-          ? 'border-emerald-300/20 bg-emerald-500/[0.10] text-emerald-100'
-          : 'border-white/10 bg-white/[0.03] text-zinc-200/90';
+      ? 'bg-[rgba(231,201,130,0.14)] text-[color:var(--ink)] ring-1 ring-inset ring-[rgba(231,201,130,0.34)]'
+      : tone === 'emerald'
+        ? 'bg-[rgba(16,185,129,0.12)] text-[color:var(--ink)] ring-1 ring-inset ring-[rgba(16,185,129,0.22)]'
+        : tone === 'violet'
+          ? 'bg-[rgba(139,92,246,0.12)] text-[color:var(--ink)] ring-1 ring-inset ring-[rgba(139,92,246,0.22)]'
+          : 'bg-white/72 text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]';
 
   return (
     <span
       className={cx(
-        'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px]',
-        'backdrop-blur-2xl',
+        'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] backdrop-blur-[14px]',
         toneCls,
       )}
     >
@@ -39,178 +65,172 @@ function Badge({
   );
 }
 
-function Pill({
+function PortalTab({
   active,
-  label,
-  hint,
-  onClick,
+  kbd,
+  title,
+  subtitle,
   Icon,
   tone,
+  onClick,
 }: {
   active: boolean;
-  label: string;
-  hint: string;
-  onClick: () => void;
+  kbd: string;
+  title: string;
+  subtitle: string;
   Icon: React.ComponentType<{ className?: string }>;
-  tone: 'gold' | 'violet' | 'emerald';
+  tone: 'gold' | 'emerald' | 'violet';
+  onClick: () => void;
 }) {
   const glow =
     tone === 'gold'
-      ? 'bg-[radial-gradient(560px_220px_at_18%_0%,rgba(231,201,130,0.18),transparent_62%)]'
+      ? 'bg-[radial-gradient(520px_220px_at_16%_0%,rgba(231,201,130,0.24),transparent_62%)]'
       : tone === 'emerald'
-        ? 'bg-[radial-gradient(560px_220px_at_18%_0%,rgba(16,185,129,0.16),transparent_62%)]'
-        : 'bg-[radial-gradient(560px_220px_at_18%_0%,rgba(120,76,255,0.18),transparent_62%)]';
+        ? 'bg-[radial-gradient(520px_220px_at_16%_0%,rgba(16,185,129,0.20),transparent_62%)]'
+        : 'bg-[radial-gradient(520px_220px_at_16%_0%,rgba(139,92,246,0.20),transparent_62%)]';
 
-  const ring =
+  const activeRing =
     tone === 'gold'
-      ? 'shadow-[0_0_0_1px_rgba(231,201,130,0.22),0_18px_60px_rgba(231,201,130,0.14)]'
+      ? 'ring-1 ring-inset ring-[rgba(231,201,130,0.38)] shadow-[0_26px_90px_rgba(231,201,130,0.10)]'
       : tone === 'emerald'
-        ? 'shadow-[0_0_0_1px_rgba(16,185,129,0.20),0_18px_60px_rgba(16,185,129,0.12)]'
-        : 'shadow-[0_0_0_1px_rgba(120,76,255,0.22),0_18px_60px_rgba(120,76,255,0.14)]';
+        ? 'ring-1 ring-inset ring-[rgba(16,185,129,0.30)] shadow-[0_26px_90px_rgba(16,185,129,0.08)]'
+        : 'ring-1 ring-inset ring-[rgba(139,92,246,0.30)] shadow-[0_26px_90px_rgba(139,92,246,0.08)]';
 
   return (
     <button
       type="button"
       onClick={onClick}
       className={cx(
-        'group relative w-full overflow-hidden rounded-2xl border px-4 py-3 text-left transition',
-        'backdrop-blur-2xl',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
-        active
-          ? cx('border-white/16 bg-white/[0.08]', ring)
-          : 'border-white/10 bg-white/[0.03] hover:bg-white/[0.05] hover:border-white/14',
+        'group relative w-full overflow-hidden rounded-2xl px-4 py-3 text-left transition',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
+        active ? cx('bg-white/86', activeRing) : cx('bg-white/66', RING, 'hover:bg-white/80'),
       )}
+      aria-pressed={active}
     >
-      <div className={cx('pointer-events-none absolute inset-0 opacity-0 transition', active ? 'opacity-100' : 'group-hover:opacity-100')}>
+      <div
+        className={cx(
+          'pointer-events-none absolute inset-0 opacity-0 transition',
+          active ? 'opacity-100' : 'group-hover:opacity-100',
+        )}
+      >
         <div className={cx('absolute inset-0', glow)} />
-        <div className="absolute inset-0 bg-[radial-gradient(520px_180px_at_86%_10%,rgba(255,255,255,0.06),transparent_62%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/20" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
       </div>
 
       <div className="relative flex items-start gap-3">
-        <span
-          className={cx(
-            'inline-flex h-10 w-10 items-center justify-center rounded-2xl border transition',
-            active ? 'border-white/16 bg-white/[0.07]' : 'border-white/10 bg-black/20',
-          )}
-        >
-          <Icon className={cx('h-[18px] w-[18px] transition', active ? 'opacity-95' : 'opacity-70')} />
+        <span className={cx('inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/86', RING)}>
+          <Icon className={cx('h-[18px] w-[18px] transition', active ? 'opacity-90' : 'opacity-70')} />
         </span>
 
         <div className="min-w-0">
-          <div className={cx('text-[13px] font-semibold tracking-[-0.01em]', active ? 'text-zinc-50' : 'text-zinc-100/90')}>
-            {label}
+          <div
+            className={cx(
+              'text-[13px] font-semibold tracking-[-0.01em]',
+              active ? 'text-[color:var(--ink)]' : 'text-[color:var(--ink-2)]',
+            )}
+          >
+            {title}
           </div>
-          <div className="mt-1 text-[12px] leading-snug text-zinc-400">{hint}</div>
+          <div className="mt-1 text-[12px] leading-snug text-[color:var(--ink-3)]">{subtitle}</div>
         </div>
 
         <span
           className={cx(
-            'ml-auto inline-flex h-6 items-center rounded-full border px-2 text-[10px] font-semibold tracking-[0.22em]',
-            active ? 'border-white/16 bg-white/[0.06] text-zinc-200' : 'border-white/10 bg-white/[0.02] text-zinc-500',
+            'ml-auto inline-flex items-center gap-2 rounded-full px-2 py-1 text-[10px] tracking-[0.22em] uppercase',
+            RING,
+            active ? 'bg-white/90 text-[color:var(--ink-2)]' : 'bg-white/66 text-[color:var(--ink-3)]',
           )}
         >
-          ACTIVE
+          <span className="font-mono">{kbd}</span>
+          {active ? 'active' : 'enter'}
         </span>
       </div>
     </button>
   );
 }
 
-function Metric({
-  k,
-  v,
-  hint,
-  accent = 'gold',
+function Stat({
+  label,
+  value,
+  note,
+  tone,
 }: {
-  k: string;
-  v: string;
-  hint?: string;
-  accent?: 'gold' | 'violet' | 'emerald';
+  label: string;
+  value: string;
+  note?: string;
+  tone: 'gold' | 'emerald' | 'violet';
 }) {
   const dot =
-    accent === 'gold'
-      ? 'bg-[#E7C982]/80 shadow-[0_0_0_4px_rgba(231,201,130,0.12)]'
-      : accent === 'emerald'
-        ? 'bg-emerald-300/80 shadow-[0_0_0_4px_rgba(16,185,129,0.12)]'
-        : 'bg-violet-300/80 shadow-[0_0_0_4px_rgba(120,76,255,0.14)]';
+    tone === 'gold'
+      ? 'bg-[rgba(231,201,130,0.95)] shadow-[0_0_0_4px_rgba(231,201,130,0.16)]'
+      : tone === 'emerald'
+        ? 'bg-[rgba(16,185,129,0.88)] shadow-[0_0_0_4px_rgba(16,185,129,0.14)]'
+        : 'bg-[rgba(139,92,246,0.88)] shadow-[0_0_0_4px_rgba(139,92,246,0.14)]';
 
   return (
-    <div
-      className={cx(
-        'relative overflow-hidden rounded-2xl border border-white/10 bg-black/25 px-4 py-3',
-        'shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]',
-      )}
-    >
-      <div className="pointer-events-none absolute inset-0 opacity-80">
-        <div className="absolute inset-0 bg-[radial-gradient(560px_220px_at_18%_0%,rgba(255,255,255,0.06),transparent_64%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+    <div className={cx('relative overflow-hidden rounded-2xl px-4 py-3', CARD)}>
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div className="absolute inset-0 bg-[radial-gradient(560px_220px_at_18%_0%,rgba(11,12,16,0.04),transparent_64%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
       </div>
 
       <div className="relative">
         <div className="flex items-center gap-2">
           <span className={cx('inline-block h-1.5 w-1.5 rounded-full', dot)} />
-          <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">{k}</div>
+          <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">{label}</div>
         </div>
-        <div className="mt-2 text-[15px] font-semibold tracking-[-0.01em] text-zinc-100">{v}</div>
-        {hint ? <div className="mt-1 text-[12px] leading-snug text-zinc-400">{hint}</div> : null}
+        <div className="mt-2 text-[15px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{value}</div>
+        {note ? <div className="mt-1 text-[12px] leading-snug text-[color:var(--ink-2)]">{note}</div> : null}
       </div>
     </div>
   );
 }
 
-function Bullet({ children }: { children: string }) {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/22 px-4 py-3">
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -left-10 -top-12 h-40 w-40 rounded-full bg-white/[0.05] blur-3xl" />
-      </div>
-      <div className="relative flex items-start gap-3">
-        <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-white/85 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
-        <div className="text-[13px] leading-relaxed text-zinc-200/90">{children}</div>
-      </div>
-    </div>
-  );
-}
-
-function DossierCard({
-  label,
+function PortalCard({
+  eyebrow,
   title,
   items,
   chip,
+  icon: Icon,
 }: {
-  label: string;
+  eyebrow: string;
   title: string;
-  items: string[];
+  items: Array<{ k: string; v: string; note?: string }>;
   chip: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <div
-      className={cx(
-        'relative overflow-hidden rounded-[28px] border border-white/10 bg-black/22 p-5',
-        'shadow-[0_26px_90px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.05)]',
-      )}
-    >
+    <div className={cx('relative overflow-hidden rounded-[28px] p-5', CARD)}>
       <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_20%_-10%,rgba(255,255,255,0.06),transparent_62%)]" />
-        <div className="absolute inset-0 opacity-[0.05] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.9)_1px,transparent_0)] [background-size:26px_26px]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_20%_-10%,rgba(11,12,16,0.05),transparent_62%)]" />
+        <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
       </div>
 
       <div className="relative flex items-start justify-between gap-3">
-        <div>
-          <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-500">{label}</div>
-          <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-zinc-200">{title}</div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={cx('inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/86', RING)}>
+              <Icon className="h-4 w-4 opacity-80" />
+            </span>
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">{eyebrow}</div>
+              <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{title}</div>
+            </div>
+          </div>
         </div>
         {chip}
       </div>
 
       <div className="relative mt-4 grid gap-2">
-        {items.map((p) => (
-          <div key={p} className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
-            <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">ENTRY</div>
-            <div className="mt-2 text-[13px] leading-snug text-zinc-200">{p}</div>
-            <div className="mt-1 text-[11px] text-zinc-500">Logged and cross-checked.</div>
+        {items.map((it) => (
+          <div key={it.k} className={cx('rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">{it.k}</div>
+              <div className="text-[10px] text-[color:var(--ink-3)]">log</div>
+            </div>
+            <div className="mt-2 text-[13px] leading-snug text-[color:var(--ink-2)]">{it.v}</div>
+            {it.note ? <div className="mt-1 text-[11px] text-[color:var(--ink-3)]">{it.note}</div> : null}
           </div>
         ))}
       </div>
@@ -218,107 +238,293 @@ function DossierCard({
   );
 }
 
+function CityPicker({
+  value,
+  onChange,
+  options,
+}: {
+  value: City;
+  onChange: (slug: string) => void;
+  options: City[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest('[data-city-picker]')) return;
+      setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  return (
+    <div className="relative" data-city-picker>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cx(
+          'group inline-flex w-full items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left transition',
+          'bg-white/74 hover:bg-white/84',
+          RING,
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
+        )}
+        aria-expanded={open}
+      >
+        <span className="min-w-0">
+          <span className="flex items-center gap-2">
+            <span className={cx('inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white/88', RING)}>
+              <MapPin className="h-4 w-4 opacity-80" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                CITY INTELLIGENCE
+              </span>
+              <span className="mt-1 block truncate text-[14px] font-semibold text-[color:var(--ink)]">{value.name}</span>
+            </span>
+          </span>
+        </span>
+
+        <ChevronDown className={cx('h-4 w-4 opacity-70 transition', open ? 'rotate-180' : '')} />
+      </button>
+
+      {open ? (
+        <div
+          className={cx(
+            'absolute right-0 z-20 mt-2 w-[min(520px,calc(100vw-32px))] overflow-hidden rounded-2xl',
+            'bg-[rgba(255,255,255,0.92)] backdrop-blur-[18px]',
+            'ring-1 ring-inset ring-[rgba(11,12,16,0.10)]',
+            'shadow-[0_40px_110px_rgba(11,12,16,0.18)]',
+          )}
+        >
+          <div className="px-4 py-3 text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+            SELECT CITY
+          </div>
+
+          <div className="max-h-[320px] overflow-auto p-2">
+            {options.map((c) => {
+              const active = c.slug === value.slug;
+              return (
+                <button
+                  key={c.slug}
+                  type="button"
+                  onClick={() => {
+                    onChange(c.slug);
+                    setOpen(false);
+                  }}
+                  className={cx(
+                    'w-full rounded-2xl px-3 py-2.5 text-left transition',
+                    active ? 'bg-white/92' : 'hover:bg-white/80',
+                    'ring-1 ring-inset ring-[rgba(11,12,16,0.08)]',
+                  )}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">{c.name}</div>
+                      <div className="mt-1 truncate text-[12px] text-[color:var(--ink-3)]">
+                        {c.country}
+                        {c.region ? ` · ${c.region}` : ''}
+                      </div>
+                    </div>
+
+                    {active ? (
+                      <span className="rounded-full bg-[rgba(11,12,16,0.06)] px-2.5 py-1 text-[10px] tracking-[0.22em] uppercase text-[color:var(--ink-2)]">
+                        active
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-[rgba(11,12,16,0.04)] px-2.5 py-1 text-[10px] tracking-[0.22em] uppercase text-[color:var(--ink-3)]">
+                        open
+                      </span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-[rgba(11,12,16,0.08)] px-4 py-3 text-[12px] text-[color:var(--ink-2)]">
+            Clean, city-by-city intelligence. Listings connect next.
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function FeaturedIntelligencePanel() {
   const [tab, setTab] = useState<TabKey>('value');
+  const [citySlug, setCitySlug] = useState<string>('marbella');
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEditableTarget(e.target as Element | null)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === '1') setTab('value');
+      if (e.key === '2') setTab('liquidity');
+      if (e.key === '3') setTab('risk');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  const allCities = useMemo(() => {
+    // Keep it tight and premium: only cities with images first
+    const sorted = [...CITIES].sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    return sorted;
+  }, []);
+
+  const city = useMemo(() => {
+    return allCities.find((c) => c.slug === citySlug) ?? allCities[0];
+  }, [allCities, citySlug]);
+
+  const toneBadge = useMemo(() => {
+    if (tab === 'value') return 'gold' as const;
+    if (tab === 'liquidity') return 'emerald' as const;
+    return 'violet' as const;
+  }, [tab]);
+
+  const accentGlow =
+    toneBadge === 'gold'
+      ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(231,201,130,0.24),transparent_62%)]'
+      : toneBadge === 'emerald'
+        ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(16,185,129,0.18),transparent_62%)]'
+        : 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(139,92,246,0.18),transparent_62%)]';
 
   const content = useMemo(() => {
+    const cityLine = `${city.name} · ${city.country}`;
+
+    // Premium-but-honest placeholders (until metrics are wired)
+    const tierLabel = (city.tier ?? 'TIER_3').replace('_', ' ');
+    const statusLabel = city.status ?? 'EXPANDING';
+
     if (tab === 'value') {
       return {
-        eyebrow: 'Featured intelligence',
-        title: 'Is the price real?',
-        body: 'Vantera checks the pricing story and shows if it is fair, inflated, or quietly underpriced - and why.',
-        sub: 'No portal gives you this clearly.',
-        metrics: [
-          { k: 'FAIR RANGE', v: 'Tight band', hint: 'High confidence in this pocket' },
-          { k: 'ASKING', v: 'Inside range', hint: 'No fantasy premium detected' },
-          { k: 'UPSIDE', v: 'Moderate', hint: 'Demand improving in best streets' },
-        ],
-        bullets: ['Stops you overpaying for a narrative', 'Shows what matters before you fly in', 'Gives a next move in plain language'],
-        proof: ['Sold comps and reductions', 'Listing history changes', 'Demand signals by micro-area'],
-        alerts: ['One similar home cut 6% this week', 'Supply stayed tight in last 14 days', 'Buyer interest rose in best streets'],
-        Icon: Sparkles,
-        badge: 'Pricing lens',
         tone: 'gold' as const,
+        eyebrow: 'Intelligence',
+        title: 'Valuation Dossier',
+        lead: `Price truth for ${cityLine}. Evidence-weighted comp logic, reductions, and pocket discipline.`,
+        badgeA: 'Proof-first',
+        badgeB: tierLabel,
+        badgeC: statusLabel,
+        heroIcon: Sparkles,
+        stats: [
+          { label: 'FAIR BAND', value: 'Calibrating', note: 'Wire comps + reductions per pocket' },
+          { label: 'ASKING', value: 'Under review', note: 'Flag fantasy premiums vs earned pricing' },
+          { label: 'EDGE', value: 'Street-level', note: 'Best streets emerge first, not broad averages' },
+        ],
+        proofEyebrow: 'CHECKS',
+        proofTitle: `${city.name}: what gets verified before claims`,
+        proofIcon: ScanEye,
+        proofChip: <Badge tone="gold">Receipts</Badge>,
+        proof: [
+          { k: 'Comps', v: 'Sold evidence and reductions (not list-only)', note: 'Weights shift by micro-area.' },
+          { k: 'History', v: 'Relists, edits and timing patterns', note: 'Narrative changes are logged.' },
+          { k: 'Demand', v: 'Buyer depth by pocket and origin', note: 'Where heat sits.' },
+        ],
+        signalsTitle: `${city.name} signals (examples)`,
+        signals: [
+          'A comparable cut 6% this week (same pocket, same finish)',
+          'Clean inventory stayed tight across 14 days (supply discipline)',
+          'Buyer attention rose in best streets (not the whole area)',
+        ],
+        ctaLabel: `Open ${city.name} dossier`,
       };
     }
 
     if (tab === 'liquidity') {
       return {
-        eyebrow: 'Featured intelligence',
-        title: 'How fast will it sell?',
-        body: 'You see buyer depth and real speed. Not marketing. Not vibe. Just how quickly clean homes actually move.',
-        sub: 'This is what makes you early, not late.',
-        metrics: [
-          { k: 'TIME TO SELL', v: 'Short', hint: 'Velocity is strong on clean inventory' },
-          { k: 'BUYER DEPTH', v: 'Deep', hint: 'International demand present' },
-          { k: 'CUT RISK', v: 'Low', hint: 'Comparables are clean' },
-        ],
-        bullets: ['Helps you time offers properly', 'Shows if “prime” is actually illiquid', 'Stops you buying the wrong pocket'],
-        proof: ['Buyer pool size and direction', 'Price cuts and relists', 'Time-on-market by micro-area'],
-        alerts: ['Two new buyers entered this pocket', 'Lower quality inventory is sitting longer', 'Best homes are moving off-market'],
-        Icon: TrendingUp,
-        badge: 'Liquidity lens',
         tone: 'emerald' as const,
+        eyebrow: 'Intelligence',
+        title: 'Liquidity Dossier',
+        lead: `How fast prime inventory actually moves in ${city.name}, without marketing fog.`,
+        badgeA: 'Velocity',
+        badgeB: tierLabel,
+        badgeC: statusLabel,
+        heroIcon: TrendingUp,
+        stats: [
+          { label: 'TIME TO SELL', value: 'Calibrating', note: 'Track by pocket and tier' },
+          { label: 'BUYER DEPTH', value: 'Mapping', note: 'Origin flows + verified intent' },
+          { label: 'CUT RISK', value: 'Early read', note: 'Reductions, relists, stagnation' },
+        ],
+        proofEyebrow: 'MEASURED',
+        proofTitle: `${city.name}: what gets measured (not guessed)`,
+        proofIcon: Waves,
+        proofChip: <Badge tone="emerald">Signal</Badge>,
+        proof: [
+          { k: 'Turnover', v: 'Time-on-market by pocket and tier', note: 'Clean vs compromised inventory.' },
+          { k: 'Buyers', v: 'Buyer inflow and direction changes', note: 'Where demand is building.' },
+          { k: 'Cuts', v: 'Reductions and stagnation detection', note: 'Signals before headlines.' },
+        ],
+        signalsTitle: `${city.name} signals (examples)`,
+        signals: [
+          'Two new buyers entered this pocket (verified demand)',
+          'Lower quality stock is sitting longer (drag detected)',
+          'Best homes are moving quietly (off-market activity)',
+        ],
+        ctaLabel: `View ${city.name} liquidity`,
       };
     }
 
     return {
-      eyebrow: 'Featured intelligence',
-      title: 'Is anything hidden?',
-      body: 'Vantera flags risk early so you do not fall in love with a problem. Clean facts, clean history, clean signals.',
-      sub: 'This is how you stay safe in luxury markets.',
-      metrics: [
-        { k: 'RISK FLAGS', v: 'Low', hint: 'No obvious red flags detected' },
-        { k: 'DATA QUALITY', v: 'Strong', hint: 'Signals cross-checked' },
-        { k: 'PROOF LEVEL', v: 'Rising', hint: 'Verification expands weekly' },
-      ],
-      bullets: ['Detects suspicious distortions', 'Keeps a clear change history', 'Built for outcomes, not clicks'],
-      proof: ['Ownership and listing consistency', 'Cross-source verification', 'Anomaly and manipulation guards'],
-      alerts: ['A listing edit was detected and logged', 'One source disagreed - flagged', 'Confidence improved as proof landed'],
-      Icon: ShieldCheck,
-      badge: 'Risk lens',
       tone: 'violet' as const,
+      eyebrow: 'Intelligence',
+      title: 'Integrity Dossier',
+      lead: `Luxury hides risk behind beauty. Vantera surfaces it early for ${city.name}.`,
+      badgeA: 'Integrity',
+      badgeB: tierLabel,
+      badgeC: statusLabel,
+      heroIcon: ShieldCheck,
+      stats: [
+        { label: 'RISK FLAGS', value: 'Scanning', note: 'Mismatch detection + anomaly guards' },
+        { label: 'DATA QUALITY', value: 'Improving', note: 'Cross-source verification expands' },
+        { label: 'PROOF LEVEL', value: 'Rising', note: 'Traceable logs per listing' },
+      ],
+      proofEyebrow: 'GUARDED',
+      proofTitle: `${city.name}: what gets locked before trust`,
+      proofIcon: Lock,
+      proofChip: <Badge tone="violet">Guarded</Badge>,
+      proof: [
+        { k: 'Consistency', v: 'Ownership and listing alignment checks', note: 'Mismatch equals caution.' },
+        { k: 'Cross-source', v: 'Verification across independent sources', note: 'Disagreement is flagged.' },
+        { k: 'Anomalies', v: 'Manipulation guards and anomaly detection', note: 'Noise is filtered.' },
+      ],
+      signalsTitle: `${city.name} signals (examples)`,
+      signals: [
+        'A listing edit was detected and logged (trace preserved)',
+        'One source disagreed - flagged for review',
+        'Confidence increased as proof landed (status updated)',
+      ],
+      ctaLabel: `Open ${city.name} integrity`,
     };
-  }, [tab]);
+  }, [tab, city, toneBadge]);
 
   const tabs = useMemo(
     () =>
       [
-        { k: 'value' as const, label: 'Value', hint: 'Is the price real?', Icon: Sparkles, tone: 'gold' as const },
-        { k: 'liquidity' as const, label: 'Liquidity', hint: 'How fast will it move?', Icon: TrendingUp, tone: 'emerald' as const },
-        { k: 'risk' as const, label: 'Risk', hint: 'Any hidden problems?', Icon: ShieldCheck, tone: 'violet' as const },
+        { k: 'value' as const, title: 'Valuation', subtitle: 'Is the price earned?', kbd: '1', Icon: Sparkles, tone: 'gold' as const },
+        { k: 'liquidity' as const, title: 'Liquidity', subtitle: 'How fast does it move?', kbd: '2', Icon: TrendingUp, tone: 'emerald' as const },
+        { k: 'risk' as const, title: 'Integrity', subtitle: 'Any hidden risk?', kbd: '3', Icon: ShieldCheck, tone: 'violet' as const },
       ] as const,
     [],
   );
 
-  const accentGlow =
-    content.tone === 'gold'
-      ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(231,201,130,0.18),transparent_62%)]'
-      : content.tone === 'emerald'
-        ? 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(16,185,129,0.16),transparent_62%)]'
-        : 'bg-[radial-gradient(1200px_520px_at_12%_-10%,rgba(120,76,255,0.18),transparent_62%)]';
-
   return (
-    <section className="relative">
-      {/* Crown lines */}
-      <div aria-hidden className="pointer-events-none absolute -top-4 inset-x-0">
-        <div className="mx-auto h-px w-[92%] bg-gradient-to-r from-transparent via-[#E7C982]/26 to-transparent" />
-        <div className="mx-auto mt-2 h-px w-[76%] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-      </div>
-
-      <div
-        className={cx(
-          'relative overflow-hidden rounded-[40px] border border-white/10 bg-white/[0.03]',
-          'shadow-[0_60px_220px_rgba(0,0,0,0.74),inset_0_1px_0_rgba(255,255,255,0.07)]',
-        )}
-      >
-        {/* Ambient */}
+    <section
+      ref={(n) => {
+        sectionRef.current = n;
+      }}
+      className="relative"
+    >
+      <div className={cx('relative overflow-hidden rounded-[40px]', CARD)}>
         <div className="pointer-events-none absolute inset-0">
           <div className={cx('absolute inset-0', accentGlow)} />
-          <div className="absolute inset-0 bg-[radial-gradient(1100px_420px_at_86%_6%,rgba(255,255,255,0.06),transparent_64%)]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E7C982]/18 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/6 via-black/22 to-black/52" />
-          <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.8)_1px,transparent_0)] [background-size:26px_26px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1100px_420px_at_86%_6%,rgba(11,12,16,0.04),transparent_64%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
+          <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
         </div>
 
         <div className="relative p-5 sm:p-7 lg:p-10">
@@ -327,171 +533,135 @@ export default function FeaturedIntelligencePanel() {
             <div className="min-w-0 max-w-2xl">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="neutral">
-                  <span className="font-semibold tracking-[0.22em] text-zinc-300">{content.eyebrow.toUpperCase()}</span>
+                  <span className="font-semibold tracking-[0.22em] uppercase">{content.eyebrow}</span>
                 </Badge>
-                <Badge tone={content.tone === 'gold' ? 'gold' : content.tone === 'emerald' ? 'emerald' : 'violet'}>
-                  {content.badge}
-                </Badge>
-                <Badge tone="neutral">Example dossier</Badge>
+                <Badge tone={toneBadge}>{content.badgeA}</Badge>
+                <Badge tone="neutral">{content.badgeB}</Badge>
+                <Badge tone="neutral">{content.badgeC}</Badge>
               </div>
 
               <div className="mt-4 flex items-start gap-3">
-                <span className="mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-black/25">
-                  <content.Icon className="h-5 w-5 text-zinc-200/90" />
+                <span className={cx('mt-1 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/86', RING)}>
+                  <content.heroIcon className="h-5 w-5 opacity-85" />
                 </span>
 
                 <div className="min-w-0">
-                  <h2 className="text-[26px] font-semibold tracking-[-0.02em] text-zinc-50 sm:text-[34px]">
+                  <h2 className="text-[24px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[32px]">
                     {content.title}
                   </h2>
-                  <p className="mt-2 text-[14px] leading-relaxed text-zinc-300/90">{content.body}</p>
-                  <p className="mt-2 text-[13px] text-zinc-400">{content.sub}</p>
+                  <p className="mt-2 text-[14px] leading-relaxed text-[color:var(--ink-2)]">{content.lead}</p>
+
+                  {city.blurb ? (
+                    <div className="mt-3 text-[12px] leading-relaxed text-[color:var(--ink-3)]">{city.blurb}</div>
+                  ) : null}
                 </div>
               </div>
             </div>
 
-            {/* Lens Selector */}
-            <div className="w-full lg:w-[440px]">
+            {/* Selector block */}
+            <div className="w-full lg:w-[460px] space-y-3">
+              <CityPicker value={city} onChange={setCitySlug} options={allCities} />
+
               <div
                 className={cx(
-                  'rounded-[30px] border border-white/10 bg-black/25 p-3',
-                  'shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]',
+                  'rounded-[30px] p-3',
+                  'bg-white/72',
+                  RING,
+                  'shadow-[0_22px_70px_rgba(11,12,16,0.08)]',
                 )}
               >
                 <div className="flex items-center justify-between gap-3 px-1">
-                  <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-500">LENS SELECTOR</div>
-                  <div className="text-[10px] text-zinc-500">3 modes, one truth layer</div>
+                  <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">MODES</div>
+                  <div className="text-[10px] text-[color:var(--ink-3)]">1 / 2 / 3</div>
                 </div>
 
                 <div className="mt-3 grid gap-2">
                   {tabs.map((t) => (
-                    <Pill
+                    <PortalTab
                       key={t.k}
                       active={tab === t.k}
-                      label={t.label}
-                      hint={t.hint}
+                      kbd={t.kbd}
+                      title={t.title}
+                      subtitle={t.subtitle}
                       Icon={t.Icon}
                       tone={t.tone}
                       onClick={() => setTab(t.k)}
                     />
                   ))}
                 </div>
-
-                <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-[12px] text-zinc-300">
-                      Output style
-                      <div className="text-[11px] text-zinc-500">Plain-language + proof trail.</div>
-                    </div>
-                    <Badge tone="gold">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#E7C982]/90 shadow-[0_0_0_3px_rgba(231,201,130,0.12)]" />
-                        Royal-grade
-                      </span>
-                    </Badge>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Metrics */}
+          {/* Stats */}
           <div className="mt-7 grid gap-3 sm:grid-cols-3">
-            {content.metrics.map((m) => (
-              <Metric key={m.k} k={m.k} v={m.v} hint={m.hint} accent={content.tone} />
+            {content.stats.map((s) => (
+              <Stat key={s.label} label={s.label} value={s.value} note={s.note} tone={content.tone} />
             ))}
           </div>
 
           {/* Proof + Signals */}
           <div className="mt-6 grid gap-4 lg:grid-cols-12">
             <div className="lg:col-span-7">
-              <DossierCard
-                label="PROOF STACK"
-                title="What Vantera checks before a claim"
+              <PortalCard
+                eyebrow={content.proofEyebrow}
+                title={content.proofTitle}
                 items={content.proof}
-                chip={<Badge tone="neutral">Verification-first</Badge>}
+                icon={content.proofIcon}
+                chip={content.proofChip}
               />
-
-              <div className="mt-4 grid gap-2">
-                {content.bullets.map((b) => (
-                  <Bullet key={b}>{b}</Bullet>
-                ))}
-              </div>
             </div>
 
             <div className="lg:col-span-5">
-              <div
-                className={cx(
-                  'relative overflow-hidden rounded-[28px] border border-white/10 bg-black/22 p-5',
-                  'shadow-[0_26px_90px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.05)]',
-                )}
-              >
+              <div className={cx('relative overflow-hidden rounded-[28px] p-5', CARD)}>
                 <div className="pointer-events-none absolute inset-0 opacity-70">
-                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_86%_-10%,rgba(120,76,255,0.12),transparent_62%)]" />
-                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_20%_-10%,rgba(255,255,255,0.06),transparent_62%)]" />
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_86%_-10%,rgba(139,92,246,0.10),transparent_62%)]" />
+                  <div className="absolute inset-0 bg-[radial-gradient(980px_360px_at_20%_-10%,rgba(11,12,16,0.05),transparent_62%)]" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
                 </div>
 
                 <div className="relative flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-[10px] font-semibold tracking-[0.26em] text-zinc-500">LIVE SIGNALS</div>
-                    <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-zinc-200">
-                      Tiny changes that move decisions
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">SIGNALS</div>
+                    <div className="mt-2 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
+                      {content.signalsTitle}
                     </div>
+                    <div className="mt-1 text-xs text-[color:var(--ink-3)]">Examples only. Wiring next.</div>
                   </div>
 
-                  <Badge tone="violet">
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-white/80 shadow-[0_0_0_3px_rgba(255,255,255,0.10)]" />
-                      Just in
-                    </span>
-                  </Badge>
+                  <Badge tone={toneBadge}>City</Badge>
                 </div>
 
                 <div className="relative mt-4 grid gap-2">
-                  {content.alerts.map((a) => (
-                    <div
-                      key={a}
-                      className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3"
-                    >
-                      <div className="pointer-events-none absolute inset-0 opacity-70">
-                        <div className="absolute -left-14 -top-14 h-44 w-44 rounded-full bg-[rgba(120,76,255,0.10)] blur-3xl" />
-                        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] via-transparent to-black/20" />
-                      </div>
-                      <div className="relative">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="text-[10px] font-semibold tracking-[0.22em] text-zinc-500">ALERT</div>
-                          <div className="text-[10px] text-zinc-500">Example</div>
-                        </div>
-                        <div className="mt-2 text-[13px] leading-relaxed text-zinc-200">{a}</div>
-                        <div className="mt-1 text-[11px] text-zinc-500">Real wiring next.</div>
-                      </div>
+                  {content.signals.map((a) => (
+                    <div key={a} className={cx('relative overflow-hidden rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
+                      <div className="relative text-[13px] leading-relaxed text-[color:var(--ink-2)]">{a}</div>
                     </div>
                   ))}
                 </div>
 
-                <div className="relative mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
-                  <div className="text-[12px] text-zinc-300">
-                    Want this on a real listing?
-                    <div className="text-[11px] text-zinc-500">Next: connect to verified inventory.</div>
+                <div className={cx('relative mt-4 flex items-center justify-between gap-3 rounded-2xl px-4 py-3', 'bg-white/74', RING)}>
+                  <div className="text-[12px] text-[color:var(--ink-2)]">
+                    City-by-city dossiers.
+                    <div className="text-[11px] text-[color:var(--ink-3)]">Next: connect listings and verified metrics.</div>
                   </div>
                   <button
                     type="button"
                     className={cx(
-                      'inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2',
-                      'text-[12px] text-zinc-200 transition',
-                      'hover:bg-white/[0.07] hover:border-white/16',
-                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20',
+                      'inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-[12px] transition',
+                      'bg-white/82 hover:bg-white/92',
+                      RING,
+                      'text-[color:var(--ink)]',
+                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(11,12,16,0.16)]',
                     )}
                   >
-                    View sample <ArrowRight className="h-4 w-4 opacity-75" />
+                    {content.ctaLabel} <ArrowRight className="h-4 w-4 opacity-75" />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-[12px] text-zinc-300">
-                This is the “wow” layer: proof + signals + clear outcomes.
-                <span className="text-zinc-500"> Next we wire it to real listings and real market data.</span>
+              <div className={cx('mt-4 rounded-2xl px-4 py-3 text-[12px]', 'bg-white/74', RING, 'text-[color:var(--ink-2)]')}>
+                Proof first. Signal second. Decisions last.
               </div>
             </div>
           </div>

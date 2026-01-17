@@ -29,7 +29,6 @@ export type RegionCluster = {
 };
 
 export type City = {
-  // Existing fields used by UI today
   slug: string;
   name: string;
   country: string;
@@ -38,12 +37,10 @@ export type City = {
   blurb?: string;
   image?: CityImage;
 
-  // Coverage metadata (optional - won't break current UI)
   tier?: CoverageTier;
   status?: CoverageStatus;
   priority?: number;
 
-  // Optional: link city to a RegionCluster
   clusterSlug?: string;
 };
 
@@ -63,7 +60,6 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     blurb:
       'Prime waterfront districts, institutional buyer flow and the reference implementation for liquidity-led signals.',
     image: {
-      // Crisp skyline with strong contrast
       src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2600&q=85',
       alt: 'Miami Metro skyline at golden hour',
     },
@@ -77,15 +73,30 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     tier: 'TIER_1',
     status: 'TRACKING',
     priority: 8,
-    headline: 'Coverage tracking',
+    headline: 'Single-market lock',
     blurb:
-      'Prime coastal markets, verified supply signals and a disciplined lens for second-home and relocation demand.',
+      'One market, one city. Costa del Sol is represented as Marbella for clean data, clean UX and disciplined signals.',
     image: {
-      // Cleaner, more “premium coast” look than the previous generic beach
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2600&q=85',
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Costa del Sol coastline at dusk',
     },
-    citySlugs: ['marbella', 'benahavis', 'estepona', 'ibiza'],
+    citySlugs: ['marbella'],
+  },
+  {
+    slug: 'balearic-islands',
+    name: 'Balearic Islands',
+    country: 'Spain',
+    region: 'Europe',
+    tier: 'TIER_3',
+    status: 'EXPANDING',
+    priority: 3,
+    headline: 'Coverage expanding',
+    blurb: 'Ultra-prime island markets. Clean structure first, deeper verification later.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Balearic Islands coastline at golden hour',
+    },
+    citySlugs: ['mallorca', 'ibiza'],
   },
   {
     slug: 'french-riviera',
@@ -98,14 +109,12 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     headline: 'Coverage expanding',
     blurb: 'A dense coastal luxury cluster. Market structure first, listings as the dataset matures.',
     image: {
-      // More editorial coastline framing
       src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2600&q=85',
       alt: 'French Riviera coastal hillside and sea',
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
   },
 
-  // Tier 3 region groupings (still included at launch)
   {
     slug: 'lake-como-region',
     name: 'Lake Como Region',
@@ -142,12 +151,9 @@ export const REGION_CLUSTERS: RegionCluster[] = [
 
 /**
  * Core launch cities (Tiers 0-2)
- *
- * Note:
- * - Monaco is intentionally promoted into the top 4 (replacing Marbella) via priority + list ordering.
  */
 export const CITIES: City[] = [
-  // Tier 0 (flagship)
+  // Tier 0
   {
     slug: 'miami',
     name: 'Miami',
@@ -182,40 +188,20 @@ export const CITIES: City[] = [
     },
   },
 
-  // Tier 1 (Monaco promoted into top 4)
+  // Tier 1
   {
     slug: 'monaco',
     name: 'Monaco',
     country: 'Monaco',
     region: 'Europe',
-    // Monaco aligns with Paris time. Using a widely-supported IANA tz avoids Intl issues.
     tz: 'Europe/Paris',
     tier: 'TIER_1',
     status: 'TRACKING',
-    // Promote into top 4: above Marbella/Benahavis/Estepona
     priority: 86,
     blurb: 'Ultra-prime density and global capital concentration. Verified signals only.',
     image: {
-      // Stronger "yachts + city" premium feel
       src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Monaco harbour with yachts and skyline',
-    },
-  },
-  {
-    slug: 'benahavis',
-    name: 'Benahavís',
-    country: 'Spain',
-    region: 'Europe',
-    tz: 'Europe/Madrid',
-    tier: 'TIER_1',
-    status: 'TRACKING',
-    priority: 78,
-    clusterSlug: 'costa-del-sol',
-    blurb: 'Gated estates, golf corridors and hillside privacy above the coast.',
-    image: {
-      // More cinematic hills than the previous generic landscape
-      src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Hills and valleys above the Costa del Sol',
     },
   },
   {
@@ -229,7 +215,6 @@ export const CITIES: City[] = [
     priority: 76,
     blurb: 'Modern skyline, speed and scale. Prime districts behave like a global asset class.',
     image: {
-      // Cleaner skyline shot, less touristy
       src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Dubai skyline at dusk',
     },
@@ -250,10 +235,10 @@ export const CITIES: City[] = [
     },
   },
 
-  // Marbella remains core, but no longer in the top 4
+  // Marbella = Costa del Sol (single city)
   {
     slug: 'marbella',
-    name: 'Marbella',
+    name: 'Marbella (Costa del Sol)',
     country: 'Spain',
     region: 'Europe',
     tz: 'Europe/Madrid',
@@ -261,27 +246,10 @@ export const CITIES: City[] = [
     status: 'TRACKING',
     priority: 70,
     clusterSlug: 'costa-del-sol',
-    blurb: 'Prime coastal living and global luxury demand. Signals tracking with disciplined verification.',
+    blurb: 'Costa del Sol, locked as one market. Prime coastal living and global luxury demand.',
     image: {
-      // More premium Mediterranean palette than the older generic coast
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Mediterranean coastline near Marbella',
-    },
-  },
-  {
-    slug: 'estepona',
-    name: 'Estepona',
-    country: 'Spain',
-    region: 'Europe',
-    tz: 'Europe/Madrid',
-    tier: 'TIER_1',
-    status: 'TRACKING',
-    priority: 68,
-    clusterSlug: 'costa-del-sol',
-    blurb: 'Beachfront modern builds and a calmer luxury rhythm with strong value.',
-    image: {
-      src: 'https://images.unsplash.com/photo-1505765050516-f72dcac9c60b?auto=format&fit=crop&w=2600&q=85',
-      alt: 'Sunlit coastal promenade on the Costa del Sol',
     },
   },
 
@@ -388,6 +356,22 @@ export const WATCHLIST_CITIES: City[] = [
     },
   },
   {
+    slug: 'mallorca',
+    name: 'Mallorca',
+    country: 'Spain',
+    region: 'Europe',
+    tz: 'Europe/Madrid',
+    tier: 'TIER_3',
+    status: 'EXPANDING',
+    priority: 19,
+    clusterSlug: 'balearic-islands',
+    blurb: 'Ultra-prime coastal estates and trophy hillside assets. Coverage expanding.',
+    image: {
+      src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
+      alt: 'Mallorca coastline',
+    },
+  },
+  {
     slug: 'ibiza',
     name: 'Ibiza',
     country: 'Spain',
@@ -396,7 +380,7 @@ export const WATCHLIST_CITIES: City[] = [
     tier: 'TIER_3',
     status: 'EXPANDING',
     priority: 18,
-    clusterSlug: 'costa-del-sol',
+    clusterSlug: 'balearic-islands',
     blurb: 'Ultra-prime seasonal market. Coverage expanding.',
     image: {
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
@@ -420,7 +404,6 @@ export const WATCHLIST_CITIES: City[] = [
   },
 ];
 
-// Canonical combined list (use this everywhere you want "all cities")
 export const ALL_CITIES: City[] = [...CITIES, ...WATCHLIST_CITIES].sort(
   (a, b) => (b.priority ?? 0) - (a.priority ?? 0),
 );

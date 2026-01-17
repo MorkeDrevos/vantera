@@ -2,26 +2,101 @@
 'use client';
 
 import Image, { type ImageProps } from 'next/image';
-import { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-type Props = Omit<ImageProps, 'alt'> & {
+type Props = Omit<ImageProps, 'alt' | 'onLoad' | 'onError'> & {
   alt: string;
   fallback?: React.ReactNode;
+
+  // Allow parent components to react (e.g. setOk(false))
+  onLoad?: () => void;
+  onError?: () => void;
 };
 
-export default function SafeImage({ alt, fallback, ...props }: Props) {
-  const [ok, setOk] = useState(true);
+/**
+ * SafeImage
+ * - Never shows broken-image UI.
+ * - Shows a premium shimmer while loading.
+ * - Smooth fade-in on load (no harsh pop).
+ * - Resets correctly when src changes.
+ * - Allows optional parent callbacks onLoad/onError (typed).
+ */
+export default function SafeImage({ alt, fallback, onLoad, onError, ...props }: Props) {
+  const srcKey = typeof props.src === 'string' ? props.src : (props.src as any)?.src ?? String(props.src);
+
+  const [failed, setFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  // One gentle retry per src
+  const retriedRef = useRef<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setFailed(false);
+    setLoaded(false);
+  }, [srcKey]);
 
   const safeFallback = useMemo(() => {
     return (
       fallback ?? (
-        <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent" />
+        <div className="absolute inset-0">
+          {/* paper shimmer */}
+          <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(0,0,0,0.04),rgba(0,0,0,0.02),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_18%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(900px_360px_at_90%_12%,rgba(11,12,16,0.06),transparent_62%)]" />
+          <div className="absolute inset-0 opacity-[0.035] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:28px_28px]" />
+
+          {/* shimmer sweep */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -inset-y-10 -left-1/2 w-[60%] rotate-12 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)] opacity-30 blur-md animate-[vanteraShimmer_1.6s_ease-in-out_infinite]" />
+          </div>
+
+          <style jsx>{`
+            @keyframes vanteraShimmer {
+              0% {
+                transform: translateX(-20%);
+              }
+              100% {
+                transform: translateX(220%);
+              }
+            }
+          `}</style>
+        </div>
       )
     );
   }, [fallback]);
 
-  // If Next/Image fails, show a premium fallback - never leak alt as visible UI.
-  if (!ok) return <>{safeFallback}</>;
+  if (failed) return <>{safeFallback}</>;
 
-  return <Image {...props} alt={alt} onError={() => setOk(false)} />;
+  return (
+    <div className="absolute inset-0">
+      {!loaded ? <>{safeFallback}</> : null}
+
+      <Image
+        {...props}
+        alt={alt}
+        onLoad={() => {
+          setLoaded(true);
+          onLoad?.();
+        }}
+        onError={() => {
+          // Let parent react immediately (e.g. setOk(false))
+          onError?.();
+
+          const already = retriedRef.current[srcKey] === true;
+          if (!already) {
+            retriedRef.current[srcKey] = true;
+            setLoaded(false);
+            // one retry: re-render is enough for Next/Image to retry fetch
+            return;
+          }
+          setFailed(true);
+        }}
+        className={[
+          props.className ?? '',
+          'transition-opacity duration-500',
+          loaded ? 'opacity-100' : 'opacity-0',
+        ].join(' ')}
+      />
+    </div>
+  );
 }

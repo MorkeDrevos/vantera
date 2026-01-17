@@ -1,23 +1,9 @@
 // src/components/home/HomePage.tsx
 import Image from 'next/image';
-import { Suspense, type ReactNode } from 'react';
+import Link from 'next/link';
+import type { ReactNode } from 'react';
 
-import TopBar from '@/components/layout/TopBar';
-import Footer from '@/components/layout/Footer';
-
-import TrustMarquee from '@/components/trust/TrustMarquee';
-
-import FeaturedIntelligencePanel from './FeaturedIntelligencePanel';
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
-import MarketBriefing from './MarketBriefing';
-import RoyalPortalBackdrop from './RoyalPortalBackdrop';
-import HeroGoldCrown from './HeroGoldCrown';
-import PremiumBadgeRow from './PremiumBadgeRow';
-
-import IntentHero from './IntentHero';
-import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
-
-import { REGION_CLUSTERS } from './cities';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -43,44 +29,37 @@ export type RuntimeCity = {
   heroImageAlt?: string | null;
 };
 
+export type RuntimeRegionCluster = {
+  slug: string;
+  name: string;
+  country?: string;
+  region?: string;
+  priority?: number;
+  citySlugs: string[];
+};
+
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
 /* =========================================================
-   Royal layout primitives (white editorial, full-bleed hero)
+   Layout primitives (white, editorial, full-bleed)
    ========================================================= */
 
-const HERO_INNER = 'mx-auto w-full max-w-[1560px] px-5 sm:px-8 lg:px-12 2xl:px-16';
-const WIDE = 'mx-auto w-full max-w-[1840px] px-5 sm:px-8 lg:px-12 2xl:px-16';
-const MID = 'mx-auto w-full max-w-[1400px] px-5 sm:px-8';
-const NARROW = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
-
-const RING = 'ring-1 ring-inset ring-[color:var(--hairline)]';
-const CARD =
-  'bg-[color:var(--surface-2)] backdrop-blur-[16px] ' +
-  RING +
-  ' shadow-[0_30px_90px_rgba(11,12,16,0.10)]';
+const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+const NARROW = 'mx-auto w-full max-w-6xl px-5 sm:px-8';
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-[100dvh] bg-[color:var(--paper)] text-[color:var(--ink)]">
-      {/* Global paper stage (very restrained) */}
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-72 left-1/2 h-[820px] w-[1400px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(231,201,130,0.18),transparent_66%)] blur-3xl" />
-        <div className="absolute -top-72 right-[-420px] h-[820px] w-[820px] rounded-full bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.08),transparent_66%)] blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.03] [background-image:radial-gradient(circle_at_1px_1px,rgba(11,12,16,0.22)_1px,transparent_0)] [background-size:26px_26px]" />
+    <div className="min-h-[100dvh] bg-white text-[color:var(--ink)]">
+      {/* Quiet paper texture + micro grid (luxury editorial) */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
+        <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
+        <div className="absolute inset-0 opacity-[0.030] [background-image:linear-gradient(to_right,rgba(10,10,12,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(10,10,12,0.18)_1px,transparent_1px)] [background-size:140px_140px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-      <div className="relative">
-        <Suspense fallback={null}>
-          <TopBar />
-        </Suspense>
-
-        <main className="w-full">{children}</main>
-
-        <Footer />
-      </div>
+      <main className="w-full">{children}</main>
     </div>
   );
 }
@@ -89,612 +68,495 @@ function Shell({ children }: { children: ReactNode }) {
    Micro components
    ========================================================= */
 
-function GoldWord({ children }: { children: React.ReactNode }) {
+function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="bg-clip-text text-transparent bg-[linear-gradient(180deg,#f7e7bf_0%,#e6c980_42%,#b7863a_100%)]">
+    <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-2)]">
       {children}
-    </span>
+    </div>
   );
 }
 
+function Hairline() {
+  return <div className="h-px w-full bg-[color:var(--hairline)]" />;
+}
+
 function SectionHeader({
-  kicker,
+  eyebrow,
   title,
   subtitle,
   right,
 }: {
-  kicker: string;
+  eyebrow: string;
   title: string;
   subtitle?: string;
   right?: React.ReactNode;
 }) {
   return (
-    <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-          {kicker}
-        </div>
-        <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[26px]">
+        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
+        <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
           {title}
         </div>
         {subtitle ? (
-          <div className="mt-1 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+          <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
             {subtitle}
           </div>
         ) : null}
       </div>
 
-      <div className="flex items-center gap-3">
-        {right}
-        <div className="hidden sm:block h-px w-44 bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-      </div>
+      {right ? <div className="flex items-center gap-3">{right}</div> : null}
     </div>
   );
 }
 
-type SignalStripItem = { k: string; v: React.ReactNode; hint?: string };
-
-function SignalStrip({ items }: { items: SignalStripItem[] }) {
+function QuickLink({ href, label, hint }: { href: string; label: string; hint?: string }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[22px]', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_280px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(980px_280px_at_84%_10%,rgba(139,92,246,0.06),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
+    <Link
+      href={href}
+      className={cx(
+        'group flex items-center justify-between gap-4 px-4 py-3',
+        'border border-[color:var(--hairline)] bg-white',
+        'transition hover:border-[rgba(10,10,12,0.22)]',
+      )}
+    >
+      <div className="min-w-0">
+        <div className="text-[13px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">{label}</div>
+        {hint ? <div className="mt-1 text-[12px] text-[color:var(--ink-2)]">{hint}</div> : null}
       </div>
-
-      <div className="relative grid grid-cols-2 gap-2 p-3 sm:grid-cols-3 sm:gap-2.5 sm:p-4 lg:grid-cols-5">
-        {items.map((it) => (
-          <div
-            key={it.k}
-            className={cx(
-              'group relative overflow-hidden rounded-2xl px-3 py-2.5 sm:px-3.5 sm:py-3',
-              'bg-white/80',
-              'ring-1 ring-inset ring-[color:var(--hairline)]',
-            )}
-            title={it.hint ?? undefined}
-          >
-            <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-0 bg-[radial-gradient(520px_160px_at_20%_0%,rgba(231,201,130,0.16),transparent_60%)]" />
-            </div>
-
-            <div className="relative flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                  {it.k}
-                </div>
-                <div className="mt-1 truncate text-sm font-medium text-[color:var(--ink)]">
-                  {it.v}
-                </div>
-              </div>
-
-              {it.hint ? (
-                <div className="ml-2 hidden shrink-0 rounded-full bg-white/90 px-2 py-1 text-[10px] tracking-[0.18em] text-[color:var(--ink-3)] ring-1 ring-inset ring-[color:var(--hairline)] sm:block">
-                  INFO
-                </div>
-              ) : null}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+      <div className="h-px w-10 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-14 group-hover:bg-[rgba(10,10,12,0.30)]" />
+    </Link>
   );
 }
 
-function Pillar({ title, body }: { title: string; body: string }) {
-  return (
-    <div className={cx('relative overflow-hidden rounded-[22px] p-5', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(560px_180px_at_18%_0%,rgba(231,201,130,0.12),transparent_60%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-      </div>
-
-      <div className="relative">
-        <div className="text-[13px] font-semibold text-[color:var(--ink)]">{title}</div>
-        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
-      </div>
-    </div>
-  );
-}
-
-function PortalVsTruth() {
-  return (
-    <div className={cx('relative overflow-hidden rounded-[28px] p-5 sm:p-6', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(980px_300px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(980px_300px_at_86%_10%,rgba(139,92,246,0.06),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-      </div>
-
-      <div className="relative grid gap-4 lg:grid-cols-2">
-        <div className="rounded-[22px] bg-white/85 p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-            Luxury portals
-          </div>
-          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-            Beautiful inventory
-          </div>
-          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Great for browsing, but vulnerable to persuasion, missing facts and theatre.
-          </div>
-
-          <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/20" />
-              Asking price leads the story
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/20" />
-              Verification happens elsewhere
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-black/20" />
-              Risk hides late in the process
-            </li>
-          </ul>
-        </div>
-
-        <div className="rounded-[22px] bg-[color:var(--paper-2)] p-6 ring-1 ring-inset ring-[color:var(--hairline)]">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-            Vantera
-          </div>
-          <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-            Quiet intelligence
-          </div>
-          <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Built for signal: value, liquidity and risk, with verification-first outputs.
-          </div>
-
-          <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
-              Fair value model, not theatre
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
-              Paperwork surfaced early
-            </li>
-            <li className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
-              Resale-killer risk flags
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FeatureCard({
+function DnaPillar({
   eyebrow,
   title,
   body,
-  bullets,
 }: {
   eyebrow: string;
   title: string;
   body: string;
-  bullets: string[];
 }) {
   return (
-    <div className={cx('relative overflow-hidden rounded-[28px] p-6', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(760px_260px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-      </div>
-
-      <div className="relative">
-        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-          {eyebrow}
-        </div>
-        <div className="mt-2 text-[22px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-          {title}
-        </div>
-        <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
-
-        <ul className="mt-5 space-y-2 text-sm text-[color:var(--ink-2)]">
-          {bullets.map((b) => (
-            <li key={b} className="flex gap-2">
-              <span className="mt-[7px] h-1.5 w-1.5 rounded-full bg-[rgba(231,201,130,0.95)]" />
-              {b}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-function CTA() {
-  return (
-    <div className={cx('relative overflow-hidden rounded-[30px] p-6 sm:p-10', CARD)}>
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(1100px_380px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(900px_340px_at_86%_10%,rgba(139,92,246,0.06),transparent_62%)]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.12)] to-transparent" />
-      </div>
-
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-            Private access
-          </div>
-          <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.02em] text-[color:var(--ink)] sm:text-[30px]">
-            Bring a serious asset or a serious buyer
-          </div>
-          <div className="mt-2 max-w-[74ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-            Vantera is built for private sellers, advisors and agents who want verification, clarity and speed.
-            <span className="text-[color:var(--ink-3)]"> Signal only.</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href="/coming-soon?flow=sell"
-            className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white hover:bg-white',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.20)]',
-              'text-[color:var(--ink)]',
-              'shadow-[0_18px_50px_rgba(11,12,16,0.10)]',
-            )}
-          >
-            Submit a private seller
-          </a>
-
-          <a
-            href="/coming-soon?flow=agents"
-            className={cx(
-              'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition',
-              'bg-white/60 hover:bg-white/75',
-              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[rgba(11,12,16,0.18)]',
-              'text-[color:var(--ink)]',
-            )}
-          >
-            Agent access
-          </a>
-        </div>
-      </div>
+    <div className="border border-[color:var(--hairline)] bg-white p-5">
+      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
+      <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
+      <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
     </div>
   );
 }
 
 /* =========================================================
-   HOME PAGE (flagship rebuild)
-   - FULL-BLEED hero (100vw)
-   - Search-first
-   - Intent moves BELOW hero
+   HERO (full-bleed, marketplace statement + search atelier)
    ========================================================= */
 
-export default function HomePage({ cities }: { cities: RuntimeCity[] }) {
-  const regionCount = new Set(cities.map((c) => c.region).filter(Boolean)).size;
-  const timezoneCount = new Set(cities.map((c) => c.tz)).size;
+function FullBleedHero({
+  cities,
+  topCountries,
+}: {
+  cities: Array<{ name: string; slug: string; country: string }>;
+  topCountries: string[];
+}) {
+  return (
+    <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
+      <div className="relative">
+        <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
+
+        <div className="relative min-h-[760px] w-full bg-[color:var(--paper-2)]">
+          <Image
+            src="/brand/hero.jpg"
+            alt="Vantera - Global luxury marketplace"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+
+          {/* White editorial wash (premium, not dark) */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.92),rgba(255,255,255,0.62),rgba(255,255,255,0.28))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.44),rgba(255,255,255,0.30),rgba(255,255,255,0.92))]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+
+          <div className={cx('relative z-10', WIDE)}>
+            <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
+              {/* Left: statement */}
+              <div className="lg:col-span-7">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Chip>Curated</Chip>
+                  <Chip>Verified</Chip>
+                  <Chip>Global</Chip>
+                </div>
+
+                <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[56px] lg:text-[72px] lg:leading-[0.98]">
+                  A global catalogue of exceptional homes, powered by intelligence
+                </h1>
+
+                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
+                  Built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market so you can
+                  move with clarity - not noise.
+                </p>
+
+                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/marketplace"
+                    className={cx(
+                      'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
+                      'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white',
+                      'hover:bg-[rgba(10,10,12,1.0)] transition',
+                    )}
+                  >
+                    Browse marketplace
+                  </Link>
+
+                  <Link
+                    href="/coming-soon?flow=sell"
+                    className={cx(
+                      'inline-flex items-center justify-center px-6 py-3 text-sm font-semibold',
+                      'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)]',
+                      'hover:border-[rgba(10,10,12,0.22)] transition',
+                    )}
+                  >
+                    List privately
+                  </Link>
+                </div>
+              </div>
+
+              {/* Right: Search atelier */}
+              <div className="lg:col-span-5">
+                <div
+                  className={cx(
+                    'relative overflow-hidden',
+                    'border border-[color:var(--hairline)] bg-white/82 backdrop-blur-[18px]',
+                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
+                  )}
+                >
+                  <div className="pointer-events-none absolute inset-0">
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(10,10,12,0.14)] to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_20%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
+                  </div>
+
+                  <div className="relative p-5 sm:p-6">
+                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                      SEARCH ATELIER
+                    </div>
+                    <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                      The fastest way to serious property intelligence
+                    </div>
+                    <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                      Search by intent, location, or move directly into a market.
+                    </div>
+
+                    <form action="/search" method="get" className="mt-5 space-y-3">
+                      <div className="border border-[color:var(--hairline)] bg-white">
+                        <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          KEYWORDS
+                        </label>
+                        <input
+                          name="q"
+                          placeholder="Waterfront, penthouse, gated, golf, privacy..."
+                          className={cx(
+                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
+                            'placeholder:text-[color:var(--ink-3)]',
+                          )}
+                        />
+                      </div>
+
+                      <div className="border border-[color:var(--hairline)] bg-white">
+                        <label className="block px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          COUNTRY
+                        </label>
+                        <select
+                          name="country"
+                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
+                          defaultValue=""
+                        >
+                          <option value="">Any</option>
+                          {topCountries.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <button
+                          type="submit"
+                          className={cx(
+                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
+                            'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                          )}
+                        >
+                          Search
+                        </button>
+
+                        <Link
+                          href="/marketplace"
+                          className={cx(
+                            'inline-flex items-center justify-center px-5 py-3 text-sm font-semibold transition',
+                            'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                          )}
+                        >
+                          Browse
+                        </Link>
+                      </div>
+
+                      <div className="pt-2">
+                        <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
+                          QUICK DESTINATIONS
+                        </div>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          {cities.slice(0, 6).map((c) => (
+                            <QuickLink key={c.slug} href={`/city/${c.slug}`} label={c.name} hint={c.country} />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 text-[12px] text-[color:var(--ink-3)]">
+                        Tip: press <span className="font-mono">/</span> to jump into search from anywhere.
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Vantera DNA */}
+            <div className="pb-10 sm:pb-12">
+              <div className="border border-[color:var(--hairline)] bg-white/84 backdrop-blur-[14px] shadow-[0_40px_140px_rgba(10,10,12,0.10)]">
+                <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
+                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
+                  <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
+                    Meet the intelligence behind the marketplace
+                  </div>
+                  <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+                    Listings are one layer. Vantera adds verification, scoring, and clarity that removes noise.
+                  </div>
+                </div>
+
+                <div className="p-5 sm:p-7">
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <DnaPillar
+                      eyebrow="TRUTH LAYER"
+                      title="Verified versus assumed"
+                      body="Clear attribution of what is verified, inferred or unknown - with structured checks designed to remove ambiguity."
+                    />
+                    <DnaPillar
+                      eyebrow="MARKET INTELLIGENCE"
+                      title="Markets, with clarity"
+                      body="Signals that explain pricing dynamics, liquidity and risk at a city level, built progressively as coverage expands."
+                    />
+                    <DnaPillar
+                      eyebrow="SIGNAL OVER NOISE"
+                      title="Designed for signal"
+                      body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
+                    />
+                    <DnaPillar
+                      eyebrow="PRIVATE NETWORK"
+                      title="Private by architecture"
+                      body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
+                    />
+                  </div>
+
+                  <div className="mt-6">
+                    <Hairline />
+                  </div>
+
+                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-[color:var(--ink-2)]">
+                      The marketplace is how you enter. The intelligence is why you stay.
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Link
+                        href="/coming-soon?section=intelligence"
+                        className={cx(
+                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                          'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                        )}
+                      >
+                        Explore intelligence (soon)
+                      </Link>
+                      <Link
+                        href="/search"
+                        className={cx(
+                          'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                          'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                        )}
+                      >
+                        Open search
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* end DNA */}
+          </div>
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-[color:var(--hairline)]" />
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================
+   HOME PAGE (marketplace-first)
+   ========================================================= */
+
+export default function HomePage({
+  cities,
+  clusters,
+}: {
+  cities: RuntimeCity[];
+  clusters?: RuntimeRegionCluster[];
+}) {
+  void clusters;
+
+  const safeCities = Array.isArray(cities) ? cities : [];
+
+  // Hero quick destinations:
+  // - sorted by priority
+  // - explicitly exclude Estepona/Benahavis from hero quick destinations
+  const EXCLUDE_HERO_SLUGS = new Set(['estepona', 'benahavis']);
+
+  const heroCandidates = safeCities
+    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
+    .slice()
+    .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+    .filter((c) => !EXCLUDE_HERO_SLUGS.has(String(c.slug).toLowerCase()));
+
+  const topForHero = heroCandidates.slice(0, 6).map((c) => ({ name: c.name, slug: c.slug, country: c.country }));
+
+  const countryCounts = new Map<string, number>();
+  for (const c of safeCities) {
+    const k = String(c?.country || '').trim();
+    if (!k) continue;
+    countryCounts.set(k, (countryCounts.get(k) ?? 0) + 1);
+  }
+  const topCountries = Array.from(countryCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([k]) => k)
+    .slice(0, 12);
+
+  // Adapter: RuntimeCity -> City (for CityCard)
+  const cityCards = safeCities
+    .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
+    .map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      country: c.country,
+      region: c.region ?? null,
+      tz: c.tz,
+      tier: c.tier,
+      status: c.status,
+      priority: c.priority ?? 0,
+      blurb: c.blurb ?? null,
+      image: c.image
+        ? {
+            src: c.image.src,
+            alt: c.image.alt ?? null,
+          }
+        : null,
+      heroImageSrc: c.heroImageSrc ?? null,
+      heroImageAlt: c.heroImageAlt ?? null,
+    }));
 
   return (
     <Shell>
-      {/* FULL-BLEED HERO */}
-      <section className="relative w-full overflow-hidden pt-10 sm:pt-12">
-        {/* HERO MEDIA (image background) */}
-        <div className="pointer-events-none absolute inset-0 -z-[1]">
-          <Image
-            src="/hero.jpg"
-            alt="Vantera hero skyline at night"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
-          {/* Editorial wash for readability (tuned, not fully opaque) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(251,251,250,0.92),rgba(251,251,250,0.86),rgba(251,251,250,0.76))]" />
-        </div>
+      <FullBleedHero
+        cities={topForHero}
+        topCountries={
+          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+        }
+      />
 
-        {/* Hero background accents (kept subtle) */}
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(1400px_620px_at_30%_0%,rgba(231,201,130,0.16),transparent_62%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(1100px_560px_at_86%_0%,rgba(139,92,246,0.06),transparent_62%)]" />
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.08)] to-transparent" />
-        </div>
-
-        {/* Optional FX (kept subtle, on white) */}
-        <div className="pointer-events-none absolute inset-0 opacity-[0.16]">
-          <RoyalPortalBackdrop />
-        </div>
-        <div className="pointer-events-none absolute inset-0 opacity-[0.12]">
-          <HeroGoldCrown />
-        </div>
-
-        <div className={HERO_INNER}>
-          <div className="relative pb-10 sm:pb-12 lg:pb-14">
-            <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-              {/* LEFT: Editorial message + search */}
-              <div className="lg:col-span-7">
-                <PremiumBadgeRow />
-
-                <h1 className="mt-7 text-balance text-[44px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-6xl lg:text-[78px] lg:leading-[1.01] 2xl:text-[86px]">
-                  Private intelligence for the world&apos;s{' '}
-                  <span className="inline">
-                    <GoldWord>most valuable assets</GoldWord>
-                  </span>
-                </h1>
-
-                <p className="mt-4 max-w-[84ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
-                  Vantera is a quiet intelligence surface for buyers, sellers and advisors who value signal over noise.
-                  <span className="text-[color:var(--ink-3)]">
-                    {' '}
-                    Built to model value, liquidity and risk without theatre.
-                  </span>
-                </p>
-
-                {/* Primary search (hero crown jewel) */}
-                <div className="mt-7 max-w-[1240px]">
-                  <VanteraOmniSearch
-                    cities={cities as any}
-                    clusters={REGION_CLUSTERS as any}
-                    autoFocus={false}
-                  />
-                </div>
-
-                {/* Hero support row (clean, not competing) */}
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-[color:var(--ink-3)]">
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                    Typos ok
-                  </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                    Keywords included
-                  </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                    City-first intelligence
-                  </span>
-                  <span className="rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                    Verification-first
-                  </span>
-                </div>
-
-                <div className="mt-6 max-w-[1240px]">
-                  <SignalStrip
-                    items={[
-                      { k: 'COVERAGE', v: <span>{cities.length} cities</span> },
-                      { k: 'REGIONS', v: <span>{regionCount}</span> },
-                      { k: 'TIMEZONES', v: <span>{timezoneCount}</span> },
-                      { k: 'UPDATES', v: <span>Weekly</span>, hint: 'Index refresh cadence' },
-                      { k: 'PROOF', v: <span>Registry + docs</span> },
-                    ]}
-                  />
-                </div>
-
-                <div className="mt-6 grid max-w-[1240px] gap-3 sm:grid-cols-3">
-                  <Pillar title="Paperwork" body="See what is missing before you waste time." />
-                  <Pillar title="Price reality" body="Spot fantasy pricing in seconds." />
-                  <Pillar title="Risk radar" body="Catch resale killers early." />
-                </div>
-              </div>
-
-              {/* RIGHT: Featured markets plate */}
-              <div className="lg:col-span-5">
-                <div className={cx('relative overflow-hidden rounded-[28px] p-6 sm:p-7', CARD)}>
-                  <div className="pointer-events-none absolute inset-0">
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_300px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_300px_at_86%_10%,rgba(139,92,246,0.06),transparent_62%)]" />
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
-                  </div>
-
-                  <div className="relative">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)] uppercase">
-                          Featured markets
-                        </div>
-                        <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                          Private intelligence, city-first
-                        </div>
-                        <div className="mt-1 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                          Tap a market to open its intelligence - pricing reality, liquidity read and risk flags.
-                        </div>
-                      </div>
-
-                      <div className="hidden sm:flex shrink-0 items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                        <div className="h-2 w-2 rounded-full bg-emerald-500/70" />
-                        <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                          UPDATED WEEKLY
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-5">
-                      <CityCardsVirtualizedClient cities={cities as any} mode="featured" />
-                    </div>
-
-                    <div className="mt-5 rounded-[20px] bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-                        House rule
-                      </div>
-                      <div className="mt-1 text-sm text-[color:var(--ink-2)]">
-                        Signal beats story. If it cannot be verified, it cannot lead.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-[26px] bg-white/80 p-6 ring-1 ring-inset ring-[color:var(--hairline)] shadow-[0_22px_70px_rgba(11,12,16,0.10)]">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)] uppercase">
-                      Proof stack
-                    </div>
-                    <div className="text-[11px] text-[color:var(--ink-3)]">Preview</div>
-                  </div>
-
-                  <div className="mt-3 grid gap-2">
-                    <div className="rounded-2xl bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                        SOURCE
-                      </div>
-                      <div className="mt-1 text-sm text-[color:var(--ink-2)]">
-                        Logged, cross-checked, traceable.
-                      </div>
-                    </div>
-                    <div className="rounded-2xl bg-white/90 p-4 ring-1 ring-inset ring-[color:var(--hairline)]">
-                      <div className="text-[10px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                        SIGNAL
-                      </div>
-                      <div className="mt-1 text-sm text-[color:var(--ink-2)]">
-                        Price reality, liquidity read, risk flags.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 text-sm text-[color:var(--ink-3)]">
-                    Portals show inventory. Vantera shows what matters before you fly in.
-                  </div>
-                </div>
-              </div>
+      {/* Keep the 6-city marketfront (FIX, don’t remove) */}
+      <section className="py-12 sm:py-16">
+        <div className={WIDE}>
+          <div className="mb-6">
+            <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">MARKETFRONT</div>
+            <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+              Six cities to start the marketplace
             </div>
-
-            {/* Why section inside hero, but calm and readable */}
-            <div className="mt-10">
-              <SectionHeader
-                kicker="Why this exists"
-                title="Above the portal layer"
-                subtitle="A discipline: verification-first, signal-first, engineered for high-value decisions."
-              />
-              <PortalVsTruth />
+            <div className="mt-2 max-w-[88ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+              Real signals only. Local time, verified supply when available, and a catalogue-first experience.
+            </div>
+            <div className="mt-6">
+              <Hairline />
             </div>
           </div>
-        </div>
 
-        {/* Trust tape - clean, centered */}
-        <div className={cx('mt-10 sm:mt-12', MID)}>
-          <TrustMarquee
-            className="!mt-0"
-            brands={[
-              { name: "Sotheby's International Realty", domain: 'sothebysrealty.com' },
-              { name: "Christie's International Real Estate", domain: 'christiesrealestate.com' },
-              { name: 'Knight Frank', domain: 'knightfrank.com' },
-              { name: 'Savills', domain: 'savills.com' },
-              { name: 'Engel & Völkers', domain: 'engelvoelkers.com' },
-              { name: 'BARNES', domain: 'barnes-international.com' },
-              { name: 'Coldwell Banker', domain: 'coldwellbanker.com' },
-              { name: 'Douglas Elliman', domain: 'elliman.com', invert: false },
-              { name: 'Compass', domain: 'compass.com', invert: false },
-              { name: 'CBRE', domain: 'cbre.com', invert: false },
-              { name: 'JLL', domain: 'jll.com', invert: false },
-              { name: 'RE/MAX', domain: 'remax.com' },
-              { name: 'BHHS', domain: 'bhhs.com' },
-              { name: 'Corcoran', domain: 'corcoran.com', invert: false },
-              { name: 'Century 21', domain: 'century21.com', invert: false },
-            ]}
-          />
+          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
         </div>
       </section>
 
-      {/* INTENT (moved BELOW hero - search stays crown jewel) */}
-      <section className="mt-12 sm:mt-14">
-        <div className={MID}>
-          <SectionHeader
-            kicker="Discovery"
-            title="One box that does magic"
-            subtitle="Start broad, then refine. Cities, lifestyle and keywords - without brittle searching."
-          />
-          <IntentHero cities={cities as any} defaultTop={6} onKeepScanningId="explore-index" />
-        </div>
-      </section>
-
-      {/* BODY */}
-      <section className="mt-12 sm:mt-14">
-        <div className={WIDE}>
-          <MarketBriefing cities={cities as any} />
-        </div>
-      </section>
-
-      <section className="mt-12 sm:mt-16">
-        <div className={WIDE}>
-          <SectionHeader
-            kicker="Featured intelligence"
-            title="Believable, not fake listings"
-            subtitle="A product layer built for decisions, not screenshots."
-            right={
-              <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)]">
-                <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">PROOF FIRST</div>
-              </div>
-            }
-          />
-          <FeaturedIntelligencePanel />
-        </div>
-      </section>
-
-      <section className="mt-14 sm:mt-18">
+      {/* Editorial intro */}
+      <section className="pb-16 sm:pb-20">
         <div className={NARROW}>
           <SectionHeader
-            kicker="Why Vantera wins"
-            title="Plain language, high precision"
-            subtitle="The same standards clients expect from institutions, applied to real estate intelligence."
-          />
-
-          <div className="grid gap-4 lg:grid-cols-3">
-            <FeatureCard
-              eyebrow="Truth-first"
-              title="Pricing without illusions"
-              body="Asking price is a starting point. Vantera models fair value from market signals and penalises fantasy listings."
-              bullets={['Tracks velocity and reductions', 'Separates value from persuasion', 'Protects buyers from regret']}
-            />
-            <FeatureCard
-              eyebrow="Verification"
-              title="Permits, ownership, and risk flags"
-              body="Luxury buyers deserve certainty. Vantera highlights what is missing, what is inconsistent and what must be verified next."
-              bullets={[
-                'Turns paperwork into plain language',
-                'Surfaces missing documents fast',
-                'Flags resale killers early',
-              ]}
-            />
-            <FeatureCard
-              eyebrow="Liquidity"
-              title="A private read on demand"
-              body="Vantera watches the market behaviour that matters: what sells, what stalls and what the next buyer will pay for."
-              bullets={[
-                'Demand signals over hype',
-                'Comparables that match reality',
-                'Designed for advisors and sellers',
-              ]}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="explore-index" className="mt-14 scroll-mt-24 sm:mt-18">
-        <div className={WIDE}>
-          <SectionHeader
-            kicker="Explore the index"
-            title="Coverage that feels alive"
-            subtitle="Fast scan for where value is forming, where risk is hiding and where liquidity is strongest."
+            eyebrow="VANTERA"
+            title="Search and browse, the way luxury should feel"
+            subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
             right={
-              <div className="hidden sm:block">
-                <div className="relative h-11 w-11 overflow-hidden rounded-2xl bg-white/90 ring-1 ring-inset ring-[color:var(--hairline)]">
-                  <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
-                </div>
+              <div className="hidden sm:flex items-center gap-3">
+                <Link
+                  href="/search"
+                  className={cx(
+                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                    'border border-[color:var(--hairline)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
+                  )}
+                >
+                  Open search
+                </Link>
+                <Link
+                  href="/marketplace"
+                  className={cx(
+                    'inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold transition',
+                    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]',
+                  )}
+                >
+                  Browse
+                </Link>
               </div>
             }
           />
 
-          <div className={cx('relative overflow-hidden rounded-[32px] p-5 sm:p-7', CARD)}>
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute inset-0 bg-[radial-gradient(1100px_360px_at_18%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(900px_320px_at_86%_10%,rgba(139,92,246,0.06),transparent_62%)]" />
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(11,12,16,0.10)] to-transparent" />
+          <div className="mt-8">
+            <Hairline />
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="border border-[color:var(--hairline)] bg-white p-5">
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">INTELLIGENCE</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Truth-first</div>
+              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                Verification, structured facts and clear attribution of what is known versus assumed.
+              </div>
             </div>
 
-            <div className="relative mt-1">
-              <CityCardsVirtualizedClient cities={cities as any} showFeatured={false} />
+            <div className="border border-[color:var(--hairline)] bg-white p-5">
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">DISCOVERY</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Fast search</div>
+              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                Keywords first, destinations second, and results designed to feel editorial, not noisy.
+              </div>
+            </div>
+
+            <div className="border border-[color:var(--hairline)] bg-white p-5">
+              <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">PRESENTATION</div>
+              <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">Catalogue grade</div>
+              <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                Big imagery, quiet typography and layouts that sell desire with restraint.
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mt-14 sm:mt-18 pb-16 sm:pb-20">
-        <div className={NARROW}>
-          <CTA />
-        </div>
-      </section>
+      {/* (Per your “img 4” note) Do NOT render the full city grid anywhere on home. */}
     </Shell>
   );
 }
