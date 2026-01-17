@@ -101,11 +101,31 @@ export default function HomePage({
 
   const EXCLUDE_HERO_SLUGS = new Set(['estepona', 'benahavis']);
 
+  // Step 1: choose candidates by priority (same as before)
   const heroCandidates = safeCities
     .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
     .slice()
     .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
     .filter((c) => !EXCLUDE_HERO_SLUGS.has(String(c.slug).toLowerCase()));
+
+  // Step 2: ensure every hero city has a REQUIRED heroImageSrc (string)
+  // This fixes: RuntimeCity[] not assignable to HeroCity[] (heroImageSrc required).
+  const heroCities = heroCandidates
+    .map((c) => {
+      const heroSrc = c.heroImageSrc ?? c.image?.src ?? null;
+      if (!heroSrc) return null;
+
+      return {
+        ...c,
+        heroImageSrc: heroSrc,
+        heroImageAlt:
+          (typeof c.heroImageAlt === 'string' && c.heroImageAlt) ||
+          c.image?.alt ||
+          c.name ||
+          null,
+      };
+    })
+    .filter(Boolean);
 
   const countryCounts = new Map<string, number>();
   for (const c of safeCities) {
@@ -144,10 +164,12 @@ export default function HomePage({
   return (
     <Shell>
       <HeroPortalSection
-        cities={heroCandidates}
+        cities={heroCities}
         clusters={safeClusters}
         topCountries={
-          topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
+          topCountries.length
+            ? topCountries
+            : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
         }
         wideClassName={WIDE}
       />
@@ -173,7 +195,11 @@ export default function HomePage({
             </div>
           </div>
 
-          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
+          <CityCardsVirtualizedClient
+            cities={cityCards}
+            mode="featured"
+            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          />
         </div>
       </section>
 
@@ -188,7 +214,8 @@ export default function HomePage({
               </div>
 
               <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
-                No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath.
+                No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with
+                intelligence underneath.
               </div>
             </div>
 
