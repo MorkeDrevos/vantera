@@ -2,9 +2,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-import TopBar from '@/components/layout/TopBar';
-import Footer from '@/components/layout/Footer';
-
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
@@ -138,8 +135,6 @@ export default async function ListingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
         <div className="absolute inset-x-0 top-0 h-[320px] bg-[radial-gradient(1100px_360px_at_50%_0%,rgba(231,201,130,0.12),transparent_62%)]" />
       </div>
-
-      <TopBar />
 
       <main className="w-full">
         {/* Header */}
@@ -323,8 +318,6 @@ export default async function ListingsPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }
