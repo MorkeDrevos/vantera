@@ -85,6 +85,7 @@ export default function Footer() {
   width={40}
   height={40}
 />
+</div>
 
                 <div className="min-w-0">
                   <div className="text-[12px] font-semibold tracking-[0.26em] text-[color:var(--ink)]">
