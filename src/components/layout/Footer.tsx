@@ -87,14 +87,17 @@ export default function Footer() {
 />
 </div>
 
-                <div className="min-w-0">
-                  <div className="text-[12px] font-semibold tracking-[0.26em] text-[color:var(--ink)]">
-                    VANTERA
-                  </div>
-                  <div className="mt-0.5 text-[13px] text-[color:var(--ink-2)]">
-                    €2M+ luxury properties. Presented properly.
-                  </div>
-                </div>
+                <div className="max-w-sm">
+  <div className="mb-3 text-xs tracking-[0.22em] text-slate-900">
+    VANTERA
+  </div>
+
+  <p className="text-sm text-slate-700 leading-relaxed">
+    Global property intelligence for the world’s most valuable homes.
+    A private catalogue built city by city, combining verified listings,
+    editorial presentation, and a truth layer designed for clarity over noise.
+  </p>
+</div>
               </div>
 
               <div className="mt-4 max-w-[70ch] text-[13px] leading-relaxed text-[color:var(--ink-2)]">
