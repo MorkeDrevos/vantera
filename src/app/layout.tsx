@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     template: '%s · Vantera',
   },
   description:
-    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers, and agent launchpads.',
+    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers and agent launchpad.',
   applicationName: 'Vantera',
   icons: {
     icon: [
