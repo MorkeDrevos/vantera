@@ -41,13 +41,13 @@ const FEATURED_IMAGE_OVERRIDES: Record<string, { src: string; alt: string }> = {
 
   // FIX: Marbella must be Marbella / Puerto Banus (yachts/marina), not a generic coast
   marbella: {
-    src: 'https://source.unsplash.com/oum0nJ4fbDo/2800x1800',
+    src: 'https://images.unsplash.com/photo-1722600522832-c7ebd5ea1ace?q=80&w=3860&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     alt: 'Puerto Banús marina, Marbella (Costa del Sol), Spain',
   },
 
   // FIX: London must be London (Thames / cityscape), not a mountain landscape
   london: {
-    src: 'https://source.unsplash.com/z889mSCfCDw/2800x1800',
+    src: 'https://images.unsplash.com/photo-1483972117325-ce4920ff780b?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
     alt: 'London cityscape and the River Thames',
   },
 };
