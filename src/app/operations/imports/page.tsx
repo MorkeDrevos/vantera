@@ -42,7 +42,6 @@ type Pipeline = {
   defaults: Array<{ k: string; v: string }>;
   runUrl: string;
   dryRunUrl?: string;
-  // Optional help text shown under actions
   note?: string;
 };
 
@@ -143,35 +142,35 @@ export default function ImportsMonitorPage() {
   const PIPELINES: Pipeline[] = useMemo(
     () => [
       {
-        key: 'attom-properties-miami',
+        key: 'attom-properties-marbella',
         title: 'ATTOM - Properties',
         badge: 'Luxury gate',
         description: 'Ingest properties with strict filters for Vantera luxury inventory.',
         defaults: [
           { k: 'residential', v: 'only' },
           { k: 'min', v: '$2,000,000' },
-          { k: 'city', v: 'miami' },
-          { k: 'radius', v: '0.5mi' },
+          { k: 'city', v: 'Marbella (Costa del Sol)' },
+          { k: 'radius', v: '12mi' },
           { k: 'limit', v: '25' },
         ],
-        runUrl: '/api/attom/ingest/properties?city=miami&radius=0.5&limit=25&minValue=2000000',
-        dryRunUrl: '/api/attom/ingest/properties?city=miami&radius=0.5&limit=25&minValue=2000000&dryRun=1',
-        note: 'Uses AVM or assessment market value to enforce the 2m gate.',
+        // NOTE: route.ts expects minAvm (not minValue)
+        runUrl: '/api/attom/ingest/properties?city=marbella&radius=12&limit=25&minAvm=2000000',
+        dryRunUrl: '/api/attom/ingest/properties?city=marbella&radius=12&limit=25&minAvm=2000000&dryRun=1',
+        note: 'Uses AVM or assessment market value to enforce the 2m gate. Benahavis + Estepona are collapsed under Marbella.',
       },
       {
-        key: 'attom-cities-miami',
+        key: 'attom-cities-global',
         title: 'ATTOM - Cities',
         badge: 'Foundation',
-        description: 'City presets and city-level scaffolding (metrics pipeline comes next).',
+        description: 'Canonical cities ingest (from cities.ts). Creates/updates city rows used by all imports.',
         defaults: [
-          { k: 'market', v: 'Miami' },
-          { k: 'region', v: 'US-FL' },
+          { k: 'market', v: 'GLOBAL (all cities)' },
+          { k: 'region', v: 'All regions' },
         ],
-        // If you have a cities ingest route, set it here.
-        // If not, this still keeps the control room structure and you can wire later.
-        runUrl: '/api/attom/ingest/cities?city=miami',
-        dryRunUrl: '/api/attom/ingest/cities?city=miami&dryRun=1',
-        note: 'If this route does not exist yet, we wire it after imports UI is locked.',
+        // Cities ingest is not per-city - it ingests the full canonical list
+        runUrl: '/api/attom/ingest/cities',
+        dryRunUrl: '/api/attom/ingest/cities?dryRun=1',
+        note: 'This ingests all canonical cities and locks Costa del Sol to Marbella.',
       },
     ],
     [],
@@ -196,7 +195,6 @@ export default function ImportsMonitorPage() {
     setErr(null);
     try {
       await fetch(url, { method: 'GET', cache: 'no-store' });
-      // Refresh shortly after so the run appears, then again after a beat
       setTimeout(load, 250);
       setTimeout(load, 1200);
     } catch (e: any) {
@@ -210,7 +208,12 @@ export default function ImportsMonitorPage() {
       await fetch('/api/ops/imports', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ source: 'attom', scope: 'cities', region: 'US-FL', market: 'Miami' }),
+        body: JSON.stringify({
+          source: 'vantera',
+          scope: 'cities',
+          region: 'GLOBAL',
+          market: 'Cities',
+        }),
       });
       setTimeout(load, 250);
       setTimeout(load, 1100);
