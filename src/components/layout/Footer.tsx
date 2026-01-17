@@ -80,7 +80,7 @@ export default function Footer() {
               <div className="flex items-center gap-3">
                 <div className="relative h-10 w-10">
   <img
-  src="/brand/favicon.svg"
+  src="images/brand/favicon.svg"
   alt="Vantera"
   width={40}
   height={40}
