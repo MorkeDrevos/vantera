@@ -4,553 +4,470 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import VanteraSignatureBackdrop from './VanteraSignatureBackdrop';
 import VanteraOmniSearch from '@/components/search/VanteraOmniSearch';
-
-import type { OmniCity, OmniRegionCluster } from '@/components/search/VanteraOmniSearch';
-import type { RuntimeCity, RuntimeRegionCluster } from './HomePage';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
 }
 
-/* =========================================================
-   Micro UI
-   ========================================================= */
+export type HeroCity = {
+  slug: string;
+  name: string;
+  country: string;
 
-function CrownRail({ className }: { className?: string }) {
+  // hero image (prefer local /public so we control quality)
+  heroImageSrc: string;
+  heroImageAlt?: string | null;
+
+  // Optional micro-signals (wire to your DB later)
+  signals?: {
+    liquidity?: number | null; // 0-100
+    risk?: number | null; // 0-100 (higher = riskier)
+    verifiedSupply?: number | null;
+    medianEurSqm?: number | null;
+  } | null;
+};
+
+export type HeroCluster = {
+  slug: string;
+  name: string;
+  country?: string;
+  region?: string;
+  priority?: number;
+  citySlugs: string[];
+};
+
+const WIDE = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
+
+const BTN_PRIMARY =
+  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition ' +
+  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1.0)] ' +
+  'shadow-[0_18px_60px_rgba(10,10,12,0.12)] hover:shadow-[0_22px_90px_rgba(206,160,74,0.18)]';
+
+const BTN_SECONDARY =
+  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition ' +
+  'border border-[rgba(10,10,12,0.12)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)] ' +
+  'shadow-[0_10px_40px_rgba(10,10,12,0.05)] hover:shadow-[0_16px_60px_rgba(10,10,12,0.06)]';
+
+function formatCompactNumber(n?: number | null) {
+  if (n === null || n === undefined) return '—';
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '—';
+  if (v >= 1_000_000) return `${Math.round(v / 100_000) / 10}m`;
+  if (v >= 1_000) return `${Math.round(v / 100) / 10}k`;
+  return `${Math.round(v)}`;
+}
+
+function clamp01(n: number) {
+  return Math.max(0, Math.min(1, n));
+}
+
+function scoreLabel(v?: number | null, kind?: 'liquidity' | 'risk') {
+  if (v === null || v === undefined) return '—';
+  const n = Number(v);
+  if (!Number.isFinite(n)) return '—';
+  const x = Math.round(n);
+  if (kind === 'risk') {
+    if (x <= 25) return 'low';
+    if (x <= 55) return 'mid';
+    return 'high';
+  }
+  // liquidity
+  if (x >= 75) return 'strong';
+  if (x >= 45) return 'mid';
+  return 'thin';
+}
+
+function CrownRail() {
   return (
-    <div className={cx('pointer-events-none absolute inset-x-0 top-0', className)}>
+    <div className="pointer-events-none absolute inset-x-0 top-0">
       <div className="h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.60),transparent)] opacity-90" />
       <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.34),transparent)] opacity-90" />
     </div>
   );
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
+function SignalChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="relative inline-flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.70)] to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(180px_52px_at_50%_0%,rgba(206,160,74,0.10),transparent_72%)]" />
-      {children}
-    </div>
+    <span className="inline-flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[color:var(--ink-2)]">
+      <span className="text-[10px] tracking-[0.22em] text-[color:var(--ink-3)]">{label}</span>
+      <span className="text-[color:var(--ink)]">{value}</span>
+    </span>
   );
 }
-
-function PortalSignal({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white px-4 py-3">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.44)] to-transparent" />
-      <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{k}</div>
-      <div className="mt-1 text-[13px] font-semibold text-[color:var(--ink)]">{v}</div>
-    </div>
-  );
-}
-
-function PortalMarquee({ items }: { items: Array<{ name: string; href: string; meta?: string }> }) {
-  return (
-    <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]">
-      <div className="pointer-events-none absolute inset-0">
-        <CrownRail />
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_20%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
-        <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.06)]" />
-      </div>
-
-      <div className="relative flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6">
-        <div className="min-w-0">
-          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">LIVE MARKETS</div>
-          <div className="mt-1 text-[13px] text-[color:var(--ink-2)]">Browse city by city. Built progressively.</div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {items.slice(0, 8).map((x) => (
-            <Link
-              key={x.href}
-              href={x.href}
-              className={cx(
-                'group inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold',
-                'border border-[rgba(10,10,12,0.12)] bg-white',
-                'hover:border-[rgba(10,10,12,0.22)] transition',
-              )}
-            >
-              <span className="text-[color:var(--ink)]">{x.name}</span>
-              {x.meta ? <span className="text-[color:var(--ink-3)]">{x.meta}</span> : null}
-              <span className="ml-1 h-px w-6 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-10 group-hover:bg-[rgba(206,160,74,0.70)]" />
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   Buttons
-   ========================================================= */
-
-const BTN_PRIMARY = cx(
-  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-  'border border-[rgba(10,10,12,0.20)] bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1.0)]',
-  'shadow-[0_18px_60px_rgba(10,10,12,0.12)] hover:shadow-[0_22px_90px_rgba(206,160,74,0.18)]',
-);
-
-const BTN_SECONDARY = cx(
-  'relative inline-flex items-center justify-center px-6 py-3 text-sm font-semibold transition',
-  'border border-[rgba(10,10,12,0.12)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)]',
-  'shadow-[0_10px_40px_rgba(10,10,12,0.05)] hover:shadow-[0_16px_60px_rgba(10,10,12,0.06)]',
-);
-
-/* =========================================================
-   Rotation (premium crossfade + controls)
-   ========================================================= */
-
-type HeroSlide = {
-  slug: string;
-  name: string;
-  country: string;
-  src: string;
-  alt?: string | null;
-  // optional signals (if present in RuntimeCity)
-  tier?: string | null;
-  status?: string | null;
-  tz?: string | null;
-};
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (!mq) return;
-
-    const apply = () => setReduced(Boolean(mq.matches));
-    apply();
-
-    const onChange = () => apply();
-    mq.addEventListener?.('change', onChange);
-    return () => mq.removeEventListener?.('change', onChange);
-  }, []);
-
-  return reduced;
-}
-
-function clampIndex(i: number, n: number) {
-  if (n <= 0) return 0;
-  return ((i % n) + n) % n;
-}
-
-function formatTier(t?: string | null) {
-  if (!t) return null;
-  // best-effort pretty print
-  return String(t).replace(/_/g, ' ').toLowerCase();
-}
-
-function formatStatus(s?: string | null) {
-  if (!s) return null;
-  return String(s).replace(/_/g, ' ').toLowerCase();
-}
-
-function buildCitySignals(s: HeroSlide) {
-  const out: string[] = [];
-  // Keep these subtle, not dashboardy
-  if (s.status) out.push(`status: ${formatStatus(s.status)}`);
-  if (s.tier) out.push(`tier: ${formatTier(s.tier)}`);
-  out.push('catalogue live');
-  return out.slice(0, 3);
-}
-
-/* =========================================================
-   HERO PORTAL SECTION
-   ========================================================= */
 
 export default function HeroPortalSection({
   cities,
   clusters,
-  topCountries,
-  wideClassName,
+  rotateMs = 6500,
 }: {
-  cities: RuntimeCity[];
-  clusters?: RuntimeRegionCluster[];
-  topCountries: string[];
-  wideClassName: string;
+  cities: HeroCity[];
+  clusters: HeroCluster[];
+  rotateMs?: number;
 }) {
-  const reducedMotion = usePrefersReducedMotion();
-
-  const omniCities: OmniCity[] = useMemo(
-    () =>
-      (Array.isArray(cities) ? cities : [])
-        .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
-        .map((c) => ({
-          slug: c.slug,
-          name: c.name,
-          country: c.country,
-          region: c.region ?? null,
-          tz: c.tz,
-          priority: c.priority ?? 0,
-        })),
-    [cities],
-  );
-
-  const omniClusters: OmniRegionCluster[] = useMemo(
-    () =>
-      (Array.isArray(clusters) ? clusters : []).map((r) => ({
-        slug: r.slug,
-        name: r.name,
-        country: r.country,
-        region: r.region,
-        priority: r.priority ?? 0,
-        citySlugs: r.citySlugs ?? [],
-      })),
-    [clusters],
-  );
-
-  const slides: HeroSlide[] = useMemo(() => {
-    return (Array.isArray(cities) ? cities : [])
-      .filter((c) => Boolean(c?.heroImageSrc) && Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
-      .slice()
-      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-      .slice(0, 8)
-      .map((c) => ({
-        slug: c.slug,
-        name: c.name,
-        country: c.country,
-        src: String(c.heroImageSrc),
-        alt: c.heroImageAlt ?? `${c.name} luxury property`,
-        tier: c.tier ? String(c.tier) : null,
-        status: c.status ? String(c.status) : null,
-        tz: c.tz ? String(c.tz) : null,
-      }));
-  }, [cities]);
+  const safeCities = Array.isArray(cities) ? cities.filter(Boolean) : [];
+  const list = safeCities.length ? safeCities : [];
 
   const [idx, setIdx] = useState(0);
-  const userPauseUntilRef = useRef<number>(0);
+  const [prevIdx, setPrevIdx] = useState<number | null>(null);
+  const [isFading, setIsFading] = useState(false);
+  const [paused, setPaused] = useState(false);
 
-  function pauseAuto(ms: number) {
-    userPauseUntilRef.current = Date.now() + ms;
+  const loaded = useRef<Set<number>>(new Set());
+  const tRef = useRef<number | null>(null);
+
+  const active = list[idx] ?? null;
+  const prev = prevIdx !== null ? list[prevIdx] ?? null : null;
+
+  // Crossfade driver (never show white flash)
+  function go(next: number) {
+    if (!list.length) return;
+
+    const target = (next + list.length) % list.length;
+    if (target === idx) return;
+
+    setPrevIdx(idx);
+    setIdx(target);
+
+    // begin fade: keep prev visible until new is ready
+    setIsFading(true);
   }
 
-  function goNext() {
-    if (slides.length <= 1) return;
-    pauseAuto(18_000);
-    setIdx((v) => clampIndex(v + 1, slides.length));
+  function next() {
+    go(idx + 1);
   }
 
-  function goPrev() {
-    if (slides.length <= 1) return;
-    pauseAuto(18_000);
-    setIdx((v) => clampIndex(v - 1, slides.length));
+  function prevSlide() {
+    go(idx - 1);
   }
 
-  function goTo(i: number) {
-    if (slides.length <= 1) return;
-    pauseAuto(18_000);
-    setIdx(clampIndex(i, slides.length));
-  }
-
+  // Auto-rotate
   useEffect(() => {
-    if (reducedMotion) return;
-    if (slides.length <= 1) return;
+    if (!list.length) return;
+    if (paused) return;
 
-    const ms = 8500; // calm cadence
-    const t = window.setInterval(() => {
-      if (Date.now() < userPauseUntilRef.current) return;
-      setIdx((v) => (v + 1) % slides.length);
-    }, ms);
+    if (tRef.current) window.clearInterval(tRef.current);
+    tRef.current = window.setInterval(() => {
+      next();
+    }, rotateMs);
 
-    return () => window.clearInterval(t);
-  }, [slides.length, reducedMotion]);
-
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (slides.length <= 1) return;
-      if (e.key === 'ArrowRight') goNext();
-      if (e.key === 'ArrowLeft') goPrev();
+    return () => {
+      if (tRef.current) window.clearInterval(tRef.current);
+      tRef.current = null;
     };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slides.length]);
+  }, [idx, paused, rotateMs, list.length]);
 
-  const active = slides[idx] ?? null;
-  const next = slides.length > 1 ? slides[(idx + 1) % slides.length] : null;
+  // When new image loads, complete fade
+  function markLoaded(i: number) {
+    loaded.current.add(i);
+    // If we are fading into this index, finish quickly
+    window.setTimeout(() => setIsFading(false), 40);
+    // Cleanup prev after fade
+    window.setTimeout(() => setPrevIdx(null), 420);
+  }
 
-  const marqueeItems = useMemo(
-    () =>
-      omniCities
-        .slice()
-        .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-        .slice(0, 8)
-        .map((c) => ({
-          name: c.name,
-          href: `/city/${c.slug}`,
-          meta: c.country,
-        })),
-    [omniCities],
-  );
+  // Preload next image (helps kill “white time”)
+  const preloadNextSrc = useMemo(() => {
+    if (!list.length) return null;
+    const n = (idx + 1) % list.length;
+    return list[n]?.heroImageSrc ?? null;
+  }, [idx, list]);
 
-  const liveCountriesCount = useMemo(() => new Set(omniCities.map((c) => c.country)).size, [omniCities]);
-  const liveMarketsCount = useMemo(() => omniCities.length, [omniCities]);
+  const overlaySignals = useMemo(() => {
+    if (!active?.signals) return [];
 
-  const overlaySignals = useMemo(() => (active ? buildCitySignals(active) : []), [active]);
+    const s = active.signals;
+    const out: Array<{ label: string; value: string }> = [];
+
+    if (typeof s.liquidity === 'number') out.push({ label: 'LIQ', value: `${Math.round(s.liquidity)}/100 ${scoreLabel(s.liquidity, 'liquidity')}` });
+    if (typeof s.risk === 'number') out.push({ label: 'RISK', value: `${Math.round(s.risk)}/100 ${scoreLabel(s.risk, 'risk')}` });
+    if (typeof s.verifiedSupply === 'number') out.push({ label: 'VER', value: formatCompactNumber(s.verifiedSupply) });
+    if (typeof s.medianEurSqm === 'number') out.push({ label: '€/SQM', value: `€${formatCompactNumber(s.medianEurSqm)}` });
+
+    return out.slice(0, 4);
+  }, [active]);
+
+  // Tight portal copy
+  const h1 = 'A luxury marketplace built on intelligence';
+  const sub =
+    'Editorial catalogue on top. A Truth Layer underneath - verification, liquidity and risk signals, built city by city.';
 
   return (
     <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
-      <div className="relative">
-        <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
+      <div className="relative min-h-[860px] w-full bg-[color:var(--paper-2)]">
+        {/* Base signature backdrop always present (prevents white flash perception) */}
+        <VanteraSignatureBackdrop />
 
-        <div className="relative min-h-[920px] w-full bg-white">
-          {/* Identity texture */}
-          <VanteraSignatureBackdrop />
-
-          {/* Rotating hero image plane */}
-          {active?.src ? (
-            <div className="absolute inset-0">
-              {/* Preload next image */}
-              {next?.src ? (
-                <div className="absolute h-0 w-0 overflow-hidden opacity-0">
-                  <Image src={next.src} alt={next.alt ?? 'next'} width={16} height={16} />
-                </div>
-              ) : null}
-
-              {/* Images (crossfade) */}
-              <div className="pointer-events-none absolute inset-0">
-                {slides.map((s, i) => {
-                  const isActive = i === idx;
-                  return (
-                    <div
-                      key={s.src}
-                      className={cx(
-                        'absolute inset-0',
-                        reducedMotion ? '' : 'transition-opacity duration-[1400ms] ease-out',
-                        isActive ? 'opacity-[0.82]' : 'opacity-0',
-                      )}
-                    >
-                      <Image
-                        src={s.src}
-                        alt={s.alt ?? 'Vantera hero'}
-                        fill
-                        priority={i === 0}
-                        className="object-cover"
-                        sizes="100vw"
-                      />
-                    </div>
-                  );
-                })}
+        {/* Image stage */}
+        <div
+          className="absolute inset-0"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          aria-hidden="true"
+        >
+          {/* Image container */}
+          <div className="absolute inset-0">
+            {/* Previous stays under during transition */}
+            {prev ? (
+              <div className="absolute inset-0">
+                <Image
+                  src={prev.heroImageSrc}
+                  alt={prev.heroImageAlt ?? `${prev.name} hero`}
+                  fill
+                  priority={false}
+                  sizes="100vw"
+                  className={cx(
+                    'object-cover',
+                    // reduce blur: NONE on the image itself
+                    'opacity-100',
+                  )}
+                />
               </div>
+            ) : null}
 
-              {/* White veils for readability */}
-              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.96),rgba(255,255,255,0.78),rgba(255,255,255,0.34),rgba(255,255,255,0.12))]" />
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_620px_at_22%_10%,rgba(255,255,255,0.94),transparent_62%)]" />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+            {/* Active fades in */}
+            {active ? (
+              <div className="absolute inset-0">
+                <Image
+                  src={active.heroImageSrc}
+                  alt={active.heroImageAlt ?? `${active.name} hero`}
+                  fill
+                  priority
+                  sizes="100vw"
+                  onLoad={() => markLoaded(idx)}
+                  className={cx(
+                    'object-cover transition-opacity duration-[520ms]',
+                    isFading ? 'opacity-0' : 'opacity-100',
+                  )}
+                />
 
-              {/* City label overlay (bottom-left, aligned to headline grid) */}
-<div className={cx('absolute bottom-6 z-20', wideClassName)}>
-  {/* match the hero grid: left column width */}
-  <div className="max-w-[720px]">
-    <div className="relative inline-block overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[12px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
-
-      <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED CITY</div>
-      <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
-        {active ? active.name : 'Editorial'}
-        {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
-      </div>
-
-      {overlaySignals.length ? (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {overlaySignals.map((t) => (
-            <span
-              key={t}
-              className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[color:var(--ink-2)]"
-            >
-              {t}
-            </span>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  </div>
-</div>
-
-          {/* Hero frame system */}
-          <div className="pointer-events-none absolute inset-0">
-            <CrownRail />
-            <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_6%,rgba(206,160,74,0.10),transparent_60%)]" />
+                {/* Image veil for readability, not blur */}
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.88),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.14),rgba(255,255,255,0.06),rgba(255,255,255,0.92))]" />
+              </div>
+            ) : null}
           </div>
 
-          <div className={cx('relative z-10', wideClassName)}>
-            <div className="grid gap-10 pb-10 pt-10 sm:pb-12 sm:pt-12 lg:grid-cols-12 lg:gap-12">
-              {/* Left: portal statement */}
-              <div className="lg:col-span-7">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Chip>LUXURY PORTAL</Chip>
-                  <Chip>GLOBAL CATALOGUE</Chip>
-                  <Chip>TRUTH LAYER</Chip>
-                </div>
+          {/* Preload next (hidden) */}
+          {preloadNextSrc ? (
+            <Image
+              src={preloadNextSrc}
+              alt=""
+              width={8}
+              height={8}
+              className="hidden"
+              priority={false}
+            />
+          ) : null}
+        </div>
 
-                {/* Tightened copy */}
-                <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[66px] lg:leading-[0.98]">
-                  A global luxury marketplace for exceptional homes
-                </h1>
+        {/* Hero frame + crown */}
+        <div className="pointer-events-none absolute inset-0">
+          <CrownRail />
+          <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_6%,rgba(206,160,74,0.10),transparent_60%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+        </div>
 
-                <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
-
-                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
-                  Curated presentation. Serious search. A Truth Layer underneath to keep decisions clean.
-                </p>
-
-                <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <Link href="/marketplace" className={BTN_PRIMARY}>
-                    Browse marketplace
-                  </Link>
-
-                  <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
-                    List privately
-                  </Link>
-                </div>
-
-                {/* Signals */}
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  <PortalSignal k="LIVE MARKETS" v={`${liveMarketsCount}`} />
-                  <PortalSignal k="COUNTRIES" v={`${liveCountriesCount}`} />
-                  <PortalSignal k="FEATURED" v={active ? active.name : 'Editorial'} />
-                </div>
+        {/* Content */}
+        <div className={cx('relative z-10', WIDE)}>
+          <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
+            {/* Left: statement */}
+            <div className="lg:col-span-7">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                  MARKETPLACE
+                </span>
+                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                  TRUTH LAYER
+                </span>
+                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                  EDITORIAL
+                </span>
               </div>
 
-              {/* Right: Portal search instrument */}
-              <div className="lg:col-span-5">
-                <div
-                  className={cx(
-                    'relative overflow-hidden',
-                    'border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[16px]',
-                    'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
-                  )}
-                >
-                  <div className="pointer-events-none absolute inset-0">
-                    <CrownRail />
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
-                    <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-                    <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.65)]" />
+              <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[64px] lg:leading-[0.98]">
+                {h1}
+              </h1>
+
+              <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
+
+              <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
+                {sub}
+              </p>
+
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link href="/marketplace" className={BTN_PRIMARY}>
+                  Browse marketplace
+                </Link>
+                <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
+                  List privately
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: smart search */}
+            <div className="lg:col-span-5">
+              <div
+                className={cx(
+                  'relative overflow-hidden',
+                  'border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[14px]',
+                  'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
+                )}
+              >
+                <div className="pointer-events-none absolute inset-0">
+                  <CrownRail />
+                  <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+                  <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.62)]" />
+                </div>
+
+                <div className="relative p-5 sm:p-6">
+                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                    SEARCH ATELIER
+                  </div>
+                  <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
+                    Type and it reacts instantly
+                  </div>
+                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                    City, lifestyle, budget, keywords. Typos are fine.
                   </div>
 
-                  <div className="relative p-5 sm:p-6">
-                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">PORTAL SEARCH</div>
-                    <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                      Search like a pro
-                    </div>
-                    <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                      City, lifestyle, budget, keywords. Typos are fine.
-                    </div>
+                  <div className="mt-4">
+                    <VanteraOmniSearch
+                      cities={list.map((c) => ({
+                        slug: c.slug,
+                        name: c.name,
+                        country: c.country,
+                        region: null,
+                        tz: 'UTC',
+                        priority: 0,
+                      }))}
+                      clusters={clusters}
+                      placeholder="marbella sea view villa under €5m"
+                      autoFocus={false}
+                    />
+                  </div>
 
-                    <div className="mt-5">
-                      <VanteraOmniSearch
-                        cities={omniCities}
-                        clusters={omniClusters}
-                        placeholder="search city, lifestyle, budget, keywords (typos ok)"
-                      />
-                    </div>
-
-                    <div className="mt-4 border border-[rgba(10,10,12,0.12)] bg-white">
-                      <div className="px-4 pt-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
-                        COUNTRY SHORTLIST
-                      </div>
-                      <div className="mt-2 flex flex-wrap gap-2 px-4 pb-4">
-                        {topCountries.slice(0, 8).map((c) => (
-                          <Link
-                            key={c}
-                            href={`/search?country=${encodeURIComponent(c)}`}
-                            className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-3 py-2 text-[12px] font-semibold text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)] transition"
-                          >
-                            {c}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 text-[12px] text-[color:var(--ink-3)]">
-                      Tip: press <span className="font-mono">/</span> from anywhere.
-                    </div>
+                  <div className="mt-4 text-[11px] text-[color:var(--ink-3)]">
+                    Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere.
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Controls row (desktop only): Prev/Next + dots (dots hidden on mobile) */}
-            {slides.length > 1 ? (
-              <div className="pb-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="hidden sm:flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={goPrev}
-                      className={cx(
-                        'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
-                        'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
-                        'hover:border-[rgba(10,10,12,0.22)]',
-                        'shadow-[0_18px_60px_rgba(10,10,12,0.08)]',
-                      )}
-                      aria-label="Previous hero image"
-                    >
-                      Prev
-                      <span className="h-px w-6 bg-[color:var(--hairline)]" />
-                    </button>
+          {/* Editorial rail (caption + signals + controls) - bottom-left, grid-aligned */}
+          <div className="pb-12 sm:pb-14">
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
-                    <button
-                      type="button"
-                      onClick={goNext}
-                      className={cx(
-                        'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
-                        'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
-                        'hover:border-[rgba(10,10,12,0.22)]',
-                        'shadow-[0_18px_60px_rgba(10,10,12,0.08)]',
-                      )}
-                      aria-label="Next hero image"
-                    >
-                      Next
-                      <span className="h-px w-6 bg-[color:var(--hairline)]" />
-                    </button>
+              <div className="flex items-end justify-between gap-6">
+                {/* Left rail block */}
+                <div className="max-w-[720px]">
+                  <div className="relative inline-block overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[10px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.07),transparent_62%)]" />
+
+                    <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                      FEATURED CITY
+                    </div>
+
+                    <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
+                      {active ? active.name : 'Editorial'}
+                      {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
+                    </div>
+
+                    {overlaySignals.length ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {overlaySignals.map((x) => (
+                          <SignalChip key={`${x.label}:${x.value}`} label={x.label} value={x.value} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <SignalChip label="LIQ" value="—" />
+                        <SignalChip label="RISK" value="—" />
+                        <SignalChip label="VER" value="—" />
+                      </div>
+                    )}
                   </div>
 
-                  {/* Dots hidden on mobile */}
-                  <div className="hidden sm:flex items-center gap-2">
-                    {slides.map((s, i) => {
-                      const isActive = i === idx;
+                  {/* tiny progress rail (desktop only) - makes the rotation noticeable */}
+                  <div className="mt-3 hidden sm:block">
+                    <div className="h-px w-full bg-[color:var(--hairline)]" />
+                    <div
+                      className="mt-1 h-[2px] w-full bg-[rgba(10,10,12,0.06)]"
+                      aria-hidden="true"
+                    >
+                      <div
+                        className="h-full bg-[linear-gradient(90deg,rgba(10,10,12,0.92),rgba(206,160,74,0.55))]"
+                        style={{
+                          width: `${Math.round(((idx + 1) / Math.max(1, list.length)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Controls (desktop only, integrated - no scattered UI) */}
+                <div className="hidden sm:flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={prevSlide}
+                    className={cx(
+                      'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
+                      'border border-[rgba(10,10,12,0.12)] bg-white/92 backdrop-blur-[10px]',
+                      'hover:border-[rgba(10,10,12,0.22)]',
+                    )}
+                    aria-label="Previous"
+                  >
+                    <ChevronLeft className="h-4 w-4 opacity-70" />
+                    Prev
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={next}
+                    className={cx(
+                      'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
+                      'border border-[rgba(10,10,12,0.12)] bg-white/92 backdrop-blur-[10px]',
+                      'hover:border-[rgba(10,10,12,0.22)]',
+                    )}
+                    aria-label="Next"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4 opacity-70" />
+                  </button>
+
+                  {/* dots */}
+                  <div className="ml-2 flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-2 backdrop-blur-[10px]">
+                    {list.slice(0, 8).map((_, i) => {
+                      const activeDot = i === idx;
                       return (
                         <button
-                          key={s.src}
+                          key={`dot-${i}`}
                           type="button"
-                          onClick={() => goTo(i)}
+                          onClick={() => go(i)}
                           className={cx(
-                            'h-2.5 w-2.5 border transition',
-                            isActive
-                              ? 'border-[rgba(206,160,74,0.95)] bg-[rgba(206,160,74,0.30)]'
-                              : 'border-[rgba(10,10,12,0.18)] bg-white',
+                            'h-1.5 w-1.5 transition',
+                            activeDot ? 'bg-[rgba(10,10,12,0.72)]' : 'bg-[rgba(10,10,12,0.20)] hover:bg-[rgba(10,10,12,0.36)]',
                           )}
-                          aria-label={`Go to ${s.name}`}
-                          title={s.name}
+                          aria-label={`Go to slide ${i + 1}`}
                         />
                       );
                     })}
                   </div>
                 </div>
-
-                <div className="mt-2 hidden sm:block text-[11px] text-[color:var(--ink-3)]">
-                  Tip: use <span className="font-mono">←</span> <span className="font-mono">→</span> to switch cities.
-                </div>
               </div>
-            ) : null}
-
-            {/* Live markets strip */}
-            <div className="pb-10 sm:pb-12">
-              <PortalMarquee items={marqueeItems} />
             </div>
           </div>
+          {/* end rail */}
         </div>
-
-        <div className="absolute inset-x-0 bottom-0 z-10 h-px bg-[color:var(--hairline)]" />
       </div>
     </section>
   );
