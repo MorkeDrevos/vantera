@@ -48,11 +48,7 @@ function PortalSignal({ k, v }: { k: string; v: string }) {
   );
 }
 
-function PortalMarquee({
-  items,
-}: {
-  items: Array<{ name: string; href: string; meta?: string }>;
-}) {
+function PortalMarquee({ items }: { items: Array<{ name: string; href: string; meta?: string }> }) {
   return (
     <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]">
       <div className="pointer-events-none absolute inset-0">
@@ -64,9 +60,7 @@ function PortalMarquee({
       <div className="relative flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6">
         <div className="min-w-0">
           <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">LIVE MARKETS</div>
-          <div className="mt-1 text-[13px] text-[color:var(--ink-2)]">
-            Browse the catalogue city by city - updated as coverage expands.
-          </div>
+          <div className="mt-1 text-[13px] text-[color:var(--ink-2)]">Browse city by city. Built progressively.</div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -108,7 +102,7 @@ const BTN_SECONDARY = cx(
 );
 
 /* =========================================================
-   Rotation (premium crossfade)
+   Rotation (premium crossfade + controls)
    ========================================================= */
 
 type HeroSlide = {
@@ -117,6 +111,10 @@ type HeroSlide = {
   country: string;
   src: string;
   alt?: string | null;
+  // optional signals (if present in RuntimeCity)
+  tier?: string | null;
+  status?: string | null;
+  tz?: string | null;
 };
 
 function usePrefersReducedMotion() {
@@ -135,6 +133,31 @@ function usePrefersReducedMotion() {
   }, []);
 
   return reduced;
+}
+
+function clampIndex(i: number, n: number) {
+  if (n <= 0) return 0;
+  return ((i % n) + n) % n;
+}
+
+function formatTier(t?: string | null) {
+  if (!t) return null;
+  // best-effort pretty print
+  return String(t).replace(/_/g, ' ').toLowerCase();
+}
+
+function formatStatus(s?: string | null) {
+  if (!s) return null;
+  return String(s).replace(/_/g, ' ').toLowerCase();
+}
+
+function buildCitySignals(s: HeroSlide) {
+  const out: string[] = [];
+  // Keep these subtle, not dashboardy
+  if (s.status) out.push(`status: ${formatStatus(s.status)}`);
+  if (s.tier) out.push(`tier: ${formatTier(s.tier)}`);
+  out.push('catalogue live');
+  return out.slice(0, 3);
 }
 
 /* =========================================================
@@ -183,7 +206,7 @@ export default function HeroPortalSection({
   );
 
   const slides: HeroSlide[] = useMemo(() => {
-    const base = (Array.isArray(cities) ? cities : [])
+    return (Array.isArray(cities) ? cities : [])
       .filter((c) => Boolean(c?.heroImageSrc) && Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
       .slice()
       .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
@@ -194,18 +217,36 @@ export default function HeroPortalSection({
         country: c.country,
         src: String(c.heroImageSrc),
         alt: c.heroImageAlt ?? `${c.name} luxury property`,
+        tier: c.tier ? String(c.tier) : null,
+        status: c.status ? String(c.status) : null,
+        tz: c.tz ? String(c.tz) : null,
       }));
-
-    // If no hero images exist yet, keep empty - hero remains clean white with signature backdrop.
-    return base;
   }, [cities]);
 
   const [idx, setIdx] = useState(0);
-  const idxRef = useRef(0);
+  const userPauseUntilRef = useRef<number>(0);
 
-  useEffect(() => {
-    idxRef.current = idx;
-  }, [idx]);
+  function pauseAuto(ms: number) {
+    userPauseUntilRef.current = Date.now() + ms;
+  }
+
+  function goNext() {
+    if (slides.length <= 1) return;
+    pauseAuto(18_000);
+    setIdx((v) => clampIndex(v + 1, slides.length));
+  }
+
+  function goPrev() {
+    if (slides.length <= 1) return;
+    pauseAuto(18_000);
+    setIdx((v) => clampIndex(v - 1, slides.length));
+  }
+
+  function goTo(i: number) {
+    if (slides.length <= 1) return;
+    pauseAuto(18_000);
+    setIdx(clampIndex(i, slides.length));
+  }
 
   useEffect(() => {
     if (reducedMotion) return;
@@ -213,11 +254,23 @@ export default function HeroPortalSection({
 
     const ms = 8500; // calm cadence
     const t = window.setInterval(() => {
+      if (Date.now() < userPauseUntilRef.current) return;
       setIdx((v) => (v + 1) % slides.length);
     }, ms);
 
     return () => window.clearInterval(t);
   }, [slides.length, reducedMotion]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (slides.length <= 1) return;
+      if (e.key === 'ArrowRight') goNext();
+      if (e.key === 'ArrowLeft') goPrev();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slides.length]);
 
   const active = slides[idx] ?? null;
   const next = slides.length > 1 ? slides[(idx + 1) % slides.length] : null;
@@ -239,26 +292,29 @@ export default function HeroPortalSection({
   const liveCountriesCount = useMemo(() => new Set(omniCities.map((c) => c.country)).size, [omniCities]);
   const liveMarketsCount = useMemo(() => omniCities.length, [omniCities]);
 
+  const overlaySignals = useMemo(() => (active ? buildCitySignals(active) : []), [active]);
+
   return (
     <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        <div className="relative min-h-[900px] w-full bg-white">
+        <div className="relative min-h-[920px] w-full bg-white">
           {/* Identity texture */}
           <VanteraSignatureBackdrop />
 
-          {/* Rotating hero image plane (colour comes from imagery, not UI) */}
+          {/* Rotating hero image plane */}
           {active?.src ? (
-            <div className="pointer-events-none absolute inset-0">
-              {/* Preload next image via hidden render (no layout) */}
+            <div className="absolute inset-0">
+              {/* Preload next image */}
               {next?.src ? (
                 <div className="absolute h-0 w-0 overflow-hidden opacity-0">
                   <Image src={next.src} alt={next.alt ?? 'next'} width={16} height={16} />
                 </div>
               ) : null}
 
-              <div className="absolute inset-0">
+              {/* Images (crossfade) */}
+              <div className="pointer-events-none absolute inset-0">
                 {slides.map((s, i) => {
                   const isActive = i === idx;
                   return (
@@ -266,7 +322,7 @@ export default function HeroPortalSection({
                       key={s.src}
                       className={cx(
                         'absolute inset-0',
-                        'transition-opacity duration-[1400ms] ease-out',
+                        reducedMotion ? '' : 'transition-opacity duration-[1400ms] ease-out',
                         isActive ? 'opacity-[0.82]' : 'opacity-0',
                       )}
                     >
@@ -283,10 +339,37 @@ export default function HeroPortalSection({
                 })}
               </div>
 
-              {/* White veils: portal-grade readability */}
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.96),rgba(255,255,255,0.76),rgba(255,255,255,0.34),rgba(255,255,255,0.12))]" />
-              <div className="absolute inset-0 bg-[radial-gradient(1200px_620px_at_22%_10%,rgba(255,255,255,0.94),transparent_62%)]" />
-              <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+              {/* White veils for readability */}
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.96),rgba(255,255,255,0.78),rgba(255,255,255,0.34),rgba(255,255,255,0.12))]" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_620px_at_22%_10%,rgba(255,255,255,0.94),transparent_62%)]" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+
+              {/* City label overlay (bottom-right, subtle) */}
+              <div className="absolute bottom-6 right-5 z-20 sm:right-8 lg:right-14 2xl:right-20">
+                <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[12px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
+
+                  <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED CITY</div>
+                  <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
+                    {active ? active.name : 'Editorial'}
+                    {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
+                  </div>
+
+                  {overlaySignals.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {overlaySignals.map((t) => (
+                        <span
+                          key={t}
+                          className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[color:var(--ink-2)]"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
             </div>
           ) : null}
 
@@ -307,15 +390,15 @@ export default function HeroPortalSection({
                   <Chip>TRUTH LAYER</Chip>
                 </div>
 
+                {/* Tightened copy */}
                 <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[66px] lg:leading-[0.98]">
-                  The luxury marketplace built for clarity, not noise
+                  A global luxury marketplace for exceptional homes
                 </h1>
 
                 <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
 
-                <p className="mt-5 max-w-[74ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
-                  Browse exceptional homes globally, city by city. Under the surface, a Truth Layer verifies, scores and explains what
-                  you&apos;re seeing - so the catalogue stays calm and decisions stay sharp.
+                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
+                  Curated presentation. Serious search. A Truth Layer underneath to keep decisions clean.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -323,16 +406,16 @@ export default function HeroPortalSection({
                     Browse marketplace
                   </Link>
 
-                  <Link href="/search" className={BTN_SECONDARY}>
-                    Open search
+                  <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
+                    List privately
                   </Link>
                 </div>
 
-                {/* Signals + current hero context */}
+                {/* Signals */}
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
                   <PortalSignal k="LIVE MARKETS" v={`${liveMarketsCount}`} />
                   <PortalSignal k="COUNTRIES" v={`${liveCountriesCount}`} />
-                  <PortalSignal k="HERO" v={active ? active.name : 'Editorial'} />
+                  <PortalSignal k="FEATURED" v={active ? active.name : 'Editorial'} />
                 </div>
               </div>
 
@@ -393,6 +476,71 @@ export default function HeroPortalSection({
                 </div>
               </div>
             </div>
+
+            {/* Controls row (desktop only): Prev/Next + dots (dots hidden on mobile) */}
+            {slides.length > 1 ? (
+              <div className="pb-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="hidden sm:flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={goPrev}
+                      className={cx(
+                        'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
+                        'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
+                        'hover:border-[rgba(10,10,12,0.22)]',
+                        'shadow-[0_18px_60px_rgba(10,10,12,0.08)]',
+                      )}
+                      aria-label="Previous hero image"
+                    >
+                      Prev
+                      <span className="h-px w-6 bg-[color:var(--hairline)]" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={goNext}
+                      className={cx(
+                        'inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition',
+                        'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
+                        'hover:border-[rgba(10,10,12,0.22)]',
+                        'shadow-[0_18px_60px_rgba(10,10,12,0.08)]',
+                      )}
+                      aria-label="Next hero image"
+                    >
+                      Next
+                      <span className="h-px w-6 bg-[color:var(--hairline)]" />
+                    </button>
+                  </div>
+
+                  {/* Dots hidden on mobile */}
+                  <div className="hidden sm:flex items-center gap-2">
+                    {slides.map((s, i) => {
+                      const isActive = i === idx;
+                      return (
+                        <button
+                          key={s.src}
+                          type="button"
+                          onClick={() => goTo(i)}
+                          className={cx(
+                            'h-2.5 w-2.5 border transition',
+                            isActive
+                              ? 'border-[rgba(206,160,74,0.95)] bg-[rgba(206,160,74,0.30)]'
+                              : 'border-[rgba(10,10,12,0.18)] bg-white',
+                          )}
+                          aria-label={`Go to ${s.name}`}
+                          title={s.name}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="mt-2 hidden sm:block text-[11px] text-[color:var(--ink-3)]">
+                  Tip: use <span className="font-mono">←</span> <span className="font-mono">→</span> to switch cities.
+                </div>
+              </div>
+            ) : null}
 
             {/* Live markets strip */}
             <div className="pb-10 sm:pb-12">
