@@ -296,54 +296,43 @@ export default function TopBar() {
   const BAR_INNER = 'mx-auto flex w-full max-w-[1760px] items-center px-5 sm:px-8 lg:px-14 2xl:px-20';
   const STRIP_INNER = 'mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-20';
 
-  /**
-   * CHANGED: Topbar now "royal graphite" (dark) with subtle gold crown line.
-   * Note: Mega panel remains porcelain (white) by design.
-   */
-  const barShell = cx(
-    'relative w-full',
-    'bg-[rgba(10,10,12,0.78)] backdrop-blur-[18px]',
-    scrolled && 'bg-[rgba(10,10,12,0.88)]',
-  );
+  const barShell = cx('relative w-full', 'bg-white/88 backdrop-blur-[18px]', scrolled && 'bg-white/94');
 
-  // desktop nav (dark mode text)
+  // editorial nav
   const navLink =
-    'relative inline-flex h-10 items-center px-1 text-[13px] font-medium transition ' +
-    'text-white/78 hover:text-white';
+    'relative inline-flex h-10 items-center px-1 text-[13px] font-medium text-[color:var(--ink-2)] transition ' +
+    'hover:text-[color:var(--ink)]';
   const navActive =
-    'text-white after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-white after:opacity-[0.50]';
+    'text-[color:var(--ink)] after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.55]';
 
-  // icons on dark bar
-  const iconMuted = 'text-white/55';
+  const iconMuted = 'text-[color:var(--ink-3)]';
 
-  // right side actions (dark mode)
+  // right side actions
   const signatureSearch =
     'group inline-flex h-10 items-center gap-2 px-4 transition ' +
-    'border border-white/14 bg-white/6 hover:border-white/22 hover:bg-white/8 ' +
-    'text-white/80';
+    'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]';
 
   const primaryCta =
     'inline-flex h-10 items-center justify-between gap-3 px-5 text-sm font-semibold transition ' +
-    'border border-[rgba(231,201,130,0.22)] bg-[rgba(231,201,130,0.10)] text-[rgba(255,255,255,0.92)] ' +
-    'hover:border-[rgba(231,201,130,0.32)] hover:bg-[rgba(231,201,130,0.14)]';
+    'border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]';
 
-  // country strip (dark mode)
+  // country strip
   const stripItem =
-    'relative inline-flex h-8 items-center px-2 text-[12px] transition ' + 'text-white/65 hover:text-white';
+    'relative inline-flex h-8 items-center px-2 text-[12px] text-[color:var(--ink-2)] transition ' +
+    'hover:text-[color:var(--ink)]';
   const stripActive =
-    'text-white after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px after:bg-white after:opacity-[0.42]';
+    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.45]';
 
   const activeCountry = (searchParams?.get('country') ?? '').trim();
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className={barShell}>
-        {/* Crown + hairlines (royal) */}
+        {/* Hairlines + crown accent (subtle) */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
-          <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
-          <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.55),transparent)] opacity-80" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_220px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
+          <div className="absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.35),transparent)] opacity-55" />
         </div>
 
         {/* Row 1 */}
@@ -351,13 +340,12 @@ export default function TopBar() {
           {/* Brand */}
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <Image
-              // CHANGED: expects a white logo asset at this path
-              src="/brand/vantera-logo-light.svg"
+              src="/brand/vantera-logo-dark.svg"
               alt="Vantera"
               width={520}
               height={160}
               priority={false}
-              className={cx('h-[26px] w-auto sm:h-[30px] md:h-[32px]', 'contrast-[1.02]')}
+              className={cx('h-[26px] w-auto sm:h-[30px] md:h-[32px]', 'contrast-[1.06]')}
             />
           </Link>
 
@@ -372,44 +360,46 @@ export default function TopBar() {
                   onFocus={() => setMegaOpen(true)}
                   className={cx(
                     'relative inline-flex h-10 items-center gap-2 px-1 text-[13px] font-medium transition select-none',
-                    'text-white/78 hover:text-white',
-                    megaOpen && 'text-white',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                    megaOpen && 'text-[color:var(--ink)]',
                   )}
                   aria-expanded={megaOpen}
                   aria-haspopup="menu"
                 >
+                  {/* CHANGED: removed Globe icon + renamed Places -> Explore */}
                   <span>Explore</span>
                   <ChevronDown className={cx('h-4 w-4 transition', megaOpen && 'rotate-180', iconMuted)} />
                   <span
                     className={cx(
-                      'absolute left-1 right-1 bottom-1 h-px bg-white opacity-0',
+                      'absolute left-1 right-1 bottom-1 h-px bg-[color:var(--ink)] opacity-0',
                       megaOpen && 'opacity-[0.35]',
                     )}
                   />
                 </button>
 
-                {/* Mega backdrop (full width) */}
+                {/* Mega backdrop (full width, like your reference) */}
                 <div
                   className={cx('fixed inset-0 z-[70]', megaOpen ? 'pointer-events-auto' : 'pointer-events-none')}
                   aria-hidden={!megaOpen}
                 >
+                  {/* Darken slightly so text stays readable over hero */}
                   <div
                     className={cx(
                       'absolute inset-0 transition-opacity duration-200',
                       megaOpen ? 'opacity-100' : 'opacity-0',
-                      'bg-[rgba(10,10,12,0.34)]',
+                      'bg-[rgba(10,10,12,0.26)]',
                     )}
                   />
                   <div
                     className={cx(
                       'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200',
                       megaOpen && 'opacity-100',
-                      '[background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.10)_1px,transparent_0)] [background-size:28px_28px]',
+                      '[background-image:radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.12)_1px,transparent_0)] [background-size:28px_28px]',
                     )}
                   />
                 </div>
 
-                {/* Mega panel (porcelain) */}
+                {/* Mega panel (centered catalogue overlay) */}
                 <div
                   ref={panelRef}
                   onPointerEnter={() => {
@@ -420,7 +410,8 @@ export default function TopBar() {
                   className={cx(
                     'fixed left-1/2 top-[72px] z-[80] w-[1220px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 origin-top',
                     'overflow-hidden border border-[rgba(10,10,12,0.14)]',
-                    'bg-[rgba(255,255,255,0.985)] backdrop-blur-[10px]',
+                    'bg-[rgba(255,255,255,0.985)]',
+                    'backdrop-blur-[10px]',
                     'shadow-[0_50px_180px_rgba(10,10,12,0.22)]',
                     'transition-[transform,opacity] duration-200',
                     megaOpen
@@ -430,6 +421,7 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Explore menu"
                 >
+                  {/* Internal soft depth (still readable) */}
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-x-0 top-0 h-px bg-[rgba(10,10,12,0.10)]" />
                     <div className="absolute inset-x-0 bottom-0 h-px bg-[rgba(10,10,12,0.10)]" />
@@ -440,7 +432,9 @@ export default function TopBar() {
                   {/* Header */}
                   <div className="relative flex items-start justify-between gap-6 px-8 py-7">
                     <div className="min-w-0">
-                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">EXPLORE</div>
+                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                        EXPLORE
+                      </div>
                       <div className="mt-3 max-w-[74ch] text-[28px] leading-[1.05] font-semibold text-[color:var(--ink)]">
                         A global luxury marketplace built city by city.
                       </div>
@@ -448,6 +442,7 @@ export default function TopBar() {
                         Countries and flagship cities. Clean entry points.
                       </div>
 
+                      {/* quick country tabs */}
                       <div className="mt-5 flex flex-wrap gap-2">
                         {countries.map((c) => (
                           <Link
@@ -480,7 +475,7 @@ export default function TopBar() {
                           'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
                       >
-                        <Command className="h-4 w-4 text-[color:var(--ink-3)]" />
+                        <Command className={cx('h-4 w-4', iconMuted)} />
                         Search <span className="ml-1 font-mono text-[11px] text-[color:var(--ink-3)]">/</span>
                       </Link>
 
@@ -493,7 +488,7 @@ export default function TopBar() {
                           'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
                         )}
                       >
-                        <X className="h-4 w-4 text-[color:var(--ink-3)]" />
+                        <X className={cx('h-4 w-4', iconMuted)} />
                         Close
                       </button>
                     </div>
@@ -501,6 +496,7 @@ export default function TopBar() {
 
                   {/* Body */}
                   <div className="relative grid grid-cols-12 gap-7 px-8 pb-8">
+                    {/* Left: flagship cities (two columns) */}
                     <div className="col-span-8">
                       <div className="mb-3 flex items-center justify-between">
                         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
@@ -527,7 +523,9 @@ export default function TopBar() {
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">{c.name}</div>
+                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">
+                                  {c.name}
+                                </div>
                                 <div className="mt-0.5 truncate text-[11px] tracking-[0.18em] text-[color:var(--ink-3)]">
                                   {c.country}
                                 </div>
@@ -550,6 +548,7 @@ export default function TopBar() {
                       </div>
                     </div>
 
+                    {/* Right: Search Atelier + submissions */}
                     <div className="col-span-4 space-y-3">
                       <div className="border border-[rgba(10,10,12,0.12)] bg-white p-4">
                         <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
@@ -588,7 +587,12 @@ export default function TopBar() {
                         </div>
                         <div className="mt-1 text-xs text-[color:var(--ink-2)]">Private by default. €2M+ only.</div>
 
-                        <Link href={sellHref} prefetch onClick={() => setMegaOpen(false)} className={cx('mt-4 inline-flex w-full', 'inline-flex h-10 items-center justify-between gap-3 px-5 text-sm font-semibold transition border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.92)] text-white hover:bg-[rgba(10,10,12,1.0)]')}>
+                        <Link
+                          href={sellHref}
+                          prefetch
+                          onClick={() => setMegaOpen(false)}
+                          className={cx('mt-4 inline-flex w-full', primaryCta)}
+                        >
                           <span>{sellLabel}</span>
                           <ArrowRight className="h-4 w-4 opacity-85" />
                         </Link>
@@ -611,10 +615,12 @@ export default function TopBar() {
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
               <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
-                <Search className="h-4 w-4 text-white/55" />
-                <span className="text-[13px] text-white/75 group-hover:text-white transition">Search</span>
-                <span className="text-white/25">·</span>
-                <span className="font-mono text-xs text-white/55">/</span>
+                <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
+                <span className="text-[13px] text-[color:var(--ink-2)] group-hover:text-[color:var(--ink)] transition">
+                  Search
+                </span>
+                <span className="text-[color:var(--ink-3)]/40">·</span>
+                <span className="font-mono text-xs text-[color:var(--ink-3)]">/</span>
               </button>
 
               <Link href={sellHref} prefetch className={primaryCta} aria-label={sellLabel}>
@@ -628,22 +634,22 @@ export default function TopBar() {
               onClick={() => setMobileOpen((v) => !v)}
               className={cx(
                 'inline-flex h-10 items-center gap-2 px-4 text-sm transition lg:hidden',
-                'border border-white/14 bg-white/6 hover:border-white/22 hover:bg-white/8',
-                'text-white/78 hover:text-white',
+                'border border-[color:var(--hairline)] bg-white hover:border-[rgba(10,10,12,0.22)]',
+                'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
               )}
               aria-expanded={mobileOpen}
               aria-controls="vantera-mobile-menu"
             >
               Menu
-              <ChevronDown className={cx('h-4 w-4 transition text-white/55', mobileOpen && 'rotate-180')} />
+              <ChevronDown className={cx('h-4 w-4 transition text-[color:var(--ink-3)]', mobileOpen && 'rotate-180')} />
             </button>
           </div>
         </div>
 
         {/* Row 2: countries strip (thin, quiet) */}
         <div className="relative hidden lg:block">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/10" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-white/10" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
           <div className={cx('relative flex h-9 items-center', STRIP_INNER)}>
             <div className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -663,15 +669,15 @@ export default function TopBar() {
               })}
             </div>
 
-            <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-white/55">
-              <span className="h-1.5 w-1.5 bg-white/28" />
+            <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+              <span className="h-1.5 w-1.5 bg-[rgba(10,10,12,0.30)]" />
               Countries
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile sheet (unchanged visuals for now) */}
+      {/* Mobile sheet (unchanged) */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[90] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
@@ -716,7 +722,9 @@ export default function TopBar() {
             </button>
           </div>
 
+          {/* rest of mobile panel exactly as you had it */}
           <div className="relative space-y-4 px-5 pb-6">
+            {/* Actions */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
               <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Actions</div>
               <div className="mt-1 text-xs text-[color:var(--ink-2)]">Search and submissions.</div>
@@ -756,6 +764,7 @@ export default function TopBar() {
               </div>
             </div>
 
+            {/* Navigation */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
               <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Navigation</div>
 
@@ -790,6 +799,7 @@ export default function TopBar() {
               </div>
             </div>
 
+            {/* Explore */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
               <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">Explore</div>
 
@@ -835,6 +845,7 @@ export default function TopBar() {
               </div>
             </div>
 
+            {/* City page switch (kept) */}
             {onCityPage ? (
               <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
                 <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">City view</div>
