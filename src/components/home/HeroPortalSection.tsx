@@ -344,34 +344,35 @@ export default function HeroPortalSection({
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_620px_at_22%_10%,rgba(255,255,255,0.94),transparent_62%)]" />
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
 
-              {/* City label overlay (bottom-right, subtle) */}
-              <div className="absolute bottom-6 right-5 z-20 sm:right-8 lg:right-14 2xl:right-20">
-                <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[12px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
+              {/* City label overlay (bottom-left, aligned to headline grid) */}
+<div className={cx('absolute bottom-6 z-20', wideClassName)}>
+  {/* match the hero grid: left column width */}
+  <div className="max-w-[720px]">
+    <div className="relative inline-block overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[12px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
 
-                  <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED CITY</div>
-                  <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
-                    {active ? active.name : 'Editorial'}
-                    {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
-                  </div>
+      <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">FEATURED CITY</div>
+      <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
+        {active ? active.name : 'Editorial'}
+        {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
+      </div>
 
-                  {overlaySignals.length ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {overlaySignals.map((t) => (
-                        <span
-                          key={t}
-                          className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[color:var(--ink-2)]"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          ) : null}
+      {overlaySignals.length ? (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {overlaySignals.map((t) => (
+            <span
+              key={t}
+              className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-2.5 py-1 text-[11px] font-semibold text-[color:var(--ink-2)]"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  </div>
+</div>
 
           {/* Hero frame system */}
           <div className="pointer-events-none absolute inset-0">
