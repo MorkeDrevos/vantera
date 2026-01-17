@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 882.05 186.68">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        font-family: Baskerville, Baskerville;
+        font-size: 106.1px;
+      }
+
+      .cls-2 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-3 {
+        letter-spacing: .06em;
+      }
+
+      .cls-4 {
+        letter-spacing: .06em;
+      }
+
+      .cls-5 {
+        letter-spacing: .06em;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" transform="translate(256.15 119.35) scale(1.15 1)"><tspan class="cls-2" x="0" y="0">V</tspan><tspan class="cls-4" x="70.98" y="0">A</tspan><tspan class="cls-5" x="149.1" y="0">NTE</tspan><tspan class="cls-3" x="388.12" y="0">R</tspan><tspan x="471.73" y="0">A</tspan></text>
+  <image width="893" height="761" transform="scale(.25)" xlink:href="Vantera Icon.png"/>
+</svg>

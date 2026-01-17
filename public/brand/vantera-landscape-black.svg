@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 179.83">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        font-family: Baskerville, Baskerville;
+        font-size: 152.57px;
+      }
+
+      .cls-2 {
+        letter-spacing: -.06em;
+      }
+
+      .cls-3 {
+        letter-spacing: .06em;
+      }
+
+      .cls-4 {
+        letter-spacing: .06em;
+      }
+
+      .cls-5 {
+        letter-spacing: .06em;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" transform="translate(0 127.31) scale(1.15 1)"><tspan class="cls-2" x="0" y="0">V</tspan><tspan class="cls-3" x="102.07" y="0">A</tspan><tspan class="cls-5" x="214.39" y="0">NTE</tspan><tspan class="cls-4" x="558.09" y="0">R</tspan><tspan x="678.32" y="0">A</tspan></text>
+</svg>
