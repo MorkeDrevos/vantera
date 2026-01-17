@@ -601,13 +601,7 @@ function AvailabilityPanel({
    Listing card (catalogue grade)
    ========================================================= */
 
-function ListingCardCatalogue({
-  l,
-  hero,
-}: {
-  l: ListingCard;
-  hero?: boolean;
-}) {
+function ListingCardCatalogue({ l, hero }: { l: ListingCard; hero?: boolean }) {
   const href = `/listing/${l.slug}`;
 
   const priceLabel = l.price ? shortMoney(l.currency, l.price) : 'Price on request';
@@ -622,7 +616,12 @@ function ListingCardCatalogue({
         'shadow-[0_26px_80px_rgba(11,12,16,0.05)] hover:shadow-[0_36px_110px_rgba(11,12,16,0.08)] transition',
       )}
     >
-      <div className={cx('relative w-full overflow-hidden bg-[color:var(--paper-2)]', hero ? 'aspect-[16/10]' : 'aspect-[4/3]')}>
+      <div
+        className={cx(
+          'relative w-full overflow-hidden bg-[color:var(--paper-2)]',
+          hero ? 'aspect-[16/10]' : 'aspect-[4/3]',
+        )}
+      >
         <Image
           src={l.cover.url}
           alt={l.cover.alt ?? l.title}
@@ -642,7 +641,12 @@ function ListingCardCatalogue({
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <div className="text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">{locLine}</div>
-            <div className={cx('mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]', hero && 'sm:text-[22px]')}>
+            <div
+              className={cx(
+                'mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]',
+                hero && 'sm:text-[22px]',
+              )}
+            >
               {l.title}
             </div>
             {l.headline ? (
@@ -680,7 +684,10 @@ function ListingCardCatalogue({
             <ArrowRight className="h-4 w-4 text-[color:var(--ink-3)]" />
           </Link>
 
-          <Link href={`/city/${l.city.slug}`} className="text-[12px] text-[color:var(--ink-3)] hover:text-[color:var(--ink)]">
+          <Link
+            href={`/city/${l.city.slug}`}
+            className="text-[12px] text-[color:var(--ink-3)] hover:text-[color:var(--ink)]"
+          >
             {l.city.name}
           </Link>
         </div>
@@ -834,13 +841,8 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-      {/* Atelier header */}
-      <section
-        className={cx(
-          'relative overflow-hidden',
-          'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]',
-        )}
-      >
+      {/* Atelier header (full width without vw hacks to avoid horizontal overflow) */}
+      <section className="relative overflow-hidden">
         <div className="relative border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute inset-0 bg-[radial-gradient(1400px_520px_at_20%_0%,rgba(231,201,130,0.14),transparent_62%)]" />
@@ -862,7 +864,8 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 </h1>
 
                 <p className="mt-4 max-w-[75ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)] sm:text-[15px]">
-                  Designed like a catalogue, powered like a trading terminal. Use filters sparingly, then browse with taste.
+                  Designed like a catalogue, powered like a trading terminal. Use filters sparingly, then browse with
+                  taste.
                 </p>
               </div>
 
@@ -876,9 +879,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
                 <div className="inline-flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-5 py-3 text-sm">
                   <span className="text-[color:var(--ink-2)]">Available</span>
-                  <span className="font-semibold text-[color:var(--ink)]">
-                    {total ? total.toLocaleString() : 0}
-                  </span>
+                  <span className="font-semibold text-[color:var(--ink)]">{total ? total.toLocaleString() : 0}</span>
                 </div>
               </div>
             </div>
@@ -932,8 +933,10 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 />
               </div>
 
-              <div className="lg:col-span-2 flex items-end justify-between gap-2">
-                <div className="flex items-center gap-2">
+              {/* IMPORTANT: this was lg:col-span-2 (too narrow) which forced horizontal overflow on many desktops.
+                  Make it span full row at lg so it wraps and never pushes outside page width. */}
+              <div className="lg:col-span-12 flex flex-wrap items-end justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2 min-w-0">
                   {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
                     <button
                       key={m}
@@ -949,9 +952,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                       {m}
                     </button>
                   ))}
-                </div>
 
-                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setFiltersOpen(true)}
@@ -970,7 +971,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                     >
                       <SlidersHorizontal className="h-4 w-4 text-[color:var(--ink-3)]" />
                       <span className="hidden sm:inline">{sortLabel}</span>
-                      <ChevronDown className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')} />
+                      <ChevronDown
+                        className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')}
+                      />
                     </button>
 
                     {sortOpen ? (
@@ -995,7 +998,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                             }}
                             className={cx(
                               'w-full px-4 py-3 text-left text-[12px] transition',
-                              sort === x.k ? 'bg-[color:var(--paper-2)] text-[color:var(--ink)]' : 'bg-white text-[color:var(--ink-2)] hover:bg-[color:var(--paper-2)]',
+                              sort === x.k
+                                ? 'bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                                : 'bg-white text-[color:var(--ink-2)] hover:bg-[color:var(--paper-2)]',
                             )}
                           >
                             {x.label}
@@ -1004,7 +1009,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                       </div>
                     ) : null}
                   </div>
+                </div>
 
+                <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
                   <PrimaryButton onClick={() => applyToUrl(1)} className="px-5 py-2.5">
                     Apply
                     <ArrowRight className="h-4 w-4" />
@@ -1090,7 +1097,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             </div>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {cards.map(({ l, hero }, idx) => (
+              {cards.map(({ l, hero }) => (
                 <div key={l.id} className={cx(hero && 'md:col-span-2')}>
                   <ListingCardCatalogue l={l} hero={hero} />
                 </div>
@@ -1308,7 +1315,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                     >
                       Clear
                     </button>
-                    <span className="text-sm text-[color:var(--ink-3)]">{needs.length ? `${needs.length} selected` : 'None selected'}</span>
+                    <span className="text-sm text-[color:var(--ink-3)]">
+                      {needs.length ? `${needs.length} selected` : 'None selected'}
+                    </span>
                   </div>
                 </div>
 
