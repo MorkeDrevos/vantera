@@ -480,7 +480,6 @@ function AvailabilityPanel({
                 </div>
               </div>
 
-              {/* honeypot */}
               <input
                 value={hp}
                 onChange={(e) => setHp(e.target.value)}
@@ -562,18 +561,9 @@ function AvailabilityPanel({
 
               <div className="mt-4 grid gap-3">
                 {[
-                  {
-                    k: 'VERIFICATION',
-                    v: 'We onboard real inventory and verify media and listing integrity.',
-                  },
-                  {
-                    k: 'NOTIFY',
-                    v: 'When the market is live, you’ll receive access and the best matching listings.',
-                  },
-                  {
-                    k: 'NO FAKE RESULTS',
-                    v: 'If a market is not live, we show availability and capture the request.',
-                  },
+                  { k: 'VERIFICATION', v: 'We onboard real inventory and verify media and listing integrity.' },
+                  { k: 'NOTIFY', v: 'When the market is live, you’ll receive access and the best matching listings.' },
+                  { k: 'NO FAKE RESULTS', v: 'If a market is not live, we show availability and capture the request.' },
                 ].map((x) => (
                   <div key={x.k} className="border border-[color:var(--hairline)] bg-white p-4">
                     <div className="text-[10px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">{x.k}</div>
@@ -749,7 +739,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
   const sortMenuRef = useRef<HTMLDivElement | null>(null);
   useClickOutside([sortBtnRef, sortMenuRef], () => setSortOpen(false), sortOpen);
 
-  // subtle scroll polish for the sticky dock
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -826,7 +815,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
   const isCoverageNotLive = showCoverageNotLive(place, total);
 
-  // Feature mix: one hero card (first result) + rest normal
   const cards = useMemo(() => {
     const base = listings.filter((l) => !!l.cover?.url);
     if (base.length <= 3) return base.map((l, idx) => ({ l, hero: idx === 0 }));
@@ -835,13 +823,12 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
 
   return (
     <div className="relative min-h-screen bg-white text-[color:var(--ink)]">
-      {/* Quiet paper texture */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-white">
         <div className="absolute inset-0 opacity-[0.030] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.24)_1px,transparent_0)] [background-size:28px_28px]" />
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-      {/* Atelier header (full width without vw hacks to avoid horizontal overflow) */}
+      {/* Header */}
       <section className="relative overflow-hidden">
         <div className="relative border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
           <div className="pointer-events-none absolute inset-0">
@@ -893,11 +880,108 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
               {summaryBits.length ? summaryBits.map((b) => <TagPill key={b}>{b}</TagPill>) : null}
               {!summaryBits.length ? <TagPill>Try: “Marbella” + “sea view”</TagPill> : null}
             </div>
+
+            {/* PROMINENT FILTER ATELIER (2nd Filters presence - obvious, primary) */}
+            <div className="mt-8 border border-[color:var(--hairline)] bg-white shadow-[0_26px_80px_rgba(11,12,16,0.05)]">
+              <div className="relative px-5 py-5 sm:px-6">
+                <GoldHairline />
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">
+                      FILTER ATELIER
+                    </div>
+                    <div className="mt-2 text-sm text-[color:var(--ink-2)]">
+                      Set your intent, refine with filters, then apply.
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setMode(m)}
+                        className={cx(
+                          'px-4 py-2.5 text-[12px] font-semibold transition border',
+                          mode === m
+                            ? 'border-[rgba(10,10,12,0.22)] bg-[color:var(--paper-2)] text-[color:var(--ink)]'
+                            : 'border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]',
+                        )}
+                      >
+                        {m}
+                      </button>
+                    ))}
+
+                    <button
+                      type="button"
+                      onClick={() => setFiltersOpen(true)}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 text-[12px] font-semibold border border-[rgba(10,10,12,0.18)] bg-[color:var(--paper-2)] text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.28)]"
+                    >
+                      <Filter className="h-4 w-4 text-[color:var(--ink-3)]" />
+                      Filters
+                      {needs.length || (type && normalize(type) !== 'any') || max || beds ? (
+                        <span className="ml-1 inline-flex items-center rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]">
+                          active
+                        </span>
+                      ) : null}
+                    </button>
+
+                    <div className="flex items-center gap-2 border border-[color:var(--hairline)] bg-white px-3 py-2.5">
+                      <SlidersHorizontal className="h-4 w-4 text-[color:var(--ink-3)]" />
+                      <select
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortKey)}
+                        className="bg-transparent text-[12px] font-semibold text-[color:var(--ink)] outline-none"
+                        aria-label="Sort"
+                      >
+                        <option value="price_high">price: high to low</option>
+                        <option value="price_low">price: low to high</option>
+                        <option value="beds">beds: most first</option>
+                        <option value="sqm">size: largest first</option>
+                        <option value="newest">newest</option>
+                      </select>
+                    </div>
+
+                    <PrimaryButton onClick={() => applyToUrl(1)} className="px-6 py-2.5">
+                      Apply
+                      <ArrowRight className="h-4 w-4" />
+                    </PrimaryButton>
+
+                    <button
+                      type="button"
+                      onClick={clearAll}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 text-[12px] font-semibold border border-[color:var(--hairline)] bg-white text-[color:var(--ink-2)] hover:border-[rgba(10,10,12,0.22)]"
+                      title="Reset"
+                      aria-label="Reset"
+                    >
+                      <X className="h-4 w-4 text-[color:var(--ink-3)]" />
+                      Reset
+                    </button>
+                  </div>
+                </div>
+
+                {(needs.length || (type && normalize(type) !== 'any') || max || beds) ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    <span className="text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">
+                      ACTIVE
+                    </span>
+                    {type && normalize(type) !== 'any' ? <TagPill>type: {type}</TagPill> : null}
+                    {typeof beds === 'number' && beds > 0 ? <TagPill>{beds}+ beds</TagPill> : null}
+                    {typeof max === 'number' && Number.isFinite(max) ? <TagPill>under {shortMoney('EUR', max)}</TagPill> : null}
+                    {needs.slice(0, 6).map((n) => (
+                      <TagPill key={n}>{n}</TagPill>
+                    ))}
+                    {needs.length > 6 ? <TagPill>+{needs.length - 6} more</TagPill> : null}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            {/* /PROMINENT FILTER ATELIER */}
           </div>
         </div>
       </section>
 
-      {/* Sticky Search Dock */}
+      {/* Sticky Search Dock (compact Filters still present) */}
       <div className="sticky top-0 z-40 bg-white/80 backdrop-blur">
         <div className={cx('relative', scrolled && 'shadow-[0_18px_60px_rgba(11,12,16,0.06)]')}>
           <GoldHairline />
@@ -933,8 +1017,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 />
               </div>
 
-              {/* IMPORTANT: this was lg:col-span-2 (too narrow) which forced horizontal overflow on many desktops.
-                  Make it span full row at lg so it wraps and never pushes outside page width. */}
               <div className="lg:col-span-12 flex flex-wrap items-end justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
@@ -971,9 +1053,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                     >
                       <SlidersHorizontal className="h-4 w-4 text-[color:var(--ink-3)]" />
                       <span className="hidden sm:inline">{sortLabel}</span>
-                      <ChevronDown
-                        className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')}
-                      />
+                      <ChevronDown className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')} />
                     </button>
 
                     {sortOpen ? (
@@ -1106,7 +1186,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
           </>
         )}
 
-        {/* Pagination */}
         {!isCoverageNotLive && pageCount > 1 ? (
           <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm text-[color:var(--ink-2)]">
@@ -1148,7 +1227,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
         ) : null}
       </section>
 
-      {/* Filters drawer (Atelier Panel) */}
+      {/* Filters drawer */}
       {filtersOpen ? (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[rgba(10,10,12,0.20)]" onClick={() => setFiltersOpen(false)} />
@@ -1179,7 +1258,9 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
             <div className="h-[calc(100%-92px)] overflow-auto p-6">
               <div className="grid gap-5">
                 <div className="border border-[color:var(--hairline)] bg-white p-5">
-                  <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">PROPERTY TYPE</div>
+                  <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
+                    PROPERTY TYPE
+                  </div>
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     {['any', 'villa', 'apartment', 'penthouse', 'house', 'plot'].map((t) => {
                       const active = normalize(type) === normalize(t);
@@ -1205,8 +1286,12 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <div className="border border-[color:var(--hairline)] bg-white p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">MAX BUDGET</div>
-                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">{max ? shortMoney('EUR', max) : 'No max'}</div>
+                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
+                        MAX BUDGET
+                      </div>
+                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">
+                        {max ? shortMoney('EUR', max) : 'No max'}
+                      </div>
                     </div>
 
                     <button
@@ -1240,8 +1325,12 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 <div className="border border-[color:var(--hairline)] bg-white p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">BEDROOMS</div>
-                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">{beds ? `${beds}+ beds` : 'Any'}</div>
+                      <div className="text-[11px] font-semibold tracking-[0.24em] text-[color:var(--ink-3)]">
+                        BEDROOMS
+                      </div>
+                      <div className="mt-2 text-sm text-[color:var(--ink-2)]">
+                        {beds ? `${beds}+ beds` : 'Any'}
+                      </div>
                     </div>
 
                     <button
