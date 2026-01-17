@@ -2,6 +2,9 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+import TopBar from '@/components/layout/TopBar';
+import Footer from '@/components/layout/Footer';
+
 import { SEO_CONFIG } from '@/lib/seo/seo.config';
 import { jsonLd, websiteJsonLd, organizationJsonLd } from '@/lib/seo/seo.jsonld';
 
@@ -65,7 +68,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* App root */}
         <div id="__vantera" className="min-h-[100dvh] bg-white">
+          <TopBar />
           {children}
+          <Footer />
         </div>
       </body>
     </html>
