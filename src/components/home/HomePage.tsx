@@ -1,9 +1,9 @@
 // src/components/home/HomePage.tsx
-import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
+import VanteraSignatureBackdrop from './VanteraSignatureBackdrop';
 
 import type { CoverageTier, CoverageStatus } from '@prisma/client';
 
@@ -199,7 +199,7 @@ const BTN_SECONDARY_SM = cx(
 
 /* =========================================================
    HERO (full-bleed, marketplace statement + search atelier)
-   JamesEdition clean editorial with royal gold cues
+   Signature Vantera (no stock city photo)
    ========================================================= */
 
 function FullBleedHero({
@@ -215,41 +215,8 @@ function FullBleedHero({
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
         <div className="relative min-h-[820px] w-full bg-[color:var(--paper-2)]">
-          <Image
-            src="/brand/hero.jpg"
-            alt="Vantera - Global luxury marketplace"
-            fill
-            priority
-            className={cx(
-              'object-cover',
-              // Crisp / less hazy, slightly richer detail
-              'contrast-[1.06] saturate-[1.05] brightness-[1.02]',
-            )}
-            sizes="100vw"
-          />
-
-          {/* Editorial paper veil (keeps detail, still white) */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.84),rgba(255,255,255,0.54),rgba(255,255,255,0.18))]" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.20),rgba(255,255,255,0.10),rgba(255,255,255,0.88))]" />
-
-          {/* Paper grain (texture, not blur) */}
-          <div className="pointer-events-none absolute inset-0 opacity-[0.050] [background-image:radial-gradient(circle_at_1px_1px,rgba(10,10,12,0.22)_1px,transparent_0)] [background-size:22px_22px]" />
-
-          {/* Royal gold atmosphere (must be visible) */}
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(980px_420px_at_18%_6%,rgba(206,160,74,0.18),transparent_62%)]" />
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_82%_30%,rgba(231,201,130,0.14),transparent_58%)]" />
-
-          {/* Crisp editorial frame */}
-          <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.12)]" />
-
-          {/* Double crown line (reads premium on white) */}
-          <div className="pointer-events-none absolute inset-x-0 top-0">
-            <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent" />
-            <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.60)] to-transparent" />
-          </div>
-
-          {/* Bottom paper fade */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+          {/* NEW: Signature Vantera backdrop (ownable, not a generic city photo) */}
+          <VanteraSignatureBackdrop />
 
           <div className={cx('relative z-10', WIDE)}>
             <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
@@ -265,7 +232,6 @@ function FullBleedHero({
                   A global catalogue of exceptional homes, powered by intelligence
                 </h1>
 
-                {/* Gold editorial anchor (small but unmistakable) */}
                 <div className="mt-5 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
 
                 <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-lg">
@@ -294,7 +260,6 @@ function FullBleedHero({
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0">
-                    {/* Crown for panel */}
                     <div className="absolute inset-x-0 top-0">
                       <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.95)] to-transparent" />
                       <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent" />
@@ -466,9 +431,6 @@ export default function HomePage({
 
   const safeCities = Array.isArray(cities) ? cities : [];
 
-  // Hero quick destinations:
-  // - sorted by priority
-  // - explicitly exclude Estepona/Benahavis from hero quick destinations
   const EXCLUDE_HERO_SLUGS = new Set(['estepona', 'benahavis']);
 
   const heroCandidates = safeCities
@@ -490,7 +452,6 @@ export default function HomePage({
     .map(([k]) => k)
     .slice(0, 12);
 
-  // Adapter: RuntimeCity -> City (for CityCard)
   const cityCards = safeCities
     .filter((c) => Boolean(c?.slug) && Boolean(c?.name) && Boolean(c?.country))
     .map((c) => ({
