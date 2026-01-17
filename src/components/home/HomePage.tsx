@@ -27,6 +27,10 @@ export type RuntimeCity = {
 
   heroImageSrc?: string | null;
   heroImageAlt?: string | null;
+
+  // Optional: video hero support
+  heroVideoSrc?: string | null;
+  heroVideoPosterSrc?: string | null;
 };
 
 export type RuntimeRegionCluster = {
@@ -109,7 +113,7 @@ export default function HomePage({
     .filter((c) => !EXCLUDE_HERO_SLUGS.has(String(c.slug).toLowerCase()));
 
   // Step 2: ensure every hero city has a REQUIRED heroImageSrc (string)
-  // This fixes: RuntimeCity[] not assignable to HeroCity[] (heroImageSrc required).
+  // Video is optional and will override image inside HeroPortalSection if present.
   const heroCities = heroCandidates
     .map((c) => {
       const heroSrc = c.heroImageSrc ?? c.image?.src ?? null;
@@ -123,6 +127,10 @@ export default function HomePage({
           c.image?.alt ||
           c.name ||
           null,
+
+        // pass-through optional video fields
+        heroVideoSrc: c.heroVideoSrc ?? null,
+        heroVideoPosterSrc: c.heroVideoPosterSrc ?? null,
       };
     })
     .filter(Boolean);
