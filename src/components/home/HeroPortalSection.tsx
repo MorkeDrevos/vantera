@@ -18,9 +18,13 @@ export type HeroCity = {
   name: string;
   country: string;
 
-  // hero image (prefer local /public so we control quality)
+  // Always available (used for image hero OR video poster fallback)
   heroImageSrc: string;
   heroImageAlt?: string | null;
+
+  // Optional: if present, hero uses video instead of image
+  heroVideoSrc?: string | null;
+  heroVideoPosterSrc?: string | null;
 
   // Optional micro-signals (wire to your DB later)
   signals?: {
@@ -71,7 +75,6 @@ function scoreLabel(v?: number | null, kind?: 'liquidity' | 'risk') {
     if (x <= 55) return 'mid';
     return 'high';
   }
-  // liquidity
   if (x >= 75) return 'strong';
   if (x >= 45) return 'mid';
   return 'thin';
@@ -105,11 +108,7 @@ export default function HeroPortalSection({
   cities: HeroCity[];
   clusters: HeroCluster[];
   rotateMs?: number;
-
-  // from HomePage (so you can control page-wide layout primitives)
   wideClassName?: string;
-
-  // optional quiet strip (desktop only)
   topCountries?: string[];
 }) {
   const WIDE = wideClassName ?? DEFAULT_WIDE;
@@ -125,23 +124,18 @@ export default function HeroPortalSection({
   const [isFading, setIsFading] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  const loaded = useRef<Set<number>>(new Set());
   const tRef = useRef<number | null>(null);
 
   const active = list[idx] ?? null;
   const prev = prevIdx !== null ? list[prevIdx] ?? null : null;
 
-  // Crossfade driver (never show white flash)
   function go(next: number) {
     if (!list.length) return;
-
     const target = (next + list.length) % list.length;
     if (target === idx) return;
 
     setPrevIdx(idx);
     setIdx(target);
-
-    // begin fade: keep prev visible until new is ready
     setIsFading(true);
   }
 
@@ -153,7 +147,6 @@ export default function HeroPortalSection({
     go(idx - 1);
   }
 
-  // Auto-rotate
   useEffect(() => {
     if (!list.length) return;
     if (paused) return;
@@ -170,20 +163,20 @@ export default function HeroPortalSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, paused, rotateMs, list.length]);
 
-  // When new image loads, complete fade
-  function markLoaded(i: number) {
-    loaded.current.add(i);
-    // If we are fading into this index, finish quickly
+  function markLoaded() {
     window.setTimeout(() => setIsFading(false), 40);
-    // Cleanup prev after fade
     window.setTimeout(() => setPrevIdx(null), 420);
   }
 
-  // Preload next image (helps kill “white time”)
-  const preloadNextSrc = useMemo(() => {
+  const preloadNext = useMemo(() => {
     if (!list.length) return null;
     const n = (idx + 1) % list.length;
-    return list[n]?.heroImageSrc ?? null;
+    const city = list[n];
+    if (!city) return null;
+    return {
+      video: city.heroVideoSrc ?? null,
+      image: city.heroImageSrc ?? null,
+    };
   }, [idx, list]);
 
   const overlaySignals = useMemo(() => {
@@ -202,7 +195,6 @@ export default function HeroPortalSection({
     return out.slice(0, 4);
   }, [active]);
 
-  // Tight portal copy
   const h1 = 'A luxury marketplace built on intelligence';
   const sub =
     'Editorial catalogue on top. A Truth Layer underneath - verification, liquidity and risk signals, built city by city.';
@@ -210,60 +202,87 @@ export default function HeroPortalSection({
   return (
     <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
       <div className="relative min-h-[860px] w-full bg-[color:var(--paper-2)]">
-        {/* Base signature backdrop always present (prevents white flash perception) */}
         <VanteraSignatureBackdrop />
 
-        {/* Image stage */}
         <div
           className="absolute inset-0"
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           aria-hidden="true"
         >
-          {/* Image container */}
           <div className="absolute inset-0">
             {/* Previous stays under during transition */}
             {prev ? (
               <div className="absolute inset-0">
-                <Image
-                  src={prev.heroImageSrc}
-                  alt={prev.heroImageAlt ?? `${prev.name} hero`}
-                  fill
-                  priority={false}
-                  sizes="100vw"
-                  className={cx('object-cover', 'opacity-100')}
-                />
+                {prev.heroVideoSrc ? (
+                  <video
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    poster={prev.heroVideoPosterSrc ?? prev.heroImageSrc}
+                  >
+                    <source src={prev.heroVideoSrc} />
+                  </video>
+                ) : (
+                  <Image
+                    src={prev.heroImageSrc}
+                    alt={prev.heroImageAlt ?? `${prev.name} hero`}
+                    fill
+                    priority={false}
+                    sizes="100vw"
+                    className="object-cover opacity-100"
+                  />
+                )}
               </div>
             ) : null}
 
             {/* Active fades in */}
             {active ? (
               <div className="absolute inset-0">
-                <Image
-                  src={active.heroImageSrc}
-                  alt={active.heroImageAlt ?? `${active.name} hero`}
-                  fill
-                  priority
-                  sizes="100vw"
-                  onLoad={() => markLoaded(idx)}
-                  className={cx(
-                    'object-cover transition-opacity duration-[520ms]',
-                    isFading ? 'opacity-0' : 'opacity-100',
-                  )}
-                />
+                {active.heroVideoSrc ? (
+                  <video
+                    className={cx('h-full w-full object-cover transition-opacity duration-[520ms]', isFading ? 'opacity-0' : 'opacity-100')}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    poster={active.heroVideoPosterSrc ?? active.heroImageSrc}
+                    onCanPlay={() => markLoaded()}
+                  >
+                    <source src={active.heroVideoSrc} />
+                  </video>
+                ) : (
+                  <Image
+                    src={active.heroImageSrc}
+                    alt={active.heroImageAlt ?? `${active.name} hero`}
+                    fill
+                    priority
+                    sizes="100vw"
+                    onLoad={() => markLoaded()}
+                    className={cx('object-cover transition-opacity duration-[520ms]', isFading ? 'opacity-0' : 'opacity-100')}
+                  />
+                )}
 
-                {/* Image veil for readability, not blur */}
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.88),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
                 <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.14),rgba(255,255,255,0.06),rgba(255,255,255,0.92))]" />
               </div>
             ) : null}
           </div>
 
-          {/* Preload next (hidden) */}
-          {preloadNextSrc ? <Image src={preloadNextSrc} alt="" width={8} height={8} className="hidden" priority={false} /> : null}
+          {/* Preload next media (hidden) */}
+          {preloadNext?.video ? (
+            <video className="hidden" muted preload="auto">
+              <source src={preloadNext.video} />
+            </video>
+          ) : preloadNext?.image ? (
+            <Image src={preloadNext.image} alt="" width={8} height={8} className="hidden" priority={false} />
+          ) : null}
         </div>
 
-        {/* Hero frame + crown */}
         <div className="pointer-events-none absolute inset-0">
           <CrownRail />
           <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
@@ -271,9 +290,7 @@ export default function HeroPortalSection({
           <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
         </div>
 
-        {/* Content */}
         <div className={cx('relative z-10', WIDE)}>
-          {/* quiet countries strip (desktop only) */}
           {safeTopCountries.length ? (
             <div className="hidden pt-6 sm:block">
               <div className="flex items-center gap-3 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-3)]">
@@ -287,7 +304,6 @@ export default function HeroPortalSection({
           ) : null}
 
           <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
-            {/* Left: statement */}
             <div className="lg:col-span-7">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
@@ -321,7 +337,6 @@ export default function HeroPortalSection({
               </div>
             </div>
 
-            {/* Right: smart search */}
             <div className="lg:col-span-5">
               <div
                 className={cx(
@@ -342,7 +357,9 @@ export default function HeroPortalSection({
                   <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
                     Type and it reacts instantly
                   </div>
-                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">City, lifestyle, budget, keywords. Typos are fine.</div>
+                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
+                    City, lifestyle, budget, keywords. Typos are fine.
+                  </div>
 
                   <div className="mt-4">
                     <VanteraOmniSearch
@@ -368,13 +385,11 @@ export default function HeroPortalSection({
             </div>
           </div>
 
-          {/* Editorial rail (caption + signals + controls) - bottom-left, grid-aligned */}
           <div className="pb-12 sm:pb-14">
             <div className="relative">
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
               <div className="flex items-end justify-between gap-6">
-                {/* Left rail block */}
                 <div className="max-w-[720px]">
                   <div className="relative inline-block overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[10px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
@@ -402,7 +417,6 @@ export default function HeroPortalSection({
                     )}
                   </div>
 
-                  {/* tiny progress rail (desktop only) - makes the rotation noticeable */}
                   <div className="mt-3 hidden sm:block">
                     <div className="h-px w-full bg-[color:var(--hairline)]" />
                     <div className="mt-1 h-[2px] w-full bg-[rgba(10,10,12,0.06)]" aria-hidden="true">
@@ -416,7 +430,6 @@ export default function HeroPortalSection({
                   </div>
                 </div>
 
-                {/* Controls (desktop only, integrated - no scattered UI) */}
                 <div className="hidden sm:flex items-center gap-2">
                   <button
                     type="button"
@@ -446,7 +459,6 @@ export default function HeroPortalSection({
                     <ChevronRight className="h-4 w-4 opacity-70" />
                   </button>
 
-                  {/* dots */}
                   <div className="ml-2 flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-2 backdrop-blur-[10px]">
                     {list.slice(0, 8).map((_, i) => {
                       const activeDot = i === idx;
@@ -457,7 +469,9 @@ export default function HeroPortalSection({
                           onClick={() => go(i)}
                           className={cx(
                             'h-1.5 w-1.5 transition',
-                            activeDot ? 'bg-[rgba(10,10,12,0.72)]' : 'bg-[rgba(10,10,12,0.20)] hover:bg-[rgba(10,10,12,0.36)]',
+                            activeDot
+                              ? 'bg-[rgba(10,10,12,0.72)]'
+                              : 'bg-[rgba(10,10,12,0.20)] hover:bg-[rgba(10,10,12,0.36)]',
                           )}
                           aria-label={`Go to slide ${i + 1}`}
                         />
@@ -468,8 +482,7 @@ export default function HeroPortalSection({
               </div>
             </div>
           </div>
-          {/* end rail */}
-        </div>
+        </div>{/* end WIDE */}
       </div>
     </section>
   );
