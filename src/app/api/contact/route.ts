@@ -10,8 +10,9 @@ type ContactPayload = {
   email?: string;
   subject?: string;
   message?: string;
+
   // hidden honeypot field from the form
-  company?: string;
+  honeypot?: string;
 };
 
 function clean(s: unknown, max = 5000) {
@@ -23,9 +24,40 @@ function isEmail(s: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 }
 
+function wantsJson(req: Request) {
+  const accept = req.headers.get('accept') || '';
+  return accept.includes('application/json');
+}
+
+async function readPayload(req: Request): Promise<ContactPayload> {
+  const ct = req.headers.get('content-type') || '';
+
+  // HTML form posts
+  if (ct.includes('application/x-www-form-urlencoded') || ct.includes('multipart/form-data')) {
+    const fd = await req.formData();
+    return {
+      name: clean(fd.get('name')),
+      email: clean(fd.get('email')),
+      subject: clean(fd.get('subject')),
+      message: clean(fd.get('message')),
+      honeypot: clean(fd.get('honeypot')),
+    };
+  }
+
+  // JSON posts
+  const body = (await req.json()) as ContactPayload;
+  return {
+    name: clean(body?.name),
+    email: clean(body?.email),
+    subject: clean(body?.subject),
+    message: clean(body?.message),
+    honeypot: clean(body?.honeypot),
+  };
+}
+
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as ContactPayload;
+    const body = await readPayload(req);
 
     const name = clean(body.name, 120) || null;
     const emailRaw = clean(body.email, 254);
@@ -35,17 +67,24 @@ export async function POST(req: Request) {
     const message = clean(body.message, 5000);
 
     // honeypot - if filled, silently accept but don’t store
-    const honeypot = clean(body.company, 200) || null;
+    const honeypot = clean(body.honeypot, 200) || null;
     if (honeypot) {
-      return NextResponse.json({ ok: true }, { status: 200 });
+      if (wantsJson(req)) return NextResponse.json({ ok: true }, { status: 200 });
+      return NextResponse.redirect(new URL('/contact?ok=1', req.url), 303);
     }
 
     if (!message) {
-      return NextResponse.json({ ok: false, error: 'Message is required.' }, { status: 400 });
+      if (wantsJson(req)) {
+        return NextResponse.json({ ok: false, error: 'Message is required.' }, { status: 400 });
+      }
+      return NextResponse.redirect(new URL('/contact?ok=0', req.url), 303);
     }
 
     if (email && !isEmail(email)) {
-      return NextResponse.json({ ok: false, error: 'Invalid email.' }, { status: 400 });
+      if (wantsJson(req)) {
+        return NextResponse.json({ ok: false, error: 'Invalid email.' }, { status: 400 });
+      }
+      return NextResponse.redirect(new URL('/contact?ok=0', req.url), 303);
     }
 
     const ip =
@@ -67,8 +106,13 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true }, { status: 200 });
+    // ✅ Best UX for native form submit
+    if (wantsJson(req)) return NextResponse.json({ ok: true }, { status: 200 });
+    return NextResponse.redirect(new URL('/contact?ok=1', req.url), 303);
   } catch {
-    return NextResponse.json({ ok: false, error: 'Server error.' }, { status: 500 });
+    if (wantsJson(req)) {
+      return NextResponse.json({ ok: false, error: 'Server error.' }, { status: 500 });
+    }
+    return NextResponse.redirect(new URL('/contact?ok=0', req.url), 303);
   }
 }
