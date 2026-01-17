@@ -1,5 +1,5 @@
 // src/app/layout.tsx
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 import TopBar from '@/components/layout/TopBar';
@@ -34,14 +34,15 @@ export const metadata: Metadata = {
 
   manifest: '/brand/site.webmanifest',
 
-  // Pure white UI
-  themeColor: '#FFFFFF',
-
   appleWebApp: {
     title: 'Vantera',
     capable: true,
     statusBarStyle: 'default',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#FFFFFF',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
