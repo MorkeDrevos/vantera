@@ -10,20 +10,20 @@ export const revalidate = 0;
 export const metadata: Metadata = {
   title: 'Marketplace',
   description:
-    'World’s Largest Luxury Marketplace. €2M+ properties only, curated globally, presented with editorial-grade precision.',
+    'An intelligence-led luxury property marketplace. €2M+ properties only, curated globally and presented with editorial-grade precision.',
   alternates: { canonical: '/marketplace' },
   openGraph: {
     type: 'website',
     title: 'Marketplace · Vantera',
     description:
-      'World’s Largest Luxury Marketplace. €2M+ properties only, curated globally, presented with editorial-grade precision.',
+      'An intelligence-led luxury property marketplace. €2M+ properties only, curated globally and presented with editorial-grade precision.',
     url: '/marketplace',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Marketplace · Vantera',
     description:
-      'World’s Largest Luxury Marketplace. €2M+ properties only, curated globally, presented with editorial-grade precision.',
+      'An intelligence-led luxury property marketplace. €2M+ properties only, curated globally and presented with editorial-grade precision.',
   },
 };
 
