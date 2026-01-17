@@ -1,4 +1,5 @@
 // src/components/home/HomePage.tsx
+import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -105,38 +106,6 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionHeader({
-  eyebrow,
-  title,
-  subtitle,
-  right,
-}: {
-  eyebrow: string;
-  title: string;
-  subtitle?: string;
-  right?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
-
-        <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
-          {title}
-        </div>
-
-        {subtitle ? (
-          <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
-            {subtitle}
-          </div>
-        ) : null}
-      </div>
-
-      {right ? <div className="flex items-center gap-3">{right}</div> : null}
-    </div>
-  );
-}
-
 function QuickLink({ href, label, hint }: { href: string; label: string; hint?: string }) {
   return (
     <Link
@@ -160,55 +129,55 @@ function QuickLink({ href, label, hint }: { href: string; label: string; hint?: 
   );
 }
 
-function DnaPillar({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
-  return (
-    <div className="group relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white p-5">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.48)] to-transparent opacity-70" />
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(680px_220px_at_18%_0%,rgba(206,160,74,0.07),transparent_60%)]" />
-      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{eyebrow}</div>
-      <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">{title}</div>
-      <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">{body}</div>
-    </div>
-  );
-}
-
-function DnaSeal() {
-  return (
-    <div className="relative inline-flex items-center gap-3 border border-[rgba(10,10,12,0.12)] bg-white px-4 py-3">
-      <CrownRail />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(260px_120px_at_20%_0%,rgba(206,160,74,0.12),transparent_70%)]" />
-
-      <div className="grid h-9 w-9 place-items-center border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.02)]">
-        <div className="h-3 w-3 rotate-45 border border-[rgba(206,160,74,0.75)] bg-[rgba(206,160,74,0.08)]" />
-      </div>
-
-      <div className="min-w-0">
-        <div className="text-[10px] font-semibold tracking-[0.32em] text-[color:var(--ink-3)]">VANTERA DNA</div>
-        <div className="mt-0.5 text-[13px] font-semibold text-[color:var(--ink)]">Truth-first marketplace</div>
-      </div>
-    </div>
-  );
-}
-
-function TruthLayerMeter() {
+function PortalSignal({ k, v }: { k: string; v: string }) {
   return (
     <div className="relative overflow-hidden border border-[rgba(10,10,12,0.12)] bg-white px-4 py-3">
-      <CrownRail />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.44)] to-transparent" />
+      <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">{k}</div>
+      <div className="mt-1 text-[13px] font-semibold text-[color:var(--ink)]">{v}</div>
+    </div>
+  );
+}
 
-      <div className="flex items-center justify-between gap-4">
+function PortalMarquee({
+  items,
+}: {
+  items: Array<{ name: string; href: string; meta?: string }>;
+}) {
+  return (
+    <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]">
+      <div className="pointer-events-none absolute inset-0">
+        <CrownRail />
+        <div className="absolute inset-0 bg-[radial-gradient(1200px_420px_at_20%_0%,rgba(206,160,74,0.08),transparent_62%)]" />
+        <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.06)]" />
+      </div>
+
+      <div className="relative flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6">
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold tracking-[0.32em] text-[color:var(--ink-3)]">TRUTH LAYER</div>
-          <div className="mt-0.5 text-[13px] font-semibold text-[color:var(--ink)]">Verification over theatre</div>
+          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">LIVE MARKETS</div>
+          <div className="mt-1 text-[13px] text-[color:var(--ink-2)]">
+            Browse the catalogue city by city - updated as coverage expands.
+          </div>
         </div>
-        <div className="shrink-0 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SIGNAL</div>
-      </div>
 
-      <div className="mt-3 h-2 w-full overflow-hidden border border-[rgba(10,10,12,0.16)] bg-[rgba(10,10,12,0.03)]">
-        <div className="h-full w-[74%] bg-[linear-gradient(90deg,rgba(10,10,12,0.92),rgba(206,160,74,0.62))]" />
+        <div className="flex flex-wrap items-center gap-2">
+          {items.slice(0, 6).map((x) => (
+            <Link
+              key={x.href}
+              href={x.href}
+              className={cx(
+                'group inline-flex items-center gap-2 px-3 py-2 text-[12px] font-semibold',
+                'border border-[rgba(10,10,12,0.12)] bg-white',
+                'hover:border-[rgba(10,10,12,0.22)] transition',
+              )}
+            >
+              <span className="text-[color:var(--ink)]">{x.name}</span>
+              {x.meta ? <span className="text-[color:var(--ink-3)]">{x.meta}</span> : null}
+              <span className="ml-1 h-px w-6 bg-[color:var(--hairline)] transition-all duration-300 group-hover:w-10 group-hover:bg-[rgba(206,160,74,0.70)]" />
+            </Link>
+          ))}
+        </div>
       </div>
-
-      <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">Built to attribute what is verified, inferred and unknown.</div>
     </div>
   );
 }
@@ -241,54 +210,83 @@ const BTN_SECONDARY_SM = cx(
 );
 
 /* =========================================================
-   HERO (full-bleed, marketplace statement + search atelier)
-   Signature Vantera (ownable)
+   HERO (Luxury Portal)
+   - White base + signature backdrop
+   - Image provides colour (premium)
+   - Live markets strip + signals
    ========================================================= */
 
 function FullBleedHero({
   cities,
   topCountries,
+  heroImage,
 }: {
   cities: Array<{ name: string; slug: string; country: string }>;
   topCountries: string[];
+  heroImage?: { src: string; alt?: string | null } | null;
 }) {
+  const marqueeItems = cities.map((c) => ({
+    name: c.name,
+    href: `/city/${c.slug}`,
+    meta: c.country,
+  }));
+
   return (
     <section className={cx('relative overflow-hidden', 'w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]')}>
       <div className="relative">
         <div className="absolute inset-x-0 top-0 z-10 h-px bg-[color:var(--hairline)]" />
 
-        <div className="relative min-h-[840px] w-full bg-[color:var(--paper-2)]">
+        <div className="relative min-h-[880px] w-full bg-white">
+          {/* Identity texture */}
           <VanteraSignatureBackdrop />
 
-          {/* Hero frame system (this is where the “gold presence” comes from) */}
+          {/* Premium image layer (colour comes from imagery, not UI) */}
+          {heroImage?.src ? (
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute inset-0 opacity-[0.78]">
+                <Image
+                  src={heroImage.src}
+                  alt={heroImage.alt ?? 'Vantera hero'}
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              </div>
+
+              {/* White veils to keep it premium + readable */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.95),rgba(255,255,255,0.72),rgba(255,255,255,0.34),rgba(255,255,255,0.12))]" />
+              <div className="absolute inset-0 bg-[radial-gradient(1200px_620px_at_22%_10%,rgba(255,255,255,0.94),transparent_62%)]" />
+              <div className="absolute inset-x-0 bottom-0 h-56 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+            </div>
+          ) : null}
+
+          {/* Hero frame system */}
           <div className="pointer-events-none absolute inset-0">
             <CrownRail />
             <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_6%,rgba(206,160,74,0.12),transparent_60%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.10),rgba(255,255,255,0.58),rgba(255,255,255,0.92))]" />
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.00),rgba(255,255,255,0.96))]" />
+            <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_22%_6%,rgba(206,160,74,0.10),transparent_60%)]" />
           </div>
 
           <div className={cx('relative z-10', WIDE)}>
-            <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
-              {/* Left: statement */}
+            <div className="grid gap-10 pb-10 pt-10 sm:pb-12 sm:pt-12 lg:grid-cols-12 lg:gap-12">
+              {/* Left: portal statement */}
               <div className="lg:col-span-7">
                 <div className="flex flex-wrap items-center gap-2">
+                  <Chip>LUXURY PORTAL</Chip>
                   <Chip>GLOBAL CATALOGUE</Chip>
                   <Chip>TRUTH LAYER</Chip>
-                  <Chip>EDITORIAL</Chip>
                 </div>
 
-                {/* More JamesEdition: slightly smaller, tighter, calmer */}
-                <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[64px] lg:leading-[0.98]">
-                  A global catalogue of exceptional homes, powered by intelligence
+                <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[66px] lg:leading-[0.98]">
+                  The luxury marketplace built for clarity, not noise
                 </h1>
 
                 <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
 
-                <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
-                  Built city by city. Under the surface is a Truth Layer that verifies, scores and explains the market so you can
-                  move with clarity - not noise.
+                <p className="mt-5 max-w-[74ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
+                  Browse exceptional homes globally, city by city. Under the surface, a Truth Layer verifies, scores and explains what
+                  you&apos;re seeing - so the catalogue stays calm and decisions stay sharp.
                 </p>
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -296,9 +294,16 @@ function FullBleedHero({
                     Browse marketplace
                   </Link>
 
-                  <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
-                    List privately
+                  <Link href="/search" className={BTN_SECONDARY}>
+                    Open search
                   </Link>
+                </div>
+
+                {/* Portal signals */}
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  <PortalSignal k="CATALOGUE" v="Curated markets" />
+                  <PortalSignal k="TRUTH LAYER" v="Verified where possible" />
+                  <PortalSignal k="ACCESS" v="Private submissions" />
                 </div>
               </div>
 
@@ -307,26 +312,24 @@ function FullBleedHero({
                 <div
                   className={cx(
                     'relative overflow-hidden',
-                    // Gold-trim + inner bevel (this makes it read premium instantly)
                     'border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[16px]',
                     'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0">
                     <CrownRail />
-                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.11),transparent_62%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
                     <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-                    {/* inner bevel */}
                     <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.65)]" />
                   </div>
 
                   <div className="relative p-5 sm:p-6">
-                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">SEARCH ATELIER</div>
+                    <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">PORTAL SEARCH</div>
                     <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                      The fastest way to serious property intelligence
+                      Find what you want fast
                     </div>
                     <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                      Search by intent, location, or move directly into a market.
+                      Keywords, city, budget - move directly into the catalogue.
                     </div>
 
                     <form action="/search" method="get" className="mt-5 space-y-3">
@@ -392,83 +395,10 @@ function FullBleedHero({
               </div>
             </div>
 
-            {/* Vantera DNA - hero-level band */}
-            <div className="pb-12 sm:pb-14">
-              <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[12px] shadow-[0_60px_190px_rgba(10,10,12,0.16)]">
-                <div className="pointer-events-none absolute inset-0">
-                  <CrownRail />
-                  <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_30%_0%,rgba(206,160,74,0.11),transparent_62%)]" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-                  <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.62)]" />
-                </div>
-
-                <div className="relative px-6 py-6 sm:px-8 sm:py-7 border-b border-[color:var(--hairline)]">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="min-w-0">
-                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
-                      <div className="mt-2 text-balance text-[24px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[30px]">
-                        Intelligence is the product, the marketplace is the interface
-                      </div>
-                      <div className="mt-2 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                        Every listing is treated as an asset record with attribution. Calm presentation on top, structured truth underneath.
-                      </div>
-
-                      <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.90)] to-transparent" />
-                    </div>
-
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
-                      <DnaSeal />
-                      <TruthLayerMeter />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="relative p-6 sm:p-8">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <DnaPillar
-                      eyebrow="TRUTH LAYER"
-                      title="Verified versus assumed"
-                      body="Clear attribution of what is verified, inferred or unknown with structured checks to remove ambiguity."
-                    />
-                    <DnaPillar
-                      eyebrow="MARKET INTELLIGENCE"
-                      title="Markets, with clarity"
-                      body="Signals that explain pricing dynamics, liquidity and risk at a city level built progressively as coverage expands."
-                    />
-                    <DnaPillar
-                      eyebrow="SIGNAL OVER NOISE"
-                      title="Designed for signal"
-                      body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
-                    />
-                    <DnaPillar
-                      eyebrow="PRIVATE NETWORK"
-                      title="Private by architecture"
-                      body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
-                    />
-                  </div>
-
-                  <div className="mt-7">
-                    <Hairline />
-                    <div className="mt-1">
-                      <GoldHairline className="opacity-75" />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-[color:var(--ink-2)]">The marketplace is how you enter. The intelligence is why you stay.</div>
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
-                        Explore intelligence (soon)
-                      </Link>
-                      <Link href="/search" className={BTN_PRIMARY_SM}>
-                        Open search
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Live markets strip */}
+            <div className="pb-10 sm:pb-12">
+              <PortalMarquee items={marqueeItems} />
             </div>
-            {/* end DNA */}
           </div>
         </div>
 
@@ -502,6 +432,15 @@ export default function HomePage({
     .filter((c) => !EXCLUDE_HERO_SLUGS.has(String(c.slug).toLowerCase()));
 
   const topForHero = heroCandidates.slice(0, 6).map((c) => ({ name: c.name, slug: c.slug, country: c.country }));
+
+  // pick the top city hero image if available (portal colour source)
+  const heroImage =
+    heroCandidates.find((c) => Boolean(c?.heroImageSrc))?.heroImageSrc
+      ? {
+          src: heroCandidates.find((c) => Boolean(c?.heroImageSrc))!.heroImageSrc as string,
+          alt: heroCandidates.find((c) => Boolean(c?.heroImageAlt))?.heroImageAlt ?? null,
+        }
+      : null;
 
   const countryCounts = new Map<string, number>();
   for (const c of safeCities) {
@@ -543,6 +482,7 @@ export default function HomePage({
         topCountries={
           topCountries.length ? topCountries : ['Spain', 'France', 'United Arab Emirates', 'United States', 'United Kingdom']
         }
+        heroImage={heroImage}
       />
 
       <DnaChapterBreak />
@@ -572,21 +512,28 @@ export default function HomePage({
 
       <section className="pb-16 sm:pb-20">
         <div className={NARROW}>
-          <SectionHeader
-            eyebrow="VANTERA"
-            title="Search and browse, the way luxury should feel"
-            subtitle="No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath."
-            right={
-              <div className="hidden sm:flex items-center gap-3">
-                <Link href="/search" className={BTN_SECONDARY_SM}>
-                  Open search
-                </Link>
-                <Link href="/marketplace" className={BTN_PRIMARY_SM}>
-                  Browse
-                </Link>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA</div>
+
+              <div className="mt-2 text-balance text-[26px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[32px]">
+                Search and browse, the way luxury should feel
               </div>
-            }
-          />
+
+              <div className="mt-2 max-w-[78ch] text-pretty text-sm leading-relaxed text-[color:var(--ink-2)]">
+                No clutter, no duplicated feeds, and no portal theatre. Just a calm catalogue experience with intelligence underneath.
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-3">
+              <Link href="/search" className={BTN_SECONDARY_SM}>
+                Open search
+              </Link>
+              <Link href="/marketplace" className={BTN_PRIMARY_SM}>
+                Browse
+              </Link>
+            </div>
+          </div>
 
           <div className="mt-8">
             <Hairline />
