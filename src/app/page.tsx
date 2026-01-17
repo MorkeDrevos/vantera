@@ -17,9 +17,9 @@ export const metadata: Metadata = (() => {
   // Keep your SEO intent system, but hard-tilt copy toward Marketplace positioning.
   const doc = SEO_INTENT.home();
 
-  const title = 'Vantera · World’s Largest Luxury Marketplace';
+  const title = 'Vantera · A Global Catalogue of Exceptional Homes';
   const description =
-    'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.';
+    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, curated globally, presented with editorial-grade precision.';
 
   return {
     title,
