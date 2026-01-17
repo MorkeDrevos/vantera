@@ -52,9 +52,7 @@ export default function DnaChapterBreak() {
             </div>
 
             <div className="mt-5 text-balance text-[28px] font-semibold tracking-[-0.04em] text-[color:var(--ink)] sm:text-[34px] lg:text-[40px]">
-              <p className="text-sm text-slate-700 leading-relaxed">
-  Private intelligence for the world’s most valuable homes.
-</p>
+              An intelligence system for the world’s most valuable homes.
             </div>
 
             <div className="mt-3 max-w-[86ch] text-sm leading-relaxed text-[color:var(--ink-2)] sm:text-[15px]">
