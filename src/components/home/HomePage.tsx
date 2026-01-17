@@ -169,6 +169,51 @@ function DnaPillar({
   );
 }
 
+// src/components/home/HomePage.tsx
+// (inside the same file, add these two helpers near your micro components)
+
+function DnaSeal() {
+  return (
+    <div className="relative inline-flex items-center gap-3 border border-[color:var(--hairline)] bg-white px-4 py-3">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.85)] to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(220px_90px_at_20%_0%,rgba(206,160,74,0.10),transparent_70%)]" />
+
+      <div className="grid h-9 w-9 place-items-center border border-[rgba(10,10,12,0.18)] bg-[rgba(10,10,12,0.02)]">
+        <div className="h-3 w-3 rotate-45 border border-[rgba(206,160,74,0.75)] bg-[rgba(206,160,74,0.08)]" />
+      </div>
+
+      <div className="min-w-0">
+        <div className="text-[10px] font-semibold tracking-[0.32em] text-[color:var(--ink-3)]">VANTERA DNA</div>
+        <div className="mt-0.5 text-[13px] font-semibold text-[color:var(--ink)]">Truth-first marketplace</div>
+      </div>
+    </div>
+  );
+}
+
+function TruthLayerMeter() {
+  return (
+    <div className="relative border border-[color:var(--hairline)] bg-white px-4 py-3">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.65)] to-transparent" />
+
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold tracking-[0.32em] text-[color:var(--ink-3)]">TRUTH LAYER</div>
+          <div className="mt-0.5 text-[13px] font-semibold text-[color:var(--ink)]">Verification over theatre</div>
+        </div>
+        <div className="shrink-0 text-[11px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SIGNAL</div>
+      </div>
+
+      <div className="mt-3 h-2 w-full overflow-hidden border border-[rgba(10,10,12,0.16)] bg-[rgba(10,10,12,0.03)]">
+        <div className="h-full w-[74%] bg-[linear-gradient(90deg,rgba(10,10,12,0.90),rgba(206,160,74,0.55))]" />
+      </div>
+
+      <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">
+        Built to attribute what is verified, inferred and unknown.
+      </div>
+    </div>
+  );
+}
+
 /* =========================================================
    Buttons (royal editorial)
    ========================================================= */
@@ -343,69 +388,91 @@ function FullBleedHero({
             </div>
 
             {/* Vantera DNA */}
-            <div className="pb-10 sm:pb-12">
-              <div className="relative border border-[color:var(--hairline)] bg-white/92 backdrop-blur-[10px] shadow-[0_34px_120px_rgba(10,10,12,0.10)]">
-                <div className="pointer-events-none absolute inset-x-0 top-0">
-                  <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.70)] to-transparent" />
-                </div>
+            // src/components/home/HomePage.tsx
+// (inside FullBleedHero, replace the entire {/* Vantera DNA */} section with this)
 
-                <div className="px-5 py-5 sm:px-7 sm:py-6 border-b border-[color:var(--hairline)]">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
-                  <div className="mt-2 text-balance text-[22px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[26px]">
-                    Meet the intelligence behind the marketplace
-                  </div>
-                  <div className="mt-2 max-w-[90ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    Listings are one layer. Vantera adds verification, scoring and clarity that removes noise.
-                  </div>
-                </div>
+{/* Vantera DNA - hero-level band */}
+<div className="pb-12 sm:pb-14">
+  <div className="relative overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px] shadow-[0_50px_170px_rgba(10,10,12,0.14)]">
+    <div className="pointer-events-none absolute inset-0">
+      <div className="absolute inset-x-0 top-0">
+        <div className="h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.90)] to-transparent" />
+        <div className="h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent" />
+      </div>
+      <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_30%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
+      <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
+    </div>
 
-                <div className="p-5 sm:p-7">
-                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    <DnaPillar
-                      eyebrow="TRUTH LAYER"
-                      title="Verified versus assumed"
-                      body="Clear attribution of what is verified, inferred or unknown - with structured checks designed to remove ambiguity."
-                    />
-                    <DnaPillar
-                      eyebrow="MARKET INTELLIGENCE"
-                      title="Markets, with clarity"
-                      body="Signals that explain pricing dynamics, liquidity and risk at a city level, built progressively as coverage expands."
-                    />
-                    <DnaPillar
-                      eyebrow="SIGNAL OVER NOISE"
-                      title="Designed for signal"
-                      body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
-                    />
-                    <DnaPillar
-                      eyebrow="PRIVATE NETWORK"
-                      title="Private by architecture"
-                      body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
-                    />
-                  </div>
+    {/* Top row: manifesto */}
+    <div className="relative px-6 py-6 sm:px-8 sm:py-7 border-b border-[color:var(--hairline)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="min-w-0">
+          <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">VANTERA DNA</div>
+          <div className="mt-2 text-balance text-[24px] font-semibold tracking-[-0.03em] text-[color:var(--ink)] sm:text-[30px]">
+            Intelligence is the product, the marketplace is the interface
+          </div>
+          <div className="mt-2 max-w-[92ch] text-sm leading-relaxed text-[color:var(--ink-2)]">
+            Every listing is treated as an asset record with attribution. Calm presentation on top, structured truth underneath.
+          </div>
 
-                  <div className="mt-6">
-                    <Hairline />
-                    <div className="mt-1">
-                      <GoldHairline className="opacity-70" />
-                    </div>
-                  </div>
+          <div className="mt-5 h-px w-24 bg-gradient-to-r from-[rgba(206,160,74,0.90)] to-transparent" />
+        </div>
 
-                  <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-[color:var(--ink-2)]">
-                      The marketplace is how you enter. The intelligence is why you stay.
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
-                        Explore intelligence (soon)
-                      </Link>
-                      <Link href="/search" className={BTN_PRIMARY_SM}>
-                        Open search
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+          <DnaSeal />
+          <TruthLayerMeter />
+        </div>
+      </div>
+    </div>
+
+    {/* Bottom row: pillars (bigger, more premium spacing) */}
+    <div className="relative p-6 sm:p-8">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <DnaPillar
+          eyebrow="TRUTH LAYER"
+          title="Verified versus assumed"
+          body="Clear attribution of what is verified, inferred or unknown with structured checks to remove ambiguity."
+        />
+        <DnaPillar
+          eyebrow="MARKET INTELLIGENCE"
+          title="Markets, with clarity"
+          body="Signals that explain pricing dynamics, liquidity and risk at a city level built progressively as coverage expands."
+        />
+        <DnaPillar
+          eyebrow="SIGNAL OVER NOISE"
+          title="Designed for signal"
+          body="Editorial control replaces clutter. Higher signal density and a calmer path to a decision."
+        />
+        <DnaPillar
+          eyebrow="PRIVATE NETWORK"
+          title="Private by architecture"
+          body="Controlled access, verified submissions and discretion as a system default for serious buyers and advisors."
+        />
+      </div>
+
+      <div className="mt-7">
+        <Hairline />
+        <div className="mt-1">
+          <GoldHairline className="opacity-70" />
+        </div>
+      </div>
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-[color:var(--ink-2)]">
+          The marketplace is how you enter. The intelligence is why you stay.
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link href="/coming-soon?section=intelligence" className={BTN_SECONDARY_SM}>
+            Explore intelligence (soon)
+          </Link>
+          <Link href="/search" className={BTN_PRIMARY_SM}>
+            Open search
+          </Link>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
             {/* end DNA */}
           </div>
         </div>
