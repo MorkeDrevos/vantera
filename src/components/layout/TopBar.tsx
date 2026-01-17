@@ -362,13 +362,15 @@ export default function TopBar() {
             {/* gold halo behind mark */}
             <span className="pointer-events-none absolute -inset-x-3 -inset-y-2 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(120px_36px_at_35%_50%,rgba(206,160,74,0.22),transparent_70%)]" />
             <Image
-              src="/brand/vantera-logo-dark.svg"
-              alt="Vantera"
-              width={520}
-              height={160}
-              priority={false}
-              className={cx('relative h-[26px] w-auto sm:h-[30px] md:h-[32px]', 'contrast-[1.08]')}
-            />
+  src="/brand/vantera-landscape-black.svg"
+  alt="Vantera"
+  width={420}
+  height={120}
+  priority
+  className={cx(
+    'relative h-[22px] w-auto sm:h-[26px] md:h-[28px]'
+  )}
+/>
           </Link>
 
           {/* Desktop nav */}
