@@ -17,26 +17,19 @@ export const metadata: Metadata = {
     'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, listings, private sellers and agent launchpad.',
   applicationName: 'Vantera',
 
-  // Brand icons (new Vantera monogram set)
   icons: {
     icon: [
-      // Modern SVG favicon (best quality)
-      { url: '/brand/favicon.svg', type: 'image/svg+xml' },
-
-      // PNG fallbacks
-      { url: '/brand/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
-      { url: '/brand/web-app-manifest-192x192.png', type: 'image/png', sizes: '192x192' },
-      { url: '/brand/web-app-manifest-512x512.png', type: 'image/png', sizes: '512x512' },
-
-      // Legacy ICO (some older browsers)
-      { url: '/brand/favicon.ico' },
+      { url: '/images/brand/favicon.svg', type: 'image/svg+xml' },
+      { url: '/images/brand/favicon-96x96.png', type: 'image/png', sizes: '96x96' },
+      { url: '/images/brand/web-app-manifest-192x192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/images/brand/web-app-manifest-512x512.png', type: 'image/png', sizes: '512x512' },
+      { url: '/images/brand/favicon.ico' },
     ],
-    apple: [{ url: '/brand/apple-touch-icon.png', sizes: '180x180' }],
-    shortcut: [{ url: '/brand/favicon.ico' }],
+    apple: [{ url: '/images/brand/apple-touch-icon.png', sizes: '180x180' }],
+    shortcut: [{ url: '/images/brand/favicon.ico' }],
   },
 
-  // PWA manifest (Android / Chrome)
-  manifest: '/brand/site.webmanifest',
+  manifest: '/images/brand/site.webmanifest',
 
   appleWebApp: {
     title: 'Vantera',
@@ -54,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     ...websiteJsonLd(),
     potentialAction: {
       '@type': 'SearchAction',
-      target: `${SEO_CONFIG.domain}/marketplace?q={search_term_string}`,
+      target: `${SEO_CONFIG.domain}/search?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
