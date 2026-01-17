@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
+import { ingestRealtorMediaForListing } from '@/lib/ingest/realtorPersistMedia';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,20 +10,17 @@ export const dynamic = 'force-dynamic';
 /**
  * Realtor.com ingest (via Apify actor).
  *
- * Uses Apify Store actor: logical_vivacity/realtor-property-scraper
- * Input schema supports: searchLocation, listingType, propertyType, limit, priceMin, etc.
- * See actor input docs for exact fields.  [oai_citation:1‡Apify](https://apify.com/logical_vivacity/realtor-property-scraper/input-schema)
+ * Actor: logical_vivacity/realtor-property-scraper
+ * We run it via Apify "run-sync-get-dataset-items" and normalize best-effort fields.
  */
 
 const APIFY_API_BASE = 'https://api.apify.com/v2';
-
-// Default actor - can be overridden via env if you want to swap scrapers later.
 const DEFAULT_ACTOR_ID = 'logical_vivacity~realtor-property-scraper';
 
-// Luxury gates (default)
+// Luxury gate (default)
 const DEFAULT_MIN_PRICE_USD = 2_000_000;
 
-// Conservative residential excludes (backup filter if actor returns odd items)
+// Conservative residential excludes (backup filter)
 const BAD_TYPE_HINTS = ['LAND', 'LOT', 'COMM', 'IND', 'OFFICE', 'RETAIL', 'COMMERCIAL'];
 
 function pickString(v: any): string | null {
@@ -90,19 +88,13 @@ function computeDataCompleteness(input: {
 
 function looksResidential(propertyType: string | null) {
   const t = (propertyType || '').toUpperCase();
-  if (!t) return true; // don’t block if missing - actor filters should handle most of it
+  if (!t) return true; // don’t block if missing
   return !BAD_TYPE_HINTS.some((x) => t.includes(x));
 }
 
-async function apifyRunSyncGetDatasetItems(opts: {
-  actorId: string;
-  token: string;
-  input: any;
-}) {
+async function apifyRunSyncGetDatasetItems(opts: { actorId: string; token: string; input: any }) {
   const { actorId, token, input } = opts;
 
-  // Apify endpoint: run actor and return dataset items in one call (sync)
-  // This is a standard Apify API pattern (run-sync-get-dataset-items).
   const url = `${APIFY_API_BASE}/acts/${encodeURIComponent(
     actorId,
   )}/run-sync-get-dataset-items?token=${encodeURIComponent(token)}&format=json`;
@@ -119,7 +111,8 @@ async function apifyRunSyncGetDatasetItems(opts: {
     throw new Error(`Apify ${res.status} ${res.statusText}\n${text.slice(0, 600)}`);
   }
 
-  return (await res.json()) as any[];
+  const json = await res.json();
+  return Array.isArray(json) ? json : [];
 }
 
 function normalizePhotos(item: any): Array<{ url: string; caption?: string | null; width?: number | null; height?: number | null }> {
@@ -144,7 +137,6 @@ function normalizePhotos(item: any): Array<{ url: string; caption?: string | nul
     });
   }
 
-  // de-dupe
   const seen = new Set<string>();
   return out.filter((p) => {
     if (seen.has(p.url)) return false;
@@ -154,7 +146,6 @@ function normalizePhotos(item: any): Array<{ url: string; caption?: string | nul
 }
 
 function normalizeListingFields(item: any) {
-  // These fields vary by scraper/actor output.
   const sourceId =
     pickString(item?.property_id) ||
     pickString(item?.listing_id) ||
@@ -188,7 +179,11 @@ function normalizeListingFields(item: any) {
   const address = safeJoin([addressLine, city, state, postal], ', ') || addressLine || null;
 
   const lat = pickNumber(item?.address?.lat) ?? pickNumber(item?.location?.lat) ?? pickNumber(item?.lat);
-  const lng = pickNumber(item?.address?.lon) ?? pickNumber(item?.location?.lon) ?? pickNumber(item?.lng) ?? pickNumber(item?.lon);
+  const lng =
+    pickNumber(item?.address?.lon) ??
+    pickNumber(item?.location?.lon) ??
+    pickNumber(item?.lng) ??
+    pickNumber(item?.lon);
 
   const propertyType =
     pickString(item?.prop_type) ||
@@ -197,17 +192,13 @@ function normalizeListingFields(item: any) {
     pickString(item?.description?.type) ||
     null;
 
-  const url =
+  const sourceUrl =
     pickString(item?.permalink) ||
     pickString(item?.url) ||
     pickString(item?.listing_url) ||
     null;
 
-  const titleBase =
-    pickString(item?.title) ||
-    pickString(item?.description?.name) ||
-    null;
-
+  const titleBase = pickString(item?.title) || pickString(item?.description?.name) || null;
   const title = titleBase || safeJoin([city, state], ' ') || 'Realtor Listing';
 
   return {
@@ -220,7 +211,7 @@ function normalizeListingFields(item: any) {
     lat: lat != null ? Number(lat) : null,
     lng: lng != null ? Number(lng) : null,
     propertyType,
-    sourceUrl: url,
+    sourceUrl,
     title,
     rawCity: city,
     rawState: state,
@@ -240,23 +231,22 @@ export async function GET(req: Request) {
 
   const dryRun = url.searchParams.get('dryRun') === '1';
 
-  // Default to 200 (Realtor pages can be deep; 25 is just a quick smoke test)
+  // Default to 200 (still safe, but useful)
   const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || '200'), 1), 2000);
 
   // Luxury gate (default $2M unless overridden)
-  const priceMin = url.searchParams.get('priceMin') ? Number(url.searchParams.get('priceMin')) : DEFAULT_MIN_PRICE_USD;
+  const priceMin = url.searchParams.get('priceMin')
+    ? Number(url.searchParams.get('priceMin'))
+    : DEFAULT_MIN_PRICE_USD;
 
-  // Optionals
   const bedsMin = url.searchParams.get('bedsMin') ? Number(url.searchParams.get('bedsMin')) : null;
   const bathsMin = url.searchParams.get('bathsMin') ? Number(url.searchParams.get('bathsMin')) : null;
 
-  // listingType supports arrays like ["for_sale"]  [oai_citation:2‡Apify](https://apify.com/logical_vivacity/realtor-property-scraper/input-schema)
   const listingType = (url.searchParams.get('listingType') || 'for_sale')
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // propertyType optional - if not passed, we still apply our conservative residential guard.
   const propertyType = url.searchParams.get('propertyType')
     ? url.searchParams
         .get('propertyType')!
@@ -267,15 +257,11 @@ export async function GET(req: Request) {
 
   const token = process.env.APIFY_TOKEN;
   if (!token) {
-    return NextResponse.json(
-      { ok: false, error: 'Missing APIFY_TOKEN env var (set in Vercel env)' },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, error: 'Missing APIFY_TOKEN env var (set in Vercel env)' }, { status: 500 });
   }
 
   const actorId = process.env.APIFY_REALTOR_ACTOR_ID || DEFAULT_ACTOR_ID;
 
-  // Create ImportRun row (same pattern as your ATTOM runs)
   const run = await prisma.importRun.create({
     data: {
       source: 'realtor',
@@ -306,7 +292,6 @@ export async function GET(req: Request) {
   let errors = 0;
 
   try {
-    // Apify actor input
     const input: any = {
       searchLocation,
       listingType,
@@ -346,10 +331,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ ok: false, runId: run.id, error: e?.message || String(e), errorSamples }, { status: 502 });
     }
 
-    scanned = Array.isArray(items) ? items.length : 0;
+    scanned = items.length;
 
-    // For now: attach everything to Miami city (US-first), unless you pass citySlug explicitly.
-    // If you want: later we map state/city -> your City table properly.
+    // US-first: attach to one City unless citySlug is provided
     const citySlug = pickString(url.searchParams.get('citySlug')) || 'miami';
 
     const city = await prisma.city.upsert({
@@ -361,6 +345,8 @@ export async function GET(req: Request) {
         country: 'United States',
         region: null,
         tz: 'America/New_York',
+        lat: null,
+        lng: null,
       },
       select: { id: true },
     });
@@ -474,34 +460,9 @@ export async function GET(req: Request) {
           select: { id: true },
         });
 
-        // Media import (photos)
+        // Media import (schema-safe: uses your ListingMedia fields only)
         if (photos.length) {
-          await prisma.listingMedia.createMany({
-            data: photos.slice(0, 40).map((p, idx) => ({
-              listingId: listing.id,
-              url: p.url,
-              alt: p.caption ?? null,
-              width: p.width ?? null,
-              height: p.height ?? null,
-              sortOrder: idx,
-              kind: 'image',
-            })),
-            skipDuplicates: true,
-          });
-
-          // Set cover if not set
-          const first = await prisma.listingMedia.findFirst({
-            where: { listingId: listing.id },
-            orderBy: { sortOrder: 'asc' },
-            select: { id: true },
-          });
-
-          if (first) {
-            await prisma.listing.update({
-              where: { id: listing.id },
-              data: { coverMediaId: first.id },
-            });
-          }
+          await ingestRealtorMediaForListing(listing.id, photos.slice(0, 40));
         }
 
         created += 1;
@@ -514,19 +475,19 @@ export async function GET(req: Request) {
     await prisma.importRun.update({
       where: { id: run.id },
       data: {
-        status: errors > 0 ? 'FAILED' : 'SUCCEEDED',
+        status: 'SUCCEEDED',
         finishedAt: new Date(),
         scanned,
         created,
         skipped,
         errors,
         errorSamples,
-        message: errors > 0 ? 'Realtor ingest finished with errors' : 'Realtor ingest complete',
+        message: errors > 0 ? 'Realtor ingest complete (with some errors)' : 'Realtor ingest complete',
       },
     });
 
     return NextResponse.json({
-      ok: errors === 0,
+      ok: true,
       runId: run.id,
       scanned,
       created,
