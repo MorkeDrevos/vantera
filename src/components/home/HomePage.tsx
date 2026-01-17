@@ -1,10 +1,7 @@
 // src/components/home/HomePage.tsx
 import Image from 'next/image';
 import Link from 'next/link';
-import { Suspense, type ReactNode } from 'react';
-
-import TopBar from '@/components/layout/TopBar';
-import Footer from '@/components/layout/Footer';
+import type { ReactNode } from 'react';
 
 import CityCardsVirtualizedClient from './CityCardsVirtualizedClient';
 
@@ -62,15 +59,7 @@ function Shell({ children }: { children: ReactNode }) {
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-      <div className="relative">
-        <Suspense fallback={null}>
-          <TopBar />
-        </Suspense>
-
-        <main className="w-full">{children}</main>
-
-        <Footer />
-      </div>
+      <main className="w-full">{children}</main>
     </div>
   );
 }
@@ -280,9 +269,7 @@ function FullBleedHero({
                         </label>
                         <select
                           name="country"
-                          className={cx(
-                            'w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none',
-                          )}
+                          className={cx('w-full bg-transparent px-4 pb-3 pt-2 text-[15px] text-[color:var(--ink)] outline-none')}
                           defaultValue=""
                         >
                           <option value="">Any</option>
@@ -565,11 +552,7 @@ export default function HomePage({
             </div>
           </div>
 
-          <CityCardsVirtualizedClient
-            cities={cityCards}
-            mode="featured"
-            columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          />
+          <CityCardsVirtualizedClient cities={cityCards} mode="featured" columns="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" />
         </div>
       </section>
 
