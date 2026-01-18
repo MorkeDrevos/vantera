@@ -283,8 +283,8 @@ export default function TopBar() {
     return combined;
   }, []);
 
-  // “Featured markets” gateway strip: clean, high intent, no country duplication
-  const gatewayCities = useMemo(() => {
+  // “Featured markets” gateway strip: curated, never wraps, no country duplication.
+  const gatewayCities = useMemo<CityLite[]>(() => {
     const base = (Array.isArray(CITIES) ? CITIES : []).map((c) => ({
       name: c.name,
       slug: c.slug,
@@ -292,7 +292,17 @@ export default function TopBar() {
       region: c.region ?? null,
       priority: c.priority ?? 0,
     }));
-    return base.slice(0, 10);
+
+    // Curate the order and add 2 more markets to feel "bigger" out of the gate.
+    const preferredSlugs = ['miami', 'new-york', 'monaco', 'dubai', 'london', 'marbella', 'cannes', 'nice'];
+
+    const bySlug = new Map(base.map((c) => [c.slug.toLowerCase(), c] as const));
+    const curated = preferredSlugs.map((s) => bySlug.get(s)).filter(Boolean) as CityLite[];
+
+    // If any are missing, fallback to top priority.
+    const fallback = base.filter((c) => !preferredSlugs.includes(c.slug.toLowerCase()));
+
+    return uniqBy([...curated, ...fallback], (c) => c.slug.toLowerCase()).slice(0, 10);
   }, []);
 
   function countryHref(country: string) {
@@ -363,6 +373,7 @@ export default function TopBar() {
   );
 
   const activeCountry = (searchParams?.get('country') ?? '').trim();
+  const coverageCount = countries.length;
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -386,7 +397,8 @@ export default function TopBar() {
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <div className="relative">
               <Image
-                src="/brand/vantera-logo-light.svg"
+                // Your file is in /public/images/brand/ (not /public/brand/)
+                src="/images/brand/vantera-logo-light.svg"
                 alt="Vantera"
                 width={420}
                 height={120}
@@ -479,9 +491,7 @@ export default function TopBar() {
                   {/* Header */}
                   <div className="relative flex items-start justify-between gap-6 px-8 py-7">
                     <div className="min-w-0">
-                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                        EXPLORE
-                      </div>
+                      <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">EXPLORE</div>
                       <div className="mt-3 max-w-[74ch] text-[28px] leading-[1.05] font-semibold text-[color:var(--ink)]">
                         A global luxury marketplace built city by city.
                       </div>
@@ -572,9 +582,7 @@ export default function TopBar() {
                             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.35),transparent)] opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">
-                                  {c.name}
-                                </div>
+                                <div className="truncate text-[14px] font-semibold text-[color:var(--ink)]">{c.name}</div>
                                 <div className="mt-0.5 truncate text-[11px] tracking-[0.18em] text-[color:var(--ink-3)]">
                                   {c.country}
                                 </div>
@@ -703,50 +711,65 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Row 2: SEO gateway strip (no more country links duplication) */}
+        {/* Row 2: gateway strip (featured markets + strong browse; no long country list duplication) */}
         <div className="relative hidden lg:block">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.18),transparent)] opacity-70" />
 
-          <div className={cx('relative flex h-10 items-center', STRIP_INNER)}>
-            <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="shrink-0 text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+          <div className={cx('relative flex h-11 items-center gap-4', STRIP_INNER)}>
+            {/* Left: Featured markets - never wrap, premium scroll w/ fade */}
+            <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="shrink-0 whitespace-nowrap text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
                 FEATURED MARKETS
               </div>
 
-              <span className="h-3 w-px bg-[color:var(--hairline)]" />
+              <span className="h-3 w-px shrink-0 bg-[color:var(--hairline)]" />
 
-              {gatewayCities.map((c) => (
-                <Link
-                  key={`gw-${c.slug}`}
-                  href={`/city/${c.slug}`}
-                  prefetch
-                  className={cx(
-                    'relative inline-flex h-8 items-center px-2 text-[12px] transition',
-                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
-                  )}
-                >
-                  {c.name}
-                </Link>
-              ))}
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                {gatewayCities.map((c) => (
+                  <Link
+                    key={`gw-${c.slug}`}
+                    href={`/city/${c.slug}`}
+                    prefetch
+                    className={cx(
+                      'inline-flex h-8 items-center px-2.5 text-[12px] whitespace-nowrap transition',
+                      'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                      'hover:bg-[rgba(10,10,12,0.03)]',
+                    )}
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Right fade so overflow feels expensive */}
+              <div className="pointer-events-none sticky right-0 h-full w-10 shrink-0 bg-[linear-gradient(to_left,rgba(255,255,255,0.96),rgba(255,255,255,0))]" />
             </div>
 
-            <div className="hidden xl:flex shrink-0 items-center gap-3 pl-3">
-              <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                Coverage:{' '}
-                <span className="text-[color:var(--ink-2)]">
-                  {countries.join(' · ')}
-                </span>
-              </div>
+            {/* Right: Coverage summary + Browse */}
+            <div className="hidden xl:flex shrink-0 items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setMegaOpen(true)}
+                className={cx(
+                  'inline-flex h-8 items-center gap-2 px-2.5 text-[12px] transition whitespace-nowrap',
+                  'text-[color:var(--ink-3)] hover:text-[color:var(--ink)]',
+                )}
+                aria-label="Open coverage explorer"
+              >
+                <span className="h-1.5 w-1.5 bg-[rgba(206,160,74,0.55)]" />
+                Coverage: <span className="text-[color:var(--ink-2)]">{coverageCount} countries</span>
+              </button>
 
               <button
                 type="button"
                 onClick={() => setMegaOpen(true)}
                 className={cx(
-                  'group inline-flex h-8 items-center gap-2 px-3 text-[12px] transition',
+                  'group inline-flex h-8 items-center gap-2 px-3 whitespace-nowrap text-[12px] transition',
                   'border border-[rgba(10,10,12,0.14)] bg-white/90 hover:border-[rgba(10,10,12,0.22)]',
                   'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                  'shadow-[0_10px_30px_rgba(10,10,12,0.04)]',
                 )}
               >
                 Browse all markets <ChevronDown className="h-4 w-4 opacity-70" />
