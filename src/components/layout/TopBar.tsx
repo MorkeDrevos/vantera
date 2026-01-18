@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, ChevronDown, Command, Search, X } from 'lucide-react';
 
-import { CITIES } from '@/components/home/cities';
+import { ALL_CITIES, CITIES, WATCHLIST_CITIES } from '@/components/home/cities';
 
 function cx(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(' ');
@@ -198,8 +198,8 @@ export default function TopBar() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onCityPage, router]);
 
-  const cityList = useMemo<CityLite[]>(() => {
-    const raw = Array.isArray(CITIES) ? (CITIES as unknown[]) : [];
+  const allCityList = useMemo<CityLite[]>(() => {
+    const raw = Array.isArray(ALL_CITIES) ? (ALL_CITIES as unknown[]) : [];
     const mapped: CityLite[] = [];
 
     for (const item of raw) {
@@ -234,10 +234,11 @@ export default function TopBar() {
       'Greece',
       'Germany',
       'Netherlands',
+      'Singapore',
     ];
 
     const present = uniqBy(
-      cityList
+      allCityList
         .map((c) => c.country)
         .filter(Boolean)
         .map((c) => String(c)),
@@ -250,13 +251,49 @@ export default function TopBar() {
     ];
 
     return ordered.slice(0, 12);
-  }, [cityList]);
+  }, [allCityList]);
 
-  // +2 cities (10 instead of 8) for the mega dropdown
-  const topCities = useMemo(() => cityList.slice(0, 10), [cityList]);
+  // Curated “flagship” mega list = CITIES + 2 watchlist picks (default: Paris + Singapore)
+  const flagshipCities = useMemo<CityLite[]>(() => {
+    const base = (Array.isArray(CITIES) ? CITIES : []).map((c) => ({
+      name: c.name,
+      slug: c.slug,
+      country: c.country,
+      region: c.region ?? null,
+      priority: c.priority ?? 0,
+    }));
 
-  // SEO gateway strip: premium “featured markets” (internal links, not duplicate country tabs)
-  const gatewayCities = useMemo(() => cityList.slice(0, 10), [cityList]);
+    const watch = Array.isArray(WATCHLIST_CITIES) ? WATCHLIST_CITIES : [];
+    const bySlug = new Map(watch.map((c) => [c.slug, c] as const));
+
+    const picks = ['paris', 'singapore']; // 2 more cities for the dropdown
+    const extra: CityLite[] = picks
+      .map((slug) => bySlug.get(slug))
+      .filter(Boolean)
+      .map((c) => ({
+        name: c!.name,
+        slug: c!.slug,
+        country: c!.country,
+        region: c!.region ?? null,
+        priority: c!.priority ?? 0,
+      }));
+
+    const combined = uniqBy([...base, ...extra], (c) => c.slug.toLowerCase());
+    combined.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
+    return combined;
+  }, []);
+
+  // “Featured markets” gateway strip: clean, high intent, no country duplication
+  const gatewayCities = useMemo(() => {
+    const base = (Array.isArray(CITIES) ? CITIES : []).map((c) => ({
+      name: c.name,
+      slug: c.slug,
+      country: c.country,
+      region: c.region ?? null,
+      priority: c.priority ?? 0,
+    }));
+    return base.slice(0, 10);
+  }, []);
 
   function countryHref(country: string) {
     return buildSearchHref({ country });
@@ -312,7 +349,6 @@ export default function TopBar() {
   const navActive =
     'text-[color:var(--ink)] after:absolute after:left-1 after:right-1 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.55]';
 
-  // Royal actions (stronger, still editorial)
   const signatureSearch = cx(
     'group relative inline-flex h-10 items-center gap-2 px-4 transition',
     'border border-[rgba(10,10,12,0.14)] bg-white/92 backdrop-blur-[10px]',
@@ -336,13 +372,11 @@ export default function TopBar() {
           <div className="absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
-          {/* Crown double-line (visible gold, still tasteful) */}
           <div className="absolute inset-x-0 top-0">
             <div className="h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.55),transparent)] opacity-80" />
             <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(231,201,130,0.35),transparent)] opacity-80" />
           </div>
 
-          {/* Warm halo under bar (makes it feel expensive over hero) */}
           <div className="absolute inset-0 bg-[radial-gradient(1200px_220px_at_50%_0%,rgba(206,160,74,0.08),transparent_60%)]" />
         </div>
 
@@ -359,7 +393,6 @@ export default function TopBar() {
                 priority
                 className="relative h-[22px] w-auto sm:h-[26px] md:h-[28px]"
               />
-              {/* Tiny gold underline on hover (subtle signature) */}
               <div className="pointer-events-none absolute -bottom-1 left-0 h-px w-0 bg-[linear-gradient(90deg,rgba(206,160,74,0.85),transparent)] opacity-0 transition-all duration-300 group-hover:w-16 group-hover:opacity-100" />
             </div>
           </Link>
@@ -433,7 +466,6 @@ export default function TopBar() {
                   role="menu"
                   aria-label="Explore menu"
                 >
-                  {/* Royal internal backdrop so it never feels flat */}
                   <div className="pointer-events-none absolute inset-0">
                     <div className="absolute inset-x-0 top-0">
                       <div className="h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.85),transparent)]" />
@@ -523,7 +555,7 @@ export default function TopBar() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
-                        {topCities.map((c) => (
+                        {flagshipCities.map((c) => (
                           <Link
                             key={c.slug}
                             href={`/city/${c.slug}`}
@@ -636,12 +668,7 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button
-                type="button"
-                onClick={openSearchResultsFromAnywhere}
-                className={signatureSearch}
-                aria-label="Search"
-              >
+              <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.45),transparent)] opacity-60" />
                 <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
                 <span className="text-[13px] text-[color:var(--ink-2)] group-hover:text-[color:var(--ink)] transition">
@@ -676,7 +703,7 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Row 2: SEO gateway strip (NOT countries - no duplication) */}
+        {/* Row 2: SEO gateway strip (no more country links duplication) */}
         <div className="relative hidden lg:block">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
@@ -707,7 +734,10 @@ export default function TopBar() {
 
             <div className="hidden xl:flex shrink-0 items-center gap-3 pl-3">
               <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-                Coverage: <span className="text-[color:var(--ink-2)]">{countries.join(' · ')}</span>
+                Coverage:{' '}
+                <span className="text-[color:var(--ink-2)]">
+                  {countries.join(' · ')}
+                </span>
               </div>
 
               <button
@@ -726,7 +756,7 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Mobile sheet (kept as your structure, only slightly richer shell) */}
+      {/* Mobile sheet (kept as your structure, upgraded shell) */}
       <div
         id="vantera-mobile-menu"
         className={cx('fixed inset-0 z-[90] lg:hidden', mobileOpen ? 'pointer-events-auto' : 'pointer-events-none')}
@@ -874,7 +904,7 @@ export default function TopBar() {
               </div>
 
               <div className="mt-4 grid gap-2">
-                {topCities.slice(0, 8).map((c) => (
+                {flagshipCities.slice(0, 8).map((c) => (
                   <Link
                     key={c.slug}
                     href={`/city/${c.slug}`}
