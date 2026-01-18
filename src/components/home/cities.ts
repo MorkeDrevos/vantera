@@ -224,7 +224,7 @@ export const CITIES: City[] = [
     priority: 86,
     blurb: 'Ultra-prime density and global capital concentration. Verified signals only.',
     image: {
-      src: '/images/hero/homepage/monaco.mp4',
+      src: 'https://artlist.io/stock-footage/clip/buildings-by-the-coast-aerial/180687',
       alt: 'Monaco harbour with yachts and skyline',
       kind: 'video',
     },
