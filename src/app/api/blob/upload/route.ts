@@ -2,6 +2,9 @@
 import { NextResponse } from 'next/server';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: Request): Promise<NextResponse> {
   const body = (await req.json()) as HandleUploadBody;
 
@@ -15,11 +18,21 @@ export async function POST(req: Request): Promise<NextResponse> {
         // Only allow uploads from Operations media tool
         // and only to the folders we want.
         const allowed =
-          pathname.startsWith('hero/homepage/') || pathname.startsWith('images/heroes/');
+          pathname.startsWith('hero/homepage/') ||
+          pathname.startsWith('images/heroes/');
 
         if (!allowed) {
           throw new Error('Path not allowed');
         }
+
+        // If you're testing locally (not on Vercel), you may need callbackUrl in newer SDKs.
+        // On Vercel it is inferred automatically.
+        const callbackUrl =
+          process.env.VERCEL
+            ? undefined
+            : process.env.NEXT_PUBLIC_SITE_URL
+              ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/blob/upload`
+              : undefined;
 
         return {
           allowedContentTypes: [
@@ -29,15 +42,15 @@ export async function POST(req: Request): Promise<NextResponse> {
             'image/png',
             'image/webp',
           ],
-          tokenPayload: JSON.stringify({
-            scope: 'operations-media',
-          }),
+          tokenPayload: JSON.stringify({ scope: 'operations-media' }),
+          ...(callbackUrl ? { callbackUrl } : {}),
         };
       },
 
       onUploadCompleted: async ({ blob }) => {
-        // Optional: you can log, notify, or later write to Prisma here
+        // Optional: log, notify, or write to Prisma here
         // console.log('Upload completed:', blob.url);
+        void blob;
       },
     });
 
