@@ -182,8 +182,6 @@ export default function HomePage({
         wideClassName={WIDE}
       />
 
-      <DnaChapterBreak />
-
       <section className="py-12 sm:py-16">
         <div className={WIDE}>
           <div className="mb-6">
@@ -196,7 +194,7 @@ export default function HomePage({
             </div>
 
             <div className="mt-6">
-              <Hairline />
+              <Hairline /> 
               <div className="mt-1">
                 <GoldHairline className="opacity-60" />
               </div>
@@ -210,6 +208,8 @@ export default function HomePage({
           />
         </div>
       </section>
+
+     <DnaChapterBreak />
 
       <section className="pb-16 sm:pb-20">
         <div className={NARROW}>
