@@ -1,15 +1,7 @@
 // src/app/operations/page.tsx
 import Link from 'next/link';
 
-function Card({
-  title,
-  desc,
-  href,
-}: {
-  title: string;
-  desc: string;
-  href: string;
-}) {
+function Card({ title, desc, href }: { title: string; desc: string; href: string }) {
   return (
     <Link
       href={href}
@@ -34,12 +26,13 @@ export default function OperationsHomePage() {
         desc="Monitor ingestion runs, status, volumes, and errors for cities and properties."
         href="/operations/imports"
       />
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-        <div className="text-base font-semibold">Next</div>
-        <p className="mt-2 text-sm text-zinc-300/90">
-          We can add “Data Health”, “Queues”, and “Coverage” pages once imports are stable.
-        </p>
-      </div>
+
+      {/* ✅ ADD THIS */}
+      <Card
+        title="Assets"
+        desc="Upload hero videos, city images, and brand assets (Blob CDN)."
+        href="/operations/assets"
+      />
     </div>
   );
 }

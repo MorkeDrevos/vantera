@@ -14,12 +14,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = (() => {
-  // Keep your SEO intent system, but hard-tilt copy toward Marketplace positioning.
   const doc = SEO_INTENT.home();
 
-  const title = 'Vantera · World’s Largest Luxury Marketplace';
+  const title = 'Vantera · A Global Catalogue of Exceptional Homes';
   const description =
-    'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.';
+    'Private intelligence for the world’s most valuable assets. Truth-first real estate intelligence, curated globally, presented with editorial-grade precision.';
 
   return {
     title,
@@ -43,7 +42,33 @@ export const metadata: Metadata = (() => {
   };
 })();
 
+/**
+ * Normalise public image paths for /public
+ * Allows DB values like:
+ * - "images/heroes/monaco.jpg"
+ * - "/images/heroes/monaco.jpg"
+ * - "https://..."
+ */
+function normalizePublicImagePath(v: unknown): string | null {
+  const s = typeof v === 'string' ? v.trim() : '';
+  if (!s) return null;
+
+  // Absolute URLs remain untouched
+  if (/^https?:\/\//i.test(s)) return s;
+
+  // Ensure leading slash for public assets
+  if (s.startsWith('/')) return s;
+  return `/${s}`;
+}
+
 function toRuntimeCity(row: any): RuntimeCity {
+  // Card image: prefer dedicated fields if you later add them
+  const cardSrc = normalizePublicImagePath(row?.cardImageSrc ?? row?.imageSrc ?? row?.heroImageSrc);
+  const heroSrc = normalizePublicImagePath(row?.heroImageSrc);
+
+  const cardAlt = typeof row?.cardImageAlt === 'string' ? row.cardImageAlt : row?.heroImageAlt;
+  const heroAlt = typeof row?.heroImageAlt === 'string' ? row.heroImageAlt : cardAlt;
+
   return {
     slug: row.slug,
     name: row.name,
@@ -54,14 +79,18 @@ function toRuntimeCity(row: any): RuntimeCity {
     status: row.status,
     priority: row.priority ?? 0,
     blurb: row.blurb,
-    image: row.heroImageSrc
+
+    // CityCard image
+    image: cardSrc
       ? {
-          src: row.heroImageSrc,
-          alt: row.heroImageAlt,
+          src: cardSrc,
+          alt: cardAlt ?? null,
         }
       : null,
-    heroImageSrc: row.heroImageSrc,
-    heroImageAlt: row.heroImageAlt,
+
+    // Hero image
+    heroImageSrc: heroSrc,
+    heroImageAlt: heroAlt ?? null,
   };
 }
 
@@ -73,14 +102,14 @@ export default async function Page() {
 
   const pageJsonLd = webPageJsonLd({
     url: canonical,
-    name: 'Vantera · World’s Largest Luxury Marketplace',
+    name: 'Vantera · A Global Catalogue of Exceptional Homes',
     description:
-      'World’s Largest Luxury Marketplace for €2M+ properties. Curated globally, presented with editorial-grade precision.',
+      'A global catalogue of exceptional homes, powered by intelligence. Built city by city with a Truth Layer that verifies, scores and explains the market.',
     about: [
       { '@type': 'Thing', name: 'Luxury real estate marketplace' },
-      { '@type': 'Thing', name: '€2M+ properties' },
-      { '@type': 'Thing', name: 'Ultra-prime homes' },
-      { '@type': 'Thing', name: 'Global luxury property listings' },
+      { '@type': 'Thing', name: 'Curated global listings' },
+      { '@type': 'Thing', name: 'Real estate intelligence' },
+      { '@type': 'Thing', name: 'Truth Layer verification' },
     ],
   });
 

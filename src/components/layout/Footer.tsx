@@ -78,16 +78,23 @@ export default function Footer() {
             {/* Brand */}
             <div className="min-w-0">
               <div className="flex items-center gap-3">
-                <div className="relative h-10 w-10 overflow-hidden bg-white border border-[color:var(--hairline)]">
-                  <Image src="/brand/vantera-mark.png" alt="Vantera" fill className="object-cover" />
-                </div>
+                <div className="relative h-10 w-10">
+  <img
+  src="images/brand/favicon.svg"
+  alt="Vantera"
+  width={40}
+  height={40}
+/>
+</div>
 
                 <div className="min-w-0">
                   <div className="text-[12px] font-semibold tracking-[0.26em] text-[color:var(--ink)]">
                     VANTERA
                   </div>
                   <div className="mt-0.5 text-[13px] text-[color:var(--ink-2)]">
-                    €2M+ luxury properties. Presented properly.
+                    <p className="text-sm text-slate-700 leading-relaxed">
+  A truth-driven real estate DNA for clarity over noise.
+</p>
                   </div>
                 </div>
               </div>

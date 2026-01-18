@@ -2,9 +2,10 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 
 export default function ComingSoon() {
+  const year = new Date().getFullYear();
+
   return (
     <main className="relative min-h-[100dvh] w-full overflow-hidden bg-[#07080B] text-white">
       {/* Backdrop */}
@@ -31,19 +32,15 @@ export default function ComingSoon() {
             <div className="pointer-events-none absolute left-1/2 top-[-220px] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_70%)] blur-3xl" />
 
             <Image
-              src="/brand/vantera-logo-dark.svg"
+              // If stored at public/images/brand/...
+              src="/images/brand/vantera-landscape-black.svg"
+              // If stored at public/brand/..., use this instead:
+              // src="/brand/vantera-logo-dark.svg"
               alt="Vantera"
               width={2000}
               height={600}
               priority
-              className="
-                relative
-                h-36 w-auto
-                opacity-[0.99]
-                sm:h-44
-                md:h-56
-                lg:h-64
-              "
+              className="relative h-36 w-auto opacity-[0.99] sm:h-44 md:h-56 lg:h-64"
             />
           </div>
         </div>
@@ -53,16 +50,7 @@ export default function ComingSoon() {
 
         {/* STATEMENT — secondary */}
         <div className="w-full max-w-[820px]">
-          <div
-            className="
-              relative
-              rounded-[20px]
-              bg-black/55
-              px-8 py-7
-              shadow-[0_30px_90px_rgba(0,0,0,0.75)]
-              sm:px-12 sm:py-9
-            "
-          >
+          <div className="relative rounded-[20px] bg-black/55 px-8 py-7 shadow-[0_30px_90px_rgba(0,0,0,0.75)] sm:px-12 sm:py-9">
             {/* ultra-hairline */}
             <div className="pointer-events-none absolute inset-0 rounded-[20px] ring-1 ring-white/[0.045]" />
 
@@ -78,7 +66,7 @@ export default function ComingSoon() {
 
         {/* FOOTER */}
         <div className="mt-16 text-[11px] tracking-[0.22em] text-white/28">
-          © {new Date().getFullYear()} Vantera
+          © {year} Vantera
         </div>
       </div>
     </main>

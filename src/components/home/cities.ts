@@ -3,6 +3,10 @@
 export type CityImage = {
   src: string;
   alt?: string;
+
+  // Optional: allow card media to be a video too (no breaking change)
+  // If omitted, treat as image.
+  kind?: 'image' | 'video';
 };
 
 export type CoverageTier = 'TIER_0' | 'TIER_1' | 'TIER_2' | 'TIER_3';
@@ -35,6 +39,8 @@ export type City = {
   region?: string;
   tz: string;
   blurb?: string;
+
+  // Card / catalogue media (image or video)
   image?: CityImage;
 
   tier?: CoverageTier;
@@ -42,6 +48,14 @@ export type City = {
   priority?: number;
 
   clusterSlug?: string;
+
+  // HERO (required image, optional video)
+  // HeroPortalSection uses video if heroVideoSrc is present
+  heroImageSrc: string;
+  heroImageAlt?: string;
+
+  heroVideoSrc?: string;
+  heroVideoPosterSrc?: string;
 };
 
 /**
@@ -114,7 +128,6 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     },
     citySlugs: ['cannes', 'nice', 'saint-tropez', 'paris'],
   },
-
   {
     slug: 'lake-como-region',
     name: 'Lake Como Region',
@@ -164,12 +177,17 @@ export const CITIES: City[] = [
     status: 'LIVE',
     priority: 100,
     clusterSlug: 'miami-metro',
-    blurb:
-      'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
+    blurb: 'Prime waterfront capital and global buyer flow. Liquidity-led intelligence and verified market signals.',
     image: {
       src: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2600&q=85',
       alt: 'Miami skyline across the water',
     },
+
+    heroImageSrc: '/images/city/miami.jpg',
+    heroImageAlt: 'Miami skyline across the water',
+
+    // heroVideoSrc: '/images/hero/homepage/miami.mp4',
+    // heroVideoPosterSrc: '/images/city/miami.jpg',
   },
   {
     slug: 'new-york',
@@ -186,6 +204,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1522083165195-3424ed129620?auto=format&fit=crop&w=2600&q=85',
       alt: 'New York skyline at blue hour',
     },
+
+    heroImageSrc: '/images/city/new-york.jpg',
+    heroImageAlt: 'New York skyline at blue hour',
+
+    // heroVideoSrc: '/images/hero/homepage/new-york.mp4',
+    // heroVideoPosterSrc: '/images/city/new-york.jpg',
   },
 
   // Tier 1
@@ -200,9 +224,16 @@ export const CITIES: City[] = [
     priority: 86,
     blurb: 'Ultra-prime density and global capital concentration. Verified signals only.',
     image: {
-      src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
+      src: 'https://artlist.io/stock-footage/clip/buildings-by-the-coast-aerial/180687',
       alt: 'Monaco harbour with yachts and skyline',
+      kind: 'video',
     },
+
+    heroImageSrc: '/images/city/monaco.jpg',
+    heroImageAlt: 'Monaco harbour with yachts and skyline',
+
+    // heroVideoSrc: '/images/hero/homepage/monaco.mp4',
+    // heroVideoPosterSrc: '/images/city/monaco.jpg',
   },
   {
     slug: 'dubai',
@@ -218,6 +249,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1526495124232-a04e1849168c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Dubai skyline at dusk',
     },
+
+    heroImageSrc: '/images/city/dubai.jpg',
+    heroImageAlt: 'Dubai skyline at dusk',
+
+    // heroVideoSrc: '/images/hero/homepage/dubai.mp4',
+    // heroVideoPosterSrc: '/images/city/dubai.jpg',
   },
   {
     slug: 'london',
@@ -233,6 +270,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2600&q=85',
       alt: 'London skyline with river and lights',
     },
+
+    heroImageSrc: '/images/city/london.jpg',
+    heroImageAlt: 'London skyline with river and lights',
+
+    // heroVideoSrc: '/images/hero/homepage/london.mp4',
+    // heroVideoPosterSrc: '/images/city/london.jpg',
   },
 
   // Marbella = Costa del Sol (single city)
@@ -251,6 +294,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Mediterranean coastline near Marbella',
     },
+
+    heroImageSrc: '/images/city/marbella.jpg',
+    heroImageAlt: 'Mediterranean coastline near Marbella',
+
+    // heroVideoSrc: '/images/hero/homepage/marbella.mp4',
+    // heroVideoPosterSrc: '/images/city/marbella.jpg',
   },
 
   // Tier 2
@@ -269,6 +318,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Cannes-style marina and waterfront',
     },
+
+    heroImageSrc: '/images/city/cannes.jpg',
+    heroImageAlt: 'Cannes-style marina and waterfront',
+
+    // heroVideoSrc: '/images/hero/homepage/cannes.mp4',
+    // heroVideoPosterSrc: '/images/city/cannes.jpg',
   },
   {
     slug: 'nice',
@@ -285,6 +340,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Nice coastline with promenade and sea',
     },
+
+    heroImageSrc: '/images/city/nice.jpg',
+    heroImageAlt: 'Nice coastline with promenade and sea',
+
+    // heroVideoSrc: '/images/hero/homepage/nice.mp4',
+    // heroVideoPosterSrc: '/images/city/nice.jpg',
   },
   {
     slug: 'saint-tropez',
@@ -301,6 +362,12 @@ export const CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1526481280695-3c687fd5432c?auto=format&fit=crop&w=2600&q=85',
       alt: 'Saint-Tropez harbour with yachts',
     },
+
+    heroImageSrc: '/images/city/saint-tropez.jpg',
+    heroImageAlt: 'Saint-Tropez harbour with yachts',
+
+    // heroVideoSrc: '/images/hero/homepage/saint-tropez.mp4',
+    // heroVideoPosterSrc: '/images/city/saint-tropez.jpg',
   },
 ];
 
@@ -322,6 +389,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=2600&q=85',
       alt: 'Paris Eiffel Tower view',
     },
+
+    heroImageSrc: '/images/city/paris.jpg',
+    heroImageAlt: 'Paris Eiffel Tower view',
+
+    // heroVideoSrc: '/images/hero/homepage/paris.mp4',
+    // heroVideoPosterSrc: '/images/city/paris.jpg',
   },
   {
     slug: 'lake-como',
@@ -338,6 +411,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1506806732259-39c2d0268443?auto=format&fit=crop&w=2600&q=85',
       alt: 'Lake Como shoreline',
     },
+
+    heroImageSrc: '/images/city/lake-como.jpg',
+    heroImageAlt: 'Lake Como shoreline',
+
+    // heroVideoSrc: '/images/hero/homepage/lake-como.mp4',
+    // heroVideoPosterSrc: '/images/city/lake-como.jpg',
   },
   {
     slug: 'swiss-alps',
@@ -354,6 +433,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2600&q=85',
       alt: 'Snowy mountain landscape',
     },
+
+    heroImageSrc: '/images/city/swiss-alps.jpg',
+    heroImageAlt: 'Snowy mountain landscape',
+
+    // heroVideoSrc: '/images/hero/homepage/swiss-alps.mp4',
+    // heroVideoPosterSrc: '/images/city/swiss-alps.jpg',
   },
   {
     slug: 'mallorca',
@@ -370,6 +455,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Mallorca coastline',
     },
+
+    heroImageSrc: '/images/city/mallorca.jpg',
+    heroImageAlt: 'Mallorca coastline',
+
+    // heroVideoSrc: '/images/hero/homepage/mallorca.mp4',
+    // heroVideoPosterSrc: '/images/city/mallorca.jpg',
   },
   {
     slug: 'ibiza',
@@ -386,6 +477,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2600&q=85',
       alt: 'Ibiza coastline',
     },
+
+    heroImageSrc: '/images/city/ibiza.jpg',
+    heroImageAlt: 'Ibiza coastline',
+
+    // heroVideoSrc: '/images/hero/homepage/ibiza.mp4',
+    // heroVideoPosterSrc: '/images/city/ibiza.jpg',
   },
   {
     slug: 'singapore',
@@ -401,6 +498,12 @@ export const WATCHLIST_CITIES: City[] = [
       src: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d0?auto=format&fit=crop&w=2600&q=85',
       alt: 'Singapore skyline at dusk',
     },
+
+    heroImageSrc: '/images/city/singapore.jpg',
+    heroImageAlt: 'Singapore skyline at dusk',
+
+    // heroVideoSrc: '/images/hero/homepage/singapore.mp4',
+    // heroVideoPosterSrc: '/images/city/singapore.jpg',
   },
 ];
 
