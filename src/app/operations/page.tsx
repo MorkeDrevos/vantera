@@ -27,18 +27,12 @@ export default function OperationsHomePage() {
         href="/operations/imports"
       />
 
+      {/* ✅ ADD THIS */}
       <Card
-        title="Media uploads"
-        desc="Upload hero videos and images to Vercel Blob (no GitHub limits)."
-        href="/operations/media"
+        title="Assets"
+        desc="Upload hero videos, city images, and brand assets (Blob CDN)."
+        href="/operations/assets"
       />
-
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:col-span-2">
-        <div className="text-base font-semibold">Next</div>
-        <p className="mt-2 text-sm text-zinc-300/90">
-          We can add “Data Health”, “Queues”, and “Coverage” pages once imports are stable.
-        </p>
-      </div>
     </div>
   );
 }
