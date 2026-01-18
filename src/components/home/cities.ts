@@ -74,7 +74,7 @@ export const REGION_CLUSTERS: RegionCluster[] = [
     blurb:
       'Prime waterfront districts, institutional buyer flow and the reference implementation for liquidity-led signals.',
     image: {
-      src: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=2600&q=85',
+      src: '/images/city/miami.jpg',
       alt: 'Miami Metro skyline at golden hour',
     },
     citySlugs: ['miami', 'new-york'],
