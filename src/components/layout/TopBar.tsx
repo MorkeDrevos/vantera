@@ -285,25 +285,44 @@ export default function TopBar() {
 
   // “Featured markets” gateway strip: curated, never wraps, no country duplication.
   const gatewayCities = useMemo<CityLite[]>(() => {
-    const base = (Array.isArray(CITIES) ? CITIES : []).map((c) => ({
-      name: c.name,
-      slug: c.slug,
-      country: c.country,
-      region: c.region ?? null,
-      priority: c.priority ?? 0,
-    }));
+  const base = (Array.isArray(CITIES) ? CITIES : []).map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    country: c.country,
+    region: c.region ?? null,
+    priority: c.priority ?? 0,
+  }));
 
-    // Curate the order and add 2 more markets to feel "bigger" out of the gate.
-    const preferredSlugs = ['miami', 'new-york', 'monaco', 'dubai', 'london', 'marbella', 'cannes', 'nice'];
+  const watch = (Array.isArray(WATCHLIST_CITIES) ? WATCHLIST_CITIES : []).map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    country: c.country,
+    region: c.region ?? null,
+    priority: c.priority ?? 0,
+  }));
 
-    const bySlug = new Map(base.map((c) => [c.slug.toLowerCase(), c] as const));
-    const curated = preferredSlugs.map((s) => bySlug.get(s)).filter(Boolean) as CityLite[];
+  const preferredSlugs = [
+    'miami',
+    'new-york',
+    'monaco',
+    'dubai',
+    'london',
+    'marbella',
+    'cannes',
+    'nice',
+    'saint-tropez',
+    'ibiza',
+    'mallorca',
+  ];
 
-    // If any are missing, fallback to top priority.
-    const fallback = base.filter((c) => !preferredSlugs.includes(c.slug.toLowerCase()));
+  const combined = [...base, ...watch];
+  const bySlug = new Map(combined.map((c) => [c.slug.toLowerCase(), c] as const));
 
-    return uniqBy([...curated, ...fallback], (c) => c.slug.toLowerCase()).slice(0, 10);
-  }, []);
+  const curated = preferredSlugs.map((s) => bySlug.get(s)).filter(Boolean) as CityLite[];
+  const fallback = combined.filter((c) => !preferredSlugs.includes(c.slug.toLowerCase()));
+
+  return uniqBy([...curated, ...fallback], (c) => c.slug.toLowerCase()).slice(0, 10);
+}, []);
 
   function countryHref(country: string) {
     return buildSearchHref({ country });
@@ -720,8 +739,8 @@ export default function TopBar() {
           <div className={cx('relative flex h-11 items-center gap-4', STRIP_INNER)}>
             {/* Left: Featured markets - never wrap, premium scroll w/ fade */}
             <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="shrink-0 whitespace-nowrap text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
-                FEATURED MARKETS
+              <div className="shrink-0 whitespace-nowrap text-[10px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+                MARKET FRONTS
               </div>
 
               <span className="h-3 w-px shrink-0 bg-[color:var(--hairline)]" />
