@@ -140,11 +140,17 @@ export default function AssetsPage() {
             </div>
 
             <div className="mt-2 text-xs text-white/45">
-              Auto-routing:
-              <span className="ml-2 text-white/70">video</span> -> <span className="text-white/70">hero/homepage/</span>,
-              <span className="ml-2 text-white/70">image</span> -> <span className="text-white/70">images/heroes/</span>,
-              <span className="ml-2 text-white/70">other</span> -> <span className="text-white/70">assets/</span>
-            </div>
+  Auto-routing:
+  <span className="ml-2 text-white/70">video</span>
+  <span className="mx-2 text-white/50">→</span>
+  <span className="text-white/70">hero/homepage/</span>,
+  <span className="ml-3 text-white/70">image</span>
+  <span className="mx-2 text-white/50">→</span>
+  <span className="text-white/70">images/heroes/</span>,
+  <span className="ml-3 text-white/70">other</span>
+  <span className="mx-2 text-white/50">→</span>
+  <span className="text-white/70">assets/</span>
+</div>
           </div>
 
           {busy ? (
