@@ -252,7 +252,11 @@ export default function TopBar() {
     return ordered.slice(0, 12);
   }, [cityList]);
 
-  const topCities = useMemo(() => cityList.slice(0, 8), [cityList]);
+  // +2 cities (10 instead of 8) for the mega dropdown
+  const topCities = useMemo(() => cityList.slice(0, 10), [cityList]);
+
+  // SEO gateway strip: premium “featured markets” (internal links, not duplicate country tabs)
+  const gatewayCities = useMemo(() => cityList.slice(0, 10), [cityList]);
 
   function countryHref(country: string) {
     return buildSearchHref({ country });
@@ -322,12 +326,6 @@ export default function TopBar() {
     'shadow-[0_14px_55px_rgba(10,10,12,0.10)] hover:shadow-[0_18px_80px_rgba(206,160,74,0.18)]',
   );
 
-  const stripItem =
-    'relative inline-flex h-8 items-center px-2 text-[12px] text-[color:var(--ink-2)] transition ' +
-    'hover:text-[color:var(--ink)]';
-  const stripActive =
-    'text-[color:var(--ink)] after:absolute after:left-2 after:right-2 after:bottom-1 after:h-px after:bg-[color:var(--ink)] after:opacity-[0.45]';
-
   const activeCountry = (searchParams?.get('country') ?? '').trim();
 
   return (
@@ -354,15 +352,13 @@ export default function TopBar() {
           <Link href="/" prefetch aria-label="Vantera home" className="group flex shrink-0 items-center">
             <div className="relative">
               <Image
-  src="images/brand/vantera-logo-light.svg"
-  alt="Vantera"
-  width={420}
-  height={120}
-  priority
-  className={cx(
-    'relative h-[22px] w-auto sm:h-[26px] md:h-[28px]'
-  )}
-/>
+                src="/brand/vantera-logo-light.svg"
+                alt="Vantera"
+                width={420}
+                height={120}
+                priority
+                className="relative h-[22px] w-auto sm:h-[26px] md:h-[28px]"
+              />
               {/* Tiny gold underline on hover (subtle signature) */}
               <div className="pointer-events-none absolute -bottom-1 left-0 h-px w-0 bg-[linear-gradient(90deg,rgba(206,160,74,0.85),transparent)] opacity-0 transition-all duration-300 group-hover:w-16 group-hover:opacity-100" />
             </div>
@@ -617,12 +613,7 @@ export default function TopBar() {
                         </div>
                         <div className="mt-1 text-xs text-[color:var(--ink-2)]">Private by default. High intent only.</div>
 
-                        <Link
-                          href={sellHref}
-                          prefetch
-                          onClick={() => setMegaOpen(false)}
-                          className={primaryCta}
-                        >
+                        <Link href={sellHref} prefetch onClick={() => setMegaOpen(false)} className={primaryCta}>
                           <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.55),transparent)] opacity-70" />
                           <span>{sellLabel}</span>
                           <ArrowRight className="h-4 w-4 opacity-85" />
@@ -645,7 +636,12 @@ export default function TopBar() {
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2.5">
             <div className="hidden items-center gap-2.5 sm:flex">
-              <button type="button" onClick={openSearchResultsFromAnywhere} className={signatureSearch} aria-label="Search">
+              <button
+                type="button"
+                onClick={openSearchResultsFromAnywhere}
+                className={signatureSearch}
+                aria-label="Search"
+              >
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.45),transparent)] opacity-60" />
                 <Search className="h-4 w-4 text-[color:var(--ink-3)]" />
                 <span className="text-[13px] text-[color:var(--ink-2)] group-hover:text-[color:var(--ink)] transition">
@@ -680,33 +676,51 @@ export default function TopBar() {
           </div>
         </div>
 
-        {/* Row 2: countries strip (thin, quiet, but premium) */}
+        {/* Row 2: SEO gateway strip (NOT countries - no duplication) */}
         <div className="relative hidden lg:block">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--hairline)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.20),transparent)] opacity-60" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-[linear-gradient(90deg,transparent,rgba(206,160,74,0.18),transparent)] opacity-70" />
 
-          <div className={cx('relative flex h-9 items-center', STRIP_INNER)}>
-            <div className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {countries.map((c) => {
-                const active = activeCountry && c.toLowerCase() === activeCountry.toLowerCase();
-                return (
-                  <Link
-                    key={c}
-                    href={countryHref(c)}
-                    prefetch
-                    className={cx(stripItem, active && stripActive)}
-                    aria-current={active ? 'page' : undefined}
-                  >
-                    {c}
-                  </Link>
-                );
-              })}
+          <div className={cx('relative flex h-10 items-center', STRIP_INNER)}>
+            <div className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto pr-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="shrink-0 text-[11px] font-semibold tracking-[0.28em] text-[color:var(--ink-3)]">
+                FEATURED MARKETS
+              </div>
+
+              <span className="h-3 w-px bg-[color:var(--hairline)]" />
+
+              {gatewayCities.map((c) => (
+                <Link
+                  key={`gw-${c.slug}`}
+                  href={`/city/${c.slug}`}
+                  prefetch
+                  className={cx(
+                    'relative inline-flex h-8 items-center px-2 text-[12px] transition',
+                    'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                  )}
+                >
+                  {c.name}
+                </Link>
+              ))}
             </div>
 
-            <div className="hidden xl:flex shrink-0 items-center gap-2 pl-3 text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
-              <span className="h-1.5 w-1.5 bg-[rgba(206,160,74,0.55)]" />
-              Countries
+            <div className="hidden xl:flex shrink-0 items-center gap-3 pl-3">
+              <div className="text-[11px] tracking-[0.22em] text-[color:var(--ink-3)]">
+                Coverage: <span className="text-[color:var(--ink-2)]">{countries.join(' · ')}</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMegaOpen(true)}
+                className={cx(
+                  'group inline-flex h-8 items-center gap-2 px-3 text-[12px] transition',
+                  'border border-[rgba(10,10,12,0.14)] bg-white/90 hover:border-[rgba(10,10,12,0.22)]',
+                  'text-[color:var(--ink-2)] hover:text-[color:var(--ink)]',
+                )}
+              >
+                Browse all markets <ChevronDown className="h-4 w-4 opacity-70" />
+              </button>
             </div>
           </div>
         </div>
@@ -761,7 +775,6 @@ export default function TopBar() {
             </button>
           </div>
 
-          {/* Rest of your mobile panel: kept exactly (only shell upgraded) */}
           <div className="relative space-y-4 px-5 pb-6">
             {/* Actions */}
             <div className="border border-[color:var(--hairline)] bg-[rgba(10,10,12,0.02)] p-4">
@@ -861,7 +874,7 @@ export default function TopBar() {
               </div>
 
               <div className="mt-4 grid gap-2">
-                {topCities.slice(0, 6).map((c) => (
+                {topCities.slice(0, 8).map((c) => (
                   <Link
                     key={c.slug}
                     href={`/city/${c.slug}`}
