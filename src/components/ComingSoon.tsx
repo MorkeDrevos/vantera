@@ -33,7 +33,7 @@ export default function ComingSoon() {
             <div className="pointer-events-none absolute left-1/2 top-[-220px] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(120,76,255,0.18),transparent_70%)] blur-3xl" />
 
             <Image
-              src="/images/brand/vantera-landscape-black.svg"
+              src="/images/brand/vantera-logo-light.svg"
               alt="Vantera"
               width={2000}
               height={600}
