@@ -3,21 +3,9 @@
 
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowRight,
-  Command,
-  MapPin,
-  Search,
-  Sparkles,
-  X,
-  Home,
-  Building2,
-  Waves,
-  Shield,
-  Clock,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { ArrowRight, MapPin, Search, Sparkles, X, Home, Building2, Waves, Shield, Clock } from 'lucide-react';
 
 type PlaceKind = 'city' | 'region' | 'search' | 'recent';
 
@@ -492,7 +480,7 @@ function Chip({ children, subtle }: { children: React.ReactNode; subtle?: boolea
   return (
     <span
       className={cx(
-        'inline-flex items-center px-2.5 py-1 text-[11px] leading-none whitespace-nowrap',
+        'inline-flex items-center px-2.5 py-1 text-[11px] leading-none whitespace-nowrap rounded-full',
         'bg-white',
         subtle
           ? 'ring-1 ring-inset ring-[rgba(10,10,12,0.10)] text-[color:var(--ink-3)]'
@@ -517,26 +505,6 @@ function modeLabel(m: ParseResult['mode']) {
   if (m === 'sell') return 'sell';
   return 'buy';
 }
-
-function mergeQuery(current: string, patch: string) {
-  const a = current.trim();
-  const b = patch.trim();
-  if (!a) return b;
-  if (!b) return a;
-
-  const aN = normalize(a);
-  const bN = normalize(b);
-  if (aN.includes(bN)) return a;
-
-  return `${a} ${b}`.trim();
-}
-
-type QuickAction = {
-  label: string;
-  hint: string;
-  patch: string;
-  icon: React.ReactNode;
-};
 
 const RECENTS_KEY = 'vantera.omni.recents.v1';
 
@@ -593,6 +561,8 @@ function pickCuratedCities(cities: OmniCity[], limit = 6): OmniCity[] {
   return picked.slice(0, limit);
 }
 
+type Variant = 'hero' | 'compact';
+
 export default function VanteraOmniSearch({
   cities,
   clusters,
@@ -601,6 +571,7 @@ export default function VanteraOmniSearch({
   className,
   autoFocus = false,
   limit = 7,
+  variant = 'hero',
 }: {
   cities: OmniCity[];
   clusters: OmniRegionCluster[];
@@ -609,6 +580,7 @@ export default function VanteraOmniSearch({
   className?: string;
   autoFocus?: boolean;
   limit?: number;
+  variant?: Variant;
 }) {
   const router = useRouter();
 
@@ -619,10 +591,10 @@ export default function VanteraOmniSearch({
   const [q, setQ] = useState('');
   const [active, setActive] = useState(0);
   const [recents, setRecents] = useState<string[]>([]);
-  const [showRefine, setShowRefine] = useState(false);
 
-  // Dropdown placement (prevents hero clipping + keeps it “attached”)
-  const [dropTop, setDropTop] = useState<number>(0);
+  // Portal positioning (fixed, but aligned to input rect)
+  const [dock, setDock] = useState<{ left: number; top: number; width: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const listboxId = `${id}-listbox`;
 
@@ -654,28 +626,11 @@ export default function VanteraOmniSearch({
 
   const interpretationLine = useMemo(() => buildInterpretationLine(parse), [parse]);
 
-  const quick: QuickAction[] = useMemo(
-    () => [
-      { label: 'villa', hint: 'space, gardens, privacy', patch: 'villa', icon: <Home className="h-4 w-4" /> },
-      { label: 'apartment', hint: 'lock up and go', patch: 'apartment', icon: <Building2 className="h-4 w-4" /> },
-      { label: 'penthouse', hint: 'views, terraces', patch: 'penthouse', icon: <Building2 className="h-4 w-4" /> },
-      { label: 'sea view', hint: 'primary view filter', patch: 'sea view', icon: <Waves className="h-4 w-4" /> },
-      { label: 'waterfront', hint: 'on the water line', patch: 'waterfront', icon: <Waves className="h-4 w-4" /> },
-      { label: 'gated', hint: 'controlled access', patch: 'gated', icon: <Shield className="h-4 w-4" /> },
-      { label: 'privacy', hint: 'low exposure', patch: 'privacy', icon: <Shield className="h-4 w-4" /> },
-      { label: 'new build', hint: 'modern stock', patch: 'new build', icon: <Sparkles className="h-4 w-4" /> },
-      { label: 'golf', hint: 'near courses', patch: 'golf', icon: <Sparkles className="h-4 w-4" /> },
-      { label: 'schools', hint: 'family safe', patch: 'schools', icon: <Sparkles className="h-4 w-4" /> },
-    ],
-    [],
-  );
-
   function runSearch() {
     const raw = q.trim();
     const href = raw ? buildSearchHref(parse) : '/search';
     if (raw) pushRecent(raw);
     setOpen(false);
-    setShowRefine(false);
     router.push(href);
   }
 
@@ -684,16 +639,7 @@ export default function VanteraOmniSearch({
     setOpen(true);
   }
 
-  useEffect(() => {
-    const onFocus = () => focusAndOpen();
-    window.addEventListener('vantera:focus-search', onFocus as any);
-    window.addEventListener('locus:focus-search', onFocus as any);
-    return () => {
-      window.removeEventListener('vantera:focus-search', onFocus as any);
-      window.removeEventListener('locus:focus-search', onFocus as any);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -711,12 +657,12 @@ export default function VanteraOmniSearch({
 
       if (e.key === 'Escape') {
         setOpen(false);
-        setShowRefine(false);
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -735,7 +681,6 @@ export default function VanteraOmniSearch({
       const root = rootRef.current;
       if (root && root.contains(t)) return;
       setOpen(false);
-      setShowRefine(false);
     };
 
     window.addEventListener('mousedown', onDown, { passive: true });
@@ -746,13 +691,29 @@ export default function VanteraOmniSearch({
     };
   }, [open]);
 
-  // Measure position so dropdown is “attached” but not clipped by hero overflow
+  // Measure rect + keep synced on scroll/resize
   useEffect(() => {
     if (!open) return;
-    const el = rootRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    setDropTop(Math.round(r.bottom + 8));
+
+    const measure = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setDock({
+        left: Math.round(r.left),
+        top: Math.round(r.bottom + 10),
+        width: Math.round(r.width),
+      });
+    };
+
+    measure();
+
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('scroll', measure, { passive: true });
+    return () => {
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure);
+    };
   }, [open, q]);
 
   const hits = useMemo(() => {
@@ -762,7 +723,7 @@ export default function VanteraOmniSearch({
     const searchHit: PlaceHit = {
       kind: 'search',
       slug: 'search',
-      title: raw ? 'open search' : 'start search',
+      title: raw ? 'Search results' : 'Open search',
       subtitle: raw ? `results for “${raw}”` : 'type a city + wishline',
       score: 1000,
       reasons: [
@@ -830,7 +791,7 @@ export default function VanteraOmniSearch({
   }, [hits]);
 
   function onInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!open) return;
+    if (!open) setOpen(true);
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -843,7 +804,7 @@ export default function VanteraOmniSearch({
       return;
     }
 
-    // ENTER always runs a search (never “random row”)
+    // ENTER always runs a search
     if (e.key === 'Enter') {
       e.preventDefault();
       runSearch();
@@ -857,57 +818,179 @@ export default function VanteraOmniSearch({
   function clear() {
     setQ('');
     setActive(0);
-    setShowRefine(false);
     focusAndOpen();
-  }
-
-  function applyQuick(patch: string) {
-    setQ((cur) => mergeQuery(cur, patch));
-    setOpen(true);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
-  }
-
-  function setMode(next: ParseResult['mode']) {
-    setQ((cur) => {
-      const tokens = tokenize(cur);
-      const filtered = tokens.filter(
-        (t) =>
-          t !== 'rent' &&
-          t !== 'rental' &&
-          t !== 'lease' &&
-          t !== 'sell' &&
-          t !== 'selling' &&
-          t !== 'list',
-      );
-      if (next === 'rent') filtered.unshift('rent');
-      if (next === 'sell') filtered.unshift('sell');
-      return filtered.join(' ').trim();
-    });
-    setOpen(true);
-    window.setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   const activeId = hits[active] ? `${id}-opt-${active}` : undefined;
 
+  const HERO_BAR =
+    'relative w-full overflow-hidden rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)] ' +
+    'shadow-[0_22px_70px_rgba(11,12,16,0.12)]';
+
+  const COMPACT_BAR =
+    'relative w-full overflow-hidden rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)] ' +
+    'shadow-[0_18px_55px_rgba(11,12,16,0.10)]';
+
+  const isHero = variant === 'hero';
+
+  const dropdown = open && dock ? (
+    <div
+      className={cx(
+        'fixed z-[9999]',
+        open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+        'transition duration-150',
+        open ? 'translate-y-0 scale-[1.0]' : 'translate-y-1 scale-[0.985]',
+      )}
+      style={{ left: dock.left, top: dock.top, width: dock.width }}
+    >
+      <div
+        className={cx(
+          'relative overflow-hidden rounded-[20px]',
+          'bg-white/96 backdrop-blur-[14px]',
+          'ring-1 ring-inset ring-[color:var(--hairline)]',
+          'shadow-[0_26px_95px_rgba(11,12,16,0.14)]',
+        )}
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
+
+        {/* Top bar */}
+        <div className="relative flex items-center justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-3">
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SEARCH</div>
+            <div className="mt-1 flex flex-wrap items-center gap-2">
+              <Chip subtle>{modeLabel(parse.mode)}</Chip>
+              {parse.placeQuery ? <Chip subtle>{parse.placeQuery}</Chip> : <Chip subtle>any market</Chip>}
+              {parse.budgetMax ? <Chip subtle>max {formatMoney(parse.budgetMax)}</Chip> : <Chip subtle>no max</Chip>}
+              {parse.bedroomsMin ? <Chip subtle>{parse.bedroomsMin}+ beds</Chip> : <Chip subtle>any beds</Chip>}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className={cx(
+              'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
+              'bg-white hover:bg-white',
+              'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
+              'text-[color:var(--ink-2)]',
+            )}
+          >
+            <X className="h-4 w-4 opacity-70" />
+            close
+          </button>
+        </div>
+
+        {/* Results */}
+        <div className="relative p-2">
+          <div id={listboxId} role="listbox" className="max-h-[340px] overflow-auto p-1">
+            {hits.length === 0 ? (
+              <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
+                no strong signals yet. add a city or a budget.
+              </div>
+            ) : (
+              <div className="grid gap-1.5">
+                {slimList.map((row) => {
+                  const h = row.item;
+                  const idxHit = hits.findIndex((x) => x === h);
+                  const selected = idxHit === active;
+                  const optId = `${id}-opt-${idxHit}`;
+                  const isPrimary = h.kind === 'search';
+
+                  return (
+                    <React.Fragment key={`${h.kind}:${h.slug}:${h.href}`}>
+                      {row.label ? (
+                        <div className="px-2 pt-2 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">
+                          {row.label}
+                        </div>
+                      ) : null}
+
+                      <Link
+                        href={h.href}
+                        prefetch
+                        id={optId}
+                        role="option"
+                        aria-selected={selected}
+                        onMouseEnter={() => setActive(idxHit)}
+                        onClick={() => {
+                          if (h.kind === 'search') pushRecent(q.trim());
+                          if (h.kind === 'recent') pushRecent(h.title);
+                          setOpen(false);
+                        }}
+                        className={cx(
+                          'group relative rounded-2xl px-3 py-2.5 transition',
+                          'bg-white hover:bg-white',
+                          'ring-1 ring-inset ring-[color:var(--hairline)]',
+                          selected && 'ring-[color:var(--hairline-2)] shadow-[0_14px_50px_rgba(11,12,16,0.08)]',
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-3">
+                              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
+                                {iconFor(h)}
+                              </span>
+
+                              <div className="min-w-0">
+                                <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
+                                  {h.title}
+                                </div>
+                                <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
+                              </div>
+                            </div>
+
+                            {h.reasons.length ? (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {h.reasons.slice(0, 2).map((r) => (
+                                  <span
+                                    key={r}
+                                    className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
+                                  >
+                                    {r}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <span
+                            className={cx(
+                              'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] ring-1 ring-inset transition',
+                              isPrimary
+                                ? 'bg-[rgba(10,10,12,0.94)] text-white ring-[rgba(10,10,12,0.0)]'
+                                : 'bg-white text-[color:var(--ink-2)] ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)]',
+                            )}
+                          >
+                            open <ArrowRight className={cx('h-4 w-4', isPrimary ? 'opacity-90' : 'opacity-70')} />
+                          </span>
+                        </div>
+                      </Link>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="relative border-t border-[color:var(--hairline)] px-4 py-3 text-[11px] text-[color:var(--ink-3)]">
+          press <span className="font-mono text-[color:var(--ink-2)]">/</span> to focus.
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div ref={rootRef} className={cx('relative w-full', className)}>
       {/* Input */}
-      <div
-        className={cx(
-          'relative w-full overflow-hidden rounded-full',
-          'bg-white',
-          'ring-1 ring-inset ring-[color:var(--hairline)]',
-          'shadow-[0_18px_55px_rgba(11,12,16,0.10)]',
-        )}
-      >
+      <div className={cx(isHero ? HERO_BAR : COMPACT_BAR)}>
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(231,201,130,0.55)] to-transparent opacity-70" />
           <div className="absolute inset-0 bg-[radial-gradient(980px_220px_at_18%_0%,rgba(231,201,130,0.08),transparent_62%)]" />
         </div>
 
-        <div className="relative flex items-center gap-3 px-4 py-3 sm:px-5">
-          <div className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-            <Sparkles className="h-4 w-4 text-[color:var(--ink-2)]" />
+        <div className={cx('relative flex items-center', isHero ? 'gap-3 px-4 py-3 sm:px-5 sm:py-4' : 'gap-3 px-4 py-3 sm:px-5')}>
+          <div className={cx('inline-flex items-center justify-center rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)]', isHero ? 'h-10 w-10' : 'h-9 w-9')}>
+            <Sparkles className={cx('text-[color:var(--ink-2)]', isHero ? 'h-5 w-5' : 'h-4 w-4')} />
           </div>
 
           <div className="min-w-0 flex-1">
@@ -924,7 +1007,8 @@ export default function VanteraOmniSearch({
               placeholder={placeholder}
               className={cx(
                 'w-full bg-transparent outline-none',
-                'text-[15px] text-[color:var(--ink)]',
+                isHero ? 'text-[16px] sm:text-[18px]' : 'text-[15px]',
+                'text-[color:var(--ink)]',
                 'placeholder:text-[color:rgba(11,12,16,0.38)]',
               )}
               autoComplete="off"
@@ -935,323 +1019,51 @@ export default function VanteraOmniSearch({
               aria-activedescendant={activeId}
             />
 
-            {open ? (
+            {isHero && open ? (
               <div className="mt-1.5 flex items-center gap-2 text-[11px] text-[color:var(--ink-3)]">
                 <span className="truncate">{interpretationLine}</span>
               </div>
             ) : null}
           </div>
 
-          {/* Desktop actions */}
-          <div className="hidden items-center gap-2 sm:flex">
+          {/* Clear (only when typing) */}
+          {q ? (
             <button
               type="button"
-              onClick={runSearch}
+              onClick={clear}
               className={cx(
-                'inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold transition',
-                'bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1)]',
-                'shadow-[0_14px_44px_rgba(10,10,12,0.14)] hover:shadow-[0_18px_62px_rgba(206,160,74,0.18)]',
+                'inline-flex items-center justify-center rounded-full bg-white ring-1 ring-inset ring-[color:var(--hairline)] text-[color:var(--ink-2)] transition hover:ring-[color:var(--hairline-2)]',
+                isHero ? 'h-10 w-10' : 'h-9 w-9',
               )}
-              aria-label="Search"
+              aria-label="Clear"
+              title="Clear"
             >
-              <Search className="h-4 w-4 opacity-90" />
-              search
+              <X className={cx('opacity-75', isHero ? 'h-5 w-5' : 'h-4 w-4')} />
             </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(true);
-                setShowRefine((v) => !v);
-                window.setTimeout(() => inputRef.current?.focus(), 0);
-              }}
-              className={cx(
-                'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
-                'bg-white hover:bg-white',
-                'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                'text-[color:var(--ink-2)]',
-              )}
-              aria-label="Refine"
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5 opacity-70" />
-              refine
-            </button>
-
-            <div className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 ring-1 ring-inset ring-[color:var(--hairline)] text-[11px] text-[color:var(--ink-3)]">
-              <Command className="h-3.5 w-3.5 opacity-70" />
-              <span className="font-mono text-[color:var(--ink-2)]">/</span>
-            </div>
-
-            {q ? (
-              <button
-                type="button"
-                onClick={clear}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] transition',
-                  'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                  'text-[color:var(--ink-2)]',
-                )}
-              >
-                <X className="h-3.5 w-3.5 opacity-70" />
-                clear
-              </button>
-            ) : null}
-          </div>
-
-          {/* Mobile actions */}
-          <div className="flex items-center gap-2 sm:hidden">
-            <button
-              type="button"
-              onClick={runSearch}
-              className={cx(
-                'inline-flex items-center justify-center rounded-full px-4 py-2 text-[12px] font-semibold transition',
-                'bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1)]',
-                'shadow-[0_14px_44px_rgba(10,10,12,0.14)]',
-              )}
-              aria-label="Search"
-            >
-              <Search className="h-4 w-4 opacity-90" />
-            </button>
-
-            {q ? (
-              <button
-                type="button"
-                onClick={clear}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[12px] transition',
-                  'bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)]',
-                  'text-[color:var(--ink-2)]',
-                )}
-              >
-                <X className="h-4 w-4 opacity-70" />
-                clear
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      {/* Dropdown */}
-      <div
-        className={cx(
-          'fixed left-1/2 z-[9999] mt-2 w-[min(980px,calc(100vw-24px))] -translate-x-1/2',
-          open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
-          'transition duration-150',
-          open ? 'translate-y-0 scale-[1.0]' : 'translate-y-1 scale-[0.985]',
-        )}
-        style={{ top: dropTop }}
-      >
-        <div
-          className={cx(
-            'relative overflow-hidden rounded-[20px]',
-            'bg-white/96 backdrop-blur-[14px]',
-            'ring-1 ring-inset ring-[color:var(--hairline)]',
-            'shadow-[0_26px_95px_rgba(11,12,16,0.14)]',
-          )}
-        >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_260px_at_50%_0%,rgba(231,201,130,0.10),transparent_62%)]" />
-
-          {/* Top bar */}
-          <div className="relative flex items-center justify-between gap-3 border-b border-[color:var(--hairline)] px-4 py-3">
-            <div className="min-w-0">
-              <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">SEARCH</div>
-              <div className="mt-1 flex flex-wrap items-center gap-2">
-                <Chip subtle>{modeLabel(parse.mode)}</Chip>
-                {parse.placeQuery ? <Chip subtle>{parse.placeQuery}</Chip> : <Chip subtle>any market</Chip>}
-                {parse.budgetMax ? <Chip subtle>max {formatMoney(parse.budgetMax)}</Chip> : <Chip subtle>no max</Chip>}
-                {parse.bedroomsMin ? <Chip subtle>{parse.bedroomsMin}+ beds</Chip> : <Chip subtle>any beds</Chip>}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="hidden sm:inline-flex rounded-full bg-white p-1 ring-1 ring-inset ring-[color:var(--hairline)]">
-                {(['buy', 'rent', 'sell'] as const).map((m) => {
-                  const activeMode = parse.mode === m;
-                  const icon =
-                    m === 'buy' ? (
-                      <Sparkles className="h-4 w-4 opacity-75" />
-                    ) : m === 'rent' ? (
-                      <Home className="h-4 w-4 opacity-75" />
-                    ) : (
-                      <ArrowRight className="h-4 w-4 opacity-75" />
-                    );
-
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setMode(m)}
-                      className={cx(
-                        'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                        activeMode
-                          ? 'bg-white ring-1 ring-inset ring-[color:var(--hairline-2)]'
-                          : 'bg-transparent hover:bg-white',
-                        'text-[color:var(--ink-2)]',
-                      )}
-                    >
-                      {icon}
-                      {m}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setOpen(false);
-                  setShowRefine(false);
-                }}
-                className={cx(
-                  'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] transition',
-                  'bg-white hover:bg-white',
-                  'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                  'text-[color:var(--ink-2)]',
-                )}
-              >
-                <X className="h-4 w-4 opacity-70" />
-                close
-              </button>
-            </div>
-          </div>
-
-          {/* Refine row */}
-          {showRefine ? (
-            <div className="relative border-b border-[color:var(--hairline)] px-4 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">REFINE</div>
-                <button
-                  type="button"
-                  onClick={() => setShowRefine(false)}
-                  className="text-[11px] text-[color:var(--ink-3)] hover:text-[color:var(--ink-2)]"
-                >
-                  hide
-                </button>
-              </div>
-
-              <div className="mt-2 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {quick.map((x) => (
-                  <button
-                    key={x.label}
-                    type="button"
-                    onClick={() => applyQuick(x.patch)}
-                    className={cx(
-                      'group inline-flex items-center gap-2 whitespace-nowrap px-3 py-2 text-[11px] font-semibold transition',
-                      'bg-white hover:bg-white',
-                      'ring-1 ring-inset ring-[color:var(--hairline)] hover:ring-[color:var(--hairline-2)]',
-                      'text-[color:var(--ink-2)]',
-                    )}
-                    title={x.hint}
-                  >
-                    <span className="opacity-70">{x.icon}</span>
-                    {x.label}
-                  </button>
-                ))}
-              </div>
-            </div>
           ) : null}
 
-          {/* Results */}
-          <div className="relative p-2">
-            <div id={listboxId} role="listbox" className="max-h-[320px] overflow-auto p-1">
-              {hits.length === 0 ? (
-                <div className="rounded-2xl bg-white px-4 py-4 ring-1 ring-inset ring-[color:var(--hairline)] text-sm text-[color:var(--ink-2)]">
-                  no strong signals yet. add a city or a budget.
-                </div>
-              ) : (
-                <div className="grid gap-1.5">
-                  {slimList.map((row) => {
-                    const h = row.item;
-                    const idxHit = hits.findIndex((x) => x === h);
-                    const selected = idxHit === active;
-                    const optId = `${id}-opt-${idxHit}`;
-                    const isPrimary = h.kind === 'search';
-
-                    return (
-                      <React.Fragment key={`${h.kind}:${h.slug}:${h.href}`}>
-                        {row.label ? (
-                          <div className="px-2 pt-2 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">
-                            {row.label}
-                          </div>
-                        ) : null}
-
-                        <Link
-                          href={h.href}
-                          prefetch
-                          id={optId}
-                          role="option"
-                          aria-selected={selected}
-                          onMouseEnter={() => setActive(idxHit)}
-                          onMouseDown={() => setOpen(true)}
-                          onClick={() => {
-                            if (h.kind === 'search') pushRecent(q.trim());
-                            if (h.kind === 'recent') pushRecent(h.title);
-                            setOpen(false);
-                            setShowRefine(false);
-                          }}
-                          className={cx(
-                            'group relative rounded-2xl px-3 py-2.5 transition',
-                            'bg-white hover:bg-white',
-                            'ring-1 ring-inset ring-[color:var(--hairline)]',
-                            selected && 'ring-[color:var(--hairline-2)] shadow-[0_14px_50px_rgba(11,12,16,0.08)]',
-                          )}
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-3">
-                                <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white ring-1 ring-inset ring-[color:var(--hairline)]">
-                                  {iconFor(h)}
-                                </span>
-
-                                <div className="min-w-0">
-                                  <div className="truncate text-[13px] font-semibold text-[color:var(--ink)]">
-                                    {h.title}
-                                  </div>
-                                  <div className="truncate text-[11px] text-[color:var(--ink-3)]">{h.subtitle}</div>
-                                </div>
-                              </div>
-
-                              {h.reasons.length ? (
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                  {h.reasons.slice(0, 2).map((r) => (
-                                    <span
-                                      key={r}
-                                      className="inline-flex items-center rounded-full bg-white px-2.5 py-1 text-[11px] text-[color:var(--ink-2)] ring-1 ring-inset ring-[color:var(--hairline)]"
-                                    >
-                                      {r}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : null}
-                            </div>
-
-                            <span
-                              className={cx(
-                                'inline-flex items-center gap-2 rounded-full px-3 py-2 text-[11px] ring-1 ring-inset transition',
-                                isPrimary
-                                  ? 'bg-[rgba(10,10,12,0.94)] text-white ring-[rgba(10,10,12,0.0)]'
-                                  : 'bg-white text-[color:var(--ink-2)] ring-[color:var(--hairline)] group-hover:ring-[color:var(--hairline-2)]',
-                              )}
-                            >
-                              open <ArrowRight className={cx('h-4 w-4', isPrimary ? 'opacity-90' : 'opacity-70')} />
-                            </span>
-                          </div>
-                        </Link>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="relative border-t border-[color:var(--hairline)] px-4 py-3 text-[11px] text-[color:var(--ink-3)]">
-            press <span className="font-mono text-[color:var(--ink-2)]">/</span> to focus.
-          </div>
+          {/* JE-style Search button (always visible on desktop) */}
+          <button
+            type="button"
+            onClick={runSearch}
+            className={cx(
+              'ml-1 inline-flex items-center justify-center font-semibold transition',
+              'bg-[rgba(10,10,12,0.94)] text-white hover:bg-[rgba(10,10,12,1)]',
+              'shadow-[0_16px_56px_rgba(10,10,12,0.16)]',
+              isHero
+                ? 'rounded-full px-6 py-3 text-[14px] sm:px-7 sm:py-3.5 sm:text-[15px]'
+                : 'rounded-full px-4 py-2 text-[11px]',
+            )}
+            aria-label="Search"
+          >
+            <span className="hidden sm:inline">Search</span>
+            <Search className={cx('sm:hidden', isHero ? 'h-5 w-5' : 'h-4 w-4')} />
+          </button>
         </div>
       </div>
+
+      {/* Dropdown (portal aligned to input) */}
+      {mounted ? createPortal(dropdown, document.body) : null}
     </div>
   );
 }
