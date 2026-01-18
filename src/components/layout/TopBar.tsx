@@ -398,7 +398,7 @@ export default function TopBar() {
             <div className="relative">
               <Image
                 // Your file is in /public/images/brand/ (not /public/brand/)
-                src="/images/brand/vantera-logo-light.svg"
+                src="/images/brand/vantera-landscape-black.svg"
                 alt="Vantera"
                 width={420}
                 height={120}
