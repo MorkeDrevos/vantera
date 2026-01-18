@@ -1,47 +1,32 @@
-// src/app/api/blob/upload/route.ts
+// src/app/api/blob/put/route.ts
 import { NextResponse } from 'next/server';
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request): Promise<NextResponse> {
-  const body = (await request.json()) as HandleUploadBody;
-
+export async function POST(request: Request) {
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request, // ✅ THIS is the fix (was `req`)
+    const pathname = request.headers.get('x-vantera-pathname') || '';
+    if (!pathname) throw new Error('Missing x-vantera-pathname');
 
-      // IMPORTANT: lock this down to your own usage
-      onBeforeGenerateToken: async (pathname) => {
-        const allowed =
-          pathname.startsWith('hero/homepage/') ||
-          pathname.startsWith('images/heroes/');
+    const allowed =
+      pathname.startsWith('hero/homepage/') ||
+      pathname.startsWith('images/heroes/');
 
-        if (!allowed) {
-          throw new Error('Path not allowed');
-        }
+    if (!allowed) throw new Error('Path not allowed');
 
-        return {
-          allowedContentTypes: [
-            'video/mp4',
-            'video/webm',
-            'image/jpeg',
-            'image/png',
-            'image/webp',
-          ],
-          tokenPayload: JSON.stringify({ scope: 'operations-media' }),
-        };
-      },
+    const contentType =
+      request.headers.get('content-type') || 'application/octet-stream';
 
-      onUploadCompleted: async ({ blob }) => {
-        void blob;
-        // Optional: log, notify, or write to Prisma here
-      },
+    const blob = await request.blob();
+
+    const uploaded = await put(pathname, blob, {
+      access: 'public',
+      contentType,
     });
 
-    return NextResponse.json(jsonResponse);
+    return NextResponse.json(uploaded);
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || 'Upload failed' },
