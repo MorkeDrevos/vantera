@@ -56,57 +56,6 @@ const BTN_SECONDARY =
   'border border-[rgba(10,10,12,0.12)] bg-white text-[color:var(--ink)] hover:border-[rgba(10,10,12,0.22)] ' +
   'shadow-[0_10px_40px_rgba(10,10,12,0.05)] hover:shadow-[0_16px_60px_rgba(10,10,12,0.06)]';
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
-
-// Deterministic hash from string -> 32-bit
-function hash32(input: string) {
-  let h = 2166136261;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-function makeModelledSignals(city: HeroCity) {
-  const h = hash32(`${city.slug}|${city.country}`);
-  // 0..1
-  const r1 = ((h & 0xffff) / 0xffff) || 0.42;
-  const r2 = (((h >>> 16) & 0xffff) / 0xffff) || 0.63;
-
-  // Liquidity: 52..92 (mostly "mid-strong")
-  const liquidity = Math.round(clamp(52 + r1 * 42, 0, 100));
-
-  // Risk: 18..68 (mostly low-mid)
-  const risk = Math.round(clamp(18 + r2 * 50, 0, 100));
-
-  // Verified supply: 26..420 (compact + believable)
-  const verifiedSupply = Math.round(26 + (r1 * 180 + r2 * 220));
-
-  // Median €/sqm: 6,500..28,500 (luxury ranges)
-  const medianEurSqm = Math.round(6500 + (r2 * 14000 + r1 * 8000));
-
-  return { liquidity, risk, verifiedSupply, medianEurSqm };
-}
-
-function hasAnySignals(s?: HeroCity['signals'] | null) {
-  if (!s) return false;
-  return (
-    typeof s.liquidity === 'number' ||
-    typeof s.risk === 'number' ||
-    typeof s.verifiedSupply === 'number' ||
-    typeof s.medianEurSqm === 'number'
-  );
-}
-
-function getSignals(city: HeroCity | null) {
-  if (!city) return { signals: null as any, isModelled: false };
-  if (hasAnySignals(city.signals)) return { signals: city.signals!, isModelled: false };
-  return { signals: makeModelledSignals(city), isModelled: true };
-}
-
 function formatCompactNumber(n?: number | null) {
   if (n === null || n === undefined) return '—';
   const v = Number(n);
@@ -121,13 +70,11 @@ function scoreLabel(v?: number | null, kind?: 'liquidity' | 'risk') {
   const n = Number(v);
   if (!Number.isFinite(n)) return '—';
   const x = Math.round(n);
-
   if (kind === 'risk') {
     if (x <= 25) return 'low';
     if (x <= 55) return 'mid';
     return 'high';
   }
-
   if (x >= 75) return 'strong';
   if (x >= 45) return 'mid';
   return 'thin';
@@ -232,12 +179,10 @@ export default function HeroPortalSection({
     };
   }, [idx, list]);
 
-  const { signals: resolvedSignals, isModelled } = useMemo(() => getSignals(active), [active]);
-
   const overlaySignals = useMemo(() => {
-    const s = resolvedSignals;
-    if (!s) return [];
+    if (!active?.signals) return [];
 
+    const s = active.signals;
     const out: Array<{ label: string; value: string }> = [];
 
     if (typeof s.liquidity === 'number')
@@ -248,7 +193,7 @@ export default function HeroPortalSection({
     if (typeof s.medianEurSqm === 'number') out.push({ label: '€/SQM', value: `€${formatCompactNumber(s.medianEurSqm)}` });
 
     return out.slice(0, 4);
-  }, [resolvedSignals]);
+  }, [active]);
 
   const h1 = 'A luxury marketplace built on intelligence';
   const sub =
@@ -328,9 +273,8 @@ export default function HeroPortalSection({
                   />
                 )}
 
-                {/* Softer veils (less foggy) */}
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.78),rgba(255,255,255,0.44),rgba(255,255,255,0.16))]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.10),rgba(255,255,255,0.05),rgba(255,255,255,0.92))]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.88),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.14),rgba(255,255,255,0.06),rgba(255,255,255,0.92))]" />
               </div>
             ) : null}
           </div>
@@ -365,97 +309,79 @@ export default function HeroPortalSection({
             </div>
           ) : null}
 
-          {/* Hero content */}
-          <div className="pb-10 pt-10 sm:pb-12 sm:pt-12">
-            <div className="max-w-[980px]">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
-                  MARKETPLACE
-                </span>
-                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
-                  TRUTH LAYER
-                </span>
-                <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
-                  EDITORIAL
-                </span>
+          {/* HERO CONTENT */}
+          <div className="pb-12 pt-10 sm:pb-14 sm:pt-12">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                MARKETPLACE
+              </span>
+              <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                TRUTH LAYER
+              </span>
+              <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
+                EDITORIAL
+              </span>
+            </div>
+
+            <h1 className="mt-7 max-w-[20ch] text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[64px] lg:leading-[0.98]">
+              {h1}
+            </h1>
+
+            <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
+
+            <p className="mt-5 max-w-[78ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
+              {sub}
+            </p>
+
+            {/* ⭐ SEARCH STAR (UNDER H1) */}
+            <div className="mt-7 max-w-[1180px]">
+              <div className="mb-2 text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                SEARCH ATELIER
               </div>
 
-              <h1 className="mt-7 text-balance text-[40px] font-semibold tracking-[-0.055em] text-[color:var(--ink)] sm:text-[52px] lg:text-[64px] lg:leading-[0.98]">
-                {h1}
-              </h1>
+              <VanteraOmniSearch
+                variant="hero"
+                cities={list.map((c) => ({
+                  slug: c.slug,
+                  name: c.name,
+                  country: c.country,
+                  region: null,
+                  tz: 'UTC',
+                  priority: 0,
+                }))}
+                clusters={safeClusters}
+                placeholder="marbella sea view villa under €5m"
+                autoFocus={false}
+              />
 
-              <div className="mt-5 h-px w-28 bg-gradient-to-r from-[rgba(206,160,74,0.95)] to-transparent" />
-
-              <p className="mt-5 max-w-[72ch] text-pretty text-[15px] leading-relaxed text-[color:var(--ink-2)] sm:text-[18px]">
-                {sub}
-              </p>
-
-              {/* HERO SEARCH - bigger, no focus jump */}
-              <div className="mt-7">
-                <div className="w-full max-w-[1240px]">
-                  <VanteraOmniSearch
-                    cities={list.map((c) => ({
-                      slug: c.slug,
-                      name: c.name,
-                      country: c.country,
-                      region: null,
-                      tz: 'UTC',
-                      priority: 0,
-                    }))}
-                    clusters={safeClusters}
-                    placeholder="City, region, country, budget, lifestyle"
-                    autoFocus={false}
-                    className={cx(
-                      'w-full',
-                      // Scoped sizing + "no jump" focus lock:
-                      // - increase input height and font
-                      // - ensure focus does NOT change border width, padding, or typography
-                      '[&_input]:h-16 [&_input]:px-6 [&_input]:text-[18px] [&_input]:leading-[1.25]',
-                      '[&_input]:border [&_input]:border-[rgba(10,10,12,0.12)]',
-                      '[&_input:focus]:border-[rgba(10,10,12,0.12)]',
-                      '[&_input:focus]:outline-none [&_input:focus]:ring-0 [&_input:focus]:shadow-none',
-                      '[&_input::placeholder]:text-[color:var(--ink-3)]',
-                    )}
-                  />
-                </div>
-
-                <div className="mt-3 text-[11px] text-[color:var(--ink-3)]">
-                  Try: <span className="text-[color:var(--ink-2)]">“Monaco penthouse under €12m sea view”</span>
-                </div>
+              <div className="mt-2 text-[11px] text-[color:var(--ink-3)]">
+                Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere.
               </div>
+            </div>
 
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link href="/marketplace" className={BTN_PRIMARY}>
-                  Browse marketplace
-                </Link>
-                <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
-                  List privately
-                </Link>
-              </div>
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link href="/marketplace" className={BTN_PRIMARY}>
+                Browse marketplace
+              </Link>
+              <Link href="/coming-soon?flow=sell" className={BTN_SECONDARY}>
+                List privately
+              </Link>
             </div>
           </div>
 
-          {/* Featured city + controls row */}
+          {/* FOOTER STRIP */}
           <div className="pb-12 sm:pb-14">
             <div className="relative">
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
 
               <div className="flex items-end justify-between gap-6">
-                <div className="max-w-[760px]">
+                <div className="max-w-[720px]">
                   <div className="relative inline-block overflow-hidden border border-[rgba(10,10,12,0.14)] bg-white/92 px-4 py-3 backdrop-blur-[10px] shadow-[0_26px_90px_rgba(10,10,12,0.10)]">
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[rgba(206,160,74,0.55)] to-transparent" />
                     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(520px_220px_at_18%_0%,rgba(206,160,74,0.07),transparent_62%)]" />
 
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
-                        FEATURED CITY
-                      </div>
-
-                      {isModelled ? (
-                        <span className="inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white px-2 py-1 text-[10px] font-semibold tracking-[0.22em] text-[color:var(--ink-3)]">
-                          MODELLED
-                        </span>
-                      ) : null}
+                    <div className="text-[10px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">
+                      FEATURED CITY
                     </div>
 
                     <div className="mt-1 text-[14px] font-semibold tracking-[-0.01em] text-[color:var(--ink)]">
@@ -463,11 +389,19 @@ export default function HeroPortalSection({
                       {active ? <span className="text-[color:var(--ink-3)]"> · {active.country}</span> : null}
                     </div>
 
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {overlaySignals.map((x) => (
-                        <SignalChip key={`${x.label}:${x.value}`} label={x.label} value={x.value} />
-                      ))}
-                    </div>
+                    {overlaySignals.length ? (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {overlaySignals.map((x) => (
+                          <SignalChip key={`${x.label}:${x.value}`} label={x.label} value={x.value} />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <SignalChip label="LIQ" value="—" />
+                        <SignalChip label="RISK" value="—" />
+                        <SignalChip label="VER" value="—" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-3 hidden sm:block">
@@ -483,7 +417,6 @@ export default function HeroPortalSection({
                   </div>
                 </div>
 
-                {/* Controls - premium, desktop only. Dots removed (img1). */}
                 <div className="hidden sm:flex items-center gap-2">
                   <button
                     type="button"
@@ -512,6 +445,26 @@ export default function HeroPortalSection({
                     Next
                     <ChevronRight className="h-4 w-4 opacity-70" />
                   </button>
+
+                  <div className="ml-2 flex items-center gap-2 border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-2 backdrop-blur-[10px]">
+                    {list.slice(0, 8).map((_, i) => {
+                      const activeDot = i === idx;
+                      return (
+                        <button
+                          key={`dot-${i}`}
+                          type="button"
+                          onClick={() => go(i)}
+                          className={cx(
+                            'h-1.5 w-1.5 transition',
+                            activeDot
+                              ? 'bg-[rgba(10,10,12,0.72)]'
+                              : 'bg-[rgba(10,10,12,0.20)] hover:bg-[rgba(10,10,12,0.36)]',
+                          )}
+                          aria-label={`Go to slide ${i + 1}`}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
