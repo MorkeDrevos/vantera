@@ -2,8 +2,14 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PutBlobResult } from '@vercel/blob';
-import { upload } from '@vercel/blob/client';
+
+type UploadedBlob = {
+  url: string;
+  pathname: string;
+  contentType?: string;
+  contentDisposition?: string;
+  size?: number;
+};
 
 type RecentItem = {
   url: string;
@@ -39,12 +45,39 @@ function saveRecent(items: RecentItem[]) {
   }
 }
 
+function sanitizeFilename(name: string) {
+  // keep it deterministic + URL-safe-ish
+  return name
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-zA-Z0-9._-]/g, '-')
+    .replace(/-+/g, '-');
+}
+
+async function uploadToBlobViaApi(file: File, pathname: string): Promise<UploadedBlob> {
+  const res = await fetch('/api/blob/put', {
+    method: 'POST',
+    headers: {
+      'content-type': file.type || 'application/octet-stream',
+      'x-vantera-pathname': pathname,
+    },
+    body: file,
+  });
+
+  if (!res.ok) {
+    const j = await res.json().catch(() => null);
+    throw new Error(j?.error || `Upload failed (${res.status})`);
+  }
+
+  return (await res.json()) as UploadedBlob;
+}
+
 export default function OperationsMediaPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [blob, setBlob] = useState<PutBlobResult | null>(null);
+  const [blob, setBlob] = useState<UploadedBlob | null>(null);
   const [recent, setRecent] = useState<RecentItem[]>([]);
 
   useEffect(() => {
@@ -73,14 +106,11 @@ export default function OperationsMediaPage() {
       const isVideo = file.type.startsWith('video/');
       const folder = isVideo ? 'hero/homepage' : 'images/heroes';
 
-      // Keep your naming clean and deterministic
-      const safeName = file.name.replace(/\s+/g, '-');
+      // Keep naming clean and deterministic
+      const safeName = sanitizeFilename(file.name);
       const pathname = `${folder}/${safeName}`;
 
-      const result = await upload(pathname, file, {
-        access: 'public',
-        handleUploadUrl: '/api/blob/upload',
-      });
+      const result = await uploadToBlobViaApi(file, pathname);
 
       setBlob(result);
 
@@ -95,6 +125,9 @@ export default function OperationsMediaPage() {
       const updated = [next, ...loadRecent()].slice(0, 50);
       setRecent(updated);
       saveRecent(updated);
+
+      // reset input so you can upload the same file again if needed
+      if (inputRef.current) inputRef.current.value = '';
     } catch (ex: any) {
       setErr(ex?.message || 'Upload failed');
     } finally {
@@ -112,8 +145,7 @@ export default function OperationsMediaPage() {
         <div className="text-xs font-semibold tracking-[0.28em] text-white/50">OPERATIONS</div>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Media uploads</h1>
         <p className="mt-2 text-sm text-zinc-300/90">
-          Upload hero videos and images to Vercel Blob. This bypasses GitHub’s 25MB web upload limit because files go
-          directly from your browser to Blob.
+          Upload hero videos and images to Vercel Blob. Files are sent to your server endpoint, then stored in Blob.
         </p>
       </div>
 
