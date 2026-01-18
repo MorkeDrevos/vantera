@@ -244,7 +244,10 @@ export default function HeroPortalSection({
               <div className="absolute inset-0">
                 {active.heroVideoSrc ? (
                   <video
-                    className={cx('h-full w-full object-cover transition-opacity duration-[520ms]', isFading ? 'opacity-0' : 'opacity-100')}
+                    className={cx(
+                      'h-full w-full object-cover transition-opacity duration-[520ms]',
+                      isFading ? 'opacity-0' : 'opacity-100',
+                    )}
                     autoPlay
                     muted
                     loop
@@ -263,12 +266,16 @@ export default function HeroPortalSection({
                     priority
                     sizes="100vw"
                     onLoad={() => markLoaded()}
-                    className={cx('object-cover transition-opacity duration-[520ms]', isFading ? 'opacity-0' : 'opacity-100')}
+                    className={cx(
+                      'object-cover transition-opacity duration-[520ms]',
+                      isFading ? 'opacity-0' : 'opacity-100',
+                    )}
                   />
                 )}
 
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.88),rgba(255,255,255,0.52),rgba(255,255,255,0.18))]" />
-                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.14),rgba(255,255,255,0.06),rgba(255,255,255,0.92))]" />
+                {/* Softer veils (less foggy) */}
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.78),rgba(255,255,255,0.44),rgba(255,255,255,0.16))]" />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.10),rgba(255,255,255,0.05),rgba(255,255,255,0.92))]" />
               </div>
             ) : null}
           </div>
@@ -303,8 +310,9 @@ export default function HeroPortalSection({
             </div>
           ) : null}
 
-          <div className="grid gap-10 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:grid-cols-12 lg:gap-12 lg:pb-16">
-            <div className="lg:col-span-7">
+          {/* Hero content */}
+          <div className="pb-10 pt-10 sm:pb-12 sm:pt-12">
+            <div className="max-w-[980px]">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="relative inline-flex items-center border border-[rgba(10,10,12,0.12)] bg-white/92 px-3 py-1.5 text-[11px] font-semibold tracking-[0.26em] text-[color:var(--ink-2)] backdrop-blur-[10px]">
                   MARKETPLACE
@@ -327,6 +335,30 @@ export default function HeroPortalSection({
                 {sub}
               </p>
 
+              {/* HERO SEARCH - wide, star of the show */}
+              <div className="mt-7">
+                <div className="w-full max-w-[1240px]">
+                  <VanteraOmniSearch
+                    cities={list.map((c) => ({
+                      slug: c.slug,
+                      name: c.name,
+                      country: c.country,
+                      region: null,
+                      tz: 'UTC',
+                      priority: 0,
+                    }))}
+                    clusters={safeClusters}
+                    placeholder="City, region, country, budget, lifestyle"
+                    autoFocus={false}
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="mt-3 text-[11px] text-[color:var(--ink-3)]">
+                  Try: <span className="text-[color:var(--ink-2)]">“Monaco penthouse under €12m sea view”</span>
+                </div>
+              </div>
+
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                 <Link href="/marketplace" className={BTN_PRIMARY}>
                   Browse marketplace
@@ -336,55 +368,9 @@ export default function HeroPortalSection({
                 </Link>
               </div>
             </div>
-
-            <div className="lg:col-span-5">
-              <div
-                className={cx(
-                  'relative overflow-hidden',
-                  'border border-[rgba(10,10,12,0.14)] bg-white/94 backdrop-blur-[14px]',
-                  'shadow-[0_40px_140px_rgba(10,10,12,0.14)]',
-                )}
-              >
-                <div className="pointer-events-none absolute inset-0">
-                  <CrownRail />
-                  <div className="absolute inset-0 bg-[radial-gradient(980px_420px_at_22%_0%,rgba(206,160,74,0.10),transparent_62%)]" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-[rgba(15,23,42,0.08)]" />
-                  <div className="absolute inset-[1px] ring-1 ring-inset ring-[rgba(255,255,255,0.62)]" />
-                </div>
-
-                <div className="relative p-5 sm:p-6">
-                  <div className="text-[11px] font-semibold tracking-[0.30em] text-[color:var(--ink-3)]">SEARCH ATELIER</div>
-                  <div className="mt-2 text-[18px] font-semibold tracking-[-0.02em] text-[color:var(--ink)]">
-                    Type and it reacts instantly
-                  </div>
-                  <div className="mt-2 text-sm leading-relaxed text-[color:var(--ink-2)]">
-                    City, lifestyle, budget, keywords. Typos are fine.
-                  </div>
-
-                  <div className="mt-4">
-                    <VanteraOmniSearch
-                      cities={list.map((c) => ({
-                        slug: c.slug,
-                        name: c.name,
-                        country: c.country,
-                        region: null,
-                        tz: 'UTC',
-                        priority: 0,
-                      }))}
-                      clusters={safeClusters}
-                      placeholder="marbella sea view villa under €5m"
-                      autoFocus={false}
-                    />
-                  </div>
-
-                  <div className="mt-4 text-[11px] text-[color:var(--ink-3)]">
-                    Tip: press <span className="font-mono text-[color:var(--ink-2)]">/</span> anywhere.
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
+          {/* Featured city + controls row */}
           <div className="pb-12 sm:pb-14">
             <div className="relative">
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[color:var(--hairline)]" />
@@ -430,6 +416,7 @@ export default function HeroPortalSection({
                   </div>
                 </div>
 
+                {/* Controls - keep desktop only, premium */}
                 <div className="hidden sm:flex items-center gap-2">
                   <button
                     type="button"
