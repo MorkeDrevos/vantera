@@ -33,7 +33,7 @@ export default function ComingSoon() {
 
             <Image
               // If stored at public/images/brand/...
-              src="/images/brand/vantera-landscape-black.svg"
+              src="/images/brand/vantera-logo-light.svg"
               // If stored at public/brand/..., use this instead:
               // src="/brand/vantera-logo-dark.svg"
               alt="Vantera"
