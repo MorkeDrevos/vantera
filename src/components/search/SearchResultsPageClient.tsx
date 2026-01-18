@@ -828,11 +828,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
         <div className="absolute inset-0 bg-[radial-gradient(1200px_520px_at_50%_0%,rgba(0,0,0,0.04),transparent_62%)]" />
       </div>
 
-<<<<<<< HEAD
-      {/* Atelier header (full width without vw hacks to avoid horizontal overflow) */}
-=======
       {/* Header */}
->>>>>>> dev
       <section className="relative overflow-hidden">
         <div className="relative border-b border-[color:var(--hairline)] bg-[color:var(--paper-2)]">
           <div className="pointer-events-none absolute inset-0">
@@ -1021,11 +1017,6 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                 />
               </div>
 
-<<<<<<< HEAD
-              {/* IMPORTANT: this was lg:col-span-2 (too narrow) which forced horizontal overflow on many desktops.
-                  Make it span full row at lg so it wraps and never pushes outside page width. */}
-=======
->>>>>>> dev
               <div className="lg:col-span-12 flex flex-wrap items-end justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2 min-w-0">
                   {(['buy', 'rent', 'sell'] as Mode[]).map((m) => (
@@ -1062,9 +1053,7 @@ export default function SearchResultsPageClient({ searchParams, listings, total,
                     >
                       <SlidersHorizontal className="h-4 w-4 text-[color:var(--ink-3)]" />
                       <span className="hidden sm:inline">{sortLabel}</span>
-                      <ChevronDown
-                        className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')}
-                      />
+                      <ChevronDown className={cx('h-4 w-4 text-[color:var(--ink-3)] transition', sortOpen && 'rotate-180')} />
                     </button>
 
                     {sortOpen ? (
